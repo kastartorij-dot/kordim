@@ -80,12 +80,14 @@ a.chip:hover{border-color:var(--dusk);text-decoration:none}
 
 /* ─── персонаж: «Панели» ─── */
 .frame{display:grid;gap:var(--gap);padding:var(--gap) 24px 30px;grid-template-columns:300px 1fr 1fr;grid-template-rows:auto auto auto 1fr;
-  grid-template-areas:"photo time time" "photo name map" "stats story map" "items talk map"}
+  grid-template-areas:"photo name  desc" "photo story desc" "stats time  map" "items talk  map"}
 .c-time{grid-area:time}.c-name{grid-area:name}.c-story{grid-area:story}.c-stats{grid-area:stats}
 .c-photo{grid-area:photo}.c-map{grid-area:map}.c-talk{grid-area:talk}.c-items{grid-area:items}
+.c-desc{grid-area:desc}.c-stats{align-self:start}.c-time{align-self:start}
 .c-name{padding:4px 2px}
-.bigname{font:900 clamp(36px,4vw,64px)/.9 var(--disp);letter-spacing:-.03em;margin:0}
-.bigname span{display:block;font:500 12px var(--disp);letter-spacing:.2em;color:var(--ochre);margin-top:10px}
+.bigname{font:900 clamp(36px,4vw,64px)/.9 var(--disp);letter-spacing:-.03em;margin:0;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.bigname span{display:block;font:500 12px var(--disp);letter-spacing:.2em;color:var(--ochre);margin-top:10px;flex-basis:100%}
+.bigname .age{font:700 16px var(--mono);color:var(--mute);letter-spacing:0}
 .now{display:flex;gap:16px;align-items:center;margin-top:16px}
 .yearbig{font:900 48px/1 var(--disp);color:var(--ochre);font-variant-numeric:tabular-nums}
 .where{font-weight:500}.where small{display:block;font:11px var(--mono);color:var(--mute)}
@@ -109,17 +111,34 @@ a.chip:hover{border-color:var(--dusk);text-decoration:none}
 .c-photo .stamp{position:absolute;left:14px;bottom:12px;z-index:1;font:700 11px var(--disp);letter-spacing:.14em;color:var(--ochre)}
 .pxbtn{position:absolute;right:10px;top:10px;z-index:2;all:unset;cursor:pointer;background:rgba(26,23,22,.75);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:8px;padding:4px 9px;font:11px var(--mono)}
 .pxbtn[aria-pressed="true"]{color:var(--ochre);border-color:var(--ochre)}
-.c-time{padding:14px 22px 12px}
-.tl{position:relative;height:66px}
-.tl .ax{position:absolute;left:0;right:0;top:30px;height:2px;background:var(--line)}
-.tl .fill{position:absolute;left:0;top:30px;height:2px;background:var(--ochre);transition:width .7s var(--ease)}
+/* компактно и рядом с тем, что она меняет: диалог, вещи/долги — не витрина на всю ширину */
+.c-time{padding:10px 16px 8px}
+.c-time h3{margin:0 0 2px;font:700 10px var(--disp);letter-spacing:.12em;color:var(--mute)}
+.tl{position:relative;height:46px}
+.tl .ax{position:absolute;left:0;right:0;top:20px;height:2px;background:var(--line)}
+.tl .fill{position:absolute;left:0;top:20px;height:2px;background:var(--ochre);transition:width .7s var(--ease)}
 .tick{all:unset;position:absolute;top:0;transform:translateX(-50%);text-align:center;cursor:pointer;white-space:nowrap}
-.tick .yr{font:700 12px var(--disp);color:var(--mute)}
-.tick .dot{display:block;width:11px;height:11px;margin:9px auto 0;border-radius:50%;background:var(--ground);border:2px solid var(--line);transition:.3s}
-.tick .lab{display:block;font:10px var(--mono);color:var(--mute);margin-top:5px}
-.tick[aria-current="true"] .yr{color:var(--ochre);font-size:16px}
-.tick[aria-current="true"] .dot{background:var(--ochre);border-color:var(--ochre);box-shadow:0 0 0 6px rgba(217,164,65,.18)}
-.tick.era{cursor:default}.tick.era .dot{width:7px;height:7px;margin-top:11px}
+.tick .yr{font:700 10px var(--disp);color:var(--mute)}
+.tick .dot{display:block;width:8px;height:8px;margin:6px auto 0;border-radius:50%;background:var(--ground);border:2px solid var(--line);transition:.3s}
+.tick .lab{display:none}
+.tick[aria-current="true"] .yr{color:var(--ochre);font-size:12px}
+.tick[aria-current="true"] .dot{background:var(--ochre);border-color:var(--ochre);box-shadow:0 0 0 5px rgba(217,164,65,.18)}
+.tick.era{cursor:default}.tick.era .dot{width:5px;height:5px;margin-top:7px}
+.tick:hover .lab,.tick[aria-current="true"] .lab{display:block;position:absolute;top:32px;left:50%;transform:translateX(-50%);font:10px var(--mono);color:var(--mute);background:var(--panel);padding:1px 6px;border-radius:5px;z-index:2}
+
+/* ─── описание: полный текст, сворачивается, если длинный.
+   Высота карточки зафиксирована (не зависит от того, свёрнут текст или развёрнут),
+   иначе разворачивание у Грейс раздувает всю сетку «Панелей» — внутри своя прокрутка. */
+.c-desc{display:flex;flex-direction:column;max-height:620px}
+.c-desc h3{margin:0;padding:12px 16px 0;font:700 11px var(--disp);letter-spacing:.14em;color:var(--mute);flex:none}
+.c-desc .in{padding:8px 16px 14px;flex:1 1 auto;min-height:0;overflow-y:auto}
+.c-desc p{margin:0 0 12px;font-size:15px;line-height:1.55;color:#d6cec4}
+.c-desc p:last-child{margin-bottom:0}
+.c-desc h4{margin:14px 0 6px;font:700 12px var(--disp);letter-spacing:.06em;color:var(--ochre)}
+.c-desc h4:first-child{margin-top:0}
+.c-desc.clamp .in{max-height:280px;overflow:hidden;position:relative;-webkit-mask-image:linear-gradient(180deg,#000 78%,transparent);mask-image:linear-gradient(180deg,#000 78%,transparent)}
+.desc-more{all:unset;cursor:pointer;margin:0 16px 12px;font:12px var(--mono);color:var(--ochre);flex:none}
+.desc-more:hover{text-decoration:underline}
 .c-map{display:flex;flex-direction:column}
 .mhead{display:flex;gap:8px;align-items:center;padding:10px 12px 8px;flex-wrap:wrap}
 .mhead a{margin-left:auto;font-size:12px}
@@ -271,7 +290,7 @@ body[data-season="autumn"] .rain{opacity:.55}
 
 @media (max-width:1100px){
   .frame,.short,.place,.home-hero,.row2,.qgrid,.world-grid{grid-template-columns:1fr}
-  .frame{grid-template-rows:none;grid-template-areas:"time" "photo" "name" "story" "stats" "map" "talk" "items"}
+  .frame{grid-template-rows:none;grid-template-areas:"photo" "name" "desc" "story" "stats" "time" "map" "talk" "items"}
   .toc{position:static;grid-auto-flow:column;overflow:auto}
   .chron{margin-left:70px}.ev .yr{left:-96px;width:60px;font-size:11px}
   .atlas-card{left:14px;width:auto}
@@ -453,6 +472,8 @@ a.fac::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;backg
   .hc-det{grid-template-columns:1fr}
   .hc-head,.hc-mini,.hc-wrap,.hc-det,.hc-hint{margin-left:14px;margin-right:14px}
   .hc-lanes{width:120px}
+  .c-desc{max-height:52vh}
+  .c-desc.clamp .in{max-height:220px}
 }
 @media (max-width:860px){
   .fherb-orbit{transform:scale(.78)}

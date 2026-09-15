@@ -40,10 +40,9 @@ function full(root, p){
   const stops = [];
 
   root.innerHTML = `<div class="frame" data-title="${esc(p.name)}">
-    <section class="card c-time"><div class="tl" id="tl"><div class="ax"></div><div class="fill" id="fill"></div></div></section>
     <section class="c-name">
       <div class="eyebrow"><a href="#/people">люди</a></div>
-      <h1 class="bigname">${esc(p.name)}<span>${esc(P.subtitle)}</span></h1>
+      <h1 class="bigname">${esc(p.name)}${P.born ? '<b class="age" id="age"></b>' : ''}<span>${esc(P.subtitle)}</span></h1>
       <div class="now"><div class="yearbig yearN"></div><div class="where"><small>ГДЕ</small><span id="where"></span></div></div>
       <div style="margin-top:12px">${(P.links || []).map(personChip).join('')}</div>
       ${P.secret ? '<details class="secret"><summary>только для автора</summary><div class="secret-pop">' + esc(P.secret) + '</div></details>' : ''}
@@ -55,6 +54,8 @@ function full(root, p){
       <span class="stamp" id="stamp"></span>
     </section>
     <section class="card c-story"><h3>ЧТО ПРОИСХОДИТ</h3><div class="in"><p class="story" id="story"></p></div></section>
+    ${P.desc && P.desc.length ? `<section class="card c-desc" id="cdesc"><h3>ОПИСАНИЕ</h3><div class="in">${P.desc.map(s => '<h4>' + esc(s.h) + '</h4>' + s.p.map(t => '<p>' + esc(t) + '</p>').join('')).join('')}</div></section>` : ''}
+    <section class="card c-time"><h3>ГОД</h3><div class="tl" id="tl"><div class="ax"></div><div class="fill" id="fill"></div></div></section>
     <section class="card c-stats"><h3>СОСТОЯНИЕ <small>к этому году</small></h3><div class="in" id="stats"></div></section>
     <section class="card c-map" id="cmap">
       <div class="mhead">
@@ -156,6 +157,7 @@ function full(root, p){
     const age = (y - YEARS[0]) / Math.max(1, YEARS[YEARS.length - 1] - YEARS[0]);
     $('#pImg', root).style.filter = 'saturate(' + (1.1 - age * .45) + ') brightness(' + (1.05 - age * .18) + ')';
     $('#stamp', root).textContent = (P.born ? Math.floor(y - P.born) + ' ЛЕТ · ' : '') + (s.label || y).toString().toUpperCase();
+    const ageEl = $('#age', root); if (ageEl) ageEl.textContent = Math.floor(y - P.born) + ' лет';
     paintMap(); paintItems(); paintTalk();
     prev = y;
   }
@@ -175,6 +177,18 @@ function full(root, p){
   thumbs.forEach((b, k) => b.onclick = () => pickPortrait(k));
   $$('[data-gstep]', root).forEach(b => b.onclick = () => pickPortrait(gi + +b.dataset.gstep));
   if (gal) gal.addEventListener('wheel', e => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)){ gal.scrollLeft += e.deltaY; e.preventDefault(); } }, {passive:false});
+
+  /* описание сворачивается, если не помещается в разумную высоту */
+  const desc = $('#cdesc', root);
+  if (desc){
+    const in_ = $('.in', desc);
+    if (in_.scrollHeight > 360){
+      desc.classList.add('clamp');
+      const more = document.createElement('button'); more.className = 'desc-more'; more.textContent = 'Показать полностью';
+      more.onclick = () => { const open = desc.classList.toggle('clamp') === false; more.textContent = open ? 'Свернуть' : 'Показать полностью'; };
+      desc.appendChild(more);
+    }
+  }
 
   const keys = e => { if (e.target.closest('.chat-opts,select,input')) return; const i = YEARS.indexOf(year);
     if (e.key === 'ArrowRight' && i < YEARS.length - 1) show(YEARS[i + 1]); if (e.key === 'ArrowLeft' && i > 0) show(YEARS[i - 1]); };
