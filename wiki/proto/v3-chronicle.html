@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кордим · В3 · Хроника</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Geologica:wght@300;400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#1a1716;  /* тёплый графит */
+  --panel:#221e1c; --raise:#2c2724; --line:#3a3431;
+  --text:#ece5dc; --mute:#9d938a;
+  --ochre:#d9a441;   /* охра: время, выбранное */
+  --dusk:#8ea7d6;    /* синий час: места, вода */
+  --ember:#d46a4a;   /* угли: риск, заряженное */
+  --sage:#9bb383;
+  --disp:'Unbounded',system-ui,sans-serif; --body:'Geologica',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--ground);color:var(--text);font:300 16px/1.6 var(--body)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ochre);outline-offset:2px}
+
+/* шкала времени — главный элемент, управляет всей страницей */
+.timebar{position:sticky;top:0;z-index:20;background:linear-gradient(var(--ground) 70%,transparent);padding:18px 40px 26px}
+.tb-top{display:flex;align-items:baseline;gap:16px}
+.brand{font:900 15px var(--disp);letter-spacing:.04em}
+.others{margin-left:auto;font:12px var(--mono);color:var(--mute)}.others a{color:var(--dusk)}
+.scale{position:relative;height:64px;margin-top:14px}
+.scale .axis{position:absolute;left:0;right:0;top:30px;height:2px;background:var(--line)}
+.scale .fill{position:absolute;left:0;top:30px;height:2px;background:var(--ochre);transition:width .7s var(--ease)}
+.tick{all:unset;position:absolute;top:0;transform:translateX(-50%);text-align:center;cursor:pointer}
+.tick .yr{font:700 13px var(--disp);color:var(--mute);transition:.3s}
+.tick .dot{display:block;width:12px;height:12px;margin:9px auto 0;border-radius:50%;background:var(--ground);border:2px solid var(--line);transition:.3s}
+.tick .lab{display:block;font:11px var(--mono);color:var(--mute);margin-top:6px}
+.tick[aria-current="true"] .yr{color:var(--ochre);font-size:18px}
+.tick[aria-current="true"] .dot{background:var(--ochre);border-color:var(--ochre);box-shadow:0 0 0 6px rgba(217,164,65,.18)}
+.tick.era .dot{width:8px;height:8px;margin-top:11px}
+
+.stage{display:grid;grid-template-columns:1.05fr .95fr;gap:36px;padding:10px 40px 60px}
+.left{min-width:0}
+.bigname{font:900 clamp(48px,7vw,104px)/.9 var(--disp);letter-spacing:-.03em;margin:0}
+.bigname span{display:block;font:500 .28em var(--disp);letter-spacing:.2em;color:var(--ochre);margin-top:12px}
+.now{display:flex;gap:18px;align-items:center;margin:26px 0 18px}
+.yearbig{font:900 64px/1 var(--disp);color:var(--ochre);font-variant-numeric:tabular-nums;min-width:170px}
+.now .where{font:500 18px var(--body)}
+.now .where small{display:block;font:12px var(--mono);color:var(--mute)}
+.story{font-size:20px;line-height:1.55;max-width:620px;min-height:140px}
+.story.swap{animation:swap .6s var(--ease)}
+@keyframes swap{from{opacity:0;transform:translateY(12px);filter:blur(4px)}}
+.bars{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:26px;max-width:620px}
+.bar{font:12px var(--mono);color:var(--mute)}
+.bar .track{height:56px;background:var(--panel);border-radius:10px;position:relative;overflow:hidden;margin-bottom:6px}
+.bar .v{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(0deg,var(--sage),rgba(155,179,131,.4));transition:height .8s var(--ease)}
+.bar.warm .v{background:linear-gradient(0deg,var(--ochre),rgba(217,164,65,.35))}
+.bar.hot .v{background:linear-gradient(0deg,var(--ember),rgba(212,106,74,.35))}
+.bar b{position:absolute;left:10px;top:6px;font:700 16px var(--disp);color:var(--text)}
+.bar .delta{position:absolute;right:8px;top:8px;font:11px var(--mono)}
+.up{color:var(--sage)}.down{color:var(--ember)}
+
+.right{display:grid;gap:18px;align-content:start}
+.photo{position:relative;border-radius:22px;overflow:hidden;height:340px}
+.photo img{width:100%;height:100%;object-fit:cover;object-position:50% 25%;transition:filter .8s var(--ease),transform 1.2s var(--ease)}
+.photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(26,23,22,.9))}
+.photo .stamp{position:absolute;left:16px;bottom:14px;z-index:1;font:700 12px var(--disp);letter-spacing:.14em;color:var(--ochre)}
+.map{position:relative;aspect-ratio:1280/698;border-radius:18px;overflow:hidden;background:#000}
+.map img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(.6) brightness(.55) contrast(1.2) sepia(.2)}
+.map svg{position:absolute;inset:0;width:100%;height:100%}
+.route{fill:none;stroke:var(--dusk);stroke-width:2;vector-effect:non-scaling-stroke;opacity:0;transition:opacity .5s}
+.route.sel{opacity:1;stroke-width:3.5}
+.flow{fill:none;stroke:#fff;stroke-width:2;vector-effect:non-scaling-stroke;stroke-dasharray:1 14;stroke-linecap:round;opacity:0;animation:flow 1.1s linear infinite}
+.flow.sel{opacity:.9}@keyframes flow{to{stroke-dashoffset:-15}}
+.pin{position:absolute;transform:translate(-50%,-50%);border:0;padding:0;background:none}
+.pin i{display:block;width:7px;height:7px;border-radius:50%;background:rgba(236,229,220,.5)}
+.pin span{position:absolute;left:10px;top:-8px;font:400 11px var(--body);white-space:nowrap;color:rgba(236,229,220,.6)}
+.pin.here i{width:14px;height:14px;background:var(--ochre);box-shadow:0 0 0 6px rgba(217,164,65,.2);animation:pulse 1.8s infinite}
+.pin.here span{color:var(--text);font-weight:500;font-size:13px}
+@keyframes pulse{50%{box-shadow:0 0 0 14px rgba(217,164,65,0)}}
+
+/* сцена-разговор этого года */
+.scene{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px 18px}
+.scene h3{margin:0 0 10px;font:700 12px var(--disp);letter-spacing:.14em;color:var(--mute);display:flex;justify-content:space-between}
+.scene .locked{color:var(--mute);font-size:14px}
+.chat-log{display:grid;gap:8px;max-height:230px;overflow:auto}
+.msg{font-size:15px;animation:swap .4s var(--ease)}
+.msg.them b{font:700 11px var(--disp);letter-spacing:.1em;color:var(--ochre);margin-right:8px}
+.msg.me{color:var(--dusk);padding-left:16px;border-left:2px solid var(--dusk)}
+.msg.sys{color:var(--mute);font-style:italic}
+.chat-opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chat-opts button{all:unset;cursor:pointer;padding:7px 12px;border-radius:99px;background:var(--raise);font-size:14px}
+.chat-opts button:hover,.chat-opts button:focus-visible{background:var(--dusk);color:#141414}
+.gained{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+.gained span{padding:4px 10px;border-radius:99px;border:1px solid rgba(212,106,74,.5);color:#eeac98;font-size:13px;animation:swap .5s var(--ease)}
+@media (max-width:1000px){.stage{grid-template-columns:1fr;padding:10px 18px}.timebar{padding:14px 18px 20px}.bars{grid-template-columns:repeat(2,1fr)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="timebar">
+  <div class="tb-top"><span class="brand">КОРДИМ · ХРОНИКА</span><span class="others"><a href="v1-dossier.html">В1</a> · <a href="v2-atlas.html">В2</a> · В3 · <a href="b2-soft.html">Б2</a></span></div>
+  <div class="scale" id="scale"><div class="axis"></div><div class="fill" id="fill"></div></div>
+</header>
+
+<div class="stage">
+  <section class="left">
+    <h1 class="bigname">Элоуэн<span>«ИГЛА» · ПОЛЕВОЙ ХИРУРГ</span></h1>
+    <div class="now"><div class="yearbig" id="yearbig">1026</div><div class="where" id="where"></div></div>
+    <p class="story" id="story"></p>
+    <div class="bars" id="bars"></div>
+  </section>
+  <section class="right">
+    <div class="photo"><img src="../img/faces/elowen.jpg" alt="Элоуэн" id="photo"><span class="stamp" id="stamp"></span></div>
+    <div class="map" id="map"><img src="../img/maps/kordim.jpg" alt="Карта"><svg viewBox="0 0 100 100" preserveAspectRatio="none" id="svg"></svg></div>
+    <div class="scene" id="scene"></div>
+  </section>
+</div>
+
+<script src="shared.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const YEARS=Object.keys(ELOWEN.years).map(Number);
+const MIN=1017,MAX=1027,ERAS=[[1024,'Грейс и Никто'],[1025,'дело Дюра']];
+const pos=y=>((y-MIN)/(MAX-MIN)*100)+'%';
+const scale=$('#scale');
+YEARS.forEach(y=>{const b=document.createElement('button');b.className='tick';b.style.left=pos(y);b.dataset.y=y;
+  b.innerHTML='<span class="yr">'+y+'</span><span class="dot"></span><span class="lab">'+ELOWEN.years[y].mark+'</span>';b.onclick=()=>show(y);scale.appendChild(b)});
+ERAS.forEach(([y,l])=>{const b=document.createElement('div');b.className='tick era';b.style.left=pos(y);b.innerHTML='<span class="yr">'+y+'</span><span class="dot"></span><span class="lab">'+l+'</span>';scale.appendChild(b)});
+
+const svg=$('#svg');drawRoutes(svg,()=>{});drawPins($('#map'));
+const K=['Ремесло','Выдержка','Доверие','Риск'],T=['','','warm','hot'];
+$('#bars').innerHTML=K.map((k,i)=>'<div class="bar '+T[i]+'"><div class="track"><div class="v"></div><b>0</b><span class="delta"></span></div>'+k+'</div>').join('');
+let prev=null;
+function show(y){
+  const s=ELOWEN.years[y];
+  document.querySelectorAll('.tick[data-y]').forEach(t=>t.setAttribute('aria-current',+t.dataset.y===y));
+  $('#fill').style.width=pos(y);
+  countYear(prev||y,y);
+  $('#where').innerHTML='<small>ГДЕ</small>'+s.where;
+  const st=$('#story');st.classList.remove('swap');void st.offsetWidth;st.classList.add('swap');st.textContent=s.text;
+  document.querySelectorAll('.bar').forEach((b,i)=>{const v=s.stats[i],old=prev?ELOWEN.years[prev].stats[i]:v;
+    b.querySelector('.v').style.height=v*10+'%';b.querySelector('b').textContent=v;
+    const d=v-old,el=b.querySelector('.delta');el.textContent=d?(d>0?'+'+d:d):'';el.className='delta '+(d>0?'up':'down')});
+  /* фото «стареет» вместе с годом */
+  const age=(y-1019)/7;$('#photo').style.filter='saturate('+(1.1-age*.5)+') brightness('+(1.05-age*.2)+') contrast('+(1+age*.15)+')';
+  $('#photo').style.transform='scale('+(1.12-age*.1)+')';
+  $('#stamp').textContent=(y-997)+' ЛЕТ · '+y;
+  $('#map').querySelectorAll('.pin').forEach(p=>p.classList.toggle('here',+p.dataset.i===s.place));
+  const lines=svg.querySelectorAll('.route'),flows=svg.querySelectorAll('.flow');
+  lines.forEach((l,i)=>{l.classList.toggle('sel',i===s.route);flows[i].classList.toggle('sel',i===s.route)});
+  const sc=$('#scene');
+  if(y===1023){sc.innerHTML='<h3>СЦЕНА ГОДА <span>Синий двор, ночь</span></h3><div id="chat"></div><div class="gained" id="gained"></div>';
+    mountChat($('#chat'),{onGain:g=>$('#gained').insertAdjacentHTML('beforeend','<span>'+g.i+' '+g.n+'</span>')})}
+  else sc.innerHTML='<h3>СЦЕНА ГОДА <span>'+s.where+'</span></h3><div class="locked">'+(y===1026?'Сцена ещё не отыграна. Здесь появится разговор, когда Никто придёт платить.':'Разговора этого года нет в каноне. Открой 1023 — там сцена в Синем дворе.')+'</div>';
+  prev=y;
+}
+function countYear(a,b){const el=$('#yearbig'),t0=performance.now();(function f(t){const k=Math.min(1,(t-t0)/500);el.textContent=Math.round(a+(b-a)*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(f)})(t0)}
+addEventListener('keydown',e=>{if(e.target.closest('.chat-opts'))return;const i=YEARS.indexOf(prev);if(e.key==='ArrowRight'&&i<YEARS.length-1)show(YEARS[i+1]);if(e.key==='ArrowLeft'&&i>0)show(YEARS[i-1])});
+show(1023);
+</script>
+</body>
+</html>

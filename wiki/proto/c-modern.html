@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кордим · прототип В · Современный</title>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;800&family=Golos+Text:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#16181b;  /* грунт */
+  --panel:#1d2024;   /* панель */
+  --raise:#252930;   /* поднятое */
+  --line:#2e333a;
+  --text:#e7e3dc;
+  --mute:#8f959d;
+  --wax:#d6a660;     /* воск: тракты, акцент */
+  --lead:#7f9cb6;    /* свинец: ссылки, вода */
+  --rust:#c0604a;    /* ржавчина: опасное, заряженное */
+  --sans:'Onest', system-ui, sans-serif;
+  --body:'Golos Text', system-ui, sans-serif;
+  --mono:'JetBrains Mono', ui-monospace, monospace;
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--ground);color:var(--text);font:15px/1.6 var(--body)}
+body{display:grid;grid-template-columns:260px 1fr;overflow:hidden}
+a{color:var(--lead)}
+
+/* ─── дерево ─── */
+aside{border-right:1px solid var(--line);display:flex;flex-direction:column;background:#131518}
+.brand{display:flex;align-items:center;gap:10px;padding:18px 18px 14px;font:800 17px var(--sans);letter-spacing:.02em}
+.brand i{width:22px;height:22px;border-radius:6px;background:conic-gradient(from 200deg,var(--wax),var(--rust),var(--lead),var(--wax))}
+.brand small{margin-left:auto;font:500 11px var(--mono);color:var(--mute)}
+.search{margin:0 12px 10px;display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;color:var(--mute);cursor:pointer;background:var(--panel)}
+.search kbd{margin-left:auto;font:11px var(--mono);border:1px solid var(--line);border-radius:4px;padding:1px 5px}
+.modes{display:flex;gap:4px;margin:4px 12px 12px;padding:3px;background:var(--panel);border-radius:9px}
+.modes button{all:unset;flex:1;text-align:center;padding:6px 0;border-radius:6px;font:500 13px var(--sans);color:var(--mute);cursor:pointer}
+.modes button[aria-pressed="true"]{background:var(--raise);color:var(--text)}
+.tree{overflow:auto;padding:0 8px 20px;flex:1}
+.grp{font:600 11px var(--mono);letter-spacing:.08em;color:var(--mute);padding:14px 10px 6px;text-transform:uppercase}
+.node{all:unset;display:flex;align-items:center;gap:10px;width:calc(100% - 20px);padding:6px 10px;border-radius:7px;cursor:pointer;color:#c7c3bc}
+.node:hover{background:var(--panel)}
+.node[aria-current="true"]{background:var(--raise);color:var(--text)}
+.node img{width:22px;height:22px;border-radius:50%;object-fit:cover}
+.node .dot{width:22px;height:22px;border-radius:50%;background:var(--raise);display:grid;place-items:center;font-size:11px;color:var(--mute)}
+.foot{padding:12px 18px;border-top:1px solid var(--line);font:12px var(--mono);color:var(--mute)}
+
+/* ─── рабочая область: запись + карта рядом ─── */
+.work{display:grid;grid-template-columns:minmax(420px,1fr) minmax(380px,.9fr);height:100vh;transition:grid-template-columns .6s var(--ease)}
+.work.mapfocus{grid-template-columns:minmax(360px,.55fr) 1.45fr}
+.entry{overflow:auto;padding:0 0 60px;border-right:1px solid var(--line)}
+.hero{position:relative;height:280px;overflow:hidden}
+.hero img{width:100%;height:100%;object-fit:cover;object-position:50% 22%;transform:scale(1.08);animation:settle 1.4s var(--ease) forwards;filter:saturate(.85)}
+@keyframes settle{to{transform:scale(1)}}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(22,24,27,.1),rgba(22,24,27,.3) 50%,var(--ground))}
+.ehead{padding:0 36px;margin-top:-86px;position:relative}
+.kind{font:500 12px var(--mono);color:var(--wax);letter-spacing:.06em}
+h1{font:800 46px/1.05 var(--sans);margin:6px 0 0;letter-spacing:-.02em}
+h1 span{color:var(--mute);font-weight:500}
+.props{display:grid;grid-template-columns:120px 1fr;gap:8px 16px;margin:22px 36px 0;padding:16px 18px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.props dt{color:var(--mute);font-size:13px}.props dd{margin:0}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:2px 9px 2px 3px;border-radius:99px;background:var(--raise);border:1px solid var(--line);font-size:13px;cursor:pointer;margin:0 4px 4px 0}
+.chip img{width:18px;height:18px;border-radius:50%;object-fit:cover}
+.chip.warn{border-color:rgba(192,96,74,.5);color:#e3a495}
+.chip.pl::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--wax);margin-left:6px}
+.sec{padding:0 36px}
+.sec h2{font:600 18px var(--sans);margin:34px 0 8px;display:flex;align-items:baseline;gap:10px}
+.sec h2 small{font:12px var(--mono);color:var(--mute)}
+.sec p{margin:0 0 12px;color:#d4d0c9}
+.timeline{position:relative;margin:14px 0 0;padding-left:18px;border-left:1px solid var(--line)}
+.ev{position:relative;padding:0 0 16px 10px;opacity:0;transform:translateY(8px);transition:.5s var(--ease)}
+.ev.in{opacity:1;transform:none}
+.ev::before{content:"";position:absolute;left:-23px;top:7px;width:9px;height:9px;border-radius:50%;background:var(--ground);border:2px solid var(--lead)}
+.ev.hot::before{border-color:var(--rust);background:var(--rust)}
+.ev b{font:500 12px var(--mono);color:var(--mute);display:block}
+.ev.place{cursor:pointer}.ev.place:hover span{color:var(--wax)}
+
+/* ─── карта ─── */
+.mappane{position:relative;overflow:hidden;background:#0f1113}
+.mapbar{position:absolute;top:14px;left:14px;right:14px;z-index:5;display:flex;gap:8px;align-items:center}
+.pill{background:rgba(29,32,36,.86);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:10px;padding:6px 10px;font:500 13px var(--sans)}
+.pill button{all:unset;cursor:pointer;padding:3px 8px;border-radius:6px;color:var(--mute)}
+.pill button[aria-pressed="true"]{background:var(--raise);color:var(--text)}
+.expand{margin-left:auto;cursor:pointer}
+.stagebox{position:absolute;inset:0;display:grid;place-items:center;padding:70px 18px 190px}
+.map{position:relative;width:100%;aspect-ratio:1280/698;border-radius:14px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.map img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(.55) brightness(.62) contrast(1.15)}
+.map svg{position:absolute;inset:0;width:100%;height:100%}
+.route{fill:none;stroke:var(--wax);stroke-width:2.2;vector-effect:non-scaling-stroke;stroke-linecap:round;opacity:.55;cursor:pointer;transition:opacity .3s,stroke-width .3s}
+.route.water{stroke:var(--lead)}
+.route.closed{stroke:var(--rust);stroke-dasharray:4 5;opacity:.5}
+.route.sel{opacity:1;stroke-width:4}
+.flow{fill:none;stroke:#fff;stroke-width:2;vector-effect:non-scaling-stroke;stroke-dasharray:2 14;opacity:0;animation:flow 1.4s linear infinite;pointer-events:none}
+.flow.sel{opacity:.85}
+@keyframes flow{to{stroke-dashoffset:-16}}
+.pin{position:absolute;transform:translate(-50%,-50%);border:0;padding:0;background:none;cursor:pointer}
+.pin i{display:block;width:10px;height:10px;border-radius:50%;background:var(--text);box-shadow:0 0 0 3px rgba(22,24,27,.8)}
+.pin span{position:absolute;left:14px;top:-7px;white-space:nowrap;font:500 12px var(--sans);color:var(--text);text-shadow:0 1px 4px #000}
+.pin.here i{background:var(--wax);box-shadow:0 0 0 3px rgba(214,166,96,.3),0 0 0 9px rgba(214,166,96,.12);animation:pulse 2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 3px rgba(214,166,96,.3),0 0 0 15px rgba(214,166,96,0)}}
+.routecard{position:absolute;left:14px;right:14px;bottom:14px;z-index:5;background:rgba(29,32,36,.92);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.rc-top{display:flex;align-items:baseline;gap:10px}
+.rc-top b{font:600 17px var(--sans)}.rc-top small{color:var(--mute)}
+.rc-days{display:flex;gap:26px;margin:10px 0 6px}
+.rc-days div{font:800 26px var(--sans);font-variant-numeric:tabular-nums}
+.rc-days small{display:block;font:500 11px var(--mono);color:var(--mute)}
+.rc-note{color:#cfcac2;font-size:14px}
+.rc-note.warn{color:#e3a495}
+
+/* ⌘K */
+.pal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:grid;place-items:start center;padding-top:14vh;z-index:99}
+.pal[hidden]{display:none}
+.pbox{width:min(560px,92vw);background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;animation:pop .25s var(--ease)}
+@keyframes pop{from{opacity:0;transform:scale(.97)}}
+.pbox input{all:unset;width:100%;padding:16px 18px;font:16px var(--body);border-bottom:1px solid var(--line);box-sizing:border-box}
+.pres button{all:unset;display:flex;gap:10px;width:100%;box-sizing:border-box;padding:10px 18px;cursor:pointer}
+.pres button:hover,.pres button.on{background:var(--raise)}
+.pres small{margin-left:auto;color:var(--mute);font:12px var(--mono)}
+:focus-visible{outline:2px solid var(--wax);outline-offset:2px}
+@media (max-width:1000px){body{grid-template-columns:1fr;overflow:auto}aside{display:none}.work,.work.mapfocus{grid-template-columns:1fr;height:auto}.mappane{height:80vh}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.ev{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand"><i></i>Кордим <small>1026</small></div>
+  <div class="search" id="openPal">Найти в мире <kbd>Ctrl K</kbd></div>
+  <div class="modes"><button aria-pressed="true">Мир</button><button disabled>Хроника</button><button disabled>Игра</button></div>
+  <div class="tree">
+    <div class="grp">Люди</div>
+    <button class="node"><img src="../img/faces/grace-portrait.jpg" alt="">Грейс</button>
+    <button class="node"><img src="../img/faces/nemo-portrait.png" alt="">Никто</button>
+    <button class="node" aria-current="true"><img src="../img/faces/elowen.jpg" alt="">Элоуэн «Игла»</button>
+    <button class="node"><img src="../img/faces/kraim.jpg" alt="">Крайм Руфус</button>
+    <button class="node"><img src="../img/faces/kael-roofs-03.jpg" alt="">Каэл</button>
+    <div class="grp">Места</div>
+    <button class="node"><span class="dot">◆</span>Ошерск</button>
+    <button class="node"><span class="dot">◆</span>Столица</button>
+    <button class="node"><span class="dot">◆</span>Порт Теней</button>
+    <div class="grp">Фракции</div>
+    <button class="node"><span class="dot">⚗</span>Алхимическая Ложа</button>
+    <button class="node"><span class="dot">✎</span>Контора Сайдена</button>
+  </div>
+  <div class="foot">прототип В · <a href="a-rpg.html">А</a> · <a href="b-pixel.html">Б</a></div>
+</aside>
+
+<div class="work" id="work">
+  <section class="entry">
+    <div class="hero"><img src="../img/faces/elowen.jpg" alt=""></div>
+    <div class="ehead">
+      <div class="kind">ПЕРСОНАЖ · ХИРУРГ</div>
+      <h1>Элоуэн <span>«Игла»</span></h1>
+    </div>
+    <dl class="props">
+      <dt>Возраст</dt><dd>29</dd>
+      <dt>Где</dt><dd><span class="chip pl" data-place="0">Ошерск · «Утопленник»</span></dd>
+      <dt>Крыша</dt><dd><span class="chip"><img src="../img/faces/kraim.jpg" alt="">Крайм Руфус</span></dd>
+      <dt>Знает</dt><dd><span class="chip"><img src="../img/faces/nemo-portrait.png" alt="">Никто · 5 лет</span></dd>
+      <dt>Статус</dt><dd><span class="chip warn">изгнана из Ложи</span><span class="chip warn">долг Никто не закрыт</span></dd>
+    </dl>
+    <div class="sec">
+      <h2>Кто она</h2>
+      <p>Молодая, но смотрит как ветеран после трёх кампаний. Мужской колет, фартук с бурыми пятнами, длинные пальцы в мелких порезах. На левом запястье — химический ожог, метка изгнанницы Ложи.</p>
+      <p>Крайм взял её под защиту: она штопает его людей без вопросов. «Она врач. Ей несут — она шьёт».</p>
+      <h2>Путь <small>нажми место — карта покажет</small></h2>
+      <div class="timeline">
+        <div class="ev"><b>1019</b><span>Начинает тайно лечить Нижний город. Правило: никогда не врать о том, кто был на столе.</span></div>
+        <div class="ev place" data-place="1"><b>1021 · Столица</b><span>Двор бывшей дубильни. Первая встреча с Никто. Через неделю приходит Ложа: ожог, три недели в подполе.</span></div>
+        <div class="ev place" data-route="0"><b>1021 · баржей вниз</b><span>Из Столицы в Ошерск.</span></div>
+        <div class="ev place hot" data-place="0"><b>1023 · Ошерск</b><span>Синий двор. «Ты». Микстура в долг, цена — плеть и желчь до весны. Впервые за четыре года соврала людям Крайма.</span></div>
+        <div class="ev hot"><b>весна 1024</b><span>Срок долга вышел. Статус не зафиксирован.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mappane">
+    <div class="mapbar">
+      <div class="pill" role="group" aria-label="Сезон">
+        <button data-s="summer" aria-pressed="false">Лето</button>
+        <button data-s="autumn" aria-pressed="true">Осень</button>
+        <button data-s="winter" aria-pressed="false">Зима</button>
+      </div>
+      <div class="pill" role="group" aria-label="Как едем">
+        <button data-m="horse" aria-pressed="true">Верхом</button>
+        <button data-m="foot" aria-pressed="false">Пешком</button>
+        <button data-m="cart" aria-pressed="false">Обоз</button>
+      </div>
+      <div class="pill expand" id="expand" role="button" tabindex="0">⤢ Карта</div>
+    </div>
+    <div class="stagebox"><div class="map" id="map"><img src="../img/maps/kordim.jpg" alt="Карта Кордима"><svg viewBox="0 0 100 100" preserveAspectRatio="none" id="svg"></svg></div></div>
+    <div class="routecard" id="rc"></div>
+  </section>
+</div>
+
+<div class="pal" id="pal" hidden><div class="pbox"><input id="pin" placeholder="Имя, место, событие…" aria-label="Поиск"><div class="pres" id="pres"></div></div></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const PLACES=[['Ошерск',56.5,12],['Столица',55,27],['Порт Теней',27.5,45],['Смитгард',85.5,47.5],['Врата',64,62.5],['Ручейный',48.5,69],['Топь',70,87.5],['Морской',37.5,11]];
+/* мили → дни: верхом 37, пешком 22, обоз 15; грунт осенью и зимой вдвое медленнее */
+const ROUTES=[
+ {n:'Речной тракт',e:'Ошерск — Столица',k:'water',miles:74,ground:false,p:[[56.5,12.6],[58,16.5],[57.6,20.5],[56.2,24],[55,27]],note:'Мосты Ошерска берут пошлину на обоих берегах.',winter:'Зимой река встаёт на два месяца — баржи не ходят.'},
+ {n:'Лесной тракт',e:'Столица — Порт Теней',k:'rough',miles:148,ground:true,p:[[55,27],[51.5,31.5],[48,37],[44.5,42.5],[39.5,45.8],[33.5,45.8],[27.5,45]],note:'Только группой от шести. Под словом Сайдена — пошлина Кессу, без него — всё.',winter:'Зимой для обозов непроходим.'},
+ {n:'Южный тракт',e:'Столица — Врата',k:'road',miles:111,ground:false,p:[[55,27],[58,33],[61,41],[63.5,50],[64.8,56.5],[64,62.5]],note:'Армия содержит дорогу. Самый законный тракт — и самый плотный на проверки.'},
+ {n:'Южный обход',e:'Врата — Порт Теней',k:'road',miles:166,ground:true,p:[[64,62.5],[58.5,66],[52.5,68.5],[48.5,69],[42,70.5],[35,66],[29.5,56],[27.5,45]],note:'Долго, но безопасно. Работает круглый год.'},
+ {n:'Восточный тракт',e:'Столица — Смитгард',k:'road',miles:185,ground:true,p:[[55,27],[62,29.5],[69.5,33.5],[76.5,39.5],[82,44.5],[85.5,47.5]],note:'Металл на запад, заказы на восток. Дом Рохт.'}
+];
+const S={season:'autumn',mode:'horse',route:1};
+const svg=$('#svg'),map=$('#map');
+ROUTES.forEach((r,i)=>{
+  const pts=r.p.map(q=>q.join(',')).join(' ');
+  const a=document.createElementNS('http://www.w3.org/2000/svg','polyline');a.setAttribute('points',pts);a.setAttribute('class','route '+r.k);a.onclick=()=>{S.route=i;paint()};svg.appendChild(a);
+  const f=document.createElementNS('http://www.w3.org/2000/svg','polyline');f.setAttribute('points',pts);f.setAttribute('class','flow');svg.appendChild(f);
+});
+PLACES.forEach(([n,x,y],i)=>{const b=document.createElement('button');b.className='pin';b.style.left=x+'%';b.style.top=y+'%';b.innerHTML='<i></i><span>'+n+'</span>';b.dataset.i=i;map.appendChild(b)});
+function days(r){const per={horse:37,foot:22,cart:15}[S.mode];let d=r.miles/per;if(r.ground&&S.season!=='summer')d*=S.season==='winter'?2.2:1.6;return d}
+function closed(r){return S.season==='winter'&&(r.k==='water'||(r.k==='rough'&&S.mode==='cart'))}
+function paint(){
+  const lines=svg.querySelectorAll('.route'),flows=svg.querySelectorAll('.flow');
+  ROUTES.forEach((r,i)=>{lines[i].classList.toggle('sel',i===S.route);lines[i].classList.toggle('closed',closed(r));flows[i].classList.toggle('sel',i===S.route&&!closed(r))});
+  const r=ROUTES[S.route],c=closed(r),d=days(r);
+  $('#rc').innerHTML='<div class="rc-top"><b>'+r.n+'</b><small>'+r.e+' · ~'+r.miles+' миль</small></div>'+
+   '<div class="rc-days"><div id="dn">'+(c?'—':'0')+'<small>'+(c?'закрыто':'дней пути')+'</small></div><div>'+(c?'—':Math.round(d*2))+'<small>ночлегов, грошей</small></div></div>'+
+   '<div class="rc-note'+(c?' warn':'')+'">'+(c?r.winter:r.note)+'</div>';
+  if(!c)countTo($('#dn').firstChild,d);
+}
+function countTo(node,target){const t0=performance.now();(function f(t){const k=Math.min(1,(t-t0)/600);node.textContent=(target*(1-Math.pow(1-k,3))).toFixed(1).replace('.0','');if(k<1)requestAnimationFrame(f)})(t0)}
+document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{S.season=b.dataset.s;document.querySelectorAll('[data-s]').forEach(x=>x.setAttribute('aria-pressed',x===b));paint()});
+document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{S.mode=b.dataset.m;document.querySelectorAll('[data-m]').forEach(x=>x.setAttribute('aria-pressed',x===b));paint()});
+function here(i){map.querySelectorAll('.pin').forEach(p=>p.classList.toggle('here',+p.dataset.i===i))}
+document.querySelectorAll('[data-place]').forEach(e=>e.onclick=()=>here(+e.dataset.place));
+document.querySelectorAll('[data-route]').forEach(e=>e.onclick=()=>{S.route=+e.dataset.route;here(-1);paint()});
+here(0);paint();
+const tog=()=>$('#work').classList.toggle('mapfocus');$('#expand').onclick=tog;$('#expand').onkeydown=e=>{if(e.key==='Enter')tog()};
+const io=new IntersectionObserver(es=>es.forEach((e,i)=>{if(e.isIntersecting){setTimeout(()=>e.target.classList.add('in'),i*120);io.unobserve(e.target)}}));
+document.querySelectorAll('.ev').forEach(e=>io.observe(e));
+/* палитра поиска */
+const IDX=[['Элоуэн «Игла»','персонаж'],['Никто','персонаж'],['Грейс','персонаж'],['Крайм Руфус','персонаж'],['Ошерск','место'],['Столица','место'],['Лесной тракт','тракт'],['Контора Сайдена','фракция'],['Алхимическая Ложа','фракция'],['Белая Чума','событие · 986']];
+const pal=$('#pal'),pin=$('#pin'),pres=$('#pres');
+function renderPal(){const q=pin.value.toLowerCase();pres.innerHTML=IDX.filter(x=>x[0].toLowerCase().includes(q)).map((x,i)=>'<button class="'+(i?'':'on')+'">'+x[0]+'<small>'+x[1]+'</small></button>').join('')}
+function openPal(){pal.hidden=false;pin.value='';renderPal();pin.focus()}
+$('#openPal').onclick=openPal;pin.oninput=renderPal;
+addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openPal()}if(e.key==='Escape')pal.hidden=true});
+pal.onclick=e=>{if(e.target===pal)pal.hidden=true};
+</script>
+</body>
+</html>

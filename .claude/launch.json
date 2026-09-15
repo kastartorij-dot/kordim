@@ -1,0 +1,28 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "wiki",
+      "runtimeExecutable": "powershell",
+      "runtimeArgs": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "wiki/_serve.ps1"
+      ],
+      "port": 8791
+    },
+    {
+      "name": "faces",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8793",
+        "--directory",
+        "персонажи"
+      ],
+      "port": 8793
+    }
+  ]
+}

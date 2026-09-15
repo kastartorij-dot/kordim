@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "kordim-graph": {
+      "command": "C:\\Users\\Глеб\\AppData\\Local\\Programs\\Python\\Python314\\Scripts\\graphify-mcp.exe",
+      "args": ["C:\\claude\\Кордим\\graphify-out\\graph.json"]
+    }
+  }
+}

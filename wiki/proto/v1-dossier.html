@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кордим · В1 · Досье</title>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;800&family=Golos+Text:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#16181b; --panel:#1d2024; --raise:#252930; --line:#2e333a;
+  --text:#e7e3dc; --mute:#8f959d;
+  --wax:#d6a660; --lead:#7f9cb6; --rust:#c0604a; --moss:#8aa66a;
+  --sans:'Onest',system-ui,sans-serif; --body:'Golos Text',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--ground);color:var(--text);font:15px/1.6 var(--body)}
+body{display:grid;grid-template-columns:240px 1fr 360px;overflow:hidden}
+a{color:var(--lead)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--wax);outline-offset:2px}
+
+aside.tree{border-right:1px solid var(--line);background:#131518;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:10px;padding:18px;font:800 17px var(--sans)}
+.brand i{width:22px;height:22px;border-radius:6px;background:conic-gradient(from 200deg,var(--wax),var(--rust),var(--lead),var(--wax))}
+.brand small{margin-left:auto;font:11px var(--mono);color:var(--mute)}
+.tabs{display:flex;gap:4px;margin:0 12px 10px;padding:3px;background:var(--panel);border-radius:9px}
+.tabs button{all:unset;flex:1;text-align:center;padding:6px 0;border-radius:6px;font:500 13px var(--sans);color:var(--mute);cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--raise);color:var(--text)}
+.grp{font:600 11px var(--mono);letter-spacing:.08em;color:var(--mute);padding:14px 22px 6px;text-transform:uppercase}
+.node{all:unset;display:flex;align-items:center;gap:10px;margin:0 8px;padding:6px 12px;border-radius:7px;cursor:pointer;color:#c7c3bc}
+.node:hover{background:var(--panel)}.node[aria-current="true"]{background:var(--raise);color:var(--text)}
+.node img{width:24px;height:24px;border-radius:50%;object-fit:cover}
+.foot{margin-top:auto;padding:12px 18px;border-top:1px solid var(--line);font:12px var(--mono);color:var(--mute)}
+
+main{overflow:auto;padding:28px 36px 60px}
+.head{display:grid;grid-template-columns:220px 1fr;gap:28px;align-items:end}
+.portrait{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:3/4}
+.portrait img{width:100%;height:100%;object-fit:cover;transform:scale(1.06);animation:settle 1.3s var(--ease) forwards}
+@keyframes settle{to{transform:none}}
+.lvl{position:absolute;left:10px;bottom:10px;background:rgba(22,24,27,.8);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:8px;padding:3px 8px;font:500 12px var(--mono)}
+.kind{font:500 12px var(--mono);color:var(--wax);letter-spacing:.06em}
+h1{font:800 48px/1 var(--sans);margin:6px 0 16px;letter-spacing:-.02em}
+h1 span{color:var(--mute);font-weight:500}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px 22px}
+.stat label{display:flex;justify-content:space-between;font:500 13px var(--sans);color:var(--mute)}
+.stat label b{color:var(--text);font-variant-numeric:tabular-nums}
+.seg{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin-top:5px}
+.seg i{height:8px;border-radius:2px;background:var(--raise);transition:background .3s}
+.seg i.f{background:var(--moss)}.stat.warm .seg i.f{background:var(--wax)}.stat.hot .seg i.f{background:var(--rust)}
+.stat small{font-size:12px;color:var(--mute)}
+.sec h2{font:600 18px var(--sans);margin:30px 0 8px}
+.sec p{margin:0 0 12px;color:#d4d0c9;max-width:680px}
+
+.minimap{margin-top:26px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.mm-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.mm-top b{font:600 15px var(--sans)}
+.mm-top select{margin-left:auto;background:var(--raise);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:5px 8px}
+.go{all:unset;cursor:pointer;background:var(--wax);color:#1a1510;font:600 13px var(--sans);padding:6px 12px;border-radius:8px}
+.map{position:relative;aspect-ratio:1280/698;border-radius:10px;overflow:hidden}
+.map img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(.5) brightness(.62) contrast(1.15)}
+.map svg{position:absolute;inset:0;width:100%;height:100%}
+.route{fill:none;stroke:var(--wax);stroke-width:2;vector-effect:non-scaling-stroke;opacity:.4;cursor:pointer}
+.route.water{stroke:var(--lead)}.route.sel{opacity:1;stroke-width:3.5}
+.flow{fill:none;stroke:#fff;stroke-width:2;vector-effect:non-scaling-stroke;stroke-dasharray:2 12;opacity:0;animation:flow 1.2s linear infinite;pointer-events:none}
+.flow.sel{opacity:.8}@keyframes flow{to{stroke-dashoffset:-14}}
+.pin{position:absolute;transform:translate(-50%,-50%);border:0;padding:0;background:none}
+.pin i{display:block;width:8px;height:8px;border-radius:50%;background:var(--text)}
+.pin span{position:absolute;left:11px;top:-8px;white-space:nowrap;font:500 11px var(--sans);text-shadow:0 1px 3px #000}
+.token{position:absolute;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:var(--wax);box-shadow:0 0 0 4px rgba(214,166,96,.25),0 0 18px var(--wax);transition:left .09s linear,top .09s linear}
+.trip{display:flex;gap:18px;margin-top:10px;font:500 13px var(--sans);color:var(--mute);align-items:baseline}
+.trip b{font:800 22px var(--sans);color:var(--text)}
+.triplog{margin-top:6px;font-size:13px;color:#c9c4bc;min-height:22px}
+.triplog .bad{color:#e3a495}
+
+/* правая колонка: вещи, долги, разговор */
+aside.side{border-left:1px solid var(--line);background:#191b1f;display:grid;grid-template-rows:auto auto 1fr;overflow:hidden}
+.box{padding:16px 18px;border-bottom:1px solid var(--line)}
+.box h3{font:600 11px var(--mono);letter-spacing:.08em;color:var(--mute);margin:0 0 10px;text-transform:uppercase;display:flex;justify-content:space-between}
+.slots{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.slot{all:unset;aspect-ratio:1;display:grid;place-items:center;font-size:20px;background:var(--panel);border:1px solid var(--line);border-radius:10px;cursor:pointer;position:relative;transition:transform .2s var(--ease),border-color .2s}
+.slot:hover,.slot:focus-visible,.slot.on{border-color:var(--wax);transform:translateY(-2px)}
+.slot.debt{border-color:rgba(192,96,74,.55);background:linear-gradient(180deg,rgba(192,96,74,.12),transparent)}
+.slot.new{animation:drop .6s var(--ease)}
+@keyframes drop{from{transform:scale(.4) translateY(-20px);opacity:0}}
+.slot.empty{opacity:.35;cursor:default}
+.tip{margin-top:10px;font-size:13px;color:#cfcac2;min-height:40px}
+.tip b{color:var(--text)}
+.chatbox{display:flex;flex-direction:column;min-height:0;padding:16px 18px}
+.chat{display:flex;flex-direction:column;flex:1;min-height:0}
+.chat-log{flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px;padding-right:4px}
+.msg{max-width:88%;padding:8px 12px;border-radius:12px;font-size:14px;animation:in .3s var(--ease)}
+@keyframes in{from{opacity:0;transform:translateY(6px)}}
+.msg.them{background:var(--raise);border-bottom-left-radius:4px}
+.msg.them b{display:block;font:600 11px var(--mono);color:var(--wax)}
+.msg.me{align-self:flex-end;background:#2c3a47;border-bottom-right-radius:4px}
+.msg.sys{align-self:center;background:none;color:var(--mute);font-style:italic;text-align:center;font-size:13px}
+.chat-opts{display:grid;gap:6px;margin-top:10px}
+.chat-opts button{all:unset;cursor:pointer;padding:8px 12px;border:1px solid var(--line);border-radius:10px;font-size:14px;color:var(--lead);transition:.2s}
+.chat-opts button:hover,.chat-opts button:focus-visible{border-color:var(--lead);background:rgba(127,156,182,.08)}
+@media (max-width:1100px){body{grid-template-columns:1fr;overflow:auto}aside.tree{display:none}aside.side{border-left:0;height:auto}main{overflow:visible}.head{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<aside class="tree">
+  <div class="brand"><i></i>Кордим <small>1026</small></div>
+  <div class="tabs"><button aria-pressed="true">Мир</button><button>Карта</button><button>Игра</button></div>
+  <div class="grp">Люди</div>
+  <button class="node"><img src="../img/faces/grace-portrait.jpg" alt="">Грейс</button>
+  <button class="node"><img src="../img/faces/nemo-portrait.png" alt="">Никто</button>
+  <button class="node" aria-current="true"><img src="../img/faces/elowen.jpg" alt="">Элоуэн «Игла»</button>
+  <button class="node"><img src="../img/faces/kraim.jpg" alt="">Крайм Руфус</button>
+  <button class="node"><img src="../img/faces/loki.jpg" alt="">Локи</button>
+  <div class="foot">В1 · <a href="v2-atlas.html">В2</a> · <a href="v3-chronicle.html">В3</a> · <a href="b2-soft.html">Б2</a></div>
+</aside>
+
+<main>
+  <div class="head">
+    <div class="portrait"><img src="../img/faces/elowen.jpg" alt="Элоуэн"><span class="lvl">29 лет</span></div>
+    <div>
+      <div class="kind">ПЕРСОНАЖ · ПОЛЕВОЙ ХИРУРГ · ОШЕРСК</div>
+      <h1>Элоуэн <span>«Игла»</span></h1>
+      <div class="stats" id="stats"></div>
+    </div>
+  </div>
+  <div class="sec">
+    <h2>Кто она</h2>
+    <p>Изгнанница Алхимической Ложи. Молодая, но смотрит как ветеран после трёх кампаний. Длинные пальцы в мелких порезах, на левом запястье — химический ожог. Живёт в подвале «Утопленника», штопает людей Крайма без вопросов.</p>
+    <h2>Никто</h2>
+    <p>Знакомы пять лет, две встречи. В 1021-м она позвала его посмотреть руку в среду — в среду за ней пришла Ложа. В 1023-м он принёс ей на спине раненого. Поговори с ней справа — это та самая ночь.</p>
+  </div>
+  <div class="minimap">
+    <div class="mm-top"><b>Как до неё добраться</b><select id="rsel" aria-label="Тракт"></select><button class="go" id="go">В путь</button></div>
+    <div class="map" id="map"><img src="../img/maps/kordim.jpg" alt="Карта"><svg viewBox="0 0 100 100" preserveAspectRatio="none" id="svg"></svg><div class="token" id="token" hidden></div></div>
+    <div class="trip"><span><b id="day">0</b> / <span id="tot">0</span> дн. верхом</span><span id="cost"></span></div>
+    <div class="triplog" id="tlog">Выбери тракт и нажми «В путь».</div>
+  </div>
+</main>
+
+<aside class="side">
+  <div class="box"><h3>Вещи <span id="icount"></span></h3><div class="slots" id="items"></div></div>
+  <div class="box"><h3>Долги и обещания</h3><div class="slots" id="debts"></div><div class="tip" id="tip">Наведи на ячейку.</div></div>
+  <div class="chatbox"><div class="box" style="padding:0;border:0"><h3>Разговор · Ошерск, 1023</h3></div><div class="chat" id="chat"></div></div>
+</aside>
+
+<script src="shared.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const TONE={Доверие:'warm',Риск:'hot'};
+const NOTE={Ремесло:'лучшая ученица Орры',Выдержка:'три недели в подполе',Доверие:'врёт Крайму ради Никто',Риск:'Ложа помнит'};
+$('#stats').innerHTML=ELOWEN.stats.map(s=>'<div class="stat '+(s.tone||'')+'"><label>'+s.k+'<b>'+s.v+'</b></label><div class="seg">'+'<i></i>'.repeat(10)+'</div><small>'+NOTE[s.k]+'</small></div>').join('');
+document.querySelectorAll('.stat').forEach((el,i)=>el.querySelectorAll('i').forEach((x,k)=>setTimeout(()=>x.classList.toggle('f',k<ELOWEN.stats[i].v),300+k*60+i*120)));
+
+const tip=$('#tip');
+function slot(it,box,cls=''){const b=document.createElement('button');b.className='slot '+cls;b.textContent=it.i;
+  const show=()=>{document.querySelectorAll('.slot').forEach(s=>s.classList.remove('on'));b.classList.add('on');tip.innerHTML='<b>'+it.n+'.</b> '+it.t};
+  b.onmouseenter=show;b.onfocus=show;b.onclick=show;box.appendChild(b);return b}
+ELOWEN.items.forEach(it=>slot(it,$('#items')));
+for(let k=ELOWEN.items.length;k<10;k++){const e=document.createElement('div');e.className='slot empty';$('#items').appendChild(e)}
+ELOWEN.debts.forEach(it=>slot(it,$('#debts'),'debt'));
+$('#icount').textContent=ELOWEN.items.length+' / 10';
+mountChat($('#chat'),{onGain:g=>{const b=slot(g,$('#debts'),'debt new');b.focus()}});
+
+const svg=$('#svg'),sel=$('#rsel');
+drawRoutes(svg,i=>{sel.value=i;pick()});drawPins($('#map'));
+ROUTES.forEach((r,i)=>sel.add(new Option(r.n+' · '+r.e,i)));
+sel.value=0;
+let stop=null;
+function pick(){const r=ROUTES[+sel.value];markRoute(svg,+sel.value);const d=Math.round(daysFor(r,'autumn','horse'));
+  $('#tot').textContent=d;$('#day').textContent=0;$('#cost').textContent='≈ '+(d*2+d*3)+' грошей на ночлег и корм';$('#tlog').textContent=r.note}
+sel.onchange=pick;pick();
+$('#go').onclick=()=>{stop&&stop();const r=ROUTES[+sel.value];
+  stop=travel(r,{token:$('#token'),days:daysFor(r,'autumn','horse'),
+    onDay:d=>$('#day').textContent=d,
+    onEvent:(t,d,bad)=>$('#tlog').innerHTML='<span class="'+(bad?'bad':'')+'">День '+d+'. '+t+'</span>',
+    onDone:()=>$('#tlog').innerHTML+=' <b>Прибыли.</b>'})};
+</script>
+</body>
+</html>

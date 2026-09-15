@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кордим · прототип Б · Пиксель</title>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#1a1822;   /* грунт */
+  --stone:#2b2833;   /* панель */
+  --stone-2:#39353f; /* поднятая */
+  --mortar:#0f0e13;  /* швы и тени */
+  --parch:#e9dcbf;   /* текст */
+  --dust:#a89e8a;    /* вторичный */
+  --torch:#e39a3b;   /* огонь: активное */
+  --blood:#b0413e;   /* опасность, заряженное */
+  --moss:#7c9a52;    /* знание, успех */
+  --river:#5f8aa6;
+  --px:'Pixelify Sans', monospace;
+  --big:'Press Start 2P', monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--night);color:var(--parch);font:20px/1.35 var(--px);-webkit-font-smoothing:none}
+body{min-height:100vh;
+  background-image:linear-gradient(45deg,rgba(255,255,255,.015) 25%,transparent 25%,transparent 75%,rgba(255,255,255,.015) 75%),linear-gradient(45deg,rgba(255,255,255,.015) 25%,transparent 25%,transparent 75%,rgba(255,255,255,.015) 75%);
+  background-size:8px 8px;background-position:0 0,4px 4px}
+/* PS1: строки развёртки и лёгкая виньетка */
+.crt{position:fixed;inset:0;pointer-events:none;z-index:90;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px);mix-blend-mode:multiply}
+.crt::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 160px rgba(0,0,0,.65)}
+
+/* пиксельная рамка: ступенчатые углы через box-shadow */
+.px{background:var(--stone);position:relative;
+  box-shadow:0 -4px 0 0 var(--mortar),0 4px 0 0 var(--mortar),-4px 0 0 0 var(--mortar),4px 0 0 0 var(--mortar),inset 0 4px 0 0 var(--stone-2),inset 0 -4px 0 0 #221f28}
+.top{display:flex;align-items:center;gap:22px;padding:14px 24px;margin:14px;}
+.logo{font:14px var(--big);color:var(--torch);letter-spacing:2px;text-shadow:3px 3px 0 var(--mortar)}
+.tabs{display:flex;gap:10px;margin-left:10px}
+.tab{all:unset;cursor:pointer;padding:8px 14px;font:600 18px var(--px);color:var(--dust);background:var(--mortar)}
+.tab[aria-selected="true"]{color:var(--mortar);background:var(--torch)}
+.tab:disabled{opacity:.4;cursor:default}
+.tab:not(:disabled):hover{color:var(--parch)}
+.clock{margin-left:auto;font:10px var(--big);color:var(--dust)}
+.clock a{color:var(--torch)}
+
+.view{display:none;padding:10px 14px 150px}.view.on{display:block}
+
+/* ─── ЛИСТ ПЕРСОНАЖА ─── */
+.sheet{display:grid;grid-template-columns:330px 1fr 290px;gap:22px;max-width:1400px;margin:0 auto}
+.portrait{padding:18px}
+.portrait canvas{width:100%;image-rendering:pixelated;display:block;background:#000;aspect-ratio:3/4}
+.nameplate{margin-top:14px;text-align:center}
+.nameplate b{font:18px var(--big);display:block;color:var(--parch);text-shadow:3px 3px 0 var(--mortar);line-height:1.4}
+.nameplate span{color:var(--torch);font-size:22px}
+.stats{margin-top:16px;display:grid;gap:8px}
+.stat{display:grid;grid-template-columns:100px 1fr 34px;align-items:center;gap:8px;font-size:17px;color:var(--dust)}
+.meter{height:14px;background:var(--mortar);display:flex;gap:2px;padding:2px}
+.meter i{flex:1;background:#2c2a31}
+.meter i.f{background:var(--moss)}.stat.red .meter i.f{background:var(--blood)}.stat.amb .meter i.f{background:var(--torch)}
+.stat em{font-style:normal;color:var(--parch);text-align:right}
+
+.lore{padding:22px 26px}
+.lore h2{font:13px var(--big);color:var(--torch);margin:24px 0 12px;text-shadow:2px 2px 0 var(--mortar)}
+.lore h2:first-child{margin-top:0}
+.lore p{margin:0 0 12px;font-size:21px}
+.lore .hl{color:var(--torch)}
+.lore .q{color:var(--blood)}
+
+.inv{padding:18px}
+.inv h2{font:11px var(--big);color:var(--dust);margin:0 0 12px}
+.slots{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.slot{aspect-ratio:1;background:var(--mortar);display:grid;place-items:center;font-size:28px;cursor:pointer;position:relative;box-shadow:inset 2px 2px 0 #000,inset -2px -2px 0 #3a3640}
+.slot:hover,.slot:focus-visible{outline:2px solid var(--torch);outline-offset:0}
+.slot.charged::after{content:"";position:absolute;right:3px;top:3px;width:6px;height:6px;background:var(--blood)}
+.slot.empty{cursor:default;opacity:.6}
+.tip{margin-top:14px;min-height:130px;background:var(--mortar);padding:12px;font-size:18px}
+.tip b{color:var(--torch);display:block;margin-bottom:4px}
+.tip small{color:var(--dust);font-size:15px}
+
+/* диалоговое окно внизу */
+.dialog{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);width:min(900px,calc(100% - 40px));padding:16px 22px 18px 110px;z-index:40;min-height:104px}
+.dialog .face{position:absolute;left:18px;top:16px;width:72px;height:72px;image-rendering:pixelated;background:#000}
+.dialog .who{font:11px var(--big);color:var(--torch)}
+.dialog .line{font-size:22px;margin-top:8px;min-height:30px}
+.dialog .next{position:absolute;right:18px;bottom:10px;color:var(--torch);animation:blink .8s steps(2) infinite;cursor:pointer;background:none;border:0;font:16px var(--big)}
+@keyframes blink{50%{opacity:0}}
+
+/* ─── КАРТА ─── */
+.mapgrid{display:grid;grid-template-columns:1fr 330px;gap:22px;max-width:1400px;margin:0 auto}
+.mapbox{padding:16px}
+.map{position:relative;aspect-ratio:1280/698;background:#000}
+.map canvas{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated}
+.map svg{position:absolute;inset:0;width:100%;height:100%}
+.route{fill:none;stroke:var(--parch);stroke-width:3;vector-effect:non-scaling-stroke;stroke-dasharray:6 6;cursor:pointer;opacity:.7;animation:march 1s steps(4) infinite}
+@keyframes march{to{stroke-dashoffset:-12}}
+.route.water{stroke:var(--river)}.route.rough{stroke:var(--blood)}
+.route.sel{stroke:var(--torch);opacity:1;stroke-width:5}
+.pin{position:absolute;transform:translate(-50%,-50%);width:14px;height:14px;background:var(--parch);border:0;padding:0;cursor:pointer;box-shadow:3px 3px 0 var(--mortar)}
+.pin span{position:absolute;left:18px;top:-6px;white-space:nowrap;font:600 16px var(--px);color:var(--parch);text-shadow:2px 2px 0 #000}
+.pin.sel{background:var(--torch)}
+.cart{position:absolute;width:20px;height:20px;transform:translate(-50%,-70%);font-size:20px;line-height:1;pointer-events:none;filter:drop-shadow(2px 2px 0 #000);transition:left .12s steps(1),top .12s steps(1)}
+.journey{padding:18px}
+.journey h2{font:13px var(--big);color:var(--torch);margin:0 0 6px;line-height:1.5}
+.journey .ends{color:var(--dust);font-size:17px}
+.dayc{font:28px var(--big);margin:18px 0 6px;color:var(--parch)}
+.dayc small{font:11px var(--big);color:var(--dust)}
+.btn{all:unset;cursor:pointer;display:inline-block;margin-top:12px;padding:10px 14px;background:var(--torch);color:var(--mortar);font:600 18px var(--px);box-shadow:4px 4px 0 var(--mortar)}
+.btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--mortar)}
+.journey p{font-size:18px}
+.log{margin-top:12px;background:var(--mortar);padding:10px;height:150px;overflow:auto;font-size:16px;color:var(--dust)}
+.log div{margin-bottom:4px}.log .bad{color:var(--blood)}.log .ok{color:var(--moss)}
+
+:focus-visible{outline:2px solid var(--torch);outline-offset:2px}
+@media (max-width:1100px){.sheet{grid-template-columns:1fr 1fr}.inv{grid-column:1/-1}.mapgrid{grid-template-columns:1fr}}
+@media (max-width:700px){.sheet{grid-template-columns:1fr}.tabs{flex-wrap:wrap}.dialog{padding-left:22px}.dialog .face{display:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="crt"></div>
+<header class="top px">
+  <div class="logo">КОРДИМ</div>
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" data-v="sheet" aria-selected="true">Персонаж</button>
+    <button class="tab" role="tab" data-v="map" aria-selected="false">Карта</button>
+    <button class="tab" disabled>Хроника</button>
+    <button class="tab" disabled>Игра</button>
+  </div>
+  <div class="clock">ОСЕНЬ 1026 · <a href="a-rpg.html">А</a> <a href="c-modern.html">В</a></div>
+</header>
+
+<section class="view on" id="sheet">
+  <div class="sheet">
+    <div class="portrait px">
+      <canvas id="pf" width="84" height="112"></canvas>
+      <div class="nameplate"><b>ЭЛОУЭН</b><span>«Игла» · хирург</span></div>
+      <div class="stats">
+        <div class="stat"><span>Ремесло</span><div class="meter" data-v="9"></div><em>9</em></div>
+        <div class="stat amb"><span>Доверие</span><div class="meter" data-v="3"></div><em>3</em></div>
+        <div class="stat red"><span>Риск</span><div class="meter" data-v="7"></div><em>7</em></div>
+      </div>
+    </div>
+
+    <div class="lore px">
+      <h2>КТО ОНА</h2>
+      <p>29 лет. Полевой хирург, <span class="hl">изгнанница Ложи</span>. Живёт в подвале «Утопленника» в Приречье, под крышей Крайма Руфуса: штопает его людей без вопросов.</p>
+      <p>Пахнет спиртом, кровью и сушёным болотным маком. На левом запястье — химический ожог, метка изгнания.</p>
+      <h2>ДВЕ ВСТРЕЧИ</h2>
+      <p><span class="hl">1021, Столица.</span> Двор бывшей дубильни. Она позвала Никто посмотреть руку в среду. В среду двор был пуст — за ней пришла Ложа.</p>
+      <p><span class="hl">1023, Ошерск.</span> Он принёс на спине раненого и узнал её на пороге. Она сказала <span class="q">«Ты»</span> и взяла микстуру в долг.</p>
+      <h2>ЧЕГО НЕ ЗНАЕТ</h2>
+      <p>Об Образце №4 не слышала. Имени алхимика и места лаборатории не знает.</p>
+    </div>
+
+    <div class="inv px">
+      <h2>ВЕЩИ И ДОЛГИ</h2>
+      <div class="slots" id="slots"></div>
+      <div class="tip" id="tip"><small>Наведи на ячейку.</small></div>
+    </div>
+  </div>
+</section>
+
+<section class="view" id="map">
+  <div class="mapgrid">
+    <div class="mapbox px"><div class="map" id="map2"><canvas id="mc" width="320" height="175"></canvas><svg viewBox="0 0 100 100" preserveAspectRatio="none" id="svgB"></svg><div class="cart" id="cart" hidden>🐴</div></div></div>
+    <div class="journey px" id="jr"></div>
+  </div>
+</section>
+
+<div class="dialog px" id="dlg">
+  <canvas class="face" id="dface" width="24" height="24"></canvas>
+  <div class="who" id="dwho">ЭЛОУЭН</div>
+  <div class="line" id="dline"></div>
+  <button class="next" id="dnext" aria-label="Дальше">▼</button>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+/* пикселизация картинки через маленький холст */
+function pixelate(src,canvas,cover=true){
+  const img=new Image();img.onload=()=>{const c=canvas.getContext('2d');c.imageSmoothingEnabled=true;
+    const cw=canvas.width,ch=canvas.height,ir=img.width/img.height,cr=cw/ch;let sw=img.width,sh=img.height,sx=0,sy=0;
+    if(cover){if(ir>cr){sw=img.height*cr;sx=(img.width-sw)/2}else{sh=img.width/cr;sy=(img.height-sh)*.25}}
+    c.drawImage(img,sx,sy,sw,sh,0,0,cw,ch);
+    /* палитра: огрубить цвета до 5 уровней на канал */
+    const d=c.getImageData(0,0,cw,ch),a=d.data;for(let i=0;i<a.length;i+=4){for(let k=0;k<3;k++)a[i+k]=Math.round(a[i+k]/51)*51}
+    c.putImageData(d,0,0)};
+  img.src=src;
+}
+pixelate('../img/faces/elowen.jpg',$('#pf'));
+pixelate('../img/faces/elowen.jpg',$('#dface'));
+
+document.querySelectorAll('.meter').forEach(m=>{for(let i=0;i<10;i++){const x=document.createElement('i');m.appendChild(x);setTimeout(()=>x.className=i<+m.dataset.v?'f':'',200+i*70)}});
+
+const ITEMS=[
+ {i:'🔪',n:'Скальпель',t:'Не боец, но в тёмном переулке вскроет сонную артерию на рефлексах.'},
+ {i:'🧪',n:'Микстура в долг',t:'Тридцать кордов. Взяла одолжением, которое держала три года.',c:1},
+ {i:'🗡️',n:'Нож Никто',t:'Лежит на полке между дурманом и живицей. Она его не убрала.',c:1},
+ {i:'🌿',n:'Серая плеть',t:'Цена долга. Споры дают сыпь на месяц.',c:1},
+ {i:'🐺',n:'Волчья желчь',t:'Вторая половина цены. Пузырь сразу в спирт.',c:1},
+ {i:'🔥',n:'Ожог Ложи',t:'Метка изгнания на левом запястье. Руки сломать не успели.'},
+ {i:'🥖',n:'Мешок муки',t:'Подарок Крайма. «Она врач. Ей несут — она шьёт».'},
+ {i:'',n:'',t:'',e:1}
+];
+const slots=$('#slots'),tip=$('#tip');
+ITEMS.forEach(it=>{const s=document.createElement('button');s.className='slot'+(it.c?' charged':'')+(it.e?' empty':'');s.textContent=it.i;s.disabled=!!it.e;
+  const show=()=>{if(!it.e)tip.innerHTML='<b>'+it.n+'</b>'+it.t+(it.c?'<br><small>✦ заряжено</small>':'')};
+  s.onmouseenter=show;s.onfocus=show;slots.appendChild(s)});
+
+/* диалог с печатной машинкой */
+const LINES=[
+ ['ЭЛОУЭН','Сядь. Руки мыть — там.'],
+ ['ЭЛОУЭН','Ты.'],
+ ['НИКТО','Я приходил в среду.'],
+ ['ЭЛОУЭН','Плеть и желчь. До весны. Оставь вещь.']
+];
+let li=0,typing=null;
+function say(){const [w,t]=LINES[li%LINES.length];$('#dwho').textContent=w;const el=$('#dline');el.textContent='';clearInterval(typing);let k=0;
+  typing=setInterval(()=>{el.textContent=t.slice(0,++k);if(k>=t.length)clearInterval(typing)},38);li++}
+$('#dnext').onclick=say;say();
+
+/* вкладки */
+document.querySelectorAll('.tab[data-v]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tab[data-v]').forEach(x=>x.setAttribute('aria-selected',x===b));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id===b.dataset.v));
+  $('#dlg').hidden=b.dataset.v!=='sheet';
+});
+
+/* карта */
+pixelate('../img/maps/kordim.jpg',$('#mc'),false);
+const PLACES=[['Ошерск',56.5,12],['Столица',55,27],['Порт Теней',27.5,45],['Смитгард',85.5,47.5],['Врата',64,62.5],['Ручейный',48.5,69],['Топь',70,87.5]];
+const ROUTES=[
+ {n:'Лесной тракт',e:'Столица → Порт Теней',k:'rough',days:4,p:[[55,27],[51.5,31.5],[48,37],[44.5,42.5],[39.5,45.8],[33.5,45.8],[27.5,45]],ev:['Сумерки в ельнике. Лучше не разводить огонь.','Люди Кесса берут пошлину. С тех, за кого ручается Сайден.','Три стрелы из ельника. Мимо.']},
+ {n:'Южный тракт',e:'Столица → Врата',k:'road',days:3,p:[[55,27],[58,33],[61,41],[63.5,50],[64.8,56.5],[64,62.5]],ev:['Армейский разъезд проверяет бумаги.','Дорогу недавно чинили.','Ночлег в общей комнате, 2 гроша.']},
+ {n:'Речной тракт',e:'Ошерск → Столица',k:'water',days:2,p:[[56.5,12.6],[58,16.5],[57.6,20.5],[56.2,24],[55,27]],ev:['Мост берёт пошлину.','Баржа Крайма идёт вниз.']},
+ {n:'Южный обход',e:'Врата → Порт Теней',k:'road',days:5,p:[[64,62.5],[58.5,66],[52.5,68.5],[48.5,69],[42,70.5],[35,66],[29.5,56],[27.5,45]],ev:['Ручейный молчит.','Лавочник: на юг не ходи.','Спокойный день.']}
+];
+const svg=$('#svgB'),map=$('#map2'),jr=$('#jr'),cart=$('#cart');
+ROUTES.forEach((r,i)=>{const el=document.createElementNS('http://www.w3.org/2000/svg','polyline');el.setAttribute('points',r.p.map(q=>q.join(',')).join(' '));el.setAttribute('class','route '+r.k);el.onclick=()=>pick(i);svg.appendChild(el)});
+PLACES.forEach(([n,x,y])=>{const b=document.createElement('button');b.className='pin';b.style.left=x+'%';b.style.top=y+'%';b.innerHTML='<span>'+n+'</span>';map.appendChild(b)});
+let cur=0,run=null;
+function pick(i){cur=i;const r=ROUTES[i];svg.querySelectorAll('.route').forEach((e,k)=>e.classList.toggle('sel',k===i));clearInterval(run);cart.hidden=true;
+  jr.innerHTML='<h2>'+r.n.toUpperCase()+'</h2><div class="ends">'+r.e+'</div><div class="dayc" id="dc">0<small> / '+r.days+' ДН.</small></div><button class="btn" id="go">▶ В путь верхом</button><div class="log" id="log"><div>Выбери тракт на карте и отправляйся.</div></div>';
+  $('#go').onclick=travel}
+function travel(){const r=ROUTES[cur],pts=[];for(let s=0;s<r.p.length-1;s++){for(let t=0;t<10;t++){const a=r.p[s],b=r.p[s+1];pts.push([a[0]+(b[0]-a[0])*t/10,a[1]+(b[1]-a[1])*t/10])}}pts.push(r.p[r.p.length-1]);
+  const log=$('#log');log.innerHTML='';cart.hidden=false;let k=0;clearInterval(run);
+  run=setInterval(()=>{const [x,y]=pts[k];cart.style.left=x+'%';cart.style.top=y+'%';
+    const day=Math.min(r.days,Math.floor(k/pts.length*r.days)+1);$('#dc').firstChild.textContent=day;
+    if(k%Math.ceil(pts.length/r.ev.length)===0){const e=r.ev[Math.floor(k/Math.ceil(pts.length/r.ev.length))];if(e){const d=document.createElement('div');d.className=/стрел|проверя/.test(e)?'bad':'ok';d.textContent='День '+day+'. '+e;log.appendChild(d);log.scrollTop=9e9}}
+    if(++k>=pts.length){clearInterval(run);const d=document.createElement('div');d.className='ok';d.textContent='Прибыли.';log.appendChild(d)}},110)}
+pick(0);
+</script>
+</body>
+</html>

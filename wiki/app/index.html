@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кордим</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Geologica:wght@300;400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="#/">КОРДИМ <small>1026 · осень</small></a>
+  <nav class="nav" id="nav" aria-label="Разделы"></nav>
+  <button class="findbtn" id="findbtn" aria-label="Поиск">Найти <kbd>Ctrl K</kbd></button>
+</header>
+<main id="view" tabindex="-1"></main>
+
+<div class="pal" id="pal" hidden>
+  <div class="pbox" role="dialog" aria-label="Поиск по миру">
+    <input id="palIn" placeholder="Имя, место, фракция, событие…" autocomplete="off">
+    <div class="pres" id="palRes"></div>
+  </div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

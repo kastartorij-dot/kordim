@@ -1,0 +1,2531 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кордим: Хроники</title>
+    <style>
+        :root {
+            --bg: #121212;
+            --text: #e0e0e0;
+            --accent: #5e1818;
+            --accent-hover: #7a2222;
+            --border: #333;
+            --panel-bg: #1e1e1e;
+        }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Georgia', serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+        .screen {
+            display: none;
+            background: var(--panel-bg);
+            padding: 30px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .screen.active {
+            display: block;
+        }
+        h1, h2 {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        input[type="text"], input[type="number"], input[type="password"], select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background: #2a2a2a;
+            border: 1px solid var(--border);
+            color: var(--text);
+            box-sizing: border-box;
+            font-family: sans-serif;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0 20px;
+        }
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        button {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 2px;
+            transition: background 0.2s;
+            margin-top: 5px;
+        }
+        button:hover {
+            background: var(--accent-hover);
+        }
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+        .btn-green { background: #2e4a2e; }
+        .btn-green:hover { background: #3a5c3a; }
+        .btn-gray { background: #444; }
+        .btn-gray:hover { background: #555; }
+        
+        .saves-panel {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .saves-panel button { flex: 1; }
+        
+        #story-text {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        /* --- реплики --- */
+        .msg { display: flex; gap: 12px; margin-bottom: 24px; align-items: flex-start; }
+        .msg-icon {
+            flex: 0 0 30px; width: 30px; height: 30px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: sans-serif; font-size: 13px; margin-top: 3px; user-select: none;
+        }
+        .msg-user .msg-icon { background: #3a3a3a; color: #ddd; }
+        .msg-ai .msg-icon { background: var(--accent); color: #fff; }
+        .msg-body { flex: 1; min-width: 0; white-space: pre-wrap; }
+        .msg-user .msg-body {
+            color: #b9b9b9; font-style: italic;
+            border-left: 2px solid #3a3a3a; padding-left: 12px;
+        }
+        .msg-actions {
+            display: flex; align-items: center; gap: 4px;
+            margin-top: 12px; white-space: normal;
+        }
+        .icon-btn {
+            background: transparent; border: 1px solid transparent; color: #6f6f6f;
+            padding: 5px 6px; margin: 0; border-radius: 4px; line-height: 0; cursor: pointer;
+        }
+        .icon-btn:hover { background: #2a2a2a; color: #ddd; }
+        .icon-btn:disabled { background: transparent; color: #3a3a3a; cursor: not-allowed; }
+        .archive-note {
+            font-family: sans-serif;
+            font-size: 12px;
+            color: #6f6f6f;
+            text-align: center;
+            margin-bottom: 22px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed #333;
+        }
+        .swipe-count {
+            font-family: sans-serif; font-size: 12px; color: #777;
+            min-width: 40px; text-align: center;
+        }
+        .actions-sep { width: 1px; height: 16px; background: #333; margin: 0 4px; }
+
+        /* --- выбор модели --- */
+        .model-field { display: flex; gap: 10px; align-items: center; }
+        .model-field input { margin: 10px 0; }
+        .model-field button { margin: 0; white-space: nowrap; }
+        .picker {
+            display: none; border: 1px solid var(--border);
+            background: #161616; border-radius: 4px; margin-bottom: 10px;
+        }
+        .picker.on { display: block; }
+        .pick-head { padding: 10px; border-bottom: 1px solid var(--border); }
+        .pick-search { margin: 0 0 8px !important; }
+        .pick-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+        .chip {
+            background: #2a2a2a; border: 1px solid var(--border); color: #bbb;
+            font-size: 12px; padding: 4px 10px; margin: 0; font-family: sans-serif;
+        }
+        .chip.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .pick-rows { max-height: 320px; overflow-y: auto; }
+        .model-row {
+            display: flex; justify-content: space-between; gap: 10px;
+            padding: 8px 10px; border-bottom: 1px solid #222; cursor: pointer;
+            font-family: sans-serif; font-size: 13px;
+        }
+        .model-row:hover { background: #222; }
+        .model-row b { font-weight: normal; color: #ddd; overflow: hidden; text-overflow: ellipsis; }
+        .model-row span { color: #888; white-space: nowrap; }
+        .model-row.free b { color: #8fbf8f; }
+        .pick-none { padding: 12px; color: #777; font-family: sans-serif; font-size: 13px; }
+
+        /* --- слоты и меню --- */
+        .slot-active { outline: 1px solid #7ea87e; }
+        .saves-panel .slot-cell { flex: 1; display: flex; gap: 4px; min-width: 0; }
+        .saves-panel .slot-cell > button { flex: 0 0 auto; }
+        .saves-panel .slot-cell > .btn-green,
+        .saves-panel .slot-cell > .btn-gray:first-child { flex: 1 1 auto; min-width: 0; }
+        .slot-reset { padding: 10px 12px; font-size: 16px; line-height: 1; }
+        .newgame-row { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
+        .newgame-row label { margin: 0; }
+        .newgame-row select { width: auto; margin: 0; }
+        .newgame-row button { margin: 0; }
+        .back-row { margin-bottom: 15px; }
+
+        /* --- телефон --- */
+        @media (max-width: 600px) {
+            body { padding: 8px; }
+            .screen { padding: 16px 14px; }
+            h1, h2 { font-size: 24px; }
+
+            /* колонка текста: было 20 символов в строке, стало ~40 */
+            #story-text { font-size: 17px; line-height: 1.55; margin-bottom: 22px; }
+            .msg { gap: 8px; margin-bottom: 18px; }
+            .msg-icon { flex-basis: 24px; width: 24px; height: 24px; font-size: 11px; }
+            .msg-user .msg-body { padding-left: 9px; }
+
+            /* Строка состояния занимала шестую часть экрана до первого слова прозы,
+               и она растёт по мере накопления ран и вещей. На телефоне сворачиваем
+               до двух строк, разворот по нажатию. */
+            #state-panel { font-size: 11.5px; line-height: 1.45; padding: 8px; cursor: pointer; }
+            #state-panel.collapsed {
+                /* ровно две строки плюс отступы: line-clamp резал третью пополам */
+                max-height: calc(2 * 1.45em + 16px);
+                overflow: hidden;
+                position: relative;
+            }
+            #state-panel.collapsed::after {
+                content: '';
+                position: absolute;
+                left: 0; right: 0; bottom: 0; height: 14px;
+                background: linear-gradient(transparent, #0f0f0f);
+            }
+            #tokens-bar {
+                margin: 14px -14px -16px;
+                font-size: 10px;
+                justify-content: flex-start;
+                gap: 4px 12px;
+                padding: 6px 8px;
+            }
+
+            /* пальцем в иконку 30px не попасть */
+            .msg-actions { gap: 2px; margin-top: 14px; }
+            .icon-btn { padding: 11px 12px; }
+            .swipe-count { min-width: 44px; }
+
+            .choice-btn { font-size: 15px; padding: 11px; }
+            #custom-action-container { gap: 8px; }
+            #custom-action-container button { padding: 10px 14px; white-space: nowrap; }
+
+            /* температура и токены не помещались в один ряд */
+            .settings-row { flex-direction: column; gap: 0; }
+            .newgame-row { flex-wrap: wrap; }
+            .saves-panel { gap: 6px; }
+            .saves-panel button { font-size: 13px; padding: 10px 6px; }
+        }
+        .choice-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: #2a2a2a;
+            border: 1px solid var(--border);
+            margin-bottom: 10px;
+            padding: 12px;
+            font-family: inherit;
+            font-size: 16px;
+        }
+        .choice-btn:hover {
+            background: #333;
+            border-color: var(--accent);
+        }
+        #custom-action-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        #custom-action-container input {
+            margin: 0;
+        }
+        #state-panel {
+            font-family: monospace;
+            font-size: 14px;
+            background: #0f0f0f;
+            padding: 10px;
+            margin-bottom: 5px;
+            border-left: 3px solid var(--accent);
+            color: #aaa;
+        }
+        #tokens-bar {
+            position: sticky;
+            bottom: 0;
+            z-index: 20;
+            font-size: 11px;
+            color: #7a7a7a;
+            font-family: sans-serif;
+            background: rgba(18,18,18,0.94);
+            border-top: 1px solid var(--border);
+            padding: 7px 10px;
+            margin: 14px -30px -30px;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        #tokens-bar b { color: #a9a9a9; font-weight: normal; }
+        #tokens-bar .warn { color: #b06a6a; }
+        .char-field { margin-bottom: 12px; }
+        .char-field label { display: block; font-size: 12px; color: #888; margin-bottom: 2px; }
+        .char-field input { margin: 0; }
+        .ev-row {
+            display: flex; gap: 8px; align-items: flex-start;
+            border-bottom: 1px solid #262626; padding: 7px 0;
+        }
+        .ev-row textarea {
+            margin: 0; font-size: 13px; min-height: 46px; resize: vertical;
+            font-family: sans-serif;
+        }
+        .ev-meta { font-size: 11px; color: #777; white-space: nowrap; padding-top: 9px; min-width: 74px; }
+        .ev-del { background: #3a2020; padding: 6px 10px; margin: 0; align-self: center; }
+        .pick-toggles { display: flex; gap: 14px; flex-wrap: wrap; padding: 6px 0 2px; font-size: 12px; color: #999; }
+        .pick-toggles label { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+        .pick-toggles input { margin: 0; }
+        .loader {
+            display: none;
+            font-style: italic;
+            color: #888;
+            margin: 20px 0;
+        }
+        .loader.error {
+            font-style: normal;
+            color: #d98a8a;
+            border-left: 3px solid #7a2222;
+            padding-left: 10px;
+            white-space: pre-wrap;
+        }
+        .settings-row {
+            display: flex;
+            gap: 15px;
+        }
+        .settings-row > div {
+            flex: 1;
+        }
+        .model-filter { margin-bottom: 5px !important; }
+        .game-controls { display: flex; gap: 10px; margin-bottom: 20px; }
+    </style>
+    <!-- Оформление под проект «Кордим» (wiki/app): те же цвета, шрифты и карточки. Логика игры не тронута. -->
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Geologica:wght@300;400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #1a1716; --panel-bg: #221e1c; --raise: #2c2724; --border: #3a3431;
+            --text: #ece5dc; --mute: #9d938a;
+            --accent: #d9a441; --accent-hover: #e6b55a;
+            --dusk: #8ea7d6; --ember: #d46a4a; --sage: #9bb383;
+            --disp: 'Unbounded', system-ui, sans-serif; --body: 'Geologica', system-ui, sans-serif; --mono: 'JetBrains Mono', ui-monospace, monospace;
+            --ease: cubic-bezier(.2,.8,.2,1);
+        }
+        body {
+            font: 300 16px/1.6 var(--body);
+            padding: 28px 20px 40px;
+            background: radial-gradient(1100px 520px at 50% -12%, rgba(217,164,65,.09), transparent 60%), var(--bg);
+            min-height: 100vh; box-sizing: border-box;
+        }
+        .container { max-width: 880px; }
+        .screen {
+            background: linear-gradient(180deg, #25201e, var(--panel-bg) 180px);
+            border: 1px solid var(--border); border-radius: 22px;
+            padding: 30px 34px; box-shadow: 0 30px 80px rgba(0,0,0,.45);
+        }
+        .screen.active { animation: kin .45s var(--ease); }
+        @keyframes kin { from { opacity: 0; transform: translateY(10px); } }
+        h1 {
+            font: 900 clamp(30px, 5vw, 48px)/1 var(--disp); letter-spacing: -.02em;
+            border: 0; padding: 0; margin: 0 0 24px;
+        }
+        h1::before {
+            content: "КОРДИМ · ХРОНИКИ"; display: block;
+            font: 400 11px var(--mono); letter-spacing: .14em; color: var(--mute); margin-bottom: 10px;
+        }
+        h2 {
+            font: 700 12px var(--disp); letter-spacing: .14em; text-transform: uppercase;
+            color: var(--mute); border-bottom: 1px solid var(--border); padding-bottom: 10px;
+        }
+        label { font-size: 14px; color: #d6cec4; }
+        input[type="text"], input[type="number"], input[type="password"], select, textarea {
+            background: var(--raise); border: 1px solid var(--border); border-radius: 10px;
+            font: 400 15px var(--body); color: var(--text); transition: border-color .2s;
+        }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+        input[type="range"], input[type="checkbox"] { accent-color: var(--accent); }
+        button {
+            background: var(--accent); color: #1a1510; font: 500 14px var(--body);
+            border-radius: 10px; padding: 10px 18px; transition: background .2s, border-color .2s, transform .2s;
+        }
+        button:hover { background: var(--accent-hover); }
+        button:disabled { background: #3a3431; color: #7a716a; }
+        .btn-gray { background: var(--raise); color: var(--text); border: 1px solid var(--border); }
+        .btn-gray:hover { background: #352f2b; border-color: var(--accent); }
+        .btn-green { background: rgba(155,179,131,.12); color: #d6e4c7; border: 1px solid rgba(155,179,131,.38); }
+        .btn-green:hover { background: rgba(155,179,131,.22); }
+        .slot-active { outline: 2px solid var(--accent); outline-offset: 2px; }
+        #story-text { font: 300 19px/1.72 var(--body); }
+        .msg-icon { font: 700 12px var(--disp); }
+        .msg-ai .msg-icon { background: var(--accent); color: #1a1510; }
+        .msg-user .msg-icon { background: var(--raise); color: var(--dusk); }
+        .msg-user .msg-body { color: var(--dusk); border-left-color: var(--dusk); font-style: normal; }
+        .icon-btn { background: transparent; color: var(--mute); }
+        .icon-btn:hover { background: var(--raise); color: var(--text); }
+        .actions-sep { background: var(--border); }
+        .archive-note, .swipe-count { font-family: var(--mono); color: var(--mute); border-color: var(--border); }
+        .choice-btn {
+            background: var(--raise); border: 1px solid var(--border); border-radius: 14px;
+            color: var(--text); font: 400 16px/1.45 var(--body); padding: 13px 16px;
+        }
+        .choice-btn:hover { background: #342e2a; border-color: var(--accent); transform: translateX(4px); }
+        #custom-action-container input { border-radius: 10px; }
+        #state-panel {
+            font: 400 13px/1.6 var(--mono); background: var(--raise); color: #d6cec4;
+            border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 12px; padding: 10px 14px;
+        }
+        #tokens-bar {
+            font: 400 11px var(--mono); color: var(--mute);
+            background: rgba(26,23,22,.95); border-top: 1px solid var(--border);
+            border-radius: 0 0 22px 22px; margin: 16px -34px -30px; padding: 8px 16px;
+        }
+        #tokens-bar b { color: #cfc7bd; }
+        .loader { color: var(--mute); }
+        .loader.error { color: #eeac98; border-left-color: var(--ember); }
+        .picker { background: #1e1a18; border-color: var(--border); border-radius: 12px; overflow: hidden; }
+        .pick-head { border-color: var(--border); }
+        .chip { background: var(--raise); border-color: var(--border); border-radius: 99px; color: #cfc7bd; font: 400 12px var(--body); }
+        .chip.on { background: var(--accent); color: #1a1510; border-color: var(--accent); }
+        .model-row { font: 400 13px var(--body); border-color: #2c2724; }
+        .model-row:hover { background: var(--raise); }
+        .model-row.free b { color: var(--sage); }
+        .char-field label, .ev-meta { font-family: var(--mono); color: var(--mute); }
+        .ev-row { border-color: var(--border); }
+        .ev-del { background: rgba(212,106,74,.16); color: #eeac98; border: 1px solid rgba(212,106,74,.4); }
+        .ev-del:hover { background: rgba(212,106,74,.28); }
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .screen { padding: 18px 16px; border-radius: 16px; }
+            #tokens-bar { margin: 14px -16px -18px; border-radius: 0 0 16px 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="screen-setup" class="screen active">
+        <h1>Меню</h1>
+        
+        <button class="btn-gray" id="btn-resume" style="display:none; margin-bottom:15px;" onclick="switchScreen('screen-game')">&larr; Вернуться к игре</button>
+
+        <div class="saves-panel" id="saves-panel">
+            <div class="slot-cell">
+                <button class="btn-green" id="slot-btn-1" onclick="slotClick(1)">Слот 1</button>
+                <button class="btn-gray slot-reset" id="slot-reset-1" onclick="startNewGameProcess(1)" title="Начать в этом слоте заново">&#8635;</button>
+            </div>
+            <div class="slot-cell">
+                <button class="btn-green" id="slot-btn-2" onclick="slotClick(2)">Слот 2</button>
+                <button class="btn-gray slot-reset" id="slot-reset-2" onclick="startNewGameProcess(2)" title="Начать в этом слоте заново">&#8635;</button>
+            </div>
+            <div class="slot-cell">
+                <button class="btn-green" id="slot-btn-3" onclick="slotClick(3)">Слот 3</button>
+                <button class="btn-gray slot-reset" id="slot-reset-3" onclick="startNewGameProcess(3)" title="Начать в этом слоте заново">&#8635;</button>
+            </div>
+        </div>
+        <div class="saves-panel">
+            <button class="btn-gray" onclick="exportSave()">Экспорт в файл</button>
+            <button class="btn-gray" onclick="document.getElementById('import-file').click()">Импорт из файла</button>
+            <input type="file" id="import-file" style="display:none" accept=".json" onchange="importSave(event)">
+        </div>
+        <label style="display:block; margin: -10px 0 20px; font-size: 14px; color: #999;">
+            <input type="checkbox" id="export-with-key"> Класть в файл ключ и настройки — для переноса на другое устройство
+        </label>
+
+        <label>API Ключ (OpenRouter):</label>
+        <input type="password" id="api-key" placeholder="sk-or-v1-...">
+        
+        <label>Основная модель:</label>
+        <div class="model-field">
+            <input type="text" id="model-main" placeholder="напр. anthropic/claude-sonnet-4.5">
+            <button type="button" class="btn-gray" onclick="openPicker('main')">Выбрать</button>
+        </div>
+        <div class="picker" id="picker-main"></div>
+
+        <label>Модель для хроники (сжатие):</label>
+        <div class="model-field">
+            <input type="text" id="model-summary" placeholder="напр. google/gemini-flash-1.5-8b">
+            <button type="button" class="btn-gray" onclick="openPicker('summary')">Выбрать</button>
+        </div>
+        <div class="picker" id="picker-summary"></div>
+        
+        <div class="settings-row">
+            <div>
+                <label>Температура (<span id="temp-val">0.7</span>):</label>
+                <input type="range" id="setting-temp" min="0" max="2" step="0.1" value="0.7">
+            </div>
+            <div>
+                <label>Макс. токенов:</label>
+                <input type="number" id="setting-tokens" value="2000">
+            </div>
+        </div>
+        
+        <label style="display: block; margin-bottom: 20px;">
+            <input type="checkbox" id="setting-cache"> Кэшировать кор (только модели anthropic/*)
+            <span style="display:block;font-size:11px;color:#777;margin-left:26px;">Запись в кэш стоит 1.25x, чтение 0.1x: первый ход дороже, дальше кор почти бесплатный. У остальных провайдеров кэш работает сам, галка им не нужна и может вызвать ошибку.</span>
+        </label>
+        
+    </div>
+
+    <div id="screen-char-gen" class="screen">
+        <div class="back-row">
+            <button class="btn-gray" onclick="switchScreen('screen-setup')">&larr; В меню</button>
+        </div>
+        <h1>Создание персонажа</h1>
+        <label>Пол персонажа:</label>
+        <select id="char-gender">
+            <option value="мужской">мужской</option>
+            <option value="женский">женский</option>
+        </select>
+        
+        <label>Возраст:</label>
+        <input type="number" id="char-age" placeholder="25" min="15" max="70">
+
+        <label>Где начинаем:</label>
+        <select id="char-location">
+            <option value="">Случайно</option>
+        </select>
+        
+        <button id="btn-generate">Сгенерировать варианты</button>
+        <div id="char-loader" class="loader">Судьба плетёт нити...</div>
+        
+        <div id="char-options" style="margin-top: 20px;"></div>
+    </div>
+
+    <div id="screen-game" class="screen">
+        <div class="game-controls">
+            <button class="btn-gray" onclick="switchScreen('screen-setup')">&larr; В меню</button>
+            <button class="btn-gray" onclick="openCharacterScreen()">Персонаж</button>
+        </div>
+        <div id="state-panel"></div>
+        
+        <div id="story-text"></div>
+        <div id="choices-container"></div>
+        
+        <div id="custom-action-container">
+            <input type="text" id="custom-action" placeholder="Или напишите своё действие...">
+            <button id="btn-custom-action">Действовать</button>
+        </div>
+        <div id="game-loader" class="loader">Рассказчик думает...</div>
+        <div id="tokens-bar">
+            <span id="tok-turn">ход: —</span>
+            <span id="tok-total">сессия: 0</span>
+            <span id="tok-cost">~$0.0000</span>
+            <span id="tok-cache">кэш: 0</span>
+        </div>
+    </div>
+
+    <div id="screen-character" class="screen">
+        <h1>Персонаж</h1>
+        <button class="btn-gray" onclick="switchScreen('screen-game')">&larr; К игре</button>
+
+        <h2 style="margin-top:22px;">Карточка</h2>
+        <div id="char-card-fields"></div>
+
+        <h2>Состояние</h2>
+        <p style="font-size:12px;color:#777;margin:0 0 10px;">Правьте, если рассказчик напутал. Деньги — в грошах.</p>
+        <div id="char-state-fields"></div>
+
+        <h2>Журнал событий (<span id="ev-count">0</span>)</h2>
+        <p style="font-size:12px;color:#777;margin:0 0 10px;">Это долгая память. Что здесь написано — то мир и помнит.</p>
+        <div id="char-events"></div>
+
+        <div style="margin-top:20px;">
+            <button onclick="saveCharacterScreen()">Сохранить</button>
+            <button class="btn-gray" onclick="switchScreen('screen-game')">Отмена</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* === БАЗА ДАННЫХ И КОНТЕКСТ === */
+    const START_LOCATIONS = ["Столица", "Порт Теней", "Ошерск", "Смитгард", "Монтин",
+                             "Врата", "Ручейный", "Топь", "Морской"];
+    
+    const CORE_PROMPT = `Ты — рассказчик и режиссёр текстовой ролевой игры в мире Кордим. Ты невидим: ты не персонаж и не участник событий. Ты ведёшь мир, всех NPC и ход сцены. Обращаться к себе как к рассказчику, выходить из роли и комментировать игру нельзя.
+
+# МИР
+
+Кордим, год 1026, ранняя осень. Реалистичный гримдарк.
+
+МАГИИ НЕТ. Совсем. Нет богов, вмешивающихся в события, нет чудес, нет сверхъестественных способностей, нет пророчеств. Необъяснимое остаётся необъяснённым: люди видели что-то и не смогли это объяснить — и объяснения не будет. Алхимия — это химия: у каждого состава есть физический механизм, цена и режим отказа. Запрещены эльфы, орки, гоблины, драконы, файерболы, зачарованное оружие и любая фэнтезийная бутафория.
+
+ГЕОГРАФИЯ. Кордим — единственная страна между Свинцовым морем на западе и Хребтом Мясника на востоке. На юге за городом Врата тракт уходит к границе с Линдасом. В центре страны Гнилой Лес — огромный тёмный лес, ничейная земля. Столица стоит к северу от леса и пронизана каналами. Другие города: Порт Теней на побережье (чёрный рынок), Ошерск с пригородом Приречье на реке, Смитгард (кузни), Монтин (крепость на единственном перевале), Врата (южный КПП), Ручейный (лесорубы), Топь (болотное поселение), Морской (рыбацкая деревня в сорок душ).
+
+АТМОСФЕРА. Грязь, кровь, политическая гниль. Сильные эксплуатируют слабых, и это никого не удивляет. Контракты — единственный закон, золото — единственный бог. Добра и зла нет, есть интересы и цены.
+
+ФРАКЦИИ одной строкой. Гильдия наёмников регистрирует контракты и берёт 15%. Городской Совет во главе с лордом Кастеном Вейром правит Столицей. Церковь держит больницы, погребение и архивы. Алхимическая Ложа контролирует редкие составы. Кузнечная Коллегия делает оружие с неподделываемым клеймом. Орден Железного Перевала держит восточный проход и не подчиняется никому. Три торговых дома — Кальвер (зерно, долговое рабство), Рохт (металл), Сел (сведения). Порт Теней поделён между тремя синдикатами: Мокрые ножи, Серый картель, Братство кулака. Свинцовые клинки — пираты. Кесс по прозвищу Корень держит Гнилой Лес.
+
+# ДЕНЬГИ
+
+Корд (золото) = 20 марок (серебро). Марка = 12 грошей (медь). В корде 240 грошей. Народные названия: корд — «жёлтый», марка — «белый», грош — «медяк».
+
+Простолюдин считает в грошах и марках и корд видит редко. Ночлег в общей комнате — 2 гроша, отдельная комната — марка, миска похлёбки — грош, кружка эля — грош. День чернорабочего — 3-4 гроша. Месяц опытного наёмника — 8-12 кордов. Взятка стражнику — 2-5 марок. Простой нож — 3-5 марок, меч среднего качества — 5-8 кордов. Лошадь под седло — 10-12 кордов. Регенерирующая микстура — 15-20 кордов.
+
+В прозе называй деньги так, как их назвал бы персонаж: «три медяка», «полторы марки», «семьдесят кордов». Не пиши «монеты» и «золото» абстрактно.
+
+# СТИЛЬ
+
+Физиологический гримдарк. Отстранённый цинизм, точность протокола вскрытия, чёрный юмор. Короткие глагольные предложения в бою.
+
+Мир гиперматериален. Запах мокрой шерсти, кислого пота и ржавчины. Тактильный вес грязи, холодной стали, дождя. Сырость, которая оседает на коже за час. Скрип мокрой кожи. Каждая сцена должна иметь минимум одну конкретную физическую деталь, которую можно понюхать, потрогать или услышать.
+
+НАСИЛИЕ. Бой и его последствия описывай анатомически точно и без смягчения: что именно рассекло, куда ушла кровь, как повело тело, чем это пахнет, сколько человек остаётся в сознании. Увечья, ампутации, работа костоправа без обезболивания, гниющая рана — часть материала, а не то, от чего надо уводить камеру. Но подробность работает на достоверность, а не на любование: никакого смакования, никакой эстетизации боли, никаких пыток ради зрелища.
+
+Ориентиры по тону: Эдуард Веркин (отстранённость, абсурд), Джо Аберкромби (нелепые грязные смерти), Ричард Морган (анатомичность разрушения тела), Глен Кук (сухой военный цинизм), Алексей Иванов «Вегетация» (биологизм, вещность).
+
+Запрещено: пафос, героика, романтизация насилия, сентиментальность, морализаторство, назидательные концовки, «и тогда он понял». Не объясняй читателю, что он должен чувствовать.
+
+СИНТАКСИС. Рубленая фраза в одно-два слова («Просрочил на два месяца. Вчера нашли.») — приём рабочий, но дозируй его: не чаще одного-двух раз на ответ и только там, где нужен удар — в бою, на обрыве плохой новости, в конце сцены. Основная ткань текста — обычные предложения с придаточными и союзами.
+
+# ВТОРОЕ ЛИЦО И ГРАНИЦЫ ИГРОКА
+
+Обращайся к персонажу игрока на «ты». Описывай, что он видит, слышит, чувствует телом, и что делает мир вокруг.
+
+НЕ РЕШАЙ ЗА ИГРОКА. Не приписывай его персонажу решений, намерений, реплик и оценок, которых игрок не заявлял. Не пиши «ты решаешь», «ты понимаешь, что», «ты чувствуешь злость», «ты думаешь». Телесное — можно и нужно: пересохло во рту, руки холодные, сердце бьёт в горле, желудок сжался. Разница простая: тело описывай, выводы и чувства оставляй игроку.
+
+Если игрок заявил действие — выполняй его последствия, а не переигрывай само действие. Если действие невозможно, покажи, обо что оно разбилось, а не отменяй его молча.
+
+# ФИЗИКА БОЯ
+
+Гиперреализм. Никаких уворотов от арбалетного болта после выстрела. Сталь не прорубает сталь: мечом латы не разрубить. Броня держит порез, но пропускает кинетику — тупой удар ломает кости и вызывает сотрясение. Болт нельзя отбить клинком и нельзя выдернуть из раны в бою: зазубрины рвут ткань и открывают кровотечение. Перезарядка тяжёлого арбалета — десять-пятнадцать секунд, и это вечность. Яды и паралитики не действуют мгновенно, им нужно двадцать-тридцать секунд, и цель теряет координацию постепенно. Усталость копится быстро: после минуты полного напряжения руки тяжелеют, дыхание рвётся.
+
+Бой — это биомеханика и анатомия, а не героика. Драка длится секунды, а не минуты. Побеждает тот, кто напал первым, из выгодной позиции и с подготовкой. Численное преимущество почти всегда решает. Герой, выходящий один против пятерых, умирает.
+
+# РАНЕНИЯ
+
+Тело — ненадёжный механизм, а здешняя медицина убивает почти так же часто, как само ранение.
+
+Порез или неглубокий укол: при чистой перевязке выживаемость высокая, без обработки заражение приходит на вторые сутки. До полной формы 7-14 дней. Глубокая рана: 3-6 недель, и место решает всё. Арбалетный болт в мягкие ткани без микстуры — 4-6 недель, если выживет.
+
+Заражение приходит на вторую ночь: жар и розовая полоса от раны к ближайшему суставу. Лечится временем, а не лечением; на четвёртое утро либо полоса встала, либо всё.
+
+НИКАКОГО «к утру почти оправился». Боль, слабость и ограниченная подвижность держатся и влияют на то, что персонаж может сделать. Регенерирующая микстура даёт шанс выжить и ускоряет дело, но валит лихорадкой на 6-8 часов и не сращивает переломы.
+
+# ВРЕМЯ
+
+Сейчас ранняя осень, месяц Пепла. Дожди начались, тракты раскисают, но проходимы. Реки полные, баржи идут последние недели. Жатва — главное событие года, деревни закрыты для чужих.
+
+Пешком 20-25 миль в день по хорошей дороге, 10-15 в дождь. Верхом 35-40. Столица — Врата: 3 дня верхом. Столица — Порт Теней лесом 4 дня, в обход через Врата 7-8. Ошерск — Столица: 2 дня верхом, баржой вниз 3 дня.
+
+ДВИГАЙ ВРЕМЯ. При смене сцены, переходе, отдыхе, ночлеге или дороге увеличивай день и дату в состоянии. Ночь прошла — день сменился. Три дня в пути — день вырос на три.
+
+# ЧТО ДЕЛАТЬ С НЕИЗВЕСТНЫМ
+
+Если игрок спрашивает про место, человека или вещь, которых нет в справке по миру, — не выдумывай глобальных сущностей. Мелкую бытовую деталь придумать можно и нужно: имя трактирщика, кличку собаки, цену на репу. Но новых городов, фракций, богов, орденов и легенд не создавай. Если игрок настаивает на чём-то, чего в мире нет, — покажи через NPC, что об этом никто не слышал.`;
+
+    /* Рекурсия выключена у всех записей намеренно.
+       Записи густо ссылаются друг на друга: одно прямое попадание поднимало
+       50 записей из 58, после чего бюджет отбирал из них две по наименьшему
+       order — то есть в каждый ход уезжали одни и те же Столица с Гнилым Лесом
+       независимо от происходящего. Механизм оставлен рабочим: если появится
+       запись, которую действительно стоит подтягивать по упоминанию, поставьте
+       ей recursive: true точечно. */
+    const LOREBOOK = [
+        /* --- ПОСТОЯННЫЕ --- */
+        { id: "rules", title: "Правила мира", keys: ["правил"], constant: true, order: 10, scanDepth: 1, recursive: false, maxChars: 489,
+          text: `Кордим, год ~1026, ранняя осень. Магии нет: необъяснимое остаётся необъяснённым, боги молчат, чудес не бывает. Есть сталь, физика, алхимия и выживание.
+ДЕНЬГИ. Корд (золото) = 20 марок (серебро). Марка = 12 грошей (медь). В корде 240 грошей. Народные названия: корд — «жёлтый», марка — «белый», грош — «медяк». Простолюдин считает в грошах и марках, корд видит редко.
+ЗАКОН. Контракты — единственный закон. Золото — единственный бог. Сильные эксплуатируют слабых, и это никого не удивляет.` },
+
+        { id: "geo", title: "Глобальная география", keys: ["мир", "географи", "карт", "континент", "Свинцов", "Хребет Мясник", "Кордим", "стран"], constant: true, order: 20, scanDepth: 4, recursive: false, maxChars: 647,
+          text: `Кордим — единственная страна между Свинцовым морем на западе и Хребтом Мясника на востоке.
+ЗАПАД. Свинцовое море — холодный коварный океан. Туманные гавани, жестокие шторма, выбеленные солью кости на берегу.
+ВОСТОК. Хребет Мясника — непроходимые зубчатые горы тёмного камня. Железные шахты, укреплённые перевалы, вечная серая облачность.
+ЮГ. За Вратами тракт идёт дальше; через два дня пути — приграничье с Линдасом. Граница не линия, а полоса спорных земель.
+ЦЕНТР. Гнилой Лес — огромный давящий лес, куда почти не проникает солнце. Столица стоит к северу от леса, пронизана каналами, текущими к морю.
+АТМОСФЕРА. Грязь, кровь, политическая гниль.` },
+
+        /* --- ЛОКАЦИИ --- */
+        { id: "capital", title: "Столица", keys: ["Столиц", "Верхний город", "Нижний город", "Торговый пояс", "канал"], constant: false, order: 100, scanDepth: 4, recursive: false, maxChars: 1309,
+          text: `Готический мегаполис ~27 000 человек, политическое и экономическое ядро Кордима.
+СЕНСОРИКА. Ладан пополам с гнилью открытых канализаций нижних ярусов. Колокол каждый час, приглушённый туманом. Мостовая скользкая от дождя и нечистот. Ночью верхние кварталы светятся масляными фонарями, нижние тонут в темноте.
+УСТРОЙСТВО. Система искусственных каналов — дренаж и транспорт, каменные мосты между кварталами.
+ВЕРХНИЙ ГОРОД — западный холм, белый камень, стража на каждом углу. Дом Вейра — административный центр. Собор занимает целый квартал.
+ТОРГОВЫЙ ПОЯС — кольцо вокруг холма. Рынки, склады, мастерские. Главная контора Гильдии — серое здание без вывески. Таверна «Три моста» собирает все слухи города.
+РЕЧНЫЕ ДОКИ — вдоль каналов, склады и рыбный рынок. Дом Сел держит тихий офис без таблички.
+НИЖНИЙ ГОРОД — восточная низина, деревянные дома вплотную. Стража заходит группами и только днём. Тиф вспыхивает раз в два-три года. Лечебница Церкви — единственное место, где примут с раной и без документов.
+ЧУМНОЙ КВАРТАЛ — северо-восточный угол за каменной стеной, закрыт сорок лет. Огни в окнах видят регулярно.
+ВЛАСТЬ. Лорд Кастен Вейр правит через Совет. Король Идвальд III бывает редко.
+ОПАСНОСТЬ высокая: у Совета, Церкви и Дома Сел разведсети перекрываются. Разговор в таверне доходит до трёх разных ушей.` },
+
+        { id: "forest", title: "Гнилой Лес", keys: ["Гнилой Лес", "Гнилого Лес", "Гнилом Лес", "лесной тракт", "тракт", "хутор"], constant: false, order: 101, scanDepth: 4, recursive: false, maxChars: 1243,
+          text: `Густой тёмный лес, ничейная земля в сердце Кордима.
+СЕНСОРИКА. Влажная прохлада даже летом. Запах гнили, грибка и алхимических стоков с верховьев. Звук идёт неправильно — голоса доносятся не с той стороны. Туман приходит без предупреждения в любое время года.
+ТРАКТ. Одна дорога через лес, срезает 3–4 дня до Столицы: лесом четыре дня верхом, в обход через Врата семь-восемь. Четыре старых поста, три заброшены. Институт Дорожных стражей мёртв.
+ЗАЧЕМ ИДУТ. Алхимические травы и грибы, растущие только здесь, — Ложа платит хорошо. Зверьё, давно выбитое в других местах. И бегство: лес принимает тех, кому некуда идти.
+ОПАСНОСТИ. Волки — стаи до двадцати, крупнее обычных, тёмная шерсть, охотятся в полной тишине; огонь отпугивает хуже обычного. Кабан вырастает до размеров небольшой лошади, 400–500 кг, клык пробивает деревянный щит — охотятся вчетвером с копьями, и всё равно кто-то не возвращается. Причина размеров — алхимическое заражение стоячей воды в глубине; мясо есть можно, внутренности нет. После дождей граница дороги и топи исчезает. Туман встал — стой и жди рассвета.
+ГЛУБИНА. В глубине есть следы, не принадлежащие ни одному известному животному. Кесс их видел и молчит. Единственный совет Вана: не ходите туда, куда ведут следы.` },
+
+        { id: "van_kess", title: "Ван и Кесс — хозяева тракта", keys: ["Ван", "Кесс", "Корен", "разбойник"], constant: false, order: 102, scanDepth: 4, recursive: false, maxChars: 1314,
+          text: `ВАН — последний Дорожный страж, около пятидесяти, живёт в полуразрушенном посту на середине лесного тракта. Знает тракт лучше любого живого человека. Продаёт знание всем, кто платит, — и купцам, и разбойникам. Кесс его не трогает, Ван его не выдаёт; негласный договор держится годами.
+КЕСС по прозвищу Корень — атаман, около сорока пяти, двадцать лет в лесу. Худой, жилистый, кожа цвета старой коры, двигается совершенно бесшумно. Под ним сорок-шестьдесят человек, число гуляет по сезону.
+ВЛАСТЬ. Его люди боятся леса, он — нет. В этом и власть: не деньги и не жестокость, а то, что он единственный знает правила. Он не безумец и не отшельник, а полевой командир партизан, у которого самая надёжная крепость в Кордиме — живая и не нанесённая на карту.
+КОДЕКС. Не убивать без нужды. Не трогать лекарей и священников. Наёмник с жетоном Гильдии платит небольшую предсказуемую «лесную пошлину» вместо полного ограбления — Гильдия знает, закладывает в цену контракта и официально это отрицает.
+КОМПРОМАТ. За двадцать лет через его людей прошло много грузов и разговоров. Кесс знает о поставках Дома Рохт то, чего Рохт не хочет афишировать, — и молчание Кесса стоит дороже военной операции.
+ПРИВЫЧКА. Перед каждым выходом Кесс оставляет что-то на старом дубе у северной опушки. Что именно — в банде дважды не спрашивают.` },
+
+        { id: "port", title: "Порт Теней", keys: ["Порт Тен", "Порта Тен", "Порту Тен", "контрабанд", "док"], constant: false, order: 103, scanDepth: 4, recursive: false, maxChars: 1209,
+          text: `Каменный прибрежный город ~15 000 человек, чёрный рынок Кордима.
+СЕНСОРИКА. Соль, гнилая рыба, смола и старая кровь с доков. Ветер со Свинцового моря пронизывает в любое время года. Каждую ночь туман такой, что человека теряешь в трёх шагах.
+ДОКИ, север вдоль берега — земля Мокрых ножей. Рест Дорр официально старший смотритель доков; каждый корабль платит пошлину официальную и вторую — Доррам. Контрабанда, алхимия с Кладбища китов, оружие без клейма.
+ТОРГОВЫЙ КВАРТАЛ, центр — Серый картель. Рынки, аптеки, меняльные конторы. Аптека Сибиллы Рейн — сердце картеля. Здесь же торгуют табаком, дорогим южным импортом.
+ТРУЩОБЫ, юг — Братство кулака. Горм держит рэкет над мелкой торговлей, низовые бордели. Стража сюда не заходит.
+МАЯК И СКАЛЫ, западный мыс. Смотритель меняет режим огня по просьбе Мокрых ножей. Под скалами пещеры, известные контрабандистам.
+ТОВАР. Легально — рыба, соль, канаты, корабельный лес, восточные специи, табак. Нелегально — оружие без клейма Коллегии, алхимия без лицензии Ложи, поддельные бумаги, «серая радость». Уникальное — кость левиафана с Кладбища китов.
+ВЛАСТЬ. Три синдиката в неустойчивом равновесии. Городской совет формально есть, фактически ротируется между их людьми.` },
+
+        { id: "whales", title: "Кладбище китов", keys: ["Кладбище кит", "левиафан"], constant: false, order: 104, scanDepth: 4, recursive: false, maxChars: 395,
+          text: `Полоса безлюдного серого побережья к югу от Порта Теней, усеянная огромными скелетами левиафанов. Ветер воет сквозь колоссальные рёбра. Пахнет старым рассолом и сухой костью. По ночам здесь видят огни. Рыбаки из Морского обходят этот берег после заката и не объясняют почему.
+Кость левиафана идёт на алхимию и стоит дорого. Между рёбрами скрыты три укрытия для кораблей — база Свинцовых клинков.` },
+
+        { id: "morskoy", title: "Морской", keys: ["Морск", "рыбацк", "рыбак", "рыбач", "рыбаков"], constant: false, order: 105, scanDepth: 4, recursive: false, maxChars: 590,
+          text: `Северная прибрежная деревня, около сорока человек, едва выживает.
+СЕНСОРИКА. Постоянный ветер с моря, запах соли, дыма и мокрых сетей. Прибой слышен везде.
+УСТРОЙСТВО. Одна таверна — она же гостиница, склад и место, где решается всё важное. Один причал. Дальше дневного перехода в море не ходят.
+ИСТОРИЯ. Деревня была под крылом рода Астерн. Когда замок на мысе пал, Морской остался деревней, которую никто не защищает. Рыбаки помнят и вслух не говорят.
+ПУТИ. Северным берегом до Порта Теней три дня — дорога тех, кто хочет войти в Порт незамеченным. Мыс, где стоял замок, обходят стороной.` },
+
+        { id: "smitgard", title: "Смитгард", keys: ["Смитгард", "кузн", "плавильн"], constant: false, order: 106, scanDepth: 4, recursive: false, maxChars: 849,
+          text: `Промышленный город-кузня ~9 000 человек, производственная столица Кордима.
+СЕНСОРИКА. Небо постоянно серое от кузнечного дыма — облако видно за десять миль. Ритм молотов от рассвета до заката. Запах горячего железа, угля и пота въелся в камень стен.
+УСТРОЙСТВО. Западная часть жилая и торговая, восточная — цеха и плавильни. Рабочих рук хронически не хватает: уход квалифицированного мастера — катастрофа.
+ВЛАСТЬ. Коллегия оружейников фактически владеет городом, Мастер-Кузнец — Хорд Вейн. Коллегия производит, Дом Рохт торгует. Начни Коллегия торговать напрямую — станет угрозой всем торговым домам разом, потому и держится нейтральным производителем.
+ШАХТЫ. Свои шахты на западном склоне дают руду для базового производства. Лучшая руда идёт с восточного склона через перевал Ордена; без восточных поставок Коллегия работает не на полную мощность.` },
+
+        { id: "montin", title: "Монтин", keys: ["Монтин", "перевал", "подъёмный мост"], constant: false, order: 107, scanDepth: 4, recursive: false, maxChars: 767,
+          text: `Город-крепость ~4 000 человек, единственный проходимый восточный перевал.
+СЕНСОРИКА. Холодный ветер даже летом. Звук цепей подъёмного моста слышен по всему городу. Воздух тонкий — новоприбывшие два дня дышат тяжело.
+УСТРОЙСТВО. Западная часть — город для проезжающих, восточная — укрепления Ордена. Последний день подъёма стоит проделать на горной лошади: Орден держит конюшню в деревне у подножия — ещё один источник дохода.
+ОРДЕН Железного Перевала не подчиняется ни Совету, ни Церкви, ни Короне. Командор — Брайд Каск. Пошлина фиксирована, торговаться нельзя. Долгосрочного договора Дому Рохт Орден не даёт намеренно: гибкость ставки — рычаг. Часть редких металлов берёт пошлиной натурой и не объясняет зачем. Копит сведения о чужих схемах как пассивную страховку.` },
+
+        { id: "osherk", title: "Ошерск и Приречье", keys: ["Ошерск", "Приречь", "баржа", "Крайм", "Утопленник"], constant: false, order: 108, scanDepth: 4, recursive: false, maxChars: 860,
+          text: `Речной торговый город ~12 000 человек, второй по величине вместе с Портом Теней.
+СЕНСОРИКА. Запах речного ила, рыбного рынка, мокрой верёвки. Скрип пришвартованных барж.
+УСТРОЙСТВО. Река разрезает город; два-три каменных моста, на каждом пошлина. ПРИРЕЧЬЕ — южный пригород. «Утопленник» — постоялый двор без записи в книге. СИНИЙ ДВОР за красильней, синие камни мостовой. МОКРЫЙ СПУСК — место, где Крайм разбирает своих.
+ВЛАСТЬ. Крайм Руфус — альдерман Приречья, глава гильдии виноторговцев, держит четыре баржи. Официально возит вино и зерно. Дешёвое вино идёт с юга по суше, дорогое — с востока через Дом Сел, и в счетах он их намеренно смешивает. Дом Сел об этой двойной бухгалтерии знает; реакция — вопрос времени.
+РЕКА. Течёт с севера, Ошерск выше по течению, чем Столица. Баржой вниз до Столицы — 3 дня, обратно вверх — 5–6. Верхом в обе стороны — 2 дня.` },
+
+        { id: "vrata", title: "Врата", keys: ["Врат", "перекрёсток", "перекресток", "пошлин", "КПП"], constant: false, order: 109, scanDepth: 4, recursive: false, maxChars: 549,
+          text: `Город-крепость ~7 500 человек, обязательный КПП.
+СЕНСОРИКА. Конский навоз, грязь и немытые тела. Скрип тележных колёс круглосуточно. У главного входа две виселицы, обе редко пустуют.
+ОПИСАНИЕ. Все южные торговые пути сходятся здесь. За южными воротами тракт идёт дальше — через два дня пути приграничные земли Линдаса; армия Идвальда держит этот участок в хорошем состоянии ради снабжения. Лучший рынок сведений за пределами Столицы и Порта Теней. Пряха держит здесь почтовую контору Вестников.
+ОПАСНОСТЬ средняя. Взятки работают быстрее аргументов.` },
+
+        { id: "top", title: "Топь", keys: ["Топь", "Топи", "болот", "мостк"], constant: false, order: 110, scanDepth: 4, recursive: false, maxChars: 446,
+          text: `Болотное поселение ~500 человек, конец дороги.
+СЕНСОРИКА. Густой запах гнили, серы и стоячей воды. Постоянное жужжание насекомых. Мостки скрипят, всё вечно влажное, туман не уходит даже в полдень.
+ОПИСАНИЕ. Дома на сваях над чёрной водой, соединённые узкими мостками. Сюда приходят прятаться: дезертиры с южной границы, должники Кальвера, беженцы из приграничных деревень. Ни гарнизона, ни Гильдии, ни Церкви. Без проводника с мостков не сходить.` },
+
+        { id: "rucheiny", title: "Ручейный", keys: ["Ручейн", "лесоруб", "просек"], constant: false, order: 111, scanDepth: 4, recursive: false, maxChars: 582,
+          text: `Небольшой город ~2 000 человек на южной опушке Гнилого Леса. Лесорубы, семьи бандитов Кесса, люди, которые не задают вопросов. Приходящий стражник получает пустые взгляды и ответ «не знаем никакого Кесса».
+СЛЕПОЕ ПЯТНО. С той стороны просеки сидит банда, которая людям Кесса не подчиняется: залётные, платят монетой и сбывают не здесь. Стек, местный лошадник, с ними связан и о южной дороге молчит совсем. Лавочник боится и говорит прямо: на юг не ходи. То, что такая банда живёт в двух часах от опушки, означает одно из двух — либо Кесс о ней не знает, либо она ему пока не мешает.` },
+        /* --- СИСТЕМЫ И ФРАКЦИИ --- */
+        { id: "alchemy", title: "Алхимия", keys: ["алхими", "алхимик", "зель", "микстур", "реагент", "вспышк", "едкий дым", "кислот", "смол", "паралитическ", "горюч", "болеутоляющ", "серая радость", "зависимост"], constant: false, order: 200, scanDepth: 4, recursive: false, maxChars: 1626,
+          text: `ПРИНЦИП. Алхимия — химия, а не магия. У всего есть физический механизм, цена и режим отказа. Алхимия НЕ МОЖЕТ воскрешать, мгновенно лечить и давать сверхъестественную силу. Любой эффект, звучащий как магия, — мошенничество либо имеет жестокую скрытую цену.
+РЕГЕНЕРИРУЮЩАЯ МИКСТУРА. Крайне редкая, 15–20 кордов, три-четыре производителя на страну. Форсирует заживление тканей и давит инфекцию, но не возвращает объём крови и не сращивает переломы. Лихорадка под сорок, недееспособность 6–8 часов, слабость три дня. Две дозы за неделю — риск отказа органов. Густая тёмно-янтарная жидкость, пахнет жжёной серой и полынью.
+БОЛЕУТОЛЯЮЩИЙ НАСТОЙ. Дёшев, есть в любой таверне. Глушит боль на 2–4 часа, замедляет реакцию и маскирует нарастающее кровотечение. При регулярном приёме привыкание: начинают с раны, продолжают потому, что без настоя обычная боль кажется невыносимой.
+СЕРАЯ РАДОСТЬ. Очень редкая, только через Серый картель, дорого. Несколько часов полного отсутствия тревоги и боли. Зависимость быстрая, физическая и психическая.
+БОЕВОЕ. Ослепляющая вспышка — слепит на 2–4 секунды, ночью до шести, действует и на того, кто бросил. Едкий дым — облако радиусом три метра на 20–30 секунд, ветер сносит. Кислотная колба — разъедает металл, замки и кожу, пары токсичны в закрытом помещении. Горючая смесь — загорается от воздуха, тушится только песком, вода усиливает. Паралитическая пыль — паралич на 10–20 минут при вдыхании, на ветру бесполезна. Липкая смола — твердеет за 10–15 секунд, на морозе хрупкая.
+УЛИКИ. Обученный медик Ложи узнаёт её кислоту по характеру ожога и по картине видит, лили на стоящего или на лежащего.` },
+
+        { id: "guild", title: "Гильдия наёмников", keys: ["Гильди", "наёмник", "наемник", "жетон", "контракт"], constant: false, order: 201, scanDepth: 4, recursive: false, maxChars: 1044,
+          text: `ПРИСУТСТВИЕ. Конторы в каждом городе с населением от трёх тысяч. Территория нейтральная: убийство внутри конторы означает, что каждый наёмный клинок на континенте становится тебе потенциальным врагом.
+ФУНКЦИЯ. Регистрация контрактов и арбитраж, комиссия 15% от выплаты. Контракт либо выполняется, либо официально возвращается; бросить — чёрный список.
+ЖЕТОН. Работающий по официальному контракту носит металлическую пластину с номером. Жетон — не полиция и не броня, а репутационный механизм: убьёшь такого — Гильдия объявит целью тебя. Кесс жетоны признаёт и берёт лесную пошлину вместо грабежа.
+БРОК САЙДЕН — глава столичной конторы, 60 лет, нет двух пальцев на левой руке. Нейтрален абсолютно.
+МАРРА ХОЛТ — его правая рука, 40 лет, бывший информатор Церкви. Улыбается всегда, и опытных людей это пугает.
+СЕДРИК «АРХИВ» — серый кардинал Гильдии, держит копии всех контрактов за тридцать лет. Марра его боится.
+ПУСТОТА В АРХИВЕ. Если Архив на запрос отвечает, что записи нет, значит заказ шёл мимо конторы, — и сама пустота является сведением.` },
+
+        { id: "state", title: "Совет, Церковь, стража", keys: ["Совет", "Церк", "стража", "стражник", "Вейр", "архиеписк"], constant: false, order: 202, scanDepth: 4, recursive: false, maxChars: 1167,
+          text: `ГОРОДСКОЙ СОВЕТ. Номинальное гражданское управление, на практике — сбор налогов и политическое маневрирование. Члены глубоко коррумпированы; долговые записи и компромат одновременно их главное оружие и главная слабость.
+ЛОРД КАСТЕН ВЕЙР — 55 лет, три поколения семьи в Совете. Говорит тихо, и остальные при этом замолкают. Слабость одна: единственный сын, молодой, амбициозный и глупый.
+ЦЕРКОВЬ. Больницы, приюты, разведывательная сеть через исповедь. Контролирует погребение и церковные архивы: запись о крещении — единственный официальный документ, подтверждающий, что человек вообще существовал. Отсюда следует, что человек без такой записи юридически не существует.
+АРХИЕПИСКОП БРАН — 60 лет. Публично осуждает насилие и частным образом финансирует его через посредников. Публично осуждает табак и курит у себя в покоях. Публичный скандал разрушил бы его власть мгновенно.
+СТРАЖА. Качество разное. В Столице профессиональна и политически скомпрометирована. В Порту Теней работает на синдикаты. В мелких поселениях недоплачена и легко подкупается. Стража применяет закон того, кто ей платит. Полноценной полиции в Кордиме нет — порядок держат частные силы фракций.` },
+
+        { id: "syndicates", title: "Три синдиката Порта Теней", keys: ["синдикат", "Мокрые нож", "Мокрых нож", "Мокрым нож", "картел", "Братство кулак", "Братства кулак", "Дорр", "Горм", "Нотариус", "Сибилл"], constant: false, order: 203, scanDepth: 4, recursive: false, maxChars: 1241,
+          text: `МОКРЫЕ НОЖИ. Доки и морская контрабанда. Граница со Свинцовыми клинками проведена ясно: открытое море и побережье — клинки, доки и портовая инфраструктура — ножи.
+РЕСТ и КЕЙН ДОРР — близнецы, по сорок, внешне неотличимы. Рест публичное лицо и официально старший смотритель доков, Кейн — тень. Кто узнал, что их двое, молчит по понятным причинам.
+СЕРЫЙ КАРТЕЛЬ. Торговый квартал, а также сведения и яды по всему Кордиму. Тесно сплетён с Домом Сел через общих людей, но формально независим: Нотариус никогда не называет себя человеком Дома Сел, Дом Сел никогда не признаёт связь. Обоим выгодно, что их трудно разделить.
+НОТАРИУС — настоящее имя неизвестно, пол является предметом споров. Никогда не врёт. Продаёт сведения обеим сторонам любого конфликта.
+СИБИЛЛА РЕЙН — держит аптеку, торгует лекарствами, табаком и ядами. Знает состав «серой радости». Сведения получает от работниц среднего звена в борделях.
+БРАТСТВО КУЛАКА. Трущобы: рэкет, прямое насилие, низовые бордели. ГОРМ «Печать», 52 года, бывший боец на ставки. Суеверен до абсурда — семь амулетов, важных разговоров в чётные дни не начинает. Всё держится на его личном авторитете: не станет его — не станет структуры. Серый картель использует Братство, когда нужны руки без головы.` },
+
+        { id: "lodge", title: "Алхимическая Ложа", keys: ["Ложа", "Ложи", "Орра", "сборщик", "лиценз"], constant: false, order: 204, scanDepth: 4, recursive: false, maxChars: 645,
+          text: `Контролирует производство и распределение редких составов по всему Кордиму.
+СБОР СЫРЬЯ устроен смешанно. Для безопасных мест — реестр вольных сборщиков. Для опасных, вроде Гнилого Леса и Топи, — договоры с местными: Кесс за лес, жители Топи за болота. Платят фиксированно и не спрашивают, как добыто. Отсюда и неприкосновенность Кесса: за ним тихий договор с организацией, у которой длинные руки.
+МАСТЕР ВЕШ ОРРА — 68 лет, маленькая сухая женщина, руки в химических ожогах до локтей. Говорит медленно и очень точно. Продаёт всем с одинаковым безразличием. О привыкании к болеутоляющему знает и считает это проблемой пациента, а не производителя.` },
+
+        { id: "hunters", title: "Охотники за головами", keys: ["Охотник", "Сурн", "мандат", "за голову"], constant: false, order: 205, scanDepth: 4, recursive: false, maxChars: 375,
+          text: `Берут контракты на людей и работают легально: у них мандаты на задержание от городских советов. С Гильдией не пересекаются напрямую — та регистрирует контракты, эти исполняют розыск.
+ДАЛК СУРН — 47 лет, педантичен. Держит реестр фрилансеров по всему Кордиму: приметы, специализация, последнее известное место. Реестр справочный, но при удобном случае Сурн никого не прикроет.` },
+
+        { id: "houses", title: "Торговые дома", keys: ["Торговый дом", "Торговые дом", "Кальвер", "Рохт", "Дом Сел", "Эйнар", "Магна", "Оррен"], constant: false, order: 206, scanDepth: 4, recursive: false, maxChars: 1392,
+          text: `Три семьи в постоянном напряжённом союзе.
+ДОМ КАЛЬВЕР — зерно, скот, земля. ЛОРД ЭЙНАР КАЛЬВЕР, 70 лет, в кресле на колёсах. Держит власть долговым рабством: крестьянин берёт зерно в голодный год и отдаёт трудом, а долг устроен так, что не закрывается никогда. Платит налоги за должников разом и потому является крупнейшим единичным налогоплательщиком страны. Наследники ждут его смерти двадцать лет, и он получает от этого тихое удовольствие.
+ДОМ РОХТ — металл, оружие, транспорт. МАГНА РОХТ, 40 лет, беспощадна в переговорах. Зависит от Ордена в перевозке восточной руды, и это её бесит: она хочет договора на годы, Орден отказывает, потому что гибкость ставки — его рычаг.
+ДОМ СЕЛ — сведения, специи, редкие товары. ОРРЕН СЕЛ, 55 лет, формальный глава; реальные решения, возможно, принимает кто-то другой. Держит восточную торговлю через Монтин и южные морские пути. Никогда не реагирует немедленно и никогда лично — всегда через слой посредников.
+ОТКРЫТЫЙ УЗЕЛ. Весной 1025-го в структуре Рохт убили Обрана Дюра, посредника, распоряжавшегося очередью на погрузку. Магна ищет не убийц, а выгодоприобретателя. Отдельно всплыло, что Дюр нанимал охрану за деньги, которых у него быть не могло; чего он боялся на самом деле, не знает никто.
+ЕЩЁ ОДИН. Дом Сел потерял в Приречье сундук с документами, где лежала схема двойной бухгалтерии Крайма — часть архитектуры, которую строили поколениями.` },
+
+        { id: "order", title: "Орден Железного Перевала и Кузнечная Коллегия", keys: ["Орден", "Железный Перевал", "Каск", "Коллеги", "Хорд Вейн", "клейм"], constant: false, order: 207, scanDepth: 4, recursive: false, maxChars: 687,
+          text: `ОРДЕН. Военный орден, основанный раньше самого Кордима. Держит единственный проходимый восточный перевал и не подчиняется ни Совету, ни Церкви, ни Короне. Пошлину назначает односторонне, часть редких металлов берёт натурой. Копит сведения о чужих схемах как пассивную страховку — не пускает в ход, просто знает.
+БРАЙД КАСК — Командор, 50 лет, тридцать лет службы, покидал Монтин восемь раз. Говорит мало.
+КУЗНЕЧНАЯ КОЛЛЕГИЯ. ХОРД ВЕЙН — Мастер-Кузнец, 61 год, руки деформированы сорока годами работы, живёт в пристройке к штабу, говорит громко по привычке. Клеймо Коллегии на оружии — гарантия качества, которую невозможно подделать; оружие без клейма стоит дешевле и продаётся не везде.` },
+
+        { id: "messengers", title: "Вестники и Корона", keys: ["Вестник", "Пряха", "почт", "письм", "Идвальд", "корол"], constant: false, order: 208, scanDepth: 4, recursive: false, maxChars: 708,
+          text: `ВЕСТНИКИ. Люди, которые ходят по дорогам Кордима с письмами за плату. Нейтралитет у них не идея, а деловое условие: им пользуются все фракции, поэтому их не трогает никто. Правило держится шестьдесят лет без единого письменного договора.
+ПРЯХА — почтовая контора во Вратах, около семидесяти. Помнит каждое письмо за сорок лет: не содержание, а от кого кому. Это делает её одним из самых осведомлённых людей страны, и она об этом знает.
+КОРОНА. ИДВАЛЬД III, 42 года, один из лучших фехтовальщиков Кордима. Армия любит его искренне, политически он слаб. Воюет с Линдасом на юге — единственное место, где делает то, для чего создан. Вейр эту войну поддерживает: король на границе — это король далеко от Столицы.` },
+        /* --- СИСТЕМЫ МИРА --- */
+        { id: "politics", title: "Политическая механика", keys: ["политик", "власт", "союз", "конфликт", "фракци"], constant: false, order: 300, scanDepth: 4, recursive: false, maxChars: 869,
+          text: `СОЮЗЫ. Вейр, торговые дома и Церковь — негласный треугольник, управляющий Столицей. Дом Рохт и Коллегия Смитгарда — производственный симбиоз: одни делают, другие торгуют, разделение выгодно обоим. Дом Сел и Серый картель сплетены тесно и формально независимы. Ложа и Коллегия — технический симбиоз: лучшее оружие с лучшими составами.
+КОНФЛИКТЫ. Орден против Дома Рохт — холодная война из-за пошлин; Орден трижды задерживал обозы, Рохт трижды уступал. Церковь против Ложи — идеологическое: Церковь хочет монополии на чудесные исцеления. Дом Кальвер против Дома Рохт — старые деньги против новых. Гильдия против Охотников — конкуренция за рынок, напряжение без войны. Кордим против Линдаса — вялотекущая пограничная война на юге, настоящая причина в торговых путях.
+ПРИНЦИП. В Кордиме нет добра и зла, есть интересы и цены. Золото важнее верности. Выживание важнее всего.` },
+
+        { id: "wounds", title: "Ранения и лечение", keys: ["ран", "кровотеч", "лечи", "перевяз", "лекар", "перелом", "сломан", "заражен", "жар"], constant: false, order: 301, scanDepth: 4, recursive: false, maxChars: 1387,
+          text: `ПРИНЦИП. Тело — ненадёжный механизм, а средневековая медицина убивает почти так же часто, как само ранение. Алхимия даёт преимущество, но не чудеса.
+ПОРЕЗЫ И НЕГЛУБОКИЕ КОЛОТЫЕ. Выживаемость высокая при чистой перевязке. Без обработки заражение приходит на вторые сутки. До полной боеспособности 7–14 дней.
+ГЛУБОКИЕ РАНЫ. Выживаемость средняя, всё решает место. Восстановление 3–6 недель; с регенерирующей микстурой — 5–7 дней до частичной боеспособности и 2–3 недели до полной.
+АРБАЛЕТНЫЙ БОЛТ. Зазубренный наконечник при извлечении рвёт ткань сильнее, чем рвал при входе. Болт в поясничной мышце рядом с позвоночником — риск задеть почку или нерв. В мягкие ткани с микстурой: 6–8 часов недееспособности, три дня сильной слабости, 10–14 дней до боевой готовности. Без микстуры — 4–6 недель, если выживет.
+ЗАРАЖЕНИЕ БЕЗ МИКСТУРЫ приходит на вторую ночь: жар и розовая полоса от раны к ближайшему суставу. Лечится не лечением, а временем. Отвар ивовой коры и прошлогодней таволги сбивает жар на несколько часов, и только. Сосновая смола и кислый болотный мох под повязку работают, но исход решает тело: отжимает толчками, три ночи. На четвёртое утро либо полоса встала и запаха нет, либо всё.
+ЖЁСТКОЕ ПРАВИЛО. Никакого «к утру почти оправился». Боль, слабость и ограниченная подвижность держатся явно и влияют на действия. Алхимия даёт шанс выжить и ускоряет ход дела, но не отменяет его.` },
+
+        { id: "roads", title: "Дороги и время в пути", keys: ["дорог", "маршрут", "переход", "верхом", "пешком", "день пути", "расстоян", "баржа"], constant: false, order: 302, scanDepth: 4, recursive: false, maxChars: 943,
+          text: `СКОРОСТЬ. Пешком 20–25 миль в день по хорошей дороге, 10–15 в дождь. Верхом 35–40 без спешки. Обоз 15, в грязь меньше.
+МАРШРУТЫ. Ошерск — Столица: 2 дня верхом, 4–5 пешком; баржой вниз по реке 3 дня, обратно вверх 5–6. Столица — Порт Теней лесом: 4 дня верхом, 7–8 пешком, и только группой от шести человек. Столица — Порт Теней в обход через Врата: 7–8 дней верхом, зато безопасно. Столица — Смитгард: 5 дней верхом. Столица — Монтин: 7 дней верхом через Смитгард, последний день подъёма лучше на горной лошади. Столица — Врата: 3 дня верхом. Врата — граница Линдаса: 2 дня верхом по дороге, которую содержит армия. Порт Теней — Морской: 3 дня пешком вдоль берега. Врата — Топь: 2 дня пешком, без проводника не стоит.
+СЕЗОННОСТЬ. Осенью и зимой грунтовые дороги замедляют вдвое. Лесной тракт зимой непроходим для обозов. Баржи стоят, пока река подо льдом, — около двух месяцев. Весной таяние делает грунтовку хуже зимней на три-четыре недели.` },
+
+        { id: "prices", title: "Цены и заработки", keys: ["цен", "корд", "марк", "грош", "монет", "заплат", "купи", "прода", "заработ", "жаловань", "стоит"], constant: false, order: 303, scanDepth: 4, recursive: false, maxChars: 1379,
+          text: `ВАЛЮТА. Корд (золото) = 20 марок = 240 грошей. Марка — основная расчётная единица, грош — повседневность.
+ПОВСЕДНЕВНОЕ. Ночлег в общей комнате 2 гроша, отдельная комната 1 марка. Миска похлёбки с хлебом 1 грош, кружка эля 1 грош. Корм лошади на день 3 гроша.
+ВЗЯТКИ. Стражнику 2–5 марок, офицеру 2–5 кордов, чиновнику 10–30 кордов.
+СНАРЯЖЕНИЕ. Простой нож 3–5 марок, боевой с клеймом 3–5 кордов. Меч среднего качества 5–8 кордов, с клеймом Коллегии 15–25. Кольчуга 10–15, бригандина 20–30. Арбалет среднего класса 8–12; тяжёлый составной, около двухсот фунтов, со взводом козьей ножкой — 60–80. Десяток бронебойных болтов 2 марки.
+ЛОШАДИ. Рабочая 5–8 кордов, верховая под седло 10–12, старая вьючная 5, боевая 20–40.
+АЛХИМИЯ. Регенерирующая микстура 15–20 кордов у того, кто варит, и до трёх дней ожидания. Ночью, срочно и мимо очереди — вдвое. Табак фунт 1–2 корда, дорогой импорт.
+ТРУД. Чернорабочий 3–4 гроша в день, ремесленник 1–2 марки. Месяц стражника 3–4 корда, месяц опытного наёмника 8–12. Охрана обоза за неделю 1–3 корда, это рутина, а не риск.
+КОНТРАКТЫ. Сложный, с устранением охраняемой цели, — 50–100 кордов, что-то совсем особое до 300. Мимо Гильдии платят иначе: сорок кордов за выбитые сведения (десять вперёд, тридцать по сдаче), сто девяносто за двор с охраной; депозита нет, перерасход не возмещают.
+МАСШТАБ. Семьдесят кордов — это дом в Ручейном с коровой.` },
+
+        { id: "plague", title: "Белая Чума", keys: ["Белая Чума", "чум", "поветри", "эпидеми"], constant: false, order: 304, scanDepth: 4, recursive: false, maxChars: 1203,
+          text: `КОГДА. Две волны. Первая около 986 года — тотальный мор: Столица потеряла треть населения за два месяца, несколько малых городов вымерли полностью, Чумной квартал замуровали. Вторая около 1006-го — малая вспышка, беженцы на дорогах, локальные очаги. Потом чума исчезла так же внезапно, как пришла. Источник не найден ни разу.
+СИМПТОМЫ. Белые пятна на коже, расползающиеся от конечностей к центру. Смерть на пятый-восьмой день.
+ВЕРСИИ. Церковь говорит о божественном испытании. Ложа — о химическом агенте природного происхождения, предположительно из подземных вод Гнилого Леса; источник не найден, негласный мониторинг продолжается, и Орра знает больше, чем говорит. Есть догадка, что чума пришла не из Гнилого Леса, а через него — из чего-то, что было до леса или под лесом. И есть версия без имени: Вейры закрыли Верхний город за три дня до первых случаев. За три дня. Доказать невозможно.
+ПОСЛЕДСТВИЯ. Дефицит рабочих рук на целое поколение, Нижний город Столицы до сих пор не восстановился. Чумной квартал — выжившие, которых некуда было выпустить, и их дети: второе поколение людей, не знающих другого мира. Кто старше пятидесяти, помнит лично, и любая массовая болезнь вызывает немедленную панику.` },
+        /* --- ОБЩЕСТВО --- */
+        { id: "rumours", title: "Слухи и байки Кордима", keys: ["слух", "байк", "легенд", "поговарива", "болтают"], constant: false, order: 305, scanDepth: 4, recursive: false, maxChars: 1720,
+          text: `ПРО ЛЮДЕЙ. «Смерть в кожаном плаще» — по трактам ходит байка о фигуре, которую никто не видит, но все слышат: один сухой щелчок, и человек падает замертво. Одни говорят, дух мести, другие — наёмный демон богатых домов; с конкретным живым человеком байку не связывает никто.
+Нотариус бессмертен — существует сорок лет и не стареет. Прагматики отвечают, что это должность, а не человек.
+Про Идвальда шепчут, что его сын не его сын.
+Про братьев Дорр: торговец, увидевший их вместе, рассказал об этом — через неделю его нашли в доках, несчастный случай.
+Про Каска: Орден охраняет не торговый путь, а что-то конкретное в горах.
+Про Седого с Кладбища: Свинцовые клинки живут среди костей левиафанов, а их капитан разговаривает с морем. Кто видел его ночью у воды, говорит разное. Живые говорят мало.
+ПРО МЕСТА. В Чумном квартале регулярно видят огни, хотя он пуст сорок лет. В Гнилом Лесу есть следы, не принадлежащие ни одному известному животному. На Кладбище китов по ночам видят огни. У мыса Астернов замок пуст, но в тихую погоду вода у мыса иногда светится холодным белым светом снизу.
+ПРО МОРЕ. Одну историю рассказывают только зимой, только в помещении и только когда шторм снаружи достаточно громкий, чтобы заглушить слова: будто Свинцовое море иногда отвечает — не всем, только тем, кто провёл на воде достаточно и научился правильно молчать. Большинство слышавших смеются. Те, кто провёл в море достаточно, не смеются, а молчат и меняют тему.
+ПРО МИР. Белая Чума вернётся: источник не найден, Ложа говорит «мониторинг продолжается», а версия без имени гласит, что чума не исчезла, а ждёт. И ещё: восточные торговцы, когда выпьют, говорят про земли за горами, которых нет на картах. Трезвые отрицают и быстро уходят.` },
+
+        { id: "threats", title: "Внешние угрозы", keys: ["угроз", "за Хребтом", "за хребтом", "восток", "открытое море", "война"], constant: false, order: 306, scanDepth: 4, recursive: false, maxChars: 1059,
+          text: `ЗА ХРЕБТОМ. Никто в Кордиме не знает точно, что там. Страна существует тысячу лет и так и не выяснила — либо выяснила и решила не говорить. Восточные торговцы, приходящие через Монтин, откуда-то идут, а на вопросы отвечают уклончиво. Каск получает донесения с востока через курьеров, которых никто не видел входящими с запада. Что Орден охраняет не только торговый путь, очевидно всякому, кто подумает дольше минуты. Три сотни лет без единого происшествия — либо угрозы нет, либо Орден работает хорошо.
+ОТКРЫТОЕ МОРЕ. Семьдесят лет назад с запада вернулся один корабль из трёх. Капитан прожил ещё два года и молчал; что-то написал перед смертью, и документ лежит в архивах Дома Сел. Седой на запад не ходит никогда — а для человека, который ходит на север, где другие не возвращаются, это говорит само за себя.
+ЛЕС. Гнилой Лес давит на границы человеческого пространства постоянно и методично. Заброшенная деревня зарастает за сорок лет, тракт требует непрерывного обслуживания. Это не враг, которого можно победить в битве, а среда, медленно забирающая своё.` },
+
+        { id: "population", title: "Население и военные силы", keys: ["населен", "численност", "сколько люд", "жител", "армия", "гарнизон"], constant: false, order: 307, scanDepth: 4, recursive: false, maxChars: 1014,
+          text: `ГОРОДА. Столица ~27 000 (до Белой Чумы было ~40 000). Порт Теней ~15 000. Ошерск с Приречьем ~12 000. Смитгард ~9 000. Врата ~7 500. Монтин ~4 000, треть из них Орден и семьи. Ручейный ~2 000. Топь ~500. Морской ~40.
+СТРАНА. Всего около 400 000 человек; до Чумы было семьсот-восемьсот тысяч. Мор выкосил половину страны. Естественный прирост съедают пограничные стычки, болезни и долговое рабство. Кордим не вымирает, но и не восстанавливается.
+СИЛЫ. Армия Идвальда ~2 500, половина размазана по южной границе. Гарнизон Столицы ~300 стражников, в малых городах по 30–50. Орден ~300 бойцов — мало, но каждый элита. В реестре Гильдии около 800 активных наёмников, из них по-настоящему опасных ветеранов не больше 150 на всю страну. Свинцовых клинков ~120, и на фоне общих цифр это грозная сила под рукой одного человека.
+СЛЕДСТВИЕ. Мир маленький и тесный: профессионалы знают друг друга по именам или по почерку работы. Потеря десятка обученных людей — событие. Дефицит людей и есть главный ресурсный кризис Кордима.` },
+
+        { id: "taverns", title: "Таверны, бордели, чтецы", keys: ["таверн", "постоялый двор", "трактир", "бордел", "чтец", "хозяин", "Утопленник", "Три моста"], constant: false, order: 308, scanDepth: 4, recursive: false, maxChars: 1492,
+          text: `ТАВЕРНА — единственное публичное место, где люди разных слоёв сидят за соседними столами. Хозяин знает всё, что происходит у него в зале, и немного сверх того: это не любопытство, а выживание — хозяин, который не знает, кто у него сидит, живёт недолго.
+ПРИДОРОЖНАЯ обслуживает путников, сведения транзитные, со всех концов страны; хозяин продаёт их Вестникам или Серому картелю. ГОРОДСКАЯ живёт постоянными клиентами и устоявшимися столами — здесь заключают сделки, которые нельзя заключить в конторе. ПОРТОВАЯ у доков самая грязная и самая полезная; в каждой такой в Порту Теней сидит человек Мокрых ножей.
+Курят в тавернах трубками после еды — у кого есть табак. Запах табачного дыма в общем зале обычное дело.
+ЧТЕЦЫ сидят у ворот, рынков и таверн и за плату читают вслух письма и документы. Через их руки проходит всё, и Серый картель держит своих людей среди чтецов.
+ЗАВЕДЕНИЯ. «Утопленник» в Приречье — плесень и прелые опилки; хозяин платит долю Крайму за право работать без вопросов и нейтрален настолько, насколько это возможно. «Три моста» в Столице — три зала на разных уровнях.
+БОРДЕЛИ трёх уровней: низовые при портовых тавернах под Братством кулака; средние в торговых кварталах, поделены между Мокрыми ножами и Серым картелем; высокие в верхних городах, устроены как салоны, официально не существуют, клиенты — советники, купцы, знать.
+ПОТОК. Клиент сказал лишнее, хозяин запомнил, сведения ушли скупщику и дальше вверх. Большинство людей не знают, что участвуют в этой системе.` },
+
+        { id: "calendar", title: "Календарь и сезоны", keys: ["сезон", "время года", "зим", "весн", "лето", "летом", "осен", "календар", "праздник", "жатв", "урожай"], constant: false, order: 309, scanDepth: 4, recursive: false, maxChars: 1506,
+          text: `СИСТЕМА. Двенадцать месяцев, названий у них нет. Говорят «в начале жатвы», «когда река встаёт», «на третью неделю после первого снега». В официальных бумагах — порядковые номера. Год начинается с первого месяца весны, счёт крестьянский, от земли.
+ВЕСНА, месяцы 1–3. Первые две-три недели — худшее время для дорог, грунтовка хуже зимней, обозы стоят, цены в городах растут. Реки разливаются, баржи встают на две-три недели. Если урожай был плохой — голод: старые запасы кончились, новые не выросли, и Дом Кальвер в это время влиятелен как никогда.
+ЛЕТО, месяцы 4–6. Лучшее время для всего: дороги сухие, реки судоходны, торговля на пике. Гнилой Лес чуть менее опасен — меньше тумана, топи подсыхают по краям. Порт Теней работает вдвое быстрее.
+ОСЕНЬ, месяцы 7–9. Сейчас ранняя осень. Дожди начались, тракты раскисают, но проходимы. Реки полные, баржи идут последние недели. Жатва — главное событие года, деревни закрыты для чужих. Конец осени — время расчётов: долги Кальвера предъявляют после урожая.
+ЗИМА, месяцы 10–12. Лесной тракт непроходим для обозов, баржи встают на два месяца, Монтин отрезан. Цены растут от начала зимы к концу. Разбойники с трактов почти исчезают — им тоже надо где-то сидеть. Лес зимой тихий и белый, волки голодные и потому опаснее; Кесс говорит, что зима — единственное время, когда лес честен.
+ПРАЗДНИКИ. Начало жатвы: три дня, когда не работают даже должники Кальвера, таверны набиты, сведения текут рекой. Зимний Огонь в середине зимы: жгут костры, пьют, вспоминают мёртвых.` },
+
+        { id: "death", title: "Болезни и смерть", keys: ["болезн", "смерт", "умер", "похорон", "тиф", "лихорадк", "кашел", "зараз", "гангрен", "погребен", "хорони"], constant: false, order: 310, scanDepth: 4, recursive: false, maxChars: 1406,
+          text: `БОЛЕЗНИ. Тиф — хроника Нижнего города и портовых кварталов: грязная вода, скученность, крысы. Вспышки раз в два-три года, умирают дети и старики; проблему никто не решает, потому что перестройка канализации дорога и политически неудобна. Болотная лихорадка у Топи и сырых берегов, летом, когда много комаров: жар и бред, местные переносят легче, чужаки тяжело. Лёгочная гниль — медленная, неизлечимая, заразная; характерный кашель узнают, и от кашляющего незнакомца люди инстинктивно отодвигаются. Кожная короста в Гнилом Лесу и сырых районах — не смертельна, но мучительна. Раневая гниль: запах гангрены узнаваем, и лекарь, идущий к такому больному, заранее думает о плате — из прагматизма, не из жестокости.
+ПОГРЕБЕНИЕ контролирует Церковь, три уровня. Бедный — яма на краю без камня и короткая молитва. Средний — место с деревянным крестом и полная служба, несколько марок. Богатый — каменный склеп, именная плита, заупокойные мессы; способ показать, что человек был кем-то. Кого не хоронит никто — общая яма, которую закапывают, когда наполнится, имён не записывают. Самоубийц Церковь на освящённой земле не хоронит, и это рычаг для семей. Хоронят быстро: летом ждать нельзя.
+БЕЗ СВИДЕТЕЛЕЙ. За пределами крупных городов регистрации смерти нет. Человек просто перестаёт существовать, и никто не ищет. Работает в обе стороны: можно тихо убрать человека, а можно самому умереть на бумаге и начать заново.` },
+        /* --- ПРИРОДА --- */
+        { id: "flora_forest", title: "Флора Гнилого Леса и Топи", keys: ["растени", "дерев", "мох", "гриб", "папоротник", "плющ", "ель", "дуб", "осин", "тростник", "рогоз"], constant: false, order: 400, scanDepth: 4, recursive: false, maxChars: 1935,
+          text: `ПРИРОДА ЛЕСА. Лес не враждебен — он безразличен, как время, холод или глубокая вода, и не делает для людей исключений. Долгое пребывание меняет человека незаметно для него самого: через месяц он тише и настороженнее, через год слышит лес раньше, чем видит. Это не магия, а изоляция, особый воздух и вечный полусумрак.
+ДЕРЕВЬЯ. Чёрная ель — до тридцати метров, ствол в три обхвата, кора угольная от сырости и грибка, нижние ветви мёртвые и торчат как обломанные кости; её чёрная смола горит даже в сырости. Серый дуб — искривлённый, в наростах, иногда полый; жёлуди мелкие и горькие. Осина-утопленница по болотным границам: кора белая с серыми пятнами, ствол наклонён над водой, листья дрожат без ветра. Мёртвый вяз — не порода, а явление: вязы умирают стоя и стоят десятилетиями, серебристо-серые, без коры, сочатся тёмной влагой; опираться нельзя.
+ПОДЛЕСОК. Сплошной ковёр мха, папоротника и гниющей листвы, в низинах по колено. Бесшумно ходить почти невозможно. Папоротник-гигант в низинах выше пояса. Плющ-душитель вьётся по стволам; несколько деревьев задушены полностью и стоят зелёными колоннами с мёртвым деревом внутри.
+СЕНСОРИКА ЛЕСА. Сырая земля, прелая листва, грибок, поверх — кислинка смолы, в низинах тухлятина болота. Тишина неправильная: капель без дождя, треск там, где никто не ходит. Сумрак в любое время суток; в полдень как поздней осенью за час до заката, ночью — абсолютная темнота.
+ОПАСНОЕ. Красная шляпка — гриб на гнилых пнях, выглядит съедобным, только ярче; конвульсии через два часа. Белый плющ в глубине: сок даёт волдыри за шесть часов, в глазах — слепота до суток.
+ТОПЬ. Тростник стеной на три-четыре метра — лодку в нём не видно с трёх шагов. Рогоз съедобен, корень богат крахмалом. Болотный мох выглядит твёрдой землёй, человек проваливается по пояс мгновенно. Водяная чума-ряска в тумане делает воду неотличимой от берега. Болотный белладонн с фиолетовыми ягодами — паралич дыхания за двадцать минут.` },
+
+        { id: "flora_other", title: "Флора Хребта, побережья, равнин и алкоголь", keys: ["хреб", "горн", "побереж", "равнин", "поле", "поля", "хмел", "вино", "пив", "сидр", "табак", "рожь", "яблон"], constant: false, order: 401, scanDepth: 4, recursive: false, maxChars: 1853,
+          text: `ХРЕБЕТ. Высокогорье убивает методично, растительность здесь борьба, а не украшение, и потому концентрированная. Железный стланик — карликовая сосна, стелется вдоль камня и не поднимается выше колена; ствол в руку бывает старше столетия. Серый чабрец в скальных трещинах, запах резкий и холодный, в горной концентрации вдвое сильнее равнинного — основа болеутоляющего, сбор контролирует Орден. Горная живица из-под корней стланика — сильный антисептик до затвердевания. Чёрный лишайник на северных сторонах скал съедобен после варки: горький, питательный, гарнизон Монтина знает рецепт. Ветреница Хребта — единственный цветок на этой высоте, живёт две недели в начале весны, Ложа платит за неё непропорционально много и не объясняет почему.
+ПОБЕРЕЖЬЕ. Почва солёная и тонкая, растения приземистые и жёсткие. Морской овёс держит берег от размыва. Солянка идёт на мыловарение. Морской чистотел в расщелинах скал даёт едкий оранжевый сок для кислотных составов. Штормовой мох в зоне прибоя скользок до опасности. У Кладбища китов почва химически иная: белая костяника растёт только в тени рёбер левиафанов, и Ложа платит за неё по весу как за золото.
+РАВНИНЫ. Единственная зона, где природа отступила перед человеком: поля, пастбища, придорожные дубравы. Опасность здесь человеческая. Поля, заброшенные после Чумы, заросли бурьяном и молодым осинником — такие места обходят. Полевая рожь — основная культура, зерновые запасы Дом Кальвер держит как политический инструмент.
+АЛКОГОЛЬ. Пиво варят в каждой деревне на своём хмеле, без всякого контроля. Яблоки идут на сидр, и северные деревни пьют его чаще пива — он дешевле всего. Вишня и слива на наливки и настойки: напиток стражников, мастеровых, мелких торговцев. Виноград в северном климате не вызревает, вино привозное. Крепкое с востока через Монтин — для знати. Табак с юга — отдельный статусный товар.` },
+
+        { id: "ingredients", title: "Алхимические ингредиенты", keys: ["ингредиент", "серая плет", "чёрный мох", "черный мох", "слепен", "болотный мак", "дурман", "плевальщиц", "желч", "жир левиафан", "живиц", "костяник", "купорос", "собира", "сбор"], constant: false, order: 402, scanDepth: 4, recursive: false, maxChars: 2050,
+          text: `РАСТИТЕЛЬНОЕ. Серая плеть (Гнилой Лес) — нитчатый гриб-паразит на корнях мёртвых деревьев, выглядит как седые волосы, свисающие с гнилого пня; основа регенерирующей микстуры, форсирует деление клеток — отсюда и лихорадка, и риск отказа органов. Споры дают сыпь на месяц, собирать только с тряпкой на лице. Чёрный мох на камнях у болот замедляет гниение: антисептик, консервант, в концентрате основа паралитической пыли. Слепень — кустарник с белыми ягодами в самой тёмной глубине леса, основа ослепляющей вспышки; птицы после ягод теряют ориентацию на часы. Кесс знает, где он растёт, и маршрут туда только через его людей. Болотный белладонн, белая костяника, морской чистотел, горный чабрец и горная живица описаны в записях о флоре. Дурман-трава растёт на равнинах повсеместно: жуют или заваривают, лёгкое головокружение и притупление голода — крестьяне используют, когда еды мало, стража смотрит сквозь пальцы. Болотный мак сильнее дурмана и слабее алхимии, в города попадает через мелких торговцев. Кислый гриб — эффект непредсказуем, от эйфории до ужаса.
+ЖИВОТНОЕ. Желчь лесных волков — катализатор регенерирующей микстуры: пузырь брать целиком и сразу в спирт, иначе катализатор мёртв, три-пять штук на партию. Сначала, впрочем, надо убить лесного волка, а они ходят по двадцать и молча. Яд болотных гадюк — основа паралитической пыли. Жир левиафана горит даже в воде; добыча опасна не из-за костей, а из-за того, что приходит ночью. Железы плевальщицы — крупной болотной жабы, что плюётся кислотой на два метра с точностью; попадание в глаза калечит зрение навсегда. Ложа официально этим не торгует, неофициально — через Серый картель.
+МИНЕРАЛЬНОЕ. Горная сера из фумарол Хребта — взрывные и дымовые составы, Орден добывает сам и продаёт дозированно. Болотный битум — связующее. Железный купорос из шахт, отход Коллегии. Глубоководная соль из пещер под Кладбищем китов — стабилизатор.
+МОНОПОЛИЯ. Что плеть и желчь суть основа — знает любой ученик Ложи. Секрет в обработке и пропорции, и на нём держатся три-четыре производителя на всю страну.` },
+
+        { id: "fauna", title: "Дикая фауна", keys: ["звер", "волк", "медвед", "лось", "лося", "лиса", "лисы", "олен", "хищник", "охот", "фаун", "стая", "стаи", "берлог", "кабан", "орёл", "акул", "тюлен"], constant: false, order: 403, scanDepth: 4, recursive: false, maxChars: 2013,
+          text: `ГНИЛОЙ ЛЕС. Основа цепочки — кабаны, олени, зайцы, грызуны; лес богат, голода нет, и потому хищники здесь крупнее. Лось вырастает заметно больше обычного, в гон бьёт передними копытами и опасен не меньше кабана. Медведь крупнее равнинного и темнее, людей не боится — двадцать лет без серьёзной охоты; без причины не агрессивен, но «без причины» у медведя означает не то же, что у человека. Весной выходит голодным, первые две недели самый опасный. Волки ходят стаями до двадцати, тёмная шерсть, охотятся в полной тишине; с медведем за территорию конкурируют, но прямых столкновений избегают. В глубине есть следы, не принадлежащие ни одному известному животному; они ведут к тому, что осталось от оленя или кабана, иногда от человека. Это не обсуждают.
+РАВНИНЫ. Фауна бедна после столетий охоты: заяц, куропатка, перепел — основа крестьянской охоты. Олень в придорожных дубравах пуглив и умён, угодья держит Дом Кальвер и бьёт за браконьерство жёстко. Волк здесь редок — изгои и молодые самцы.
+ХРЕБЕТ. Горный козёл — основная добыча, стада по 10–15 голов ходят одними маршрутами из поколения в поколение. Горный лев редок и одинок, прыгает с высоты, первым ударом лапы ломает шею; шкура стоит как хороший контракт, охоту монополизировал Орден. Горный орёл с размахом до двух метров уносит детей и мелкий скот, когти оставляют плохо заживающие раны. Сурок кормит гарнизон Монтина, жир идёт от обморожений.
+ПОБЕРЕЖЬЕ. Треска, сельдь, камбала — главный ресурс. Серая акула крупнее и злее обычных, летом держит рыбаков у берега. Тюлень на скальных мысах: жир и шкура, мясо едят только в голодный год. Левиафаны существуют — кости на Кладбище тому доказательство; живых видят редко, только в шторм и только силуэтом.
+ВЫДАЮЩИЕСЯ. В каждой зоне есть звери, пережившие достаточно: родились крупнее и быстрее, а десятки встреч с охотниками довершили дело. Охотники знают таких поимённо и передают сведения устно. Гильдия иногда выставляет контракт, когда зверь начинает вредить систематически: цена высокая, берутся редко.` },
+        /* --- ХОЗЯЙСТВО, ПРАВО, СОСЕДИ --- */
+        { id: "trade", title: "Ресурсы и торговля", keys: ["торговл", "ресурс", "импорт", "экспорт", "желез", "зерн", "соль", "пушнин", "обоз", "груз"], constant: false, order: 311, scanDepth: 4, recursive: false, maxChars: 1619,
+          text: `ЖЕЛЕЗО И УГОЛЬ — главное богатство страны. Западный склон Хребта с мелкими шахтами Коллегия держит напрямую, и этого хватает на базовое производство; лучшая руда идёт с восточного склона только через перевал Ордена. Треугольник устойчив: Коллегия делает, Орден пропускает, Рохт торгует.
+ЗЕРНО И СКОТ — второй столп. Центральные равнины кормят Кордим, и Дом Кальвер держит это поколениями через долговое рабство. Голод не постоянен, но всегда возможен: два плохих урожая подряд или перекрытая река.
+РЫБА И СОЛЬ. Соль важнее рыбы: без неё не сохранить мясо, не выдубить кожу, не сварить половину лекарств Ложи. Соляные болота у Топи от портовых синдикатов не зависят.
+СТРОЕВОЙ ЛЕС. Гнилой Лес формально ничей, Ручейный работает через людей Кесса. Дом Рохт хотел бы взять его под контроль, но мешают три слоя: лес делает операцию физически бессмысленной, политическая цена высока, а Кесс держит компромат на поставки Рохта.
+ПУШНИНА — лиса, бобёр, куница, промысел организует Дом Кальвер. ТАБАК идёт с юга, монополию Дом Сел держит тихо.
+ИМПОРТ. С востока через Монтин — специи, красители, дорогие ткани, крепкое в маленьких бутылях. Редкие металлы оттуда покупают Ложа и Коллегия, и зачем — публично не обсуждается. С юга морем и сушей — вино, специи, табак.
+РЫЧАГИ. Перекрыть Монтин — восточная торговля встаёт; Орден делал это трижды, и трёх недель хватало, чтобы Рохт шёл на переговоры. Перекрыть реку у Ошерска — встаёт половина речной торговли, четыре баржи Крайма и есть горло целого региона. Закрыть Порт Теней — встают дальние рейсы Дома Сел. Плохой урожай автоматически делает Кальвера самым влиятельным в Совете.` },
+
+        { id: "blades", title: "Свинцовые клинки", keys: ["Свинцов", "клинк", "Седой", "Седого", "Седому", "пират", "флот", "серый парус", "абордаж"], constant: false, order: 209, scanDepth: 4, recursive: false, maxChars: 2046,
+          text: `Официального имени у них нет — прозвище кордимское, по цвету парусов: серые в тумане Свинцового моря почти не видны. Как организация существуют около четырёх лет: Седой вернулся из похода в 1022-м и за три года собрал флот.
+БАЗА на Кладбище китов: между рёбрами левиафанов три мелкие бухты, с моря не видны, с берега — туман и кости. Постройки лагеря врублены прямо в скелеты, рёбра работают несущими балками.
+ПРАВИЛО НОЧИ. После заката никто не идёт к воде, что бы ни случилось. За четыре года нарушили трое. Все трое не вернулись. Седой не комментировал.
+ФЛОТ. Шесть кораблей. Пять рабочих — быстрые, мелкосидящие, плоское дно, одна мачта, вёсла, паруса крашены в серый, старые, но ухоженные до педантизма. Экипаж рабочего судна около двадцати человек, и это уже тесно: гребцы они же абордажная партия, поэтому потеря даже пятерых выводит корабль из строя до нового набора. Шестой — большой, другой постройки, для открытого моря; ходит с сокращённой командой, собранной с остальных, и пока он в море, флот не работает целиком.
+ТАКТИКА. Разведчик неделями отслеживает маршруты. Подходят на вёслах в тумане, без парусов. Алхимия вместо пушек: ослепляющие вспышки и едкий дым через Серый картель. Абордаж — крюки, верёвки, короткий бой, всё за несколько минут. Пленных не берут из практичности: команду в шлюпки и к берегу.
+КОДЕКС. Рыбаков не трогают никогда. Мелкого торговца предупреждают и дают сдать груз. Суда Торговых домов и синдикатов берут без переговоров. Нарушение кодекса внутри — один разговор, второго не бывает.
+СЕДОЙ. Около тридцати пяти, волосы совершенно белые — слишком рано для возраста. Среднего роста, жилистый, две сабли за спиной крест-накрест, левой дерётся чуть лучше и этим сбивает с толку. Пришёл в Порт Теней матросом, через год ушёл на запад в открытое море, вернулся один на чужом корабле и без команды. Что было в том походе, не говорит. Откуда деньги на флот — белое пятно. Знает Свинцовое море, как Кесс знает лес: иногда меняет курс без объяснений, и там оказывается шторм или патруль. На запад не ходит никогда.` },
+
+        { id: "literacy", title: "Письменность и грамотность", keys: ["грамотн", "письм", "архив", "документ", "чтец", "подпис", "печат", "акцент", "диалект"], constant: false, order: 312, scanDepth: 4, recursive: false, maxChars: 1298,
+          text: `КТО ЧИТАЕТ. В крупных городах грамотны около двадцати из ста взрослых, в деревне — один-два человека, если повезёт, а чаще никого. Гарантированно читают священники, купцы среднего звена, чиновники Совета, люди Гильдии, наёмники высокого уровня. Частично — мастера Коллегии, трактирщики больших городов, офицеры стражи. Практически никогда — крестьяне, портовые грузчики, солдаты.
+СЛЕДСТВИЯ. Устное слово для большинства весит больше письменного: сделки заключают через свидетелей, а не через бумагу, и репутация остаётся единственной гарантией для того, кто не читает.
+ПОДПИСЬ — личная печать либо крестик с отпечатком пальца.
+ВЛАСТЬ БУМАГИ. Архив Гильдии хранит тридцать лет контрактов, и Седрик единственный, кто читал всё; Марра боится его не потому, что он силён, а потому, что он знает. Церковные архивы фиксируют крещение, венчание и смерть — единственное официальное подтверждение, что человек существовал. Долговые расписки Кальвера крестьяне подписывают крестиком, не умея прочесть, и это не случайность, а система.
+ЯЗЫК. По всей стране один язык с областными говорами; столичный считается правильным, и провинциальный выговор выдаёт происхождение мгновенно. Люди глубинных хуторов говорят на варианте, который горожанин понимает с трудом. За Хребтом язык другой. Орден это знает и молчит.` },
+
+        { id: "lindas", title: "Линдас — южный сосед", keys: ["Линдас", "южан", "южный сосед", "южная границ", "Сыны Солнца", "Марс"], constant: false, order: 313, scanDepth: 4, recursive: false, maxChars: 2116,
+          text: `Образованные люди — Совет, Гильдия, Дом Сел — знают название. Остальные говорят «южане» или «те за границей». Линдас начинается за два дня пути южнее Врат, и граница не линия, а полоса спорных земель шириной около дневного перехода.
+ПОЧЕМУ ВОЮЮТ. Официально — за торговые пути: Линдас хочет прямой выход на север без посредников, Кордим хочет сохранить транзит. Неофициально Дом Сел и несколько советников зарабатывают на войне больше, чем заработали бы на мире, — поставки армии, контракты, торговля сведениями с обеих сторон. Мир невыгоден тем, кто принимает решения.
+ИЗНУТРИ. Линдас старше, населённее и имеет письменную историю, которой у Кордима нет. На северного соседа смотрят как на варваров с деньгами и всё же торгуют. Теплее, южнее, виноградники и специи, города древнее, грамотность выше.
+РЕЛИГИЯ другая, и это решает всё. Смерть в бою за правое дело считается не концом, а переходом. Вернуться живым без приказа — социальная смерть: семья отворачивается, теологи не дадут обряда, имя вычёркивают из списков павших. Солдаты не храбрее — они иначе считают смерть и позор, и отступление для них теологическая проблема.
+КАК ВОЮЮТ. Построение — таран: щит к щиту, плотно, медленное давление. Не быстры и не манёвренны, но устойчивы до абсурда; кордимская конница против них вдвое менее эффективна. Слабость не в людях, а в конструкции: таран работает, пока строй единый кусок, а удар с фланга рассекает его, и отрезанные части продолжают давить вперёд, потому что разворот не их задача. Поэтому Линдас избегает генеральных сражений и держится укреплённых форпостов и проходов. На ровном поле почти непробиваемы, на пересечённой местности — другой разговор. Осады ведут методично, провизию организуют лучше кордимцев.
+МАРС. Легендарный командир тяжёлой пехоты, ветеран арен: гигант с гигантским копьём и ростовым щитом, бросок пробивает человека насквозь. Прозван «Кровавым Смехом» — кордимцы считают, что он смеётся в бою, но это хриплое дыхание гиганта под нагрузкой в глухом доспехе. Его отряд «Сыны Солнца» — бывшие аренные бойцы, ставшие элитной пехотой. Идвальд его уважает, кордимские командиры боятся.` },
+
+        { id: "plague_quarter", title: "Чумной квартал и Илай Крысолов", keys: ["Чумной квартал", "Чумного квартал", "Илай", "Крысолов", "вены", "подземель"], constant: false, order: 114, scanDepth: 4, recursive: false, maxChars: 1951,
+          text: `СТАТУС. Замурован после первой волны Белой Чумы, около 986 года. Официальная позиция Совета — пустая карантинная зона, вход запрещён бессрочно. Фактически внутри живёт несколько сотен человек: потомки тех, кто не успел выйти или не захотел. Второе поколение никогда не видело города снаружи.
+БЫТ. Огороды на плоских крышах, дождевая вода, крысы и голуби как основной белок, ремесло из мусора и обломков прошлого. Золото внутри бесполезно, расчёты только натурой — еда, инструменты, лекарства. Ночью в окнах видят огни, и стража натренирована смотреть в другую сторону.
+ПОЧЕМУ НЕ СОЖГЛИ. Квартал стоит на старых каналах, и внутри есть прямой выход в подземную водную систему Столицы — единственная неконтролируемая магистраль в городе, минующая заставы Вейра. Слишком многие влиятельные люди кормятся с этой контрабанды.
+СДЕРЖИВАНИЕ. Илай дал понять, что у него есть уцелевшие образцы Чумы и что при появлении войск с факелами ампулы разобьются в главных стоках Верхнего города. Есть ли они на самом деле, не знает никто снаружи. Возможно, зараза давно деградировала. Возможно, внутри нашли способ её сохранить. Возможно, Илай блефует двадцать лет. Советники понимают, что проверка стоит дороже, чем отказ от проверки, и этого достаточно.
+ВЕНЫ — система лазов и каналов, связывающая квартал со Столицей. Кесс гоняет через них редкие ингредиенты, Серый картель — свои грузы. Здесь же хранят «горячие» грузы и людей, которых официально не существует; если человека надо спрятать надолго или надёжно убрать, его проводят внутрь, и больше его не видят.
+ИЛАЙ КРЫСОЛОВ, около сорока пяти. Родился не здесь: ему было пять, когда опустились решётки, и он помнит, как закрывались ворота. Наружу не выходит никогда, но имеет десятки глаз и ушей по Столице среди нищих и чтецов. Убеждён, что Чума была искусственной зачисткой Нижнего города, а выжившие квартала — случайный брак успешной операции. Версия стройна, логична и делает его совершенно бескомпромиссным.` },
+
+        { id: "law", title: "Правовая система", keys: ["закон", "преступлен", "наказан", "долговое рабство", "юрисдикц", "штраф", "суд", "арест", "приговор"], constant: false, order: 314, scanDepth: 4, recursive: false, maxChars: 1827,
+          text: `СУТЬ. Единого кодекса в Кордиме нет. Правосудие опирается на прецеденты, хартии отдельных городов и власть денег. Закон — это то, что может позволить себе тот, кто платит городской страже. Понятия «справедливость» не существует, есть понятие «компенсация ущерба».
+СТРАЖА — муниципальный инструмент, а не полиция. Своей волей ничего не расследует: следствие идёт, только если потерпевшая сторона за него платит. Крупный налогоплательщик де-факто неуязвим для рядовых претензий, а если Совет решит надавить на конкурента, стража внезапно вспомнит все забытые статуты.
+УБИЙСТВО преследуют, только если у жертвы был защитник с деньгами, связями и желанием поднимать шум. Случайная жертва — вопрос финансового веса, а не морали: если шальной болт убивает долгового раба Дома Кальвер, дела об убийстве не заводят, а счетоводы выставляют стрелку счёт за уничтожение ценного имущества.
+ДОЛГОВОЕ РАБСТВО полностью законно и оформляется у нотариусов. Должник теряет право собственности на самого себя на срок долга, который из-за процентов обычно становится пожизненным. Раб — инструмент: за его преступление отвечает хозяин, платит штраф городу и забивает виновного сам в назидание остальным.
+ЭКСТЕРРИТОРИАЛЬНОСТЬ. Стража не вправе арестовать мастера Ложи или священника — попытка создаёт институциональный конфликт. Ложа и Церковь судят своих сами, в подвалах и без лишних глаз.
+МЕСТНОСТЬ. Закон Столицы не действует за её воротами. В Смитгарде последнее слово за главой Коллегии, в Порту Теней законно то, что одобрили Дорры или Нотариус, на перевале судит Орден военным трибуналом. В Топи и Гнилом Лесу законов нет вовсе.
+СУДЫ существуют формально при крупных домах и советах, а на практике процесс — инструмент затяжной финансовой войны: бедняк проигрывает не потому, что неправ, а потому, что не может оплачивать месяцы проволочек.` },
+
+        { id: "contracts", title: "Как устроены контракты", keys: ["контракт", "заказчик", "ликвидац", "награда", "оплата", "депозит", "посредник"], constant: false, order: 210, scanDepth: 4, recursive: false, maxChars: 1822,
+          text: `ЧТО ТАКОЕ ГИЛЬДИЯ. Не тайное общество убийц, а официальный профсоюз наёмников широкого профиля: охрана, эскорт, разведка, силовые акции. Жетон — лицензия на опасную работу, а не разрешение на убийство. Берут только то, что можно оформить на бумаге: «убить конкурента» не примут, а «превентивную ликвидацию угрозы имуществу заказчика» одобрят без вопросов.
+ПРОЦЕДУРА. Заказчик приходит к регистратору, описывает цель; Гильдия оценивает риск, назначает минимальную цену и фиксирует условия письменно, копия уходит в Архив. Исполнитель берёт контракт вслепую: он не знает заказчика, заказчик не знает его. Оплата пополам — половина вперёд через депозит Гильдии, вторая по предъявлении доказательства.
+ПРОВАЛ И ОТКАЗ. Провал не карается смертью, но бьёт по репутации. А вот бросить уже взятый контракт — прямой путь к аннулированию жетона и чёрному списку.
+ТАБУ. Заказ на членов столичного Совета или на лорда Вейра не принимают в принципе: это объявление войны государству, которое уничтожит саму Гильдию. Заказ на другого владельца жетона требует двойного тарифа и личного одобрения главы конторы.
+МЕЛКИЙ ШРИФТ. Анонимность заказчика гарантирована только при чистом исполнении. При грубом провале, скандале или вмешательстве властей Гильдия сдаёт заказчика первым, чтобы защитить себя. Знают все, вслух не обсуждает никто.
+ПРЯМОЙ КОНТРАКТ мимо Гильдии — быстрее, дешевле, опаснее. Депозита нет, золото из рук в руки или через слепого посредника, защиты нет ни у кого. Единственная гарантия — взаимно гарантированное уничтожение: заказчик знает исполнителя, исполнитель знает заказчика. Люди Гильдии формально брать такое не вправе, фактически берут, и Гильдия смотрит сквозь пальцы, пока это не бьёт по её репутации.
+ОХОТНИКИ работают иначе: только по публичным наградам и мандатам, закрытых заказов от частных лиц не берут.` },
+
+        { id: "deep_farms", title: "Глубинные хутора", keys: ["Глубинн", "хутор", "Глубина", "сдвиг речи"], constant: false, order: 115, scanDepth: 4, recursive: false, maxChars: 1340,
+          text: `Поселения в самых старых и непроходимых частях Гнилого Леса. Жители не ищут контакта, не выходят к трактам и не торгуют. Существование подтверждается косвенно: на приметных старых деревьях в глубине появляются странные подношения — сплетённые корни, инструменты непонятного назначения, однажды вырезанная из кости фигурка, похожая на детскую игрушку. Следов вокруг нет, но вещи всегда свежие. Кесс отлично знает, где начинаются их территории, и не обсуждает это даже с доверенными.
+ЕДИНСТВЕННЫЙ ЗАДОКУМЕНТИРОВАННЫЙ СЛУЧАЙ. Охотник заблудился в тумане и вышел на хутор. Вернулся через три недели. Говорил мало — не потому, что скрывал, а потому, что не находил слов. Речь изменилась необратимо: слова обычные кордимские, но грамматика и построение фраз сдвинулись так, что смысл ускользал, оставляя сосущую тревогу. Смотрел чуть мимо собеседника. Заданные вопросы понимал, но отвечал на другие, будто слышал иной слой. Через месяц умер во сне без следов насилия, яда или болезни. Городской лекарь ничего не записал в журнал: молча поставил крест напротив фамилии и перевернул страницу.
+ЛОЖА официально отрицает существование хуторов, списывая слухи на болотную лихорадку и бредни браконьеров. В её закрытых архивах есть запертый шкаф, а в нём том с пустыми страницами и рукописной пометкой на обложке: «Глубина». Оглавление вырвано с корнем.` },
+        /* --- ЛЮДИ, КОТОРЫХ МОЖНО ВСТРЕТИТЬ --- */
+        { id: "torn", title: "Торн", keys: ["Торн", "Эйгон Кальвер", "бастард"], constant: false, order: 500, scanDepth: 4, recursive: false, maxChars: 1238,
+          text: `Правая рука Седого, мозг и главный логист Свинцовых клинков. Настоящее имя — Эйгон Кальвер.
+ВНЕШНОСТЬ. Тридцать пять. Светлая аккуратная борода, вечно прищуренные глаза. Поношенная, но качественная кираса и дешёвый амулет, который он никогда не снимает.
+МАСКА. «Свой в доску парень»: смеётся, пьёт с матросами, хлопает по плечам — и кристально их презирает, не из высокомерия, а от усталости. Блестящий тактик и переговорщик, историю и законы Кордима знает лучше столичных советников.
+ЧЕГО ХОЧЕТ. Он бастард лорда Эйнара Кальвера, непризнанный: отец о нём попросту не думает. Мать была долговой рабыней и умерла от истощения на пшеничных полях, пока законные наследники пили вино. Торн рано понял, что система не сломана, — она работает ровно так, как задумана. Его цель не убийство отца, а уничтожение Дома Кальвер целиком: сжечь поля, стереть имя, пустить долговые книги по ветру. Свинцовые клинки для него армия и инструмент.
+БОЙ. Мясник с головой тактика, тяжёлый зазубренный палаш. Честно не дерётся никогда: плюнет кровью в глаза, бросит песок, толкнёт под ноги врагу своего же раненого матроса. Черту перешёл давно и оправданий не ищет — важен результат. Один на один выходит, только если уверен на сто процентов или загнан в угол.` },
+
+        { id: "brant", title: "Грегор Брант", keys: ["Брант", "Грегор", "жетоны на ше", "полуторный меч"], constant: false, order: 501, scanDepth: 4, recursive: false, maxChars: 1498,
+          text: `Элитный охотник за головами. Садист и коллекционер чужих смертей.
+ВНЕШНОСТЬ. Высокий, неестественно худой. Мертвенно-бледное лицо, усы, опускающиеся за уголки губ, пустые рыбьи глаза. Только лёгкий потёртый кожаный колет, ничего лишнего. Движется с пугающей механической плавностью — не крадётся, просто так ходит.
+ПРИРОДА. Никакой трагической предыстории: он таким родился. Дисциплинированный садист, никакого хаоса — холодный выбор жертвы и хирургическое исполнение.
+ТРОФЕИ. Работает через Далка Сурна, но не подчиняется ему: Сурн для него диспетчер с хорошим меню. Золото не интересует, интересует процесс. Берёт публичные контракты исключительно на наёмников, объявленных Гильдией вне закона: находит, ломает физически и психологически, убивает, срезает с шеи номерной жетон. Связку жетонов носит на цепи, и при ходьбе они тихо звенят. Сайдена и Марру Холт трясёт от ярости, но технически Брант делает их грязную работу, и его терпят. Для наёмника Кордима этот тихий звон означает смерть.
+БОЙ. Полуторный меч без украшений, идеально сбалансированный. Никакой алхимии и арбалетов. Нечеловеческая скорость, абсолютное чувство дистанции, полное отсутствие страха. Побеждает до первого удара — заставляет противника себя бояться. На десяти шагах и дальше отобьёт клинком одиночный брошенный нож; ближе пяти или при залпе в три-четыре ножа уходит за укрытие, потому что физика не позволяет иного.
+ТРЕЩИНА одна: он позволяет разговору длиться дольше, чем следует, если противник достаточно интересен.` },
+
+        { id: "leon", title: "Леон Клятвопреступник", keys: ["Леон", "Клятвопреступник", "гвардеец", "Кеан Вейр"], constant: false, order: 502, scanDepth: 4, recursive: false, maxChars: 1721,
+          text: `Странствующий рыцарь, бывший командир Королевской Гвардии. Человек, потерявший смысл обнажать клинок.
+ВНЕШНОСТЬ. Лет тридцать восемь. Высокий, когда-то безупречно сложенный; сейчас плечи чуть опущены — не от слабости, а от укоренившейся привычки не занимать места. Лицо красивое и злое разом. Дорогой идеально сбалансированный полуторный меч лежит в дешёвых потёртых ножнах. Герб на нагруднике не замазан, а физически стёрт металлом по металлу — методично, будто он делал это долго и с извращённым удовольствием.
+ПАДЕНИЕ. Пять лет назад при подавлении бунта в Столице он убил Верховного Советника Кеана, родственника лорда Вейра, прямо на ступенях Ратуши и на глазах у солдат. Кеан приказал сжечь жилой квартал Нижнего города вместе с людьми, прикрывшись угрозой заразы. Леон воткнул ему меч в горло и сказал только: «Нет». Идвальд под давлением Вейров лишил его титула, земель и имени в реестре Гвардии.
+РАНА. На суде женщина, которую он лично вытащил из огня, дала показания против него: заявила, что приказа сжигать людей не было. Не за золото — люди Вейра нашли её раньше, и она отреклась от правды, чтобы её дети остались живы. Леон это понимает и молчит, потому что правда её убьёт.
+СЕЙЧАС. Он лучший фехтовальщик Кордима, и это его и убивает: победа перестала что-либо давать. Пьёт не чтобы забыть, а чтобы руки немного дрожали и бой снова требовал усилия. Ищет не реабилитации и не мести, а одну причину, ради которой стоит быть трезвым.
+БОЙ. Полуторный меч и эталонная работа ног. Не рубит — перенаправляет: инерция противника, минимум силы, максимум точности. Даже с похмельной дрожью разберёт троих наёмников без царапины, просто из раздражения. Иногда даёт противнику лишнюю секунду — не из жалости, из скуки.` },
+
+        { id: "kael", title: "Каэл, Король сточных крыш", keys: ["Каэл", "Король сточных крыш", "сточн"], constant: false, order: 503, scanDepth: 4, recursive: false, maxChars: 1126,
+          text: `Городская легенда Столицы. Говорят, в одиночку вырезал отряд стражи двумя ножами и знанием подворотен. Работал на Дом Сел, работал на Гильдию, теперь ни на кого. Появляется, когда хочет, и исчезает раньше, чем его начинают искать.
+ВНЕШНОСТЬ. За пятьдесят. Жилистый и сухой, как верёвка, пролежавшая зиму на улице. Потёртый кожаный плащ, два шрама через левую бровь. Глаза стервятника — не злые и не добрые, оценивающие: смотрит на людей как на задачи с известным решением.
+ФИЛОСОФИЯ. Проповедует нигилизм: мир — сточная канава, выживают те, кому нечего терять. Утверждает, что ничем не одержим и просто живёт. На деле одержим доказательством собственной правоты — что привязанность убивает. Каждый раз, когда кто-то выживает благодаря связи с другим человеком, это злит его сильнее, чем должно бы злить равнодушного.
+БОЙ. Мастер вертикального боя: кошки, тросы, крюки, движение по балкам и крышам. Два тяжёлых тесака-бритвы и два самодельных кулачных арбалета на предплечьях. Бьёт сверху, из тени; его стиль — террор через среду, противник никогда не знает, где он. Единственная слабость — открытое пространство без вертикали.` },
+        { id: "hada", title: "Хада, Золотой Демон", keys: ["Хада", "Хады", "Хаду", "Золотой Демон", "Золотого Демона", "Шёпот", "Шепот", "белая маск"], constant: false, order: 504, scanDepth: 4, recursive: false, maxChars: 1932,
+          text: `Независимый наёмник, снайпер-виртуоз, маньяк-эстет.
+ВНЕШНОСТЬ. Высокий, пугающе худой — не болезненно, а как натянутая струна. Асимметричный плащ из дорогой ткани, всегда безупречно чистый, что в Кордиме само по себе аномалия. Лицо скрыто белой театральной маской без рта, только прорези для глаз; под ней каша из шрамов. Движется тихо и намеренно, никогда не торопится.
+ФИЛОСОФИЯ. Презирает войну, массовые казни и случайные убийства: смерть, в которой жертва не успела осознать происходящее, для него варварство и мусор. Убивает, чтобы составить композицию — послание, которое должен прочитать идеальный зритель.
+ЧЕТЫРЕ АКТА. Первый выстрел — повреждение: тело узнаёт, что умирает. Второй — дезориентация: разум перестаёт держать пространство. Третий — загон: жертва понимает, что выхода нет. Четвёртый — единственный, который имеет значение. Пятого выстрела он не делает никогда: если четырёх не хватило, представление провалилось. Такое случалось дважды, и оба раза он исчезал на недели, а возвращался с новым планом, точнее прежнего.
+ШЁПОТ. Уникальный тяжёлый арбалет, единственный в Кордиме механизм с боковым пружинным магазином на четыре болта: короткое движение рычага предплечьем взводит тетиву и подаёт болт, три секунды между выстрелами. Сделан мастером, которого больше нет, требует металлургии, недоступной Коллегии, запасных частей не существует.
+ДВА РЕЖИМА. Постановочный: магазин снят, зарядка вручную хрупкими алхимическими болтами — автоподача просто раздавила бы их. Боевой: магазин пристёгнут, обычная сталь, высокая скорость, никакой алхимии; переход в этот режим для него унижение, осанка меняется, движения становятся злыми. Смена режима занимает несколько секунд.
+СЛАБОЕ МЕСТО. В ближний бой не вступает принципиально — хаос некрасив. Прижатый вплотную уйдёт любой ценой, бросив контракт.
+ПРАВИЛО ОХОТНИКОВ. Нашёл композицию Хады и кровь ещё свежая — разворачивайся и беги: значит, ты уже часть новой сцены.` },
+
+        { id: "loki", title: "Локи Птицелов", keys: ["Локи", "Птицелов", "птичк", "топорик"], constant: false, order: 505, scanDepth: 4, recursive: false, maxChars: 1946,
+          text: `Главный информатор Порта Теней. Эксцентричный механик, мастер слухов, хаотичный союзник.
+ВНЕШНОСТЬ. Высокий нескладно, журавлино, будто вырос быстрее, чем успел привыкнуть к своему телу. Нервный, дёрганый, глаза бегают — но ищут детали, а не прячутся от страха. На висках татуировки в виде птичьих перьев. Одет практично и неряшливо, за поясом всегда два лёгких метательных топорика. Живёт в полузатопленной лачуге на сваях: место выбрано так, чтобы подойти незамеченным нельзя было с трёх сторон из четырёх.
+ПОД МАСКОЙ. Смеётся невпопад, говорит загадками, кажется сумасшедшим — а под этим острый расчётливый ум и железная система. Считает, что мир есть разговор и баланс потоков; неизвестное вызывает у него физический дискомфорт, как заноза. Собирает тайны не ради власти, а чтобы устранить перекос.
+ПЛАТА. Золото не берёт категорически — оно обезличивает сделку. Требует живую плату: секрет, который клиент никому не рассказывал; пуговицу с плаща лорда Вейра; имя человека, которого клиент боится больше всего. Берёшь у живого человека — плати чем-то настоящим.
+ПТИЧКИ — его сеть: беспризорники, портовые девки, нищие. Несколько лет назад он продал сведения по неверному расчёту, и несколько его людей погибли. Об этом он не говорит никогда, но с тех пор держит железное правило: не продавать то, что прямо ведёт к смерти конкретного человека из его сети.
+РУКИ. Гениальный механик-самоучка, лачуга напичкана самодельными замками, растяжками и сигналками. Руки должны быть заняты: птички носят ему сломанные арбалетные замки и шестерни, он чинит бесплатно, потому что сломанная вещь — это перекос. За работой он единственный раз в жизни молчит и не хихикает.
+БОЙ. Дерётся редко и без удовольствия, но если дошло — бьёт неожиданно резко. Рост и длинные руки дают рычаг, топорики летят дальше и точнее, чем ждёшь. В ближнем бою неудобен из-за нестандартной журавлиной геометрии движений: мастера не одолеет, но уйдёт живым там, где другой умрёт.` },
+
+        { id: "otstupnik", title: "Отступник Д", keys: ["Отступник", "Зверобой", "Тлеющий", "Дэй", "Дэю", "Дэя", "красный плащ"], constant: false, order: 506, scanDepth: 4, recursive: false, maxChars: 1809,
+          text: `Настоящее имя вымарано из реестров Алхимической Ложи, в досье осталась буква «Д». Информаторы зовут его «Д», обыватели — «Зверобоем» или «Тлеющим», некоторые просто Дэй.
+ВНЕШНОСТЬ. Силуэт читается раньше лица: длинный потёртый кожаный плащ с тёмно-красной подкладкой — вспышка цвета в сером мире — и низко надвинутая широкополая шляпа. Черты правильные, но мимика и пропорции едва уловимо сдвинуты, и люди инстинктивно тревожатся рядом с ним. Пахнет горькими травами, алхимической серой и застарелым высохшим страхом.
+ИЗГНАНИЕ. Выгнан мастером Оррой за академическую ересь: Ложа хотела делать яды и инструменты против тварей Гнилого Леса и Кладбища китов, а он хотел понять их как единую экосистему. Изучает анатомию левиафанов и лесных мутаций, полевые записи и анатомические атласы шифрует собственным невзламываемым кодом.
+ОДЕРЖИМОСТЬ. Единственный в Кордиме, кто убеждён, что Белая Чума не болезнь, а реакция среды — симптом присутствия чего-то массивного, спящего под Кордимом или под лесом. Доказать не может, версию не разделяет никто. Однажды ночью в глубине леса он, по его словам, столкнулся с этим Присутствием: записал увиденное, вырвал страницу и сжёг, так что единственное свидетельство уничтожил сам.
+ТАЙМЕР. С той ночи застёгнут на все пуговицы до подбородка даже в жестокую жару: под плащом по шее и ключицам медленно ползут белые пятна — дремлющая Чума или грибковый симбиоз. Жив только потому, что глушит это тяжёлой химией собственного производства, а нечеловеческое лицо — следствие медленного отказа органов.
+ЦЕННОСТЬ. Не боец: нож носит для самообороны, дерётся грязно и без техники, лишь бы выиграть секунду на отход. Зато знает уязвимости любой твари Кордима: где у неё слепое пятно и какой реагент растворит панцирь. Появляется там, где граница между природой и кошмаром истончается.` },
+        { id: "elowen", title: "Элоуэн Игла", keys: ["Элоуэн", "Игла", "Иглы", "Игле", "Иголк", "хирург", "лекарь", "полевой лекар"], constant: false, order: 507, scanDepth: 4, recursive: false, maxChars: 1852,
+          text: `Полевой хирург, изгнанница Алхимической Ложи. Осела в Приречье, в подвале постоялого двора «Утопленник». Якорь нормальности для наёмников всего региона.
+ВНЕШНОСТЬ. Двадцать девять лет, молодая, но взгляд как у ветерана после трёх тяжёлых кампаний. Волосы туго стянуты на затылке. Практичный мужской колет, поверх фартук с бурыми пятнами, которые уже не отстирать. Пальцы длинные, феноменально ловкие, всегда в мелких порезах от спешки. Пахнет чистым спиртом, кровью, сушёным болотным маком и усталостью. На левом запястье прячет глубокий химический ожог — метку изгнанницы.
+ЗА ЧТО ИЗГНАНА. Была одной из лучших учениц мастера Орры и нарушила фундаментальное правило Ложи: «мы не спасаем жизни, мы продаём время». Синтезировала дешёвые аналоги элитных микстур — болотный мак как обезболивающее, чёрный мох как антисептик — и стала лечить бедняков Нижнего города. Ложа пришла за ней: ожог поставить успели, сломать руки нет. Три недели в подполе у пивовара в двух кварталах от тех, кто её искал, потом баржей вниз. Ложа терпит её существование ровно до тех пор, пока она не суётся обратно в Столицу.
+КРЫША. Крайм взял её под защиту; взамен она штопает его людей без вопросов и без записей.
+ХАРАКТЕР. Не циник, а абсолютный прагматик, и остра на язык. Когда на столе истекает кровью наёмник, ей безразлично, скольких он убил: для неё это рваный мешок с трубками, который надо зашить. Жестоко материт пациентов, пока шьёт их без наркоза, и они слушаются. Бескорыстной себя не считает: связи с теневым миром держит сознательно, потому что они её защищают и снабжают редкими компонентами.
+В БОЮ. Не боец, но со скальпелем и знанием анатомии в тёмном переулке вскроет нападающему сонную артерию на рефлексах. Настоящая её сила в другом: она вытаскивает тех, кто уже должен был умереть. Рану, которую не берёт стандартная алхимия, лечат в её подвале или нигде.` },
+
+        { id: "asterns", title: "Род Астерн и мыс", keys: ["Астерн", "замок на мысе", "мыс", "Цена Астернов"], constant: false, order: 315, scanDepth: 4, recursive: false, maxChars: 2349,
+          text: `КТО БЫЛИ. Маленький морской дом на северном побережье между Морским и Ошерском: замок на скальном мысу, деревня в сорок душ, соляные варницы и суда. Земли почти нет, доход шёл с трёх вещей — с соли, без которой не сохранить мясо и не сварить половину лекарств Ложи; с каботажа, поскольку они были единственным домом на этом отрезке берега с судами, способными ходить дальше дневного перехода; и с северного пути в три дня вдоль берега до Порта Теней, где у них стояла тихая стоянка, не платившая ни Доррам, ни Дому Сел, ни короне.
+ПОЧЕМУ ПАЛИ. Замок пережил Белую Чуму — изоляция на мысу спасла, и это ключ ко всему. Страна вышла из ямы обезлюдевшей, а на севере остался целый род с целыми судами и наличными. Богаты в одном и политически голы во всём: те, кто мог за них вступиться, умерли в 986-м. Их тронули не из зависти, а потому что впервые стало и выгодно, и безнаказанно.
+КАК ЭТО БЫЛО. Все говорят «двухлетняя осада» 1009–1011 годов, но осады не было. Первый год тракт был перекрыт, у основания мыса сидел сторожевой отряд человек в сорок, а Астерны спокойно возили всё морем. Перелом сделала бумага: приговор о неуплате и незаконном провозе с конфискацией, подписанный судьёй Ворном Далле, перевёл их груз в статус контрабанды, а суда — в невозможность легально войти хоть в один порт. Покупатели отвалились за сезон, долг перестал обслуживаться, суда арестовали кредиторы. Когда закрылось море, мыс выелся за одну зиму. Наёмников наняли в самом конце, недели на три, на добивание.
+ЛЕГЕНДА. «Цена Астернов»: когда стало ясно, что замок падёт, все взрослые собрались в большом зале и приняли решение вместе. Утром вошедшие нашли их мёртвыми — сидящими ровно, с закрытыми глазами, без единой раны. Четверо детей были живы, здоровы и спокойны, и не помнили ничего. Детей разлучили по разным семьям.
+ЗАМОК стоит пустым. Заселить его пробовали трижды — солевары кредиторов, потом барон с семьёй, потом случайный покупатель с молотка. Каждый раз одно и то же: за зиму половина слегла, половина перестала отвечать на вопросы. Больше замок не трогают, покупателя у него нет, рыбаки Морского обходят мыс и не объясняют почему.
+МОРАЛЬ. Дом раздавило между долгом, пошлиной и бумагой — единственный вид злодейства, который Кордим вообще производит. Кредиторы взыскали, порт защитил свою пошлину, судья подписал сходящееся. Потому и спросить не с кого.` },
+
+        { id: "dalle", title: "Ворн Далле Справедливый", keys: ["Ворн Далле", "Далле", "Справедливый", "судья"], constant: false, order: 508, scanDepth: 4, recursive: false, maxChars: 656,
+          text: `Бывший судья, около шестидесяти двух, по прозвищу Справедливый. Тот, кто в 1009-м подписал приговор о неуплате и незаконном провозе с конфискацией — приговор, убивший род Астернов.
+ПОЧЕМУ ПОДПИСАЛ. Не за взятку. Формально всё сходилось: долг был, недоимка была, груз шёл мимо книг. Он подписал правильную бумагу и получил мёртвый дом. Это его и мучает.
+ЧТО ДЕЛАЕТ. Едет исправлять, хотя сам плохо формулирует, что считает исправлением: иска не подать, наказать некого, вернуть имя мёртвым нельзя. Но у него есть то, чего нет ни у кого другого: знание, что платежи были, а расписки исчезли. Единственный живой человек, который вслух признаёт, что произошло.` },
+
+        { id: "hvat", title: "Хват и его пятеро", keys: ["Хват", "серая шляп", "залётн", "залетн", "засада на тракте"], constant: false, order: 509, scanDepth: 4, recursive: false, maxChars: 803,
+          text: `Банда залётных, не подчиняющаяся Кессу. Зимовали неудачно, оголодали и вышли на тракт: мотив простой — две лошади под седлом стоят больше, чем всё остальное на дороге. Зимой убили охотника на заимке. Весной 1026-го взяли на повороте лесного тракта южнее Порта Теней караван из двух всадников: трое с луками сидели в ельнике, и добычей стала раненая лошадь с вьюками и три метательных ножа.
+ХВАТ. Главарь: спокойный, широкий в плечах, седая борода справа, серая войлочная шляпа не по размеру, которую он поправляет каждый раз, когда поворачивает голову. Шляпа отцовская — снята с убитого охотника.
+ГДЕ ОНИ. После потери одного их пятеро вместе с Хватом. На осень 1026-го сидят за просекой у Ручейного, платят монетой и сбывают не здесь. Местный лошадник Стек с ними связан и о южной дороге молчит совсем.` },
+
+        { id: "duo", title: "Слухи о дуэте", keys: ["Грейс", "Стальная Грейс", "Смерть в кожаном плаще", "широкополая шляп", "безумная половина"], constant: false, order: 510, scanDepth: 4, recursive: false, maxChars: 1899,
+          text: `Это то, что о них знают в мире. Ни одна фракция их личности не установила: досье нет ни у Гильдии, ни у синдикатов, ни у Свинцовых клинков.
+СТАЛЬНАЯ ГРЕЙС. Известна в кругах Гильдии по всему Кордиму: среди наёмников и криминала имя работает как предупреждение, и большинство профессионалов предпочитает избегать прямого столкновения. Стандартная оценка: для нейтрализации нужно минимум четверо-пятеро опытных бойцов с заранее подготовленной позиции. В народе по торговым трактам ходит байка о «Смерти в кожаном плаще» — фигуре, которую никто не видит, но все слышат: один сухой щелчок, и человек падает замертво. Одни говорят, дух мести, другие — наёмный демон богатых домов; с женщиной в широкополой шляпе байку не связывает никто. Среди советников и мелкой знати имя всплывает, когда надо объяснить удобную смерть конкурента, но документальных подтверждений нет, и большинство предпочитает не проверять.
+ЧТО ЗНАЮТ ВРАГИ. «Грейс» — выбранный псевдоним, не настоящее имя, и настоящее нигде не звучит и ни в одной сводке не значится. Работает с напарником. Специалист дальнего боя, позицию занимает до начала контакта. Никогда не бросала зарегистрированный контракт.
+НИКТО. Заметно менее известен. Узнаваем в Порту Теней и криминальном подполье Столицы как «безумная половина пары». Химический шрам на черепе и кислотные пальцы — единственные устойчивые приметы. Специалист по ножам и алхимическим инструментам, непредсказуем в бою, стандартные тактики против него не работают. Отпечатков пальцев не оставляет нигде, и по той же причине не может подписать документ обычным способом.
+СО СТОРОНЫ. Наблюдатели описывают пару как непропорционально опасную для двух человек: он контролирует пространство и создаёт хаос, она контролирует дистанцию и устраняет с точностью. По отдельности ни один не работает на полную силу.
+ВАЖНО. Встреча с ними — событие редкое. Обычная жизнь в Кордиме проходит мимо них.` }
+    ];
+
+    /* === ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ === */
+    let apiKey = '';
+    let currentModel = '';
+    let summaryModel = '';
+    let temperature = 0.7;
+    let maxTokens = 2000;
+    let useCache = false;
+    let allModelsData = [];
+    const DEFAULT_MODEL = 'deepseek/deepseek-v4-flash';
+    /* Список запасных на случай, если id устарел: gemini-flash-1.5-8b снят
+       с обслуживания и отдавал "No endpoints found" прямо на первом запросе. */
+    const MODEL_FALLBACKS = ['deepseek/deepseek-v4-flash', 'deepseek/deepseek-chat',
+                             'deepseek/', 'google/gemini-2.0-flash', 'google/'];
+    const LOREBOOK_BUDGET = 8000;   // символов справки по миру на один ход
+    const RECURSIVE_SHARE = 0.35;   // какую долю бюджета можно отдать рекурсивным находкам
+    
+    let activeSlot = 1;
+    let gameStarted = false;
+    let sessionTokens = { prompt: 0, completion: 0, cached: 0 };
+    let sessionId = "";
+    let isSummarizing = false;
+    
+    let character = { name: "", gender: "", age: "", origin: "", trade: "", flaw: "" };
+    let gameState = { location: "", money: 0, wounds: [], inventory: [], date: "1 День Месяца Пепла, 1026 год", day: 1 };
+    
+    let chatHistory = [];
+    let events = [];
+    let archivedTurns = 0;   // сколько сообщений ушло в хронику и исчезло с экрана
+    let stateSnapshots = []; 
+
+    /* Деньги хранятся одним целым числом в грошах.
+       Корд = 20 марок = 240 грошей, марка = 12 грошей. Разряды считает код. */
+    /* В приватном режиме и на некоторых источниках localStorage бросает
+       исключение при обращении. Без обёртки это роняло инициализацию целиком. */
+    function lsGet(key) {
+        try { return localStorage.getItem(key); } catch (e) { return null; }
+    }
+
+    function lsSet(key, value) {
+        try { localStorage.setItem(key, value); return true; } catch (e) { return false; }
+    }
+
+    function plural(n, one, few, many) {
+        const n10 = n % 10, n100 = n % 100;
+        if (n10 === 1 && n100 !== 11) return one;
+        if (n10 >= 2 && n10 <= 4 && (n100 < 12 || n100 > 14)) return few;
+        return many;
+    }
+
+    function formatMoney(groshi) {
+        const g = Math.max(0, Math.round(Number(groshi) || 0));
+        const kords = Math.floor(g / 240);
+        const marks = Math.floor((g % 240) / 12);
+        const rest = g % 12;
+        const parts = [];
+        if (kords) parts.push(`${kords} ${plural(kords, 'корд', 'корда', 'кордов')}`);
+        if (marks) parts.push(`${marks} ${plural(marks, 'марка', 'марки', 'марок')}`);
+        if (rest || !parts.length) parts.push(`${rest} ${plural(rest, 'грош', 'гроша', 'грошей')}`);
+        return parts.join(' ');
+    }
+
+    function generateUUID() {
+        return crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+    /* === ИНИЦИАЛИЗАЦИЯ === */
+    document.addEventListener('DOMContentLoaded', () => {
+        const ls = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+        apiKey = ls('or_key') || '';
+        if (apiKey) document.getElementById('api-key').value = apiKey;
+        
+        document.getElementById('setting-temp').value = ls('or_temp') || '0.7';
+        document.getElementById('temp-val').textContent = document.getElementById('setting-temp').value;
+        document.getElementById('setting-tokens').value = ls('or_tokens') || '2000';
+        const savedCache = ls('or_cache');
+        if (savedCache !== null) document.getElementById('setting-cache').checked = (savedCache === 'true');
+
+        document.getElementById('model-main').value = ls('or_model') || DEFAULT_MODEL;
+        document.getElementById('model-summary').value = ls('or_model_sum') || DEFAULT_MODEL;
+        
+        document.getElementById('setting-temp').addEventListener('input', (e) => {
+            document.getElementById('temp-val').textContent = e.target.value;
+        });
+
+        const locSelect = document.getElementById('char-location');
+        START_LOCATIONS.forEach(loc => {
+            const opt = document.createElement('option');
+            opt.value = loc;
+            opt.textContent = loc;
+            locSelect.appendChild(opt);
+        });
+
+        const statePanel = document.getElementById('state-panel');
+        statePanel.classList.add('collapsed');
+        statePanel.title = 'Нажмите, чтобы свернуть или развернуть';
+        statePanel.addEventListener('click', () => statePanel.classList.toggle('collapsed'));
+
+        loadModels();
+        checkSavesUI();
+        
+        document.getElementById('btn-generate').addEventListener('click', generateCharacters);
+        document.getElementById('btn-custom-action').addEventListener('click', () => submitCustomAction());
+        document.getElementById('custom-action').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') submitCustomAction();
+        });
+    });
+
+    /* === УТИЛИТЫ === */
+    function switchScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    function escapeRegExp(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    let lastTurn = { prompt: 0, completion: 0, cached: 0 };
+    let sessionCost = 0;
+    let cacheEverReported = false;
+
+    function kfmt(n) {
+        return n >= 10000 ? (n / 1000).toFixed(1) + 'k' : String(n);
+    }
+
+    /* Диагностика кэша: у части провайдеров cached_tokens не приходит вовсе,
+       и ноль в полосе означает не промах, а молчание. Сырой usage кладём
+       в консоль, чтобы можно было отличить одно от другого. */
+    function updateTokenDisplay(usage, modelId) {
+        if (usage) {
+            console.log('[usage]', modelId || currentModel, JSON.stringify(usage));
+            const pt = usage.prompt_tokens || 0;
+            const ct = usage.completion_tokens || 0;
+            const cached = (usage.prompt_tokens_details && usage.prompt_tokens_details.cached_tokens) || 0;
+            if (usage.prompt_tokens_details && usage.prompt_tokens_details.cached_tokens !== undefined) {
+                cacheEverReported = true;
+            }
+            sessionTokens.prompt += pt;
+            sessionTokens.completion += ct;
+            sessionTokens.cached += cached;
+            lastTurn = { prompt: pt, completion: ct, cached: cached };
+
+            const m = allModelsData.find(x => x.id === (modelId || currentModel));
+            if (m && !m.vary) {
+                sessionCost += (pt / 1e6) * m.inp + (ct / 1e6) * m.out;
+            }
+        }
+        const el = (id) => document.getElementById(id);
+        if (!el('tok-turn')) return;
+        el('tok-turn').innerHTML = `ход: <b>${kfmt(lastTurn.prompt)}</b> / ${kfmt(lastTurn.completion)}`;
+        el('tok-total').innerHTML = `сессия: <b>${kfmt(sessionTokens.prompt)}</b> / ${kfmt(sessionTokens.completion)}`;
+        el('tok-cost').innerHTML = sessionCost > 0 ? `~<b>$${sessionCost.toFixed(4)}</b>` : '~$0.0000';
+        const c = el('tok-cache');
+        if (!cacheEverReported) {
+            c.textContent = 'кэш: не сообщает';
+            c.className = '';
+        } else {
+            c.textContent = 'кэш: ' + kfmt(sessionTokens.cached);
+            c.className = sessionTokens.cached === 0 ? 'warn' : '';
+        }
+    }
+
+    /* === НАСТРОЙКИ И СОХРАНЕНИЯ === */
+    function applySettings() {
+        apiKey = document.getElementById('api-key').value.trim();
+        temperature = parseFloat(document.getElementById('setting-temp').value);
+        maxTokens = parseInt(document.getElementById('setting-tokens').value);
+        currentModel = document.getElementById('model-main').value.trim() || DEFAULT_MODEL;
+        summaryModel = document.getElementById('model-summary').value.trim() || currentModel;
+        useCache = document.getElementById('setting-cache').checked;
+
+        if (apiKey) {
+            /* Через lsSet: в приватном режиме обращение к localStorage бросает
+               исключение, и раньше оно валило и импорт, и запуск новой игры. */
+            lsSet('or_key', apiKey);
+            lsSet('or_temp', temperature);
+            lsSet('or_tokens', maxTokens);
+            lsSet('or_model', currentModel);
+            lsSet('or_model_sum', summaryModel);
+            lsSet('or_cache', useCache);
+        }
+    }
+
+    /* Вес решает, что доживёт до конца партии, а ставит его модель — и слабая
+       модель поле пропускает. Раньше событие без веса не проходило ни в ветку
+       weight >= 4, ни в weight <= 3 и исчезало из массива навсегда. */
+    function eventWeight(e) {
+        const raw = e ? e.weight : undefined;
+        // Пропущенный вес — это «неизвестно», то есть середина, а не «удалить первым».
+        if (raw === null || raw === undefined || raw === '') return 3;
+        const w = Number(raw);
+        return Number.isFinite(w) ? Math.min(5, Math.max(1, w)) : 3;
+    }
+
+    function cleanEvents() {
+        if (events.length <= 200) return;
+        const currentDay = gameState.day || 1;
+
+        // 1. Очистка по возрасту и низкому весу
+        events = events.filter(e => !(eventWeight(e) <= 2 && Number(e.day) < currentDay - 30));
+
+        // 2. Если всё ещё больше 200 — режем самые старые из тех, что не жалко
+        if (events.length > 200) {
+            const byDay = (a, b) => (Number(a.day) || 0) - (Number(b.day) || 0);
+            const safeEvents = events.filter(e => eventWeight(e) >= 4);
+            const removableEvents = events.filter(e => eventWeight(e) < 4).sort(byDay);
+
+            const neededRemovals = Math.min(removableEvents.length, events.length - 200);
+            removableEvents.splice(0, neededRemovals);
+
+            events = [...safeEvents, ...removableEvents].sort(byDay);
+        }
+    }
+
+    function saveGame() {
+        cleanEvents();
+        const saveObj = { sessionId, character, gameState, chatHistory, events, archivedTurns, currentModel, summaryModel };
+        let serialized = JSON.stringify(saveObj);
+
+        try {
+            localStorage.setItem(`kordim_save_${activeSlot}`, serialized);
+            checkSavesUI();
+        } catch (e) {
+            // Если упали по квоте - чистим историю свайпов до выбранных вариантов
+            console.warn("Ошибка сохранения (квота?), очистка свайпов...", e);
+            chatHistory.forEach(msg => {
+                if (msg.swipes && msg.swipes.length > 1) {
+                    msg.swipes = [msg.content];
+                    msg.swipeIndex = 0;
+                }
+            });
+            saveObj.chatHistory = chatHistory;
+            serialized = JSON.stringify(saveObj);
+
+            try {
+                localStorage.setItem(`kordim_save_${activeSlot}`, serialized);
+                checkSavesUI();
+            } catch (e2) {
+                console.error("Повторная ошибка сохранения", e2);
+                alert("Сейв превышает квоту хранилища браузера. Пожалуйста, экспортируйте данные в файл (Кнопка 'Экспорт в файл' в меню).");
+            }
+        }
+    }
+
+    function loadGame(slot) {
+        const savedData = lsGet(`kordim_save_${slot}`);
+        if (!savedData) return alert("Слот пуст");
+        
+        try {
+            const parsed = JSON.parse(savedData);
+            activeSlot = slot;
+            
+            sessionId = parsed.sessionId || generateUUID();
+            character = parsed.character || character;
+            gameState = parsed.gameState || gameState;
+            chatHistory = parsed.chatHistory || [];
+            events = parsed.events || [];
+            archivedTurns = parsed.archivedTurns || 0;
+            
+            if (parsed.currentModel) document.getElementById('model-main').value = parsed.currentModel;
+            if (parsed.summaryModel) document.getElementById('model-summary').value = parsed.summaryModel;
+            
+            applySettings();
+            
+            stateSnapshots = [];
+            if (!apiKey) return alert('Введите ключ API перед загрузкой');
+            
+            gameStarted = true;
+            checkSavesUI();
+            renderGameUI();
+        } catch (e) {
+            console.error("Ошибка загрузки:", e);
+            alert("Файл сохранения поврежден");
+        }
+    }
+
+    /* Пустой слот начинает новую игру прямо здесь, занятый — загружает.
+       Перезапись занятого слота живёт на отдельной кнопке со стрелкой. */
+    function slotClick(slot) {
+        if (lsGet(`kordim_save_${slot}`)) loadGame(slot);
+        else startNewGameProcess(slot);
+    }
+
+    function startNewGameProcess(slot) {
+        slot = parseInt(slot, 10) || 1;
+        if (lsGet(`kordim_save_${slot}`) &&
+            !confirm(`В слоте ${slot} уже есть сохранение. Оно будет затёрто первым же ходом. Продолжить?`)) return;
+
+        activeSlot = slot;
+        applySettings();
+        if (!apiKey) { alert('Нужен ключ API'); return; }
+        
+        gameStarted = false;
+        checkSavesUI();
+        sessionId = generateUUID();
+        character = { name: "", gender: "", age: "", origin: "", trade: "", flaw: "" };
+        gameState = { location: "", money: 0, wounds: [], inventory: [], date: "1 День Месяца Пепла, 1026 год", day: 1 };
+        chatHistory = [];
+        events = [];
+        archivedTurns = 0;
+        stateSnapshots = [];
+        sessionTokens = { prompt: 0, completion: 0, cached: 0 };
+        
+        switchScreen('screen-char-gen');
+    }
+
+    function checkSavesUI() {
+        for (let i = 1; i <= 3; i++) {
+            const hasSave = !!lsGet(`kordim_save_${i}`);
+            const btn = document.getElementById(`slot-btn-${i}`);
+            if (!btn) continue;
+            const isActive = gameStarted && i === activeSlot;
+
+            btn.textContent = isActive ? `Слот ${i} · идёт игра`
+                            : hasSave  ? `Слот ${i} · Загрузить`
+                                       : `Слот ${i} · Новая игра`;
+            btn.classList.toggle('slot-active', isActive);
+            btn.classList.toggle('btn-green', hasSave || isActive);
+            btn.classList.toggle('btn-gray', !hasSave && !isActive);
+            btn.disabled = false;   // пустой слот — тоже действие, а не тупик
+
+            const reset = document.getElementById(`slot-reset-${i}`);
+            if (reset) reset.style.display = hasSave ? '' : 'none';
+        }
+        const resume = document.getElementById('btn-resume');
+        if (resume) resume.style.display = gameStarted ? 'block' : 'none';
+    }
+
+    /* Формат файла переноса:
+       { kordim: 1, settings: {...}, save: {...} }
+       Старые файлы — это сразу объект сохранения без обёртки, импорт их понимает.
+       Ключ попадает в файл только по явной галочке и лежит там открытым текстом:
+       если файл куда-то денется, ключ надо удалить в панели OpenRouter. */
+    function exportSave() {
+        const withKey = document.getElementById('export-with-key').checked;
+        const savedData = lsGet(`kordim_save_${activeSlot}`);
+
+        if (!savedData && !withKey) return alert("Нет данных для экспорта");
+
+        const bundle = { kordim: 1 };
+
+        if (savedData) {
+            try { bundle.save = JSON.parse(savedData); }
+            catch (e) { return alert("Сохранение в этом слоте повреждено"); }
+        }
+
+        if (withKey) {
+            applySettings();
+            if (!apiKey) return alert("Ключ не введён — переносить нечего");
+            bundle.settings = {
+                apiKey: apiKey,
+                model: currentModel,
+                summaryModel: summaryModel,
+                temperature: temperature,
+                maxTokens: maxTokens,
+                useCache: useCache
+            };
+        }
+
+        const blob = new Blob([JSON.stringify(bundle)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = withKey ? "kordim_transfer.json" : `kordim_save_slot${activeSlot}.json`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function importSave(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        event.target.value = '';   // иначе повторный выбор того же файла не сработает
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            let data;
+            try { data = JSON.parse(e.target.result); }
+            catch (err) { return alert("Файл повреждён или это не файл игры"); }
+
+            const isBundle = data && data.kordim;
+            const settings = isBundle ? data.settings : null;
+            const save = isBundle ? data.save : data;
+
+            if (settings) {
+                if (settings.apiKey) document.getElementById('api-key').value = settings.apiKey;
+                if (settings.model) document.getElementById('model-main').value = settings.model;
+                if (settings.summaryModel) document.getElementById('model-summary').value = settings.summaryModel;
+                if (settings.temperature !== undefined) {
+                    document.getElementById('setting-temp').value = settings.temperature;
+                    document.getElementById('temp-val').textContent = settings.temperature;
+                }
+                if (settings.maxTokens) document.getElementById('setting-tokens').value = settings.maxTokens;
+                if (settings.useCache !== undefined) document.getElementById('setting-cache').checked = !!settings.useCache;
+                applySettings();   // осядет в localStorage этого устройства
+            }
+
+            if (save && save.chatHistory) {
+                try {
+                    localStorage.setItem(`kordim_save_${activeSlot}`, JSON.stringify(save));
+                } catch (err) {
+                    return alert("Не хватило места в хранилище браузера для этого сохранения");
+                }
+                loadGame(activeSlot);
+                return;
+            }
+
+            checkSavesUI();
+            alert(settings
+                ? "Ключ и настройки перенесены. Сохранения в файле не было."
+                : "В файле нет ни настроек, ни сохранения");
+        };
+        reader.readAsText(file);
+    }
+
+    /* === МОДЕЛИ === */
+    const MODEL_FAMS = [
+        ["Все", null],
+        ["Бесплатные", "#free"],
+        ["Google", "google/"],
+        ["OpenAI", "openai/"],
+        ["Anthropic", "anthropic/"],
+        ["DeepSeek", "deepseek/"],
+        ["xAI", "x-ai/"],
+        ["Qwen", "qwen/"],
+        ["Meta", "meta"],
+        ["Mistral", "mistralai/"],
+        ["Z.AI", "z-ai/"],
+        ["Moonshot", "moonshotai/"]
+    ];
+
+    async function loadModels() {
+        try {
+            const res = await fetch('https://openrouter.ai/api/v1/models');
+            const data = await res.json();
+            allModelsData = (data.data || []).map(m => {
+                const pr = m.pricing || {};
+                const inp = Number(pr.prompt) * 1e6;
+                const out = Number(pr.completion) * 1e6;
+                const bad = !isFinite(inp) || !isFinite(out) || inp < 0 || out < 0;
+                const sp = m.supported_parameters || [];
+                return {
+                    id: m.id, name: m.name || m.id, inp, out, vary: bad,
+                    free: !bad && inp === 0 && out === 0,
+                    /* is_moderated — единственный машиночитаемый признак внешнего
+                       модерационного слоя в API OpenRouter. Отсутствие поля
+                       трактуем как «неизвестно», а не как «нет модерации». */
+                    moderated: !!(m.top_provider && m.top_provider.is_moderated),
+                    modKnown: !!(m.top_provider && m.top_provider.is_moderated !== undefined),
+                    stream: sp.length ? sp.indexOf('stream') !== -1 : null,
+                    ctx: m.context_length || 0
+                };
+            }).sort((a, b) => a.id.localeCompare(b.id));
+            ensureLiveModels();
+        } catch (e) {
+            console.error("Ошибка загрузки моделей:", e);
+        }
+    }
+
+    function pickLiveModel() {
+        for (const pref of MODEL_FALLBACKS) {
+            const hit = allModelsData.find(m => pref.endsWith('/') ? m.id.startsWith(pref) : m.id === pref);
+            if (hit) return hit.id;
+        }
+        return allModelsData.length ? allModelsData[0].id : DEFAULT_MODEL;
+    }
+
+    /* Модель, записанная в настройках или в сейве, могла быть снята с
+       обслуживания. Молча подменяем на живую, иначе первый же запрос падает. */
+    function ensureLiveModels() {
+        if (!allModelsData.length) return;
+        const alive = (id) => allModelsData.some(m => m.id === id);
+        ['model-main', 'model-summary'].forEach(fieldId => {
+            const el = document.getElementById(fieldId);
+            if (!el) return;
+            const val = el.value.trim();
+            if (val && !alive(val)) {
+                const good = pickLiveModel();
+                console.warn(`Модель ${val} недоступна, подменяю на ${good}`);
+                el.value = good;
+            }
+        });
+    }
+
+    function priceLabel(m) {
+        if (m.vary) return "цена плавающая";
+        if (m.free) return "бесплатно";
+        return "$" + m.inp.toFixed(2) + " / $" + m.out.toFixed(2);
+    }
+
+    function openPicker(type) {
+        const box = document.getElementById(`picker-${type}`);
+        const input = document.getElementById(`model-${type}`);
+
+        if (box.classList.contains('on')) { box.classList.remove('on'); return; }
+        if (!allModelsData.length) { alert("Список моделей ещё не загрузился. Попробуйте через пару секунд."); return; }
+
+        box.innerHTML = '';
+        const head = document.createElement('div'); head.className = 'pick-head';
+        const search = document.createElement('input');
+        search.type = 'text'; search.className = 'pick-search';
+        search.placeholder = 'Поиск: имя модели или производитель';
+        const chips = document.createElement('div'); chips.className = 'pick-chips';
+        const toggles = document.createElement('div'); toggles.className = 'pick-toggles';
+        const rows = document.createElement('div'); rows.className = 'pick-rows';
+
+        const mkToggle = (labelText, lsKey, title) => {
+            const lab = document.createElement('label');
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.checked = lsGet(lsKey) === 'true';
+            lab.title = title;
+            lab.appendChild(cb);
+            lab.appendChild(document.createTextNode(labelText));
+            toggles.appendChild(lab);
+            cb.addEventListener('change', () => { lsSet(lsKey, cb.checked); draw(); rows.scrollTop = 0; });
+            return cb;
+        };
+        const cbUnmod = mkToggle('без фильтра запроса', 'pick_unmod',
+            'Скрывает модели, перед которыми стоит отдельный классификатор, заворачивающий запрос с ошибкой 403 до отправки в модель (top_provider.is_moderated). Это НЕ про то, что модель согласится писать что угодно: собственные правила модели остаются при ней.');
+        const cbStream = mkToggle('со стримингом', 'pick_stream',
+            'Только модели, у которых в supported_parameters заявлен stream.');
+        const cbCtx = mkToggle('контекст от 32k', 'pick_ctx',
+            'Отсекает короткие окна, в которые кор с лорбуком не влезут.');
+
+        head.appendChild(search); head.appendChild(chips); head.appendChild(toggles);
+        box.appendChild(head); box.appendChild(rows);
+
+        const fams = MODEL_FAMS.filter(([, key]) =>
+            key === null || key === "#free" ? true : allModelsData.some(m => m.id.startsWith(key)));
+        let fam = null;
+
+        function draw() {
+            const q = search.value.trim().toLowerCase();
+            const shown = allModelsData.filter(m => {
+                if (fam === "#free" && !m.free) return false;
+                if (fam && fam !== "#free" && !m.id.startsWith(fam)) return false;
+                if (cbUnmod.checked && m.moderated) return false;
+                if (cbStream.checked && m.stream === false) return false;
+                if (cbCtx.checked && m.ctx && m.ctx < 32000) return false;
+                if (!q) return true;
+                return m.id.toLowerCase().includes(q) || m.name.toLowerCase().includes(q);
+            });
+            rows.innerHTML = '';
+            if (!shown.length) {
+                const none = document.createElement('div');
+                none.className = 'pick-none';
+                none.textContent = 'Ничего не нашлось';
+                rows.appendChild(none);
+                return;
+            }
+            shown.slice(0, 300).forEach(m => {
+                const row = document.createElement('div');
+                row.className = 'model-row' + (m.free ? ' free' : '');
+                const b = document.createElement('b'); b.textContent = m.id;
+                const pr = document.createElement('span'); pr.textContent = priceLabel(m);
+                row.appendChild(b); row.appendChild(pr);
+                row.addEventListener('click', () => {
+                    input.value = m.id;
+                    box.classList.remove('on');
+                });
+                rows.appendChild(row);
+            });
+            if (shown.length > 300) {
+                const more = document.createElement('div');
+                more.className = 'pick-none';
+                more.textContent = `…и ещё ${shown.length - 300}. Уточните поиск.`;
+                rows.appendChild(more);
+            }
+        }
+
+        fams.forEach(([name, key]) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'chip' + (key === null ? ' on' : '');
+            b.textContent = name;
+            b.addEventListener('click', () => {
+                fam = key;
+                Array.from(chips.children).forEach(x => x.classList.toggle('on', x === b));
+                draw(); rows.scrollTop = 0;
+            });
+            chips.appendChild(b);
+        });
+
+        search.addEventListener('input', () => { draw(); rows.scrollTop = 0; });
+        search.value = '';
+        draw();
+        box.classList.add('on');
+        setTimeout(() => search.focus({ preventScroll: true }), 30);
+    }
+
+    /* === КОНТЕКСТ === */
+    function buildSystemBlock(text, cacheable, model) {
+        if (cacheable && useCache && model.startsWith('anthropic/')) {
+            return { role: "system", content: [{ type: "text", text: text, cache_control: { type: "ephemeral" } }] };
+        }
+        return { role: "system", content: text };
+    }
+
+    /* Отбор записей лорбука.
+
+       Порядок важен: сначала то, что реально прозвучало в игре, и только потом
+       то, что подтянулось рекурсией по текстам уже сработавших записей. Иначе
+       одна большая справочная запись, перечисляющая названия городов, выбирает
+       весь бюджет и вытесняет локацию, в которой игрок сейчас стоит. */
+    function getLorebookContext(history) {
+        const trigger = new Map();   // id -> 'direct' | 'recursive'
+        let combinedScanText = "";
+
+        const matches = (entry, text) => entry.keys.some(key =>
+            new RegExp(`(^|[^\\p{L}])${escapeRegExp(key)}`, 'iu').test(text));
+
+        const take = (entry, kind) => {
+            trigger.set(entry.id, kind);
+            if (entry.recursive) combinedScanText += " " + entry.text;
+        };
+
+        LOREBOOK.forEach(entry => { if (entry.constant) take(entry, 'direct'); });
+
+        // Круг первый — по тому, что игрок и рассказчик действительно сказали.
+        LOREBOOK.forEach(entry => {
+            if (trigger.has(entry.id)) return;
+            const scanTarget = history.slice(-entry.scanDepth).map(m => m.content).join(" ");
+            if (matches(entry, scanTarget)) take(entry, 'direct');
+        });
+
+        // Дальше — рекурсия по текстам сработавших записей, до двух кругов.
+        let addedThisPass = true;
+        let depth = 1;
+        while (addedThisPass && depth < 3) {
+            addedThisPass = false;
+            depth++;
+            LOREBOOK.forEach(entry => {
+                if (trigger.has(entry.id)) return;
+                if (matches(entry, combinedScanText)) { take(entry, 'recursive'); addedThisPass = true; }
+            });
+        }
+
+        const clip = (e) => e.text.substring(0, e.maxChars || e.text.length);
+        const byOrder = (a, b) => a.order - b.order;
+        const pick = (kind) => LOREBOOK.filter(e => trigger.get(e.id) === kind).sort(byOrder);
+
+        // Бюджет распределяется по приоритету, а выводится в порядке order.
+        const chosen = [];
+        let totalChars = 0;
+        let recursiveChars = 0;
+        const recursiveCap = LOREBOOK_BUDGET * RECURSIVE_SHARE;
+        for (const entry of pick('direct').concat(pick('recursive'))) {
+            const text = clip(entry);
+            const isRecursive = trigger.get(entry.id) === 'recursive';
+            if (totalChars + text.length > LOREBOOK_BUDGET) continue;   // не break: мелкая запись ещё влезет
+            if (isRecursive && recursiveChars + text.length > recursiveCap) continue;
+            chosen.push(entry);
+            totalChars += text.length;
+            if (isRecursive) recursiveChars += text.length;
+        }
+        chosen.sort(byOrder);
+
+        const injected = chosen.map(e => `[${e.title}]: ${clip(e)}`);
+        return injected.length > 0 ? `СПРАВКА ПО МИРУ:\n${injected.join('\n')}` : "";
+    }
+
+    function getMemoryContext(recentHistory) {
+        if (events.length === 0) return "";
+        
+        const scanText = recentHistory.slice(-4).map(m => m.content).join(" ");
+        let candidateEvents = new Set();
+        
+        events.filter(e => e.weight >= 4).forEach(e => candidateEvents.add(e));
+        events.slice(-10).forEach(e => candidateEvents.add(e));
+        events.forEach(e => {
+            if (Array.isArray(e.keys) && e.keys.some(key => new RegExp(`(^|[^\\p{L}])${escapeRegExp(key)}`, 'iu').test(scanText))) {
+                candidateEvents.add(e);
+            }
+        });
+
+        let arr = Array.from(candidateEvents).sort((a, b) => {
+            if (b.weight !== a.weight) return b.weight - a.weight;
+            return b.day - a.day; 
+        });
+        
+        let pickedEvents = [];
+        let currentLength = 0;
+        
+        for (let e of arr) {
+            let line = `[День ${e.day}, ${e.where || '?'}] ${e.what} (${(e.who || []).join(', ')})`;
+            if (currentLength + line.length > 3000) break;
+            pickedEvents.push(e);
+            currentLength += line.length + 1;
+        }
+        
+        pickedEvents.sort((a, b) => a.day - b.day);
+        let memoryText = pickedEvents.map(e => `[День ${e.day}, ${e.where || '?'}] ${e.what} (${(e.who || []).join(', ')})`).join("\n");
+        return memoryText ? `ПАМЯТЬ СОБЫТИЙ:\n${memoryText}` : "";
+    }
+
+    /* === РЕНДЕР И ПАРСИНГ === */
+    function updateStatePanel() {
+        document.getElementById('state-panel').textContent = 
+            `[${gameState.date} (День ${gameState.day})] | Локация: ${gameState.location} | При себе: ${formatMoney(gameState.money)} | Раны: ${gameState.wounds.join(', ') || 'нет'} | Инвентарь: ${gameState.inventory.join(', ') || 'пусто'}`;
+    }
+
+    function renderChoices(choicesArr) {
+        const container = document.getElementById('choices-container');
+        container.innerHTML = ''; 
+        choicesArr.forEach(cleanText => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.textContent = cleanText;
+            btn.addEventListener('click', () => makeGameTurn(cleanText));
+            container.appendChild(btn);
+        });
+    }
+
+    const ICONS = {
+        rewrite: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>',
+        undo:    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>',
+        prev:    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>',
+        next:    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>'
+    };
+
+    function appendMessageBlock(role) {
+        const wrap = document.createElement('div');
+        wrap.className = 'msg ' + (role === 'user' ? 'msg-user' : 'msg-ai');
+
+        const icon = document.createElement('div');
+        icon.className = 'msg-icon';
+        icon.textContent = role === 'user' ? 'Я' : '✦';
+        icon.title = role === 'user' ? 'Ваше действие' : 'Рассказчик';
+
+        const body = document.createElement('div');
+        body.className = 'msg-body';
+
+        wrap.appendChild(icon);
+        wrap.appendChild(body);
+        document.getElementById('story-text').appendChild(wrap);
+        return body;
+    }
+
+    function iconButton(iconKey, title, handler, disabled) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'icon-btn';
+        b.innerHTML = ICONS[iconKey];
+        b.title = title;
+        b.disabled = !!disabled;
+        if (!disabled) b.addEventListener('click', handler);
+        return b;
+    }
+
+    function buildActionsRow(msg) {
+        const row = document.createElement('div');
+        row.className = 'msg-actions';
+
+        row.appendChild(iconButton('rewrite', 'Переписать ответ (новый вариант)', () => rewriteTurn()));
+        row.appendChild(iconButton('undo', 'Переиграть ход (убрать последний ответ и действие)',
+            () => undoTurn(), !(chatHistory.length >= 2 && msg.stateBefore)));
+
+        if (msg.swipes && msg.swipes.length > 1) {
+            const sep = document.createElement('div');
+            sep.className = 'actions-sep';
+            row.appendChild(sep);
+
+            row.appendChild(iconButton('prev', 'Предыдущий вариант', () => changeSwipe(-1)));
+            const count = document.createElement('span');
+            count.className = 'swipe-count';
+            count.textContent = `${msg.swipeIndex + 1} / ${msg.swipes.length}`;
+            row.appendChild(count);
+            row.appendChild(iconButton('next', 'Следующий вариант', () => changeSwipe(1)));
+        }
+        return row;
+    }
+
+    function renderGameUI(skipLast = false) {
+        switchScreen('screen-game');
+        const storyDiv = document.getElementById('story-text');
+        storyDiv.innerHTML = '';
+
+        if (archivedTurns > 0) {
+            const note = document.createElement('div');
+            note.className = 'archive-note';
+            note.textContent = `— ранее: ${archivedTurns} ${plural(archivedTurns, 'сообщение свёрнуто', 'сообщения свёрнуты', 'сообщений свёрнуто')} в хронику, `
+                             + `${events.length} ${plural(events.length, 'событие', 'события', 'событий')} в памяти —`;
+            storyDiv.appendChild(note);
+        }
+
+        let msgsToRender = chatHistory;
+        if (skipLast && chatHistory.length > 0 && chatHistory[chatHistory.length - 1].role === 'assistant') {
+            msgsToRender = chatHistory.slice(0, -1);
+        }
+
+        msgsToRender.forEach((msg, index) => {
+            const body = appendMessageBlock(msg.role);
+            if (msg.role === 'user') {
+                body.textContent = msg.display ?? msg.content;
+            } else {
+                const textDiv = document.createElement('div');
+                textDiv.textContent = parseResponse(msg.content).text;
+                body.appendChild(textDiv);
+
+                if (!skipLast && index === chatHistory.length - 1) {
+                    body.appendChild(buildActionsRow(msg));
+                }
+            }
+        });
+
+        updateStatePanel();
+
+        if (!skipLast) {
+            const lastMsg = chatHistory[chatHistory.length - 1];
+            if (lastMsg && lastMsg.role === 'assistant') {
+                renderChoices(parseResponse(lastMsg.content).choicesArr);
+            } else {
+                document.getElementById('choices-container').innerHTML = '';
+            }
+        } else {
+            document.getElementById('choices-container').innerHTML = '';
+        }
+
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function parseResponse(text) {
+        const extract = (tag) => {
+            const regex = new RegExp(`<${tag}>([\\s\\S]*?)<\/${tag}>`, 'i');
+            const match = text.match(regex);
+            return match ? match[1].trim() : null;
+        };
+        
+        let stateDelta = {};
+        let stateStr = extract('состояние');
+        if (stateStr) {
+            try {
+                let temp = JSON.parse(stateStr);
+                if (temp.money !== undefined) stateDelta.money = Number(temp.money) || 0;
+                if (Array.isArray(temp.wounds)) stateDelta.wounds = temp.wounds.map(String);
+                if (Array.isArray(temp.inventory)) stateDelta.inventory = temp.inventory.map(String);
+                if (temp.location !== undefined) stateDelta.location = String(temp.location);
+                if (temp.date !== undefined) stateDelta.date = String(temp.date);
+                if (temp.day !== undefined) stateDelta.day = Number(temp.day) || gameState.day;
+            } catch (e) {
+                console.warn("Ошибка парсинга состояния:", e);
+            }
+        }
+
+        /* Ответ, обрезанный по max_tokens, теряет закрывающие теги: раньше
+           это давало сырой текст с видимым "<выборы>" и без кнопок. */
+        let choicesStr = extract('выборы');
+        if (choicesStr === null) {
+            const open = text.search(/<выборы>/i);
+            if (open !== -1) {
+                choicesStr = text.slice(open + 8).split(/<состояние>/i)[0].trim();
+            }
+        }
+        const choicesArr = choicesStr ? choicesStr.split('\n').filter(l => l.trim()).map(c => c.replace(/^\d+\.\s*/, '')) : [];
+
+        return {
+            text: (function () {
+                let t = extract('текст');
+                if (t === null) {
+                    const open = text.search(/<текст>/i);
+                    t = open !== -1 ? text.slice(open + 7) : text;
+                    t = t.split(/<выборы>/i)[0].split(/<состояние>/i)[0];
+                    t = t.replace(/<\/?(текст|выборы|состояние)>/gi, '').trim();
+                }
+                return t;
+            })(),
+            choicesArr: choicesArr,
+            stateDelta: stateDelta
+        };
+    }
+
+    function applyState(delta) {
+        Object.assign(gameState, delta);
+    }
+
+    /* === API ЗАПРОСЫ === */
+    const REQUEST_TIMEOUT_MS = 90000;
+
+    /* HTTP-Referer OpenRouter использует для статистики приложений. Когда игра
+       открыта как локальный файл, туда уходит "file:///C:/..." — значение,
+       которое сервер вправе не принять. На file:// заголовок просто не шлём. */
+    function apiHeaders() {
+        const headers = {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+            'X-Title': 'Kordim RPG'
+        };
+        if (/^https?:/i.test(window.location.href)) {
+            headers['HTTP-Referer'] = window.location.href;
+        }
+        return headers;
+    }
+
+    /* Без таймаута зависший запрос вешал экран навсегда: кнопка заблокирована,
+       лоадер крутится, сообщения нет. Теперь любой исход заканчивается текстом. */
+    async function fetchWithTimeout(url, options, ms = REQUEST_TIMEOUT_MS) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), ms);
+        const localFile = !/^https?:/i.test(window.location.href);
+        try {
+            return await fetch(url, Object.assign({}, options, { signal: controller.signal }));
+        } catch (e) {
+            if (e.name === 'AbortError') {
+                throw new Error(`Ответа нет ${Math.round(ms / 1000)} секунд. Проверьте связь.`
+                    + (localFile ? ' Игра открыта как локальный файл — мобильные браузеры часто блокируют такие запросы к API.' : ''));
+            }
+            throw new Error(`Запрос не ушёл: ${e.message}.`
+                + (localFile ? ' Игра открыта как локальный файл — скорее всего, браузер заблокировал обращение к API с адреса file://.' : ''));
+        } finally {
+            clearTimeout(timer);
+        }
+    }
+
+    /* 403 у OpenRouter означает, что запрос завернул внешний классификатор
+       и до модели он не доехал. Раньше это выглядело как невнятная ошибка
+       без объяснения, что именно не понравилось. */
+    function describeApiError(data, status, reqModel) {
+        const err = (data && data.error) || null;
+        const meta = err && err.metadata;
+        if (status === 403 || (err && err.code === 403)) {
+            let out = 'Запрос заблокирован фильтром до отправки в модель.';
+            if (meta && Array.isArray(meta.reasons) && meta.reasons.length) {
+                out += ' Причина: ' + meta.reasons.join(', ') + '.';
+            }
+            if (meta && meta.flagged_input) {
+                out += ' Помечен фрагмент: «' + meta.flagged_input + '».';
+            }
+            out += ' Помогает переформулировать этот кусок или взять модель без предварительного фильтра.';
+            return out + ` [модель: ${reqModel}]`;
+        }
+        if (status === 402) return `Кончились кредиты на OpenRouter. [модель: ${reqModel}]`;
+        if (status === 429) return `Слишком часто, провайдер притормаживает. Подождите и повторите. [модель: ${reqModel}]`;
+        if (status === 502) return `Провайдер модели сейчас недоступен. Попробуйте другую. [модель: ${reqModel}]`;
+        if (status === 503) return `Нет провайдера, подходящего под запрос. Смените модель. [модель: ${reqModel}]`;
+        const msg = err ? (err.message || JSON.stringify(err)) : `код ${status}`;
+        return `${msg} [модель: ${reqModel}]`;
+    }
+
+    async function callOpenRouter(messages, modelOverride = null, tempOverride = null, tokensOverride = null) {
+        const reqModel = modelOverride || currentModel;
+        const reqTemp = tempOverride !== null ? tempOverride : temperature;
+        const reqTokens = tokensOverride !== null ? tokensOverride : maxTokens;
+
+        const response = await fetchWithTimeout('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: apiHeaders(),
+            body: JSON.stringify({
+                model: reqModel,
+                messages: messages,
+                temperature: reqTemp,
+                max_tokens: reqTokens,
+                session_id: sessionId
+            })
+        });
+
+        let data;
+        try { data = await response.json(); }
+        catch (e) { throw new Error(`Сервер ответил не по формату (код ${response.status})`); }
+
+        if (!response.ok || data.error) {
+            throw new Error(describeApiError(data, response.status, reqModel));
+        }
+        const fr = data.choices && data.choices[0] && data.choices[0].finish_reason;
+        if (fr === 'content_filter') {
+            throw new Error(`Ответ обрезан фильтром содержимого на стороне провайдера. [модель: ${reqModel}]`);
+        }
+        return data;
+    }
+
+    async function callOpenRouterStream(messages, onChunk) {
+        const response = await fetchWithTimeout('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: apiHeaders(),
+            body: JSON.stringify({
+                model: currentModel,
+                messages: messages,
+                temperature: temperature,
+                max_tokens: maxTokens,
+                session_id: sessionId,
+                stream: true
+            })
+        });
+
+        if (!response.ok) {
+            let j = null;
+            try { j = await response.json(); } catch (e) {}
+            throw new Error(describeApiError(j, response.status, currentModel));
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let fullText = "";
+        let finalUsage = null;
+        let streamFiltered = false;
+        let streamError = null;
+        let buffer = ""; 
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop(); 
+            
+            for (let line of lines) {
+                if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+                    try {
+                        const data = JSON.parse(line.slice(6));
+                        if (data.choices && data.choices.length > 0 && data.choices[0].delta && data.choices[0].delta.content) {
+                            fullText += data.choices[0].delta.content;
+                            onChunk(fullText);
+                        }
+                        if (data.usage) finalUsage = data.usage;
+                        /* Провайдер может оборвать генерацию на середине —
+                           ошибка приходит отдельным SSE-событием. */
+                        if (data.error) streamError = data.error;
+                        const fr = data.choices && data.choices[0] && data.choices[0].finish_reason;
+                        if (fr === 'content_filter') streamFiltered = true;
+                    } catch (e) {}
+                }
+            }
+        }
+        if (streamError) {
+            throw new Error(describeApiError({ error: streamError }, streamError.code || 0, currentModel));
+        }
+        if (streamFiltered && !fullText.trim()) {
+            throw new Error(`Ответ полностью заблокирован фильтром содержимого. [модель: ${currentModel}]`);
+        }
+        return { content: fullText, usage: finalUsage, filtered: streamFiltered };
+    }
+
+    /* === СЮЖЕТ И ХОДЫ === */
+    async function generateCharacters() {
+        const gender = document.getElementById('char-gender').value || "неизвестно";
+        const age = document.getElementById('char-age').value || "неизвестно";
+        const chosenLoc = document.getElementById('char-location').value;
+        gameState.location = chosenLoc || START_LOCATIONS[Math.floor(Math.random() * START_LOCATIONS.length)];
+
+        const btn = document.getElementById('btn-generate');
+        const loader = document.getElementById('char-loader');
+        /* Прошлая четвёрка оставалась на экране под новой. */
+        document.getElementById('char-options').innerHTML = '';
+        btn.disabled = true;
+        loader.classList.remove('error');
+        loader.textContent = 'Судьба плетёт нити...';
+        loader.style.display = 'block';
+        let failed = false;
+
+        const prompt = `Сгенерируй 4 варианта персонажа для старта. Пол: ${gender}. Возраст: ${age}. Стартовая локация: ${gameState.location}.
+Пол всех четверых должен совпадать с запрошенным. Если персонаж выдаёт себя за другой пол, это допустимо только как содержание поля «уязвимость», и в поле «имя» тогда стоит имя, под которым он живёт.
+Не заключай поля в квадратные скобки — только текст, разделённый вертикальной чертой.
+Формат СТРОГО:
+<текст>Атмосферное вступление.</текст>
+<выборы>
+1. [Имя] | [Происхождение] | [Ремесло] | [Уязвимость или тайна]
+Персонажи — обычные люди Кордима, не герои и не избранные. Ремесло бытовое или криминальное, под стать месту.
+Поле money в состоянии — целое число ГРОШЕЙ (корд = 240 грошей, марка = 12). Стартовый капитал бедняка: от 10 до 120 грошей.
+...
+</выборы>
+<состояние>{"money": 40}</состояние>`;
+
+        /* Раньше сюда уходил только кор, и четвёрка сочинялась без справки
+           о стартовом городе: Монтин описывался наугад. Подсовываем лорбуку
+           название локации как будто это реплика, чтобы поднялись её записи. */
+        const tempMessages = [buildSystemBlock(CORE_PROMPT, true, currentModel)];
+        const startLore = getLorebookContext([{ role: 'user', content: gameState.location }]);
+        if (startLore) tempMessages.push({ role: "system", content: startLore });
+        tempMessages.push({ role: "user", content: prompt });
+
+        try {
+            const data = await callOpenRouter(tempMessages);
+            updateTokenDisplay(data.usage);
+            
+            const parsed = parseResponse(data.choices[0].message.content);
+            const optionsContainer = document.getElementById('char-options');
+            optionsContainer.innerHTML = '';
+            
+            const p = document.createElement('p');
+            p.textContent = parsed.text;
+            optionsContainer.appendChild(p);
+            
+            parsed.choicesArr.forEach(cleanText => {
+                const choiceBtn = document.createElement('button');
+                choiceBtn.className = 'choice-btn';
+                choiceBtn.textContent = cleanText;
+                choiceBtn.addEventListener('click', () => {
+                    const parts = cleanText.split('|').map(s => s.trim());
+                    character.gender = gender;
+                    character.age = age;
+                    character.name = parts[0] || "Неизвестный";
+                    character.origin = parts[1] || "";
+                    character.trade = parts[2] || "";
+                    character.flaw = parts[3] || "";
+                    startGame(cleanText);
+                });
+                optionsContainer.appendChild(choiceBtn);
+            });
+        } catch (e) {
+            /* Сообщение остаётся на экране: alert на телефоне легко пропустить,
+               а зависший лоадер без текста не объясняет вообще ничего. */
+            failed = true;
+            loader.classList.add('error');
+            loader.textContent = `Не получилось. ${e.message}`;
+        } finally {
+            btn.disabled = false;
+            if (!failed) loader.style.display = 'none';
+        }
+    }
+
+    function startGame(characterDesc) {
+        chatHistory = [];
+        const initPrompt = `Я выбрал персонажа: ${characterDesc}.
+Локация: ${gameState.location}.
+Опиши, где я сейчас нахожусь, что делаю и дай 4 варианта действий.
+Отвечай СТРОГО в формате: <текст>...</текст><выборы>...</выборы><состояние>...</состояние>`;
+
+        chatHistory.push({ role: "user", content: initPrompt, display: `(Начало игры) Персонаж: ${characterDesc}` });
+        executeTurn(true);
+    }
+
+    function submitCustomAction() {
+        const input = document.getElementById('custom-action');
+        const action = input.value.trim();
+        if (!action) return;
+        input.value = '';
+        makeGameTurn(action);
+    }
+
+    function makeGameTurn(userText) {
+        chatHistory.push({ role: "user", content: userText, display: userText });
+        executeTurn(false);
+    }
+
+    async function summarizeHistory() {
+        if (isSummarizing || chatHistory.length <= 16) return;
+        const countToSummarize = chatHistory.length - 8;
+        const messagesToSummarize = chatHistory.slice(0, countToSummarize);
+        
+        isSummarizing = true;
+        const prompt = `Верни только JSON-массив, без пояснений и markdown-обёртки. Факты, не художественный текст. Формат: [{"day": 3, "type": "встреча|сделка|конфликт|потеря|обещание|рана|перемещение", "who": ["имя"], "where": "локация", "what": "одна фраза, факт без прозы", "keys": ["слова для поиска"], "weight": 1-5}]`;
+        
+        let sumMessages = [
+            { role: "system", content: "Ты архивариус. Выдавай строго валидный JSON." },
+            ...messagesToSummarize.map(m => ({ role: m.role, content: m.content })),
+            { role: "user", content: prompt }
+        ];
+
+        try {
+            const data = await callOpenRouter(sumMessages, summaryModel, 0.3, 600);
+            updateTokenDisplay(data.usage, summaryModel);
+            
+            let textReply = data.choices[0].message.content.trim();
+            textReply = textReply.replace(/^```(json)?/, '').replace(/```$/, '').trim();
+            
+            const newEvents = JSON.parse(textReply);
+            if (Array.isArray(newEvents)) {
+                /* Чиним данные на входе, а не потом: слабая модель пропускает вес,
+                   пишет день строкой и забывает keys — а на этих полях держится
+                   и отбор в память, и очистка. */
+                const clean = newEvents.filter(e => e && typeof e === 'object').map(e => ({
+                    day: Number(e.day) || (gameState.day || 1),
+                    type: String(e.type || ''),
+                    who: Array.isArray(e.who) ? e.who.map(String) : [],
+                    where: String(e.where || ''),
+                    what: String(e.what || '').trim(),
+                    keys: Array.isArray(e.keys) ? e.keys.map(String) : [],
+                    weight: eventWeight(e)
+                })).filter(e => e.what);
+
+                events = events.concat(clean);
+                chatHistory.splice(0, countToSummarize);
+                archivedTurns += countToSummarize;
+                saveGame();
+                /* Без перерисовки сообщения просто исчезали бы со следующим ходом
+                   без всякого объяснения. Но не посреди хода: сжатие идёт в фоне
+                   и может закончиться во время стриминга — перерисовка стёрла бы
+                   текст, который в этот момент печатается на экран. */
+                const turnRunning = document.getElementById('game-loader').style.display === 'block';
+                if (!turnRunning && document.getElementById('screen-game').classList.contains('active')) {
+                    renderGameUI();
+                }
+            }
+        } catch (e) {
+            console.error("Ошибка парсинга событийной памяти:", e);
+        } finally {
+            isSummarizing = false;
+        }
+    }
+
+    /* === ОСНОВНОЙ ЦИКЛ === */
+    async function executeTurn(isInit, isRewrite = false) {
+        const loader = document.getElementById('game-loader');
+        const customBtn = document.getElementById('btn-custom-action');
+        
+        loader.classList.remove('error');
+        loader.textContent = 'Рассказчик думает...';
+        loader.style.display = 'block';
+        document.getElementById('choices-container').innerHTML = '';
+        customBtn.disabled = true;
+        let failed = false;
+        
+        let stateBeforeTurn = JSON.parse(JSON.stringify(gameState));
+        if (isRewrite) {
+            const lastMsg = chatHistory[chatHistory.length - 1];
+            if (lastMsg.stateBefore) stateBeforeTurn = JSON.parse(JSON.stringify(lastMsg.stateBefore));
+        }
+
+        updateStatePanel();
+        renderGameUI(isRewrite); 
+
+        /* Порядок под кэш провайдера: неизменный префикс (кор + карточка персонажа +
+           append-only история) идёт первым, всё меняющееся уезжает в хвост.
+           Хвост оформлен ролью user, а не system: доки OpenRouter требуют выносить
+           динамику в позднее user-сообщение, а не дописывать её системными блоками
+           после кэшируемого. */
+        let messages = [];
+        messages.push(buildSystemBlock(CORE_PROMPT, true, currentModel));
+        messages.push({ role: "system", content: `ПЕРСОНАЖ: Имя: ${character.name}, Пол: ${character.gender}, Возраст: ${character.age}, Происхождение: ${character.origin}, Ремесло: ${character.trade}, Уязвимость: ${character.flaw}` });
+
+        const historyForContext = isRewrite ? chatHistory.slice(0, -1) : chatHistory;
+        messages = messages.concat(historyForContext.map(m => ({ role: m.role, content: m.content })));
+
+        const tail = [];
+        const lore = getLorebookContext(historyForContext);
+        if (lore) tail.push(lore);
+
+        const memory = getMemoryContext(historyForContext);
+        if (memory) tail.push(memory);
+
+        tail.push(`ТЕКУЩЕЕ СОСТОЯНИЕ: ${JSON.stringify(gameState)}
+Деньги в состоянии — целое число ГРОШЕЙ. Сейчас при себе: ${formatMoney(gameState.money)}. Корд = 240 грошей, марка = 12 грошей.
+ПРАВИЛО ОТВЕТА: всегда возвращай <текст>, <выборы> (4 штуки списком) и обновлённый JSON в <состояние>. Обязательно двигай date и day вперёд при смене сцены, ночлеге и дороге.`);
+
+        messages.push({ role: "user", content: tail.join("\n\n") });
+
+        const streamP = appendMessageBlock('assistant');
+
+        try {
+            let data = await callOpenRouterStream(messages, (partialText) => {
+                const textMatch = partialText.match(/<текст>([\s\S]*?)(?:<\/(?:текст)?>|$)/i);
+                streamP.textContent = textMatch ? textMatch[1].trim() : partialText.replace(/<[^>]*>?/g, '');
+                window.scrollTo(0, document.body.scrollHeight);
+            });
+            
+            updateTokenDisplay(data.usage);
+            let reply = data.content;
+            let parsed = parseResponse(reply);
+
+            if (parsed.choicesArr.length === 0) {
+                messages.push({ role: "assistant", content: reply });
+                messages.push({ role: "system", content: "НАПОМИНАНИЕ: Обязательно выведи 4 варианта действий внутри тега <выборы>." });
+                const retryData = await callOpenRouter(messages);
+                updateTokenDisplay(retryData.usage); 
+                reply = retryData.choices[0].message.content;
+                parsed = parseResponse(reply);
+            }
+
+            applyState(parsed.stateDelta);
+            
+            if (isRewrite) {
+                let lastMsg = chatHistory[chatHistory.length - 1];
+                lastMsg.swipes.push(reply);
+                lastMsg.swipeIndex = lastMsg.swipes.length - 1;
+                lastMsg.content = reply;
+            } else {
+                chatHistory.push({ role: "assistant", content: reply, swipes: [reply], swipeIndex: 0, stateBefore: stateBeforeTurn });
+            }
+            
+            if (chatHistory.length > 16) summarizeHistory();
+            
+            gameStarted = true;
+            saveGame();
+            renderGameUI();
+        } catch (e) {
+            failed = true;
+            if (!isRewrite) {
+                chatHistory.pop();
+                gameState = stateBeforeTurn;
+            }
+            renderGameUI();
+            loader.classList.add('error');
+            loader.textContent = `Ход не прошёл. ${e.message}`;
+            loader.style.display = 'block';
+        } finally {
+            if (!failed) loader.style.display = 'none';
+            customBtn.disabled = false;
+            /* На телефоне автофокус выдёргивал клавиатуру после каждого хода. */
+            if (window.matchMedia('(min-width: 601px)').matches) {
+                document.getElementById('custom-action').focus();
+            }
+        }
+    }
+
+    function rewriteTurn() {
+        if (chatHistory.length < 2) return;
+        const lastMsg = chatHistory[chatHistory.length - 1];
+        if (lastMsg.role !== 'assistant') return;
+        if (!lastMsg.swipes) { lastMsg.swipes = [lastMsg.content]; lastMsg.swipeIndex = 0; }
+
+        if (lastMsg.stateBefore) gameState = JSON.parse(JSON.stringify(lastMsg.stateBefore));
+        executeTurn(false, true);
+    }
+
+    function undoTurn() {
+        /* Откат самого первого хода оставлял пустой экран без кнопок и без
+           выхода: истории нет, выборов нет, играть нечем. */
+        if (chatHistory.length <= 2) {
+            alert('Это первый ход — откатывать некуда. Чтобы начать заново, вернитесь в меню и выберите слот.');
+            return;
+        }
+        const lastMsg = chatHistory[chatHistory.length - 1];
+        if (lastMsg.role !== 'assistant' || !lastMsg.stateBefore) return;
+        
+        gameState = JSON.parse(JSON.stringify(lastMsg.stateBefore));
+        chatHistory.pop(); 
+        if (chatHistory.length > 0 && chatHistory[chatHistory.length - 1].role === 'user') {
+            chatHistory.pop(); 
+        }
+        
+        saveGame();
+        renderGameUI();
+    }
+
+    /* === ЭКРАН ПЕРСОНАЖА ===
+       Ручная правка нужна потому, что состояние ведёт модель, а она врёт:
+       теряет монеты, забывает раны, дублирует предметы. Без вентиля партия
+       чинится только откатом хода. */
+    const CHAR_FIELDS = [
+        ['name',   'Имя'],
+        ['gender', 'Пол'],
+        ['age',    'Возраст'],
+        ['origin', 'Происхождение'],
+        ['trade',  'Ремесло'],
+        ['flaw',   'Уязвимость']
+    ];
+
+    function openCharacterScreen() {
+        const cardBox = document.getElementById('char-card-fields');
+        cardBox.innerHTML = '';
+        CHAR_FIELDS.forEach(([key, label]) => {
+            const wrap = document.createElement('div');
+            wrap.className = 'char-field';
+            const l = document.createElement('label');
+            l.textContent = label;
+            const i = document.createElement('input');
+            i.type = 'text';
+            i.id = 'cf-' + key;
+            i.value = character[key] != null ? String(character[key]) : '';
+            wrap.appendChild(l); wrap.appendChild(i);
+            cardBox.appendChild(wrap);
+        });
+
+        const stateBox = document.getElementById('char-state-fields');
+        stateBox.innerHTML = '';
+        const stateFields = [
+            ['location', 'Локация', gameState.location],
+            ['date',     'Дата (как её видит рассказчик)', gameState.date],
+            ['day',      'День (число)', gameState.day],
+            ['money',    'Деньги в грошах — сейчас ' + formatMoney(gameState.money), gameState.money],
+            ['wounds',   'Раны через запятую', (gameState.wounds || []).join(', ')],
+            ['inventory','Инвентарь через запятую', (gameState.inventory || []).join(', ')]
+        ];
+        stateFields.forEach(([key, label, val]) => {
+            const wrap = document.createElement('div');
+            wrap.className = 'char-field';
+            const l = document.createElement('label');
+            l.textContent = label;
+            const i = document.createElement('input');
+            i.type = 'text';
+            i.id = 'sf-' + key;
+            i.value = val != null ? String(val) : '';
+            wrap.appendChild(l); wrap.appendChild(i);
+            stateBox.appendChild(wrap);
+        });
+
+        renderEventsEditor();
+        switchScreen('screen-character');
+        window.scrollTo(0, 0);
+    }
+
+    function renderEventsEditor() {
+        const box = document.getElementById('char-events');
+        box.innerHTML = '';
+        document.getElementById('ev-count').textContent = events.length;
+        if (!events.length) {
+            const none = document.createElement('p');
+            none.style.cssText = 'color:#666;font-size:13px;';
+            none.textContent = 'Пока пусто. События появятся, когда история дорастёт до сжатия.';
+            box.appendChild(none);
+            return;
+        }
+        events.slice().sort((a, b) => (a.day || 0) - (b.day || 0)).forEach(ev => {
+            const row = document.createElement('div');
+            row.className = 'ev-row';
+
+            const meta = document.createElement('div');
+            meta.className = 'ev-meta';
+            meta.textContent = `д.${ev.day ?? '?'} · в${ev.weight ?? '?'}`;
+            meta.title = `${ev.type || 'без типа'} · ${ev.where || 'место не указано'} · ${(ev.who || []).join(', ')}`;
+
+            const ta = document.createElement('textarea');
+            ta.value = ev.what || '';
+            ta.addEventListener('input', () => { ev.what = ta.value; });
+
+            const del = document.createElement('button');
+            del.className = 'ev-del';
+            del.textContent = '✕';
+            del.title = 'Забыть это событие';
+            del.addEventListener('click', () => {
+                const i = events.indexOf(ev);
+                if (i !== -1) events.splice(i, 1);
+                renderEventsEditor();
+            });
+
+            row.appendChild(meta); row.appendChild(ta); row.appendChild(del);
+            box.appendChild(row);
+        });
+    }
+
+    function saveCharacterScreen() {
+        CHAR_FIELDS.forEach(([key]) => {
+            const el = document.getElementById('cf-' + key);
+            if (el) character[key] = el.value.trim();
+        });
+
+        const g = (k) => {
+            const el = document.getElementById('sf-' + k);
+            return el ? el.value.trim() : '';
+        };
+        const splitList = (v) => v.split(',').map(x => x.trim()).filter(Boolean);
+
+        gameState.location  = g('location');
+        gameState.date      = g('date');
+        const day = parseInt(g('day'), 10);
+        if (!isNaN(day)) gameState.day = day;
+        const money = parseInt(g('money'), 10);
+        if (!isNaN(money)) gameState.money = Math.max(0, money);
+        gameState.wounds    = splitList(g('wounds'));
+        gameState.inventory = splitList(g('inventory'));
+
+        events = events.filter(e => (e.what || '').trim().length > 0);
+
+        saveGame();
+        updateStatePanel();
+        switchScreen('screen-game');
+        renderGameUI();
+    }
+
+    function changeSwipe(direction) {
+        const lastMsg = chatHistory[chatHistory.length - 1];
+        if (lastMsg.role !== 'assistant' || !lastMsg.swipes || lastMsg.swipes.length <= 1) return;
+        
+        lastMsg.swipeIndex += direction;
+        if (lastMsg.swipeIndex < 0) lastMsg.swipeIndex = lastMsg.swipes.length - 1;
+        if (lastMsg.swipeIndex >= lastMsg.swipes.length) lastMsg.swipeIndex = 0;
+        
+        lastMsg.content = lastMsg.swipes[lastMsg.swipeIndex];
+        /* Дельту накладываем только на снимок состояния до хода. Без снимка
+           (старые сейвы) она легла бы поверх дельты предыдущего варианта, и
+           деньги с ранами поплыли бы при каждом перещёлкивании. */
+        if (lastMsg.stateBefore) {
+            gameState = JSON.parse(JSON.stringify(lastMsg.stateBefore));
+            applyState(parseResponse(lastMsg.content).stateDelta);
+        }
+        
+        saveGame();
+        renderGameUI();
+    }
+</script>
+</body>
+</html>
