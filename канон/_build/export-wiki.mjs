@@ -13,7 +13,9 @@ const KANON = path.join(ROOT, 'канон');
 const OUT = path.join(ROOT, 'wiki', 'app', 'data', 'canon.js');
 
 function readBlock(rel) {
-  const text = fs.readFileSync(path.join(KANON, rel), 'utf8');
+  // \r\n -> \n сразу: файл мог быть пересохранён редактором целиком в CRLF (в т.ч. автором
+  // вручную), а для экспорта в вики точное воспроизведение переносов строк не нужно.
+  const text = fs.readFileSync(path.join(KANON, rel), 'utf8').replace(/\r\n/g, '\n');
   const lines = text.split('\n');
   if (lines[0] !== '---') throw new Error(`${rel}: нет YAML-шапки`);
   let close = -1;

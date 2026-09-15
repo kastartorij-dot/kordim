@@ -292,7 +292,7 @@ a.fac::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;backg
 .fac .kind{color:var(--fc)}
 .fac .who{font-size:13px;color:var(--mute)}
 
-/* ─── страница фракции ─── */
+/* ─── страница фракции: базовый шаблон + грим по архетипу ─── */
 .fhero{position:relative;min-height:360px;display:flex;align-items:flex-end;padding:34px 36px;overflow:hidden;background-color:#15120f;background-size:cover,auto,auto;background-position:center;border-bottom:1px solid var(--line)}
 .fhero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(26,23,22,.05) 30%,rgba(26,23,22,.96)),linear-gradient(90deg,rgba(26,23,22,.8),transparent 65%)}
 .fhero>*{position:relative;z-index:1}
@@ -323,6 +323,55 @@ a.fac::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;backg
 .rel small{display:block;color:var(--mute);font-size:13px;line-height:1.4}
 .rel .t{font:10px var(--mono);padding:1px 6px;border-radius:5px;align-self:start;margin-top:3px;border:1px solid}
 .rel .t.soyuz{color:var(--sage)}.rel .t.spor{color:var(--ember)}.rel .t.delo{color:var(--dusk)}
+
+/* архетип: официальные (контора, Совет, Церковь, Корона, дома, Ложа, Коллегия, Орден, Охотники, Вестники) —
+   ровные линии, «печатный» вид */
+.arche-official .card,.arche-official .fhooks,.arche-official .fevs,.arche-official .fpeople .pcard{border-radius:8px}
+.arche-official .fhero{background-color:#161311}
+
+/* архетип: подполье/синдикат (Мокрые ножи, Серый картель, Братство кулака) —
+   резче, диагональная штриховка на баннере, темнее карточки */
+.arche-crime .fhero{background-image:repeating-linear-gradient(-45deg,rgba(0,0,0,.35) 0 2px,transparent 2px 14px)!important}
+.arche-crime .card,.arche-crime .fhooks,.arche-crime .fpeople .pcard{background:#1a1613;border-color:#3a2f28}
+.arche-crime .fev{border-top-color:#3a2f28}
+
+/* архетип: дикое/независимое (Люди Кесса, Отряд «Лихо») — мягче, органичные углы, без ровных краёв */
+.arche-wild .card,.arche-wild .fhooks,.arche-wild .fpeople .pcard{border-radius:22px 8px 22px 8px}
+.arche-wild .fpeople .av{border-radius:16px 6px 16px 6px}
+
+/* ─── страница фракции: «Герб» (штучное оформление, пока только Свинцовые клинки) ─── */
+.fherb{max-width:900px;margin:0 auto;padding:56px 24px 70px;text-align:center}
+.fherb-em{width:170px;height:170px;margin:0 auto 20px;border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(circle at 40% 30%,color-mix(in srgb,var(--fc) 40%,var(--ground)),var(--ground) 72%);
+  box-shadow:0 0 0 1px var(--line),0 30px 80px -20px color-mix(in srgb,var(--fc) 60%,transparent)}
+.fherb-em .ico{width:88px;height:88px;color:var(--fc);stroke-width:1.1}
+.fherb .eyebrow{justify-content:center;display:flex}
+.fherb h1{font:900 clamp(36px,5.5vw,58px)/.95 var(--disp);margin:10px 0}
+.fherb-quote{font:500 21px/1.5 var(--body);color:#e5ded4;max-width:600px;margin:0 auto 26px}
+.fherb-quote::before,.fherb-quote::after{content:'"';color:var(--fc);font-family:var(--disp)}
+.fherb-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:40px}
+.fherb-stats div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:9px 16px;font-size:13px;color:var(--mute)}
+.fherb-stats b{display:block;color:var(--text);font:700 15px var(--disp)}
+.fherb-orbit{position:relative;width:460px;max-width:100%;height:460px;margin:0 auto 46px}
+.fherb-orbit::before{content:"";position:absolute;inset:54px;border:1px dashed var(--line);border-radius:50%}
+.fherb-orbit .core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:104px;height:104px;border-radius:50%;background:var(--panel);border:1px solid var(--fc);display:grid;place-items:center;font:700 12px var(--disp);color:var(--fc);text-align:center;padding:8px}
+.fherb-orbit a{position:absolute;width:92px;margin-left:-46px;margin-top:-30px;text-align:center;font-size:12px;color:var(--text)}
+.fherb-orbit a:hover{text-decoration:none}
+.fherb-orbit a .dot{width:42px;height:42px;border-radius:50%;background:var(--panel);border:1px solid var(--oc,var(--line));display:grid;place-items:center;margin:0 auto 6px;color:var(--oc);font:700 13px var(--disp)}
+.fherb-orbit a b{display:block;font-size:12px;font-weight:500}
+.fherb-prose{max-width:620px;margin:0 auto 28px;text-align:left}
+.fherb-prose p{color:#d6cec4;margin:0 0 14px}
+.fherb-hooks{max-width:620px;margin:0 auto 36px;text-align:left;display:flex;flex-direction:column;gap:10px}
+.fherb-hooks div{padding:14px 18px;border:1px solid var(--line);border-radius:14px;background:var(--panel);font-size:14px;position:relative;padding-left:34px}
+.fherb-hooks div::before{content:"";position:absolute;left:16px;top:18px;width:6px;height:6px;border-radius:50%;background:var(--fc)}
+.fherb-folk{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:36px}
+.fherb-folk a{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;width:78px;color:var(--text)}
+.fherb-folk a:hover{text-decoration:none;color:var(--ochre)}
+.fherb-folk .av{width:56px;height:56px;border-radius:50%;object-fit:cover;background:color-mix(in srgb,var(--fc) 25%,var(--panel));border:1px solid var(--line);display:grid;place-items:center;font:700 18px var(--disp);color:var(--fc)}
+.fherb .c-map{max-width:620px;margin:0 auto 30px;text-align:left;border:1px solid var(--line);border-radius:14px}
+.fherb .c-map .map{min-height:260px}
+.fherb-evs{max-width:620px;margin:0 auto;text-align:left;display:flex;flex-direction:column}
+.fherb-evs .fev{grid-template-columns:70px 1fr}
 
 /* ─── хроника: лента ─── */
 .hc{padding:24px 0 40px}
@@ -404,6 +453,9 @@ a.fac::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;backg
   .hc-det{grid-template-columns:1fr}
   .hc-head,.hc-mini,.hc-wrap,.hc-det,.hc-hint{margin-left:14px;margin-right:14px}
   .hc-lanes{width:120px}
+}
+@media (max-width:860px){
+  .fherb-orbit{transform:scale(.78)}
 }
 /* ─── персонаж: галерея, тайна, картинки предметов ─── */
 /* галерея портретов: маленькие превью внизу карточки, выбранное — в охряной рамке */

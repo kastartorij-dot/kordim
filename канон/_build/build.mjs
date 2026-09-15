@@ -17,9 +17,10 @@ const CHECK = process.argv.includes('--check');
 function readBody(relPath) {
   const text = fs.readFileSync(path.join(KANON, relPath), 'utf8');
   const lines = text.split('\n');
-  if (lines[0] !== '---') throw new Error(`${relPath}: нет YAML-шапки`);
+  // редактор мог пересохранить файл с \r\n целиком (в т.ч. разделители шапки) — не зависим от этого
+  if (lines[0].replace(/\r$/, '') !== '---') throw new Error(`${relPath}: нет YAML-шапки`);
   let close = -1;
-  for (let i = 1; i < lines.length; i++) if (lines[i] === '---') { close = i; break; }
+  for (let i = 1; i < lines.length; i++) if (lines[i].replace(/\r$/, '') === '---') { close = i; break; }
   if (close < 0) throw new Error(`${relPath}: не нашёл закрывающую черту шапки`);
   return lines.slice(close + 1).join('\n');
 }

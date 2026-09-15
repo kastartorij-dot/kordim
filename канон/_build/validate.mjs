@@ -22,7 +22,7 @@ const allFiles = [...manifest.части.flatMap(p => p.блоки), ...manifest
 
 let problems = 0;
 for (const rel of allFiles) {
-  const text = fs.readFileSync(path.join(KANON, rel), 'utf8');
+  const text = fs.readFileSync(path.join(KANON, rel), 'utf8').replace(/\r\n/g, '\n');
   const bodyStart = text.indexOf('\n---\n', 4) + 5;
   const front = text.slice(0, bodyStart);
   const body = text.slice(bodyStart);
