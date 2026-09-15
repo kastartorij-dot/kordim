@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кордим · Варианты страницы фракции</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Geologica:wght@300;400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#1a1716;--panel:#221e1c;--raise:#2c2724;--line:#3a3431;
+  --text:#ece5dc;--mute:#9d938a;--ochre:#d9a441;--dusk:#8ea7d6;--ember:#d46a4a;--sage:#9bb383;
+  --disp:'Unbounded',system-ui,sans-serif;--body:'Geologica',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--ground);color:var(--text);font:300 15px/1.6 var(--body)}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--ochre);outline-offset:2px}
+h1,h2,h3{font-family:var(--disp)}
+
+/* переключатель концептов сверху — только для этого сравнения, в вики не попадёт */
+.picker{position:sticky;top:0;z-index:50;background:rgba(20,18,17,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:14px 24px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.picker b{font:900 13px var(--disp);letter-spacing:.03em;margin-right:8px}
+.picker .tabs{display:flex;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px}
+.picker .tabs button{background:none;border:0;padding:8px 16px;border-radius:9px;font-size:13px;color:var(--mute)}
+.picker .tabs button.on{background:var(--raise);color:var(--ochre)}
+.picker .who{margin-left:auto;display:flex;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px}
+.picker .who button{background:none;border:0;padding:8px 14px;border-radius:9px;font-size:13px;color:var(--mute)}
+.picker .who button.on{background:var(--raise);color:var(--text)}
+.note{max-width:760px;margin:16px 24px 0;padding:12px 16px;background:var(--panel);border:1px dashed var(--line);border-radius:12px;font-size:13px;color:#cfc7bd}
+.note b{color:var(--ochre)}
+
+.stage{display:none}
+.stage.on{display:block}
+
+/* ── общие мелочи ── */
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;border:1px solid var(--line);background:var(--raise);font-size:13px;color:var(--text)}
+.eyebrow{font:11px var(--mono);letter-spacing:.1em;color:var(--mute);text-transform:uppercase}
+
+/* ══════════════════════ A. ДЕЛО (папка/досье, вкладки-разделители) ══════════════════════ */
+.docA{max-width:1180px;margin:0 auto;padding:40px 24px 80px}
+.docA .stamp{display:flex;align-items:flex-start;gap:24px;padding:28px 32px;background:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px),
+    linear-gradient(180deg,color-mix(in srgb,var(--fc) 10%,var(--panel)),var(--panel));
+  border:1px solid var(--line);border-radius:4px;position:relative;overflow:hidden}
+.docA .stamp::before{content:"";position:absolute;inset:0;border:10px solid transparent;
+  background:linear-gradient(var(--panel),var(--panel)) padding-box,
+    repeating-linear-gradient(45deg,var(--fc) 0 3px,transparent 3px 9px) border-box;
+  opacity:.35;pointer-events:none}
+.docA .seal{width:84px;height:84px;border-radius:50%;background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--fc) 55%,white 8%),var(--fc) 70%);display:grid;place-items:center;flex:none;box-shadow:0 6px 20px rgba(0,0,0,.4);color:#1a1716}
+.docA .seal svg{width:44px;height:44px}
+.docA .id{font:12px var(--mono);color:var(--mute);letter-spacing:.06em}
+.docA .id b{color:var(--fc)}
+.docA h1{font:900 42px/1 var(--disp);margin:6px 0 8px}
+.docA .kind{font-size:14px;color:#cfc7bd}
+.docA .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+.docA .body{display:grid;grid-template-columns:150px 1fr;gap:0;margin-top:0;border:1px solid var(--line);border-top:0;border-radius:0 0 4px 4px;overflow:hidden}
+.docA .tabs2{background:var(--raise);border-right:1px solid var(--line);padding:10px 0}
+.docA .tabs2 button{display:block;width:100%;text-align:left;background:none;border:0;padding:12px 18px;font:12px var(--mono);letter-spacing:.05em;color:var(--mute);border-left:3px solid transparent}
+.docA .tabs2 button.on{color:var(--text);border-left-color:var(--fc);background:rgba(255,255,255,.03)}
+.docA .pane{padding:26px 30px;background:var(--panel)}
+.docA .pane p{margin:0 0 14px;color:#d6cec4;max-width:70ch}
+.docA .folk{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.docA .folk a{display:flex;gap:10px;align-items:center;padding:10px;background:var(--raise);border:1px solid var(--line);border-radius:10px}
+.docA .folk .av{width:36px;height:36px;border-radius:50%;background:color-mix(in srgb,var(--fc) 30%,var(--raise));display:grid;place-items:center;font:700 14px var(--disp);color:var(--fc);flex:none}
+.docA .hookline{padding:12px 14px;background:var(--raise);border-left:3px solid var(--fc);border-radius:0 8px 8px 0;margin-bottom:10px;font-size:14px}
+.docA .relrow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.docA .relrow:last-child{border-bottom:0}
+.docA .reltag{font:10px var(--mono);text-transform:uppercase;padding:2px 8px;border-radius:5px;background:var(--raise);color:var(--mute);flex:none}
+
+/* ══════════════════════ B. ГЕРБ (крупная эмблема, орбита связей) ══════════════════════ */
+.docB{max-width:980px;margin:0 auto;padding:60px 24px 90px;text-align:center}
+.docB .emblem{width:180px;height:180px;margin:0 auto 22px;border-radius:50%;position:relative;
+  background:radial-gradient(circle at 40% 30%,color-mix(in srgb,var(--fc) 40%,var(--ground)),var(--ground) 72%);
+  display:grid;place-items:center;box-shadow:0 0 0 1px var(--line),0 30px 80px -20px color-mix(in srgb,var(--fc) 60%,transparent)}
+.docB .emblem svg{width:96px;height:96px;color:var(--fc)}
+.docB .eyebrow{justify-content:center;display:flex}
+.docB h1{font:900 clamp(38px,6vw,64px)/.95 var(--disp);margin:10px 0}
+.docB .quote{font:500 22px/1.5 var(--body);color:#e5ded4;max-width:640px;margin:0 auto 30px;position:relative}
+.docB .quote::before,.docB .quote::after{content:'"';color:var(--fc);font-family:var(--disp)}
+.docB .stats{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:44px}
+.docB .stats div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 18px;font-size:13px;color:var(--mute)}
+.docB .stats b{display:block;color:var(--text);font:700 15px var(--disp)}
+
+.docB .orbit{position:relative;width:520px;max-width:100%;height:520px;margin:0 auto 50px}
+.docB .orbit::before{content:"";position:absolute;inset:60px;border:1px dashed var(--line);border-radius:50%}
+.docB .orbit .core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:110px;height:110px;border-radius:50%;background:var(--panel);border:1px solid var(--fc);display:grid;place-items:center;font:700 13px var(--disp);color:var(--fc);text-align:center;padding:8px}
+.docB .orbit a{position:absolute;width:96px;margin-left:-48px;margin-top:-30px;text-align:center;font-size:12px}
+.docB .orbit a .dot{width:44px;height:44px;border-radius:50%;background:var(--panel);border:1px solid var(--oc,var(--line));display:grid;place-items:center;margin:0 auto 6px;color:var(--oc)}
+.docB .orbit a b{display:block;font-size:12px;font-weight:500}
+.docB .orbit a small{color:var(--mute);font-size:10px;text-transform:uppercase;letter-spacing:.05em}
+
+.docB .prose{max-width:620px;margin:0 auto 30px;text-align:left}
+.docB .prose p{color:#d6cec4;margin:0 0 14px}
+.docB .hooks{max-width:620px;margin:0 auto;text-align:left;display:flex;flex-direction:column;gap:10px}
+.docB .hooks div{padding:14px 18px;border:1px solid var(--line);border-radius:14px;background:var(--panel);font-size:14px;position:relative;padding-left:34px}
+.docB .hooks div::before{content:"";position:absolute;left:16px;top:18px;width:6px;height:6px;border-radius:50%;background:var(--fc)}
+.docB .folkline{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:36px 0}
+.docB .folkline a{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;width:76px}
+.docB .folkline .av{width:56px;height:56px;border-radius:50%;background:color-mix(in srgb,var(--fc) 25%,var(--panel));border:1px solid var(--line);display:grid;place-items:center;font:700 18px var(--disp);color:var(--fc)}
+
+/* ══════════════════════ C. АРХЕТИП (общий костяк + грим по типу фракции) ══════════════════════ */
+.docC{max-width:1180px;margin:0 auto;padding:40px 24px 80px}
+.docC .hero{border-radius:20px;padding:34px 36px;position:relative;overflow:hidden;border:1px solid var(--line);margin-bottom:22px}
+.docC .hero .em{position:absolute;right:24px;top:50%;transform:translateY(-50%);opacity:.16;width:150px;height:150px;color:var(--fc)}
+.docC h1{font:900 40px/1 var(--disp);margin:8px 0}
+.docC .grid{display:grid;grid-template-columns:1fr 320px;gap:20px}
+.docC .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin-bottom:16px}
+.docC .card h3{margin:0 0 12px;font:700 12px var(--disp);letter-spacing:.1em;color:var(--mute)}
+.docC .prose p{margin:0 0 12px;color:#d6cec4}
+.docC .folk a{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.docC .folk a:last-child{border-bottom:0}
+.docC .folk .av{width:32px;height:32px;border-radius:50%;background:color-mix(in srgb,var(--fc) 25%,var(--raise));display:grid;place-items:center;font:700 13px var(--disp);color:var(--fc)}
+.docC .hookitem{font-size:14px;color:#d6cec4;padding:8px 0;border-bottom:1px solid var(--line)}
+.docC .hookitem:last-child{border-bottom:0}
+
+/* архетип: официальная фракция — ровные линии, «печатный» вид */
+.arche-official .hero{background:linear-gradient(145deg,var(--panel),color-mix(in srgb,var(--fc) 8%,var(--panel)))}
+.arche-official .card{border-radius:6px}
+.arche-official .hero{border-radius:6px}
+
+/* архетип: подполье/синдикат — резче, темнее, диагональная штриховка */
+.arche-crime .hero{background:
+  repeating-linear-gradient(-45deg,rgba(0,0,0,.25) 0 2px,transparent 2px 14px),
+  linear-gradient(160deg,#100e0d,color-mix(in srgb,var(--fc) 14%,#100e0d))}
+.arche-crime .card{background:#1a1613;border-color:#3a2f28}
+
+/* архетип: дикое/независимое — мягче, органичнее */
+.arche-wild .hero{border-radius:28px 12px 28px 12px;background:radial-gradient(circle at 20% 20%,color-mix(in srgb,var(--fc) 22%,var(--panel)),var(--panel) 70%)}
+.arche-wild .card{border-radius:22px 10px 22px 10px}
+
+@media (max-width:860px){
+  .docA .body{grid-template-columns:1fr}
+  .docA .tabs2{display:flex;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line)}
+  .docA .tabs2 button{border-left:0;border-bottom:3px solid transparent;white-space:nowrap}
+  .docA .tabs2 button.on{border-bottom-color:var(--fc)}
+  .docB .orbit{transform:scale(.72);margin-bottom:0}
+  .docC .grid{grid-template-columns:1fr}
+  .picker{padding:10px 14px}.picker b{width:100%;margin-bottom:6px}
+}
+</style>
+</head>
+<body>
+
+<div class="picker">
+  <b>КОРДИМ · ФРАКЦИИ · три варианта</b>
+  <div class="tabs" id="tabs">
+    <button data-s="a" class="on">A · Дело</button>
+    <button data-s="b">Б · Герб</button>
+    <button data-s="c">В · Архетип</button>
+  </div>
+  <div class="who" id="who">
+    <button data-f="kontora" class="on">Контора Сайдена</button>
+    <button data-f="blades">Свинцовые клинки</button>
+    <button data-f="church">Церковь</button>
+  </div>
+</div>
+<div class="note" id="noteText"></div>
+
+<!-- ═══════ A ═══════ -->
+<section class="stage on" id="stageA"><div class="docA" id="mountA"></div></section>
+<!-- ═══════ B ═══════ -->
+<section class="stage" id="stageB"><div class="docB" id="mountB"></div></section>
+<!-- ═══════ C ═══════ -->
+<section class="stage" id="stageC"><div class="docC" id="mountC"></div></section>
+
+<script>
+/* ─── тестовые данные (сокращённые, только чтобы сравнить вёрстку) ─── */
+const F = {
+  kontora: {
+    name:'Контора Сайдена', kind:'Частная контора · Столица', color:'#d9a441', archetype:'official',
+    guarantee:'собственным карманом', size:'~100 имён в книге',
+    quote:'Товар конторы — не заказ, а слово.',
+    text:['Одна на страну. Сайден ручается перед заказчиком за исполнителя и перед исполнителем за оплату. Власти и своих людей нет — есть книга имён.',
+      'Десятая часть с заказчика, половина вперёд в запертом ящике, договор — хирограф. Жетон — именной знак поручительства. Убийств контора не пишет.'],
+    hooks:['Наследника нет: вместе с Сайденом кончится единственная в стране вещь, работающая на слове.','Седрик помнит всё — в том числе пустой ответ Магне Рохт по делу Дюра.'],
+    people:[['Брок Сайден','держит контору'],['Марра Холт','связь и слухи'],['Седрик «Архив»','помнит всё']],
+    rels:[['Совет','союз'],['Люди Кесса','союз'],['Отряд «Лихо»','спор'],['Охотники','спор']],
+    icon:'<path d="M5 3h14v8c-2 1.5-4-1.5-7 0s-5-1.5-7 0z"/><path d="M5 14c2-1.5 4 1.5 7 0s5 1.5 7 0v7H5z"/>'
+  },
+  blades: {
+    name:'Свинцовые клинки', kind:'Пираты · Кладбище китов', color:'#8ea7b8', archetype:'wild',
+    guarantee:null, size:'~120 человек, 6 кораблей',
+    quote:'После заката никто не идёт к воде.',
+    text:['Существуют около четырёх лет. Разведчик неделями пасёт маршрут, подход на вёслах в тумане, вспышки и дым вместо пушек, короткий бой.',
+      'Рыбаков не трогают никогда. Мелкого торговца предупреждают. Суда домов и синдикатов берут без переговоров.'],
+    hooks:['Правило ночи нарушили трое — не вернулся никто.','Торн знает, кто такая Грейс, и сохранил это при себе.'],
+    people:[['Седой','капитан'],['Торн','правая рука']],
+    rels:[['Мокрые ножи','спор']],
+    icon:'<path d="M12 2v17M12 3l8 13h-8M12 6 5 16h7"/><path d="M3 19h18l-2 3H5z"/>'
+  },
+  church: {
+    name:'Церковь', kind:'Больницы, приюты, архивы', color:'#cfc6b4', archetype:'official',
+    guarantee:null, size:null,
+    quote:'Крещение — единственный документ, что человек существовал.',
+    text:['Разведсеть через исповеди. Архивы крещений, венчаний и смертей — единственное официальное подтверждение, что человек жил.',
+      'Архиепископ Бран публично осуждает насилие и табак — и финансирует одно, курит другое.'],
+    hooks:['Публичный скандал разрушает власть Церкви мгновенно.','Самоубийц не хоронят на освящённой земле — рычаг на семьи.'],
+    people:[['Архиепископ Бран','глава']],
+    rels:[['Совет','союз'],['Ложа','спор']],
+    icon:'<path d="M12 3v2M7 17v-6a5 5 0 0 1 10 0v6l2 2H5z"/><path d="M10 21h4"/>'
+  }
+};
+let cur = 'a', who = 'kontora';
+
+const NOTES = {
+  a:'<b>Вариант А · «Дело».</b> Страница выглядит как открытая карточка дела: сургучная печать фракции, номер-метка, слева вкладки-разделители вместо простого скролла (Суть / Люди / Крючки / Связи). Подходит любой фракции, но особенно официальным и «бумажным» — конторе, Совету, Церкви, Коллегии.',
+  b:'<b>Вариант Б · «Герб».</b> Крупная эмблема и цитата в духе легенды, связи — не список, а орбита вокруг герба. Драматичнее и требует хорошей картинки герба/баннера, чтобы раскрыться; сейчас работает и на одной иконке. Хорош для фракций с мифом вокруг них — Клинки, Ложа, Орден, Кесс.',
+  c:'<b>Вариант В · «Архетип».</b> Костяк как в текущей вики, но у каждого типа фракции — свой грим по CSS: у официальных ровные линии и «печатный» вид, у подполья — резче и с диагональной штриховкой, у дикого/независимого — мягче, органичные скруглённые углы. Дешевле всего внедрить на все 16 фракций сразу, без индивидуального рисунка под каждую.'
+};
+
+function renderA(f){
+  return `<div class="stamp" style="--fc:${f.color}">
+    <div class="seal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">${f.icon}</svg></div>
+    <div><div class="id">ДЕЛО № <b>${f.name.length}${f.color.slice(1,4).toUpperCase()}</b> · открыто, действующее</div>
+      <h1>${f.name}</h1><div class="kind">${f.kind}</div>
+      <div class="meta">${f.guarantee?'<span class="chip">ручается '+f.guarantee+'</span>':''}${f.size?'<span class="chip">'+f.size+'</span>':''}</div>
+    </div></div>
+  <div class="body" style="--fc:${f.color}">
+    <div class="tabs2" id="tabsA">
+      <button class="on" data-t="suit">СУТЬ</button>
+      <button data-t="folk">ЛЮДИ</button>
+      <button data-t="hooks">КРЮЧКИ</button>
+      <button data-t="rel">СВЯЗИ</button>
+    </div>
+    <div class="pane" id="paneA"></div>
+  </div>`;
+}
+function paneA(f, t){
+  if (t==='folk') return `<div class="folk">${f.people.map(([n,r])=>`<a href="#"><span class="av">${n[0]}</span><div><b style="display:block;font-size:13px">${n}</b><small style="color:var(--mute)">${r}</small></div></a>`).join('')}</div>`;
+  if (t==='hooks') return f.hooks.map(h=>`<div class="hookline">${h}</div>`).join('');
+  if (t==='rel') return f.rels.map(([n,ty])=>`<div class="relrow"><span class="reltag">${ty}</span><b>${n}</b></div>`).join('');
+  return f.text.map(p=>`<p>${p}</p>`).join('');
+}
+function mountAt(){
+  const root = document.getElementById('mountA');
+  root.innerHTML = renderA(F[who]);
+  let t = 'suit';
+  const paint = () => { document.getElementById('paneA').innerHTML = paneA(F[who], t); };
+  paint();
+  document.getElementById('tabsA').onclick = e => {
+    const b = e.target.closest('button'); if(!b) return;
+    t = b.dataset.t;
+    [...document.getElementById('tabsA').children].forEach(x=>x.classList.toggle('on', x===b));
+    paint();
+  };
+}
+
+function renderB(f){
+  const rels = f.rels;
+  const R = 210;
+  const items = rels.map((r,i)=>{
+    const ang = (i/(rels.length||1))*Math.PI*2 - Math.PI/2;
+    const x = 260 + Math.cos(ang)*R, y = 260 + Math.sin(ang)*R;
+    return `<a style="left:${x}px;top:${y}px;--oc:var(--mute)"><span class="dot">${r[0][0]}</span><b>${r[0]}</b><small>${r[1]}</small></a>`;
+  }).join('');
+  return `<div style="--fc:${f.color}">
+    <div class="emblem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">${f.icon}</svg></div>
+    <div class="eyebrow">ФРАКЦИЯ · ${f.kind}</div>
+    <h1>${f.name}</h1>
+    <div class="quote">${f.quote}</div>
+    <div class="stats">${f.guarantee?`<div><b>${f.guarantee}</b>ручается</div>`:''}${f.size?`<div><b>${f.size.split(',')[0]}</b>сила</div>`:''}<div><b>${f.rels.length}</b>связей</div></div>
+    ${rels.length?`<div class="orbit"><div class="core">${f.name}</div>${items}</div>`:''}
+    <div class="prose">${f.text.map(p=>`<p>${p}</p>`).join('')}</div>
+    <div class="hooks">${f.hooks.map(h=>`<div>${h}</div>`).join('')}</div>
+    <div class="folkline">${f.people.map(([n])=>`<a><span class="av">${n[0]}</span>${n}</a>`).join('')}</div>
+  </div>`;
+}
+
+function renderC(f){
+  return `<div class="arche-${f.archetype}" style="--fc:${f.color}">
+    <div class="hero"><div class="eyebrow">ФРАКЦИЯ · ${f.kind}</div><h1>${f.name}</h1>
+      <div class="meta">${f.guarantee?'<span class="chip">ручается '+f.guarantee+'</span>':''}${f.size?'<span class="chip">'+f.size+'</span>':''}</div>
+      <svg class="em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">${f.icon}</svg>
+    </div>
+    <div class="grid">
+      <div><div class="card prose">${f.text.map(p=>`<p>${p}</p>`).join('')}</div>
+        <div class="card"><h3>КРЮЧКИ</h3>${f.hooks.map(h=>`<div class="hookitem">${h}</div>`).join('')}</div></div>
+      <div><div class="card folk"><h3>ЛЮДИ</h3>${f.people.map(([n,r])=>`<a><span class="av">${n[0]}</span><div><b style="font-size:13px;display:block">${n}</b><small style="color:var(--mute)">${r}</small></div></a>`).join('')}</div>
+        <div class="card"><h3>СВЯЗИ</h3>${f.rels.map(([n,ty])=>`<div class="hookitem"><span style="font:10px var(--mono);text-transform:uppercase;color:var(--mute)">${ty}</span> ${n}</div>`).join('')}</div></div>
+    </div>
+  </div>`;
+}
+
+function paint(){
+  document.getElementById('noteText').innerHTML = NOTES[cur];
+  ['a','b','c'].forEach(s => document.getElementById('stage'+s.toUpperCase()).classList.toggle('on', s===cur));
+  if (cur==='a') mountAt();
+  if (cur==='b') document.getElementById('mountB').innerHTML = renderB(F[who]);
+  if (cur==='c') document.getElementById('mountC').innerHTML = renderC(F[who]);
+}
+document.getElementById('tabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; cur=b.dataset.s; [...document.getElementById('tabs').children].forEach(x=>x.classList.toggle('on',x===b)); paint(); };
+document.getElementById('who').onclick = e => { const b=e.target.closest('button'); if(!b) return; who=b.dataset.f; [...document.getElementById('who').children].forEach(x=>x.classList.toggle('on',x===b)); paint(); };
+paint();
+</script>
+</body>
+</html>
