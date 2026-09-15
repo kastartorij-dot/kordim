@@ -17,7 +17,9 @@ import * as atlas from './views/atlas.js';
 import * as chronicle from './views/chronicle.js';
 import * as world from './views/world.js';
 import * as questions from './views/questions.js';
+import * as canon from './views/canon.js';
 import * as game from './views/game.js';
+import { CANON } from '../data/canon.js';
 
 /* нет файла портрета — вместо картинки буква имени */
 window.kordimNoImg = img => { const s = document.createElement('span'); s.className = img.className; s.textContent = img.dataset.initial || ''; img.replaceWith(s); };
@@ -30,6 +32,7 @@ const NAV = [
   ['map', 'Карта', atlas],
   ['chronicle', 'Хроника', chronicle],
   ['world', 'Мир', world],
+  ['canon', 'Канон', canon],
   ['questions', 'Вопросы', questions],
   ['game', 'Игра', game]
 ];
@@ -64,7 +67,8 @@ const INDEX = [
   ...PLACES.map(p => ({t:p.name, k:'место', h:'#/place/' + p.id})),
   ...FACTIONS.map(f => ({t:f.name, k:'фракция', h:'#/faction/' + f.id})),
   ...ARTICLES.map(a => ({t:a.title, k:'мир', h:'#/world/' + a.id})),
-  ...EVENTS.map(e => ({t:e.y + ' — ' + e.t, k:'хроника', h:'#/chronicle'}))
+  ...EVENTS.map(e => ({t:e.y + ' — ' + e.t, k:'хроника', h:'#/chronicle'})),
+  ...CANON.записи.map(r => ({t:r.title, k:'канон', h:'#/canon'}))
 ];
 const pal = $('#pal'), inp = $('#palIn'), res = $('#palRes');
 let hits = [], at = 0;
