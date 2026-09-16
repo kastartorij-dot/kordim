@@ -33,7 +33,7 @@ const NAV = [
   ['factions', 'Фракции', factions],
   ['map', 'Карта', atlas],
   ['chronicle', 'Хроника', chronicle],
-  ['scenes', 'Сцены', scenes],
+  ['scenes', 'Арки', scenes],
   ['world', 'Мир', world],
   ['canon', 'Канон', canon],
   ['questions', 'Вопросы', questions],
@@ -74,7 +74,7 @@ const INDEX = [
   ...FACTIONS.map(f => ({t:f.name, k:'фракция', h:'#/faction/' + f.id})),
   ...ARTICLES.map(a => ({t:a.title, k:'мир', h:'#/world/' + a.id})),
   ...EVENTS.map((e, i) => ({t:e.y + ' — ' + e.h, s:e.y + ' ' + e.h + ' ' + e.t, k:'хроника', h:'#/chronicle/' + i})),
-  ...SCENES.map(sc => ({t:sc.title, s:sc.title + ' ' + (LINES[sc.arc] || ''), k:'сцена', h:'#/scenes/' + sc.arc})),
+  ...SCENES.map(sc => ({t:sc.title, s:sc.title + ' ' + (LINES[sc.arc] || ''), k:'арка', h:'#/scenes/' + sc.arc})),
   /* весь канон, не только лорбук: герои, правила ведения и приложения искались мимо */
   ...['герои', 'правила', 'записи', 'приложения'].flatMap(g => CANON[g].map(r =>
     ({t:r.title, s:r.title + ' ' + (r.ключи || []).join(' '), k:'канон', h:'#/canon/' + encodeURIComponent(canon.canonKey(g, r))})))
