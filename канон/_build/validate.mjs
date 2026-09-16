@@ -1,5 +1,8 @@
 // Проверяет блоки канона на снятые вещи (Гильдия, гримдарк и т.п. из канон/запреты.txt)
-// и на пустые ключи у записей ЧАСТИ III. Не трогает файлы, только печатает отчёт.
+// и на пустые ключи у записей ЧАСТИ III. Тем же списком проверяет и проза/*.md — грубые
+// прямые нарушения канона в тексте сцен (это не полная сверка, только явные формулировки
+// из чёрного списка; тонкие противоречия — отдельно, глазами). Не трогает файлы, только
+// печатает отчёт.
 //
 // node канон/_build/validate.mjs
 
@@ -36,6 +39,23 @@ for (const rel of allFiles) {
   if (/^id: \d+/m.test(front) && /ключи:\s*\[\]/.test(front)) {
     console.log(`⚠ ${rel}: пустые ключи`);
     problems++;
+  }
+}
+
+// проза/*.md — та же проверка на запреты, без ключей (это не канон, ключи не нужны)
+const PROZA = path.join(ROOT, 'проза');
+if (fs.existsSync(PROZA)) {
+  for (const file of fs.readdirSync(PROZA).filter(f => f.endsWith('.md'))) {
+    const text = fs.readFileSync(path.join(PROZA, file), 'utf8').replace(/^﻿/, '').replace(/\r\n/g, '\n');
+    // если есть шапка (---...---), проверяем только тело — шапка сама по себе не текст сцены
+    const hasFront = text.startsWith('---\n');
+    const body = hasFront ? text.slice(text.indexOf('\n---\n', 4) + 5) : text;
+    for (const term of bans) {
+      if (body.includes(term)) {
+        console.log(`⚠ проза/${file}: снятая формулировка «${term}»`);
+        problems++;
+      }
+    }
   }
 }
 

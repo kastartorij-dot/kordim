@@ -10,6 +10,18 @@ export const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&l
 export const IMG = '../img/';
 export const MAP_IMG = IMG + 'maps/kordim.jpg';
 
+/* лёгкий рендер прозы: пустая строка — граница абзаца, "## текст" — заголовок сцены,
+   одиночное "---" — разделитель сцены, **жирный** — акцент. Использует раздел «Сцены». */
+export function proseHTML(text){
+  return text.split(/\n\s*\n/).map(block => {
+    block = block.trim();
+    if (!block) return '';
+    if (block.startsWith('## ')) return '<h3 class="scene-h">' + esc(block.slice(3).trim()) + '</h3>';
+    if (block === '---') return '<hr class="scene-div">';
+    return '<p>' + esc(block).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>') + '</p>';
+  }).join('');
+}
+
 export function personChip(id){
   const p = personById(id); if (!p) return '';
   /* портрет ищется и по имени файла faces/<id>.jpg: положил файл — он появился */

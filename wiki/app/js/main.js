@@ -4,7 +4,7 @@ import { PEOPLE } from '../data/people.js';
 import { PLACES } from '../data/places.js';
 import { FACTIONS } from '../data/factions.js';
 import { ARTICLES } from '../data/articles.js';
-import { EVENTS } from '../data/events.js';
+import { EVENTS, LINES } from '../data/events.js';
 
 import * as home from './views/home.js';
 import * as people from './views/people.js';
@@ -15,11 +15,13 @@ import * as factions from './views/factions.js';
 import * as faction from './views/faction.js';
 import * as atlas from './views/atlas.js';
 import * as chronicle from './views/chronicle.js';
+import * as scenes from './views/scenes.js';
 import * as world from './views/world.js';
 import * as questions from './views/questions.js';
 import * as canon from './views/canon.js';
 import * as game from './views/game.js';
 import { CANON } from '../data/canon.js';
+import { SCENES } from '../data/scenes.js';
 
 /* нет файла портрета — вместо картинки буква имени */
 window.kordimNoImg = img => { const s = document.createElement('span'); s.className = img.className; s.textContent = img.dataset.initial || ''; img.replaceWith(s); };
@@ -31,6 +33,7 @@ const NAV = [
   ['factions', 'Фракции', factions],
   ['map', 'Карта', atlas],
   ['chronicle', 'Хроника', chronicle],
+  ['scenes', 'Сцены', scenes],
   ['world', 'Мир', world],
   ['canon', 'Канон', canon],
   ['questions', 'Вопросы', questions],
@@ -71,6 +74,7 @@ const INDEX = [
   ...FACTIONS.map(f => ({t:f.name, k:'фракция', h:'#/faction/' + f.id})),
   ...ARTICLES.map(a => ({t:a.title, k:'мир', h:'#/world/' + a.id})),
   ...EVENTS.map((e, i) => ({t:e.y + ' — ' + e.h, s:e.y + ' ' + e.h + ' ' + e.t, k:'хроника', h:'#/chronicle/' + i})),
+  ...SCENES.map(sc => ({t:sc.title, s:sc.title + ' ' + (LINES[sc.arc] || ''), k:'сцена', h:'#/scenes/' + sc.arc})),
   /* весь канон, не только лорбук: герои, правила ведения и приложения искались мимо */
   ...['герои', 'правила', 'записи', 'приложения'].flatMap(g => CANON[g].map(r =>
     ({t:r.title, s:r.title + ' ' + (r.ключи || []).join(' '), k:'канон', h:'#/canon/' + encodeURIComponent(canon.canonKey(g, r))})))

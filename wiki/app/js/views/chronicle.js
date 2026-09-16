@@ -3,10 +3,13 @@
    «Полная лента» — горизонтальная лента с дорожками по линиям сюжета: тянется, листается, проигрывается. */
 import { $, $$, esc, IMG, personChip, placeChip } from '../ui.js';
 import { EVENTS, LINES, LINE_COLOR, ERAS } from '../../data/events.js';
+import { SCENES } from '../../data/scenes.js';
 
 const names = {...LINES, world:'Мир'};
 const color = l => LINE_COLOR[l] || LINE_COLOR.world;
 const linesOf = e => e.lines.length ? e.lines : ['world'];
+const sceneFor = e => SCENES.find(s => s.event === e.slug);
+const sceneLink = e => { const s = sceneFor(e); return s ? '<a class="btn more" href="#/scenes/' + s.arc + '">📖 читать сцену</a>' : ''; };
 
 export function render(root, [param]){
   let mode = null;
@@ -62,7 +65,7 @@ function keyView(wrap, openFull){
     card.innerHTML = '<div class="im" style="' + bg + '"></div><div class="tx"><div class="yr">' + esc(e.y) + '</div><h3>' + esc(e.h) + '</h3><p>' + esc(e.t) + '</p>' +
       '<div>' + linesOf(e).map(l => '<span class="ltag" style="--c:' + color(l) + '">' + esc(names[l]) + '</span>').join('') + '</div>' +
       '<div style="margin-top:4px">' + (e.people || []).slice(0, 4).map(personChip).join('') + '</div>' +
-      '<button class="btn more" data-full="' + i + '">В полной ленте →</button></div>';
+      '<div class="scene-links">' + sceneLink(e) + '<button class="btn more" data-full="' + i + '">В полной ленте →</button></div></div>';
     card.hidden = false; card.classList.remove('pop'); void card.offsetWidth; card.classList.add('pop');
     $$('.ks-ev', wrap).forEach(b => b.classList.toggle('on', +b.dataset.k === k));
   }
@@ -143,7 +146,7 @@ function full(wrap, ctrl, param){
     $$('.hc-yr', wrap).forEach(v => v.classList.toggle('on', +v.dataset.yi === i));
     det.innerHTML = '<div class="y">' + esc(e.y) + '</div><div><h2>' + esc(e.h) + '</h2><p>' + esc(e.t) + '</p>' +
       '<div>' + linesOf(e).map(l => '<button class="ltag" data-line="' + l + '" style="--c:' + color(l) + '">' + esc(names[l]) + '</button>').join('') + '</div>' +
-      '<div style="margin-top:4px">' + (e.people || []).map(personChip).join('') + (e.place ? placeChip(e.place) : '') + '</div></div>' +
+      '<div style="margin-top:4px">' + (e.people || []).map(personChip).join('') + (e.place ? placeChip(e.place) : '') + '</div>' + sceneLink(e) + '</div>' +
       '<div class="hc-nav"><button class="btn" data-go="-1"' + (i ? '' : ' disabled') + '>←</button><span>' + (i + 1) + ' / ' + EVENTS.length + '</span><button class="btn" data-go="1"' + (i < EVENTS.length - 1 ? '' : ' disabled') + '>→</button></div>';
     det.classList.remove('swap'); void det.offsetWidth; det.classList.add('swap');
     sc.scrollTo({left:xs[i] - sc.clientWidth / 2 + 80, behavior:smooth ? 'smooth' : 'auto'});

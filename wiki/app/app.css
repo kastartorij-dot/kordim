@@ -260,6 +260,23 @@ body[data-season="autumn"] .rain{opacity:.55}
 .ev .tags{margin-top:6px}
 .ev.dim{opacity:.25}
 
+/* ─── сцены ─── */
+.scene-arcs{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.scene-arc{padding:18px;border-top:3px solid var(--c);color:var(--text)}
+.scene-arc:hover{text-decoration:none;border-color:var(--c);transform:translateY(-2px)}
+.scene-arc b{display:block;font:700 18px var(--disp);margin-bottom:6px}
+.scene-arc span{display:block;color:var(--mute);font-size:13px}
+.scene-arc .badge{margin-top:8px;display:inline-block}
+.scene-page{max-width:820px}
+.scene-chap{margin:40px 0 18px;padding-top:28px;border-top:2px solid var(--c,var(--line))}
+.scene-chap:first-child{margin-top:0;padding-top:0;border-top:0}
+.scene-chap h2{font:900 26px var(--disp);margin:0 0 10px}
+.scene-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:6px}
+.scene-words{margin-left:auto;font:11px var(--mono);color:var(--mute)}
+.scene-h{font:700 15px var(--disp);letter-spacing:.03em;color:var(--ochre);margin:30px 0 12px}
+.scene-div{border:0;border-top:1px dashed var(--line);margin:26px 0}
+.scene-links{display:flex;gap:10px;align-items:center;margin-top:10px}
+
 /* ─── мир ─── */
 .world-grid{display:grid;grid-template-columns:240px 1fr;gap:30px}
 .toc{position:sticky;top:calc(var(--top) + 20px);align-self:start;display:grid;gap:2px}
