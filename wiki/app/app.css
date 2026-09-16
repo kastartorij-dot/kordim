@@ -81,9 +81,9 @@ a.chip:hover{border-color:var(--dusk);text-decoration:none}
 /* ─── персонаж: «Панели» ─── */
 .frame{display:grid;gap:var(--gap);padding:var(--gap) 24px 30px;grid-template-columns:300px 1fr 1fr;grid-template-rows:auto auto auto 1fr;
   grid-template-areas:"photo name  desc" "photo story desc" "stats time  map" "items talk  map"}
-.c-time{grid-area:time}.c-name{grid-area:name}.c-story{grid-area:story}.c-stats{grid-area:stats}
-.c-photo{grid-area:photo}.c-map{grid-area:map}.c-talk{grid-area:talk}.c-items{grid-area:items}
-.c-desc{grid-area:desc}.c-stats{align-self:start}.c-time{align-self:start}
+.frame .c-time{grid-area:time}.frame .c-name{grid-area:name}.frame .c-story{grid-area:story}.frame .c-stats{grid-area:stats}
+.frame .c-photo{grid-area:photo}.frame .c-map{grid-area:map}.frame .c-talk{grid-area:talk}.frame .c-items{grid-area:items}
+.frame .c-desc{grid-area:desc}.frame .c-stats{align-self:start}.frame .c-time{align-self:start}
 .c-name{padding:4px 2px}
 .bigname{font:900 clamp(36px,4vw,64px)/.9 var(--disp);letter-spacing:-.03em;margin:0;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
 .bigname span{display:block;font:500 12px var(--disp);letter-spacing:.2em;color:var(--ochre);margin-top:10px;flex-basis:100%}
