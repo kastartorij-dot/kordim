@@ -28,11 +28,8 @@
       "name": "faces",
       "runtimeExecutable": "python",
       "runtimeArgs": [
-        "-m",
-        "http.server",
-        "8793",
-        "--directory",
-        "персонажи"
+        "персонажи/_serve.py",
+        "8793"
       ],
       "port": 8793
     }
