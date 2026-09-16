@@ -14,7 +14,7 @@ export function render(root){
       <div class="seg" role="group" aria-label="Способ">${Object.entries(MODE_LABEL).map(([k, l]) => '<button data-m="' + k + '" aria-pressed="' + (k === 'horse') + '">' + l[0].toUpperCase() + l.slice(1) + '</button>').join('')}</div>
     </div>
     <section class="float atlas-card" id="card"></section>
-    <div class="float atlas-hint">тяни мышью · колесо — масштаб · нажми тракт или город</div>
+    <div class="float atlas-hint">тяни карту · колесо — масштаб · нажми тракт или город</div>
   </div>`;
 
   const atlas = $('#atlas', root), world = $('#world', root), map = $('#map', root), svg = $('svg', map);

@@ -11,6 +11,9 @@ const GROUPS = [
   { k: 'приложения', label: 'Приложения', c: 'var(--dusk)' },
 ];
 
+/* ключ блока для ссылки из поиска: у приложений в шапках нет id — берём заголовок */
+export const canonKey = (group, item) => group + '-' + String(item.id || item.title).toLowerCase().replace(/\s+/g, '-');
+
 const STATUS = {
   'канон': { label: 'канон', c: 'var(--sage)' },
   'открытый вопрос': { label: 'открытый вопрос', c: 'var(--ember)' },
@@ -31,7 +34,7 @@ function md(text) {
     .join('');
 }
 
-export function render(root) {
+export function render(root, [param]) {
   const all = GROUPS.flatMap(g => CANON[g.k].map(item => ({ ...item, группа: g.k })));
   let group = 'все';
   let query = '';
@@ -63,7 +66,7 @@ export function render(root) {
   function card(item) {
     const st = STATUS[item.статус] || STATUS['канон'];
     const gLabel = GROUPS.find(g => g.k === item.группа)?.label || item.группа;
-    return `<article class="canon-item" data-id="${esc(item.группа)}-${esc(item.id)}">
+    return `<article class="canon-item" data-id="${esc(canonKey(item.группа, item))}">
       <button class="canon-h">
         ${typeof item.id === 'number' || /^\d+$/.test(item.id) ? `<span class="canon-num">${esc(item.id)}</span>` : ''}
         <h3>${esc(item.title)}</h3>
@@ -84,6 +87,16 @@ export function render(root) {
       : '<div class="empty">Ничего не нашлось.</div>';
   }
   paint();
+
+  /* пришли по ссылке из поиска — раскрыть нужный блок и подвести к нему */
+  if (param) {
+    const art = $(`.canon-item[data-id="${param}"]`, root);
+    if (art) {
+      $('.canon-body', art).hidden = false;
+      art.classList.add('open');
+      requestAnimationFrame(() => art.scrollIntoView({ block: 'center' }));
+    }
+  }
 
   grid.addEventListener('click', e => {
     const h = e.target.closest('.canon-h');

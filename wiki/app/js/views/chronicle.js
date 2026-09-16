@@ -49,7 +49,7 @@ function keyView(wrap, openFull){
         '<span class="ks-dot"></span><span class="ks-yr">' + esc(e.y) + '</span><span class="ks-h">' + esc(e.h) + '</span></button>').join('')}
       <div class="ks-card" id="card" hidden></div>
     </div></div>
-    <p class="hc-hint">наведи на событие — всплывёт карточка · нажми — закрепить · ← → листать · в «Полной ленте» все ${EVENTS.length} событий по линиям</p>`;
+    <p class="hc-hint">наведи или нажми на событие — всплывёт карточка · ← → листать · в «Полной ленте» все ${EVENTS.length} событий по линиям</p>`;
   history.replaceState(null, '', '#/chronicle');
 
   const card = $('#card', wrap);
@@ -125,7 +125,7 @@ function full(wrap, ctrl, param){
       </div></div>
     </div>
     <div class="card hc-det" id="det"></div>
-    <p class="hc-hint">тяни ленту мышью · колесо листает · ← → по событиям · нажми линию слева, чтобы оставить только её</p>`;
+    <p class="hc-hint">тяни ленту · колесо листает · ← → по событиям · нажми линию слева, чтобы оставить только её</p>`;
 
   const sc = $('#sc', wrap), det = $('#det', wrap), mini = $('#mini', wrap), win = $('#win', wrap), playBtn = $('#play', ctrl);
   let cur = nowIdx, line = null, play = null;

@@ -1,5 +1,5 @@
 /* Мир: статьи с шапкой, крупными цифрами, карточками разделов и интерактивными вставками. */
-import { $, $$, esc, IMG, SPEED, MODE_LABEL } from '../ui.js';
+import { $, $$, esc, IMG, SPEED, MODE_LABEL, plural } from '../ui.js';
 import { ARTICLES } from '../../data/articles.js';
 import { GOODS } from '../../data/goods.js';
 import { icon } from '../icons.js';
@@ -27,7 +27,6 @@ export function render(root, [id]){
 }
 
 const n1 = v => v.toLocaleString('ru-RU', {maximumFractionDigits:1});
-const plural = (n, f) => { const a = Math.abs(n) % 100, b = a % 10; return a > 10 && a < 20 ? f[2] : b > 1 && b < 5 ? f[1] : b === 1 ? f[0] : f[2]; };
 const seg = (name, pairs, on) => '<div class="seg" role="group">' + pairs.map(([k, l]) => '<button data-' + name + '="' + k + '" aria-pressed="' + (k === on) + '">' + l + '</button>').join('') + '</div>';
 function bindSeg(box, name, cb){
   $$('[data-' + name + ']', box).forEach(b => b.onclick = () => { $$('[data-' + name + ']', box).forEach(x => x.setAttribute('aria-pressed', x === b)); cb(b.dataset[name]); });
