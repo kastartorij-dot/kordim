@@ -7,6 +7,7 @@ export const SCENES = [
     "status": "черновик",
     "event": "kerg-yard",
     "arc": "likho",
+    "line": "likho",
     "s": 1024.7,
     "people": [
       "rask",
@@ -24,7 +25,8 @@ export const SCENES = [
     "title": "Дело Обрана Дюра",
     "status": "черновик",
     "event": "dur-yard",
-    "arc": "grace",
+    "arc": "dur-yard",
+    "line": "grace",
     "s": 1025.3,
     "people": [
       "grace",
@@ -41,7 +43,8 @@ export const SCENES = [
     "title": "Как появилась Нора",
     "status": "черновик",
     "event": "nora",
-    "arc": "grace",
+    "arc": "nora",
+    "line": "grace",
     "s": 1026.2,
     "people": [
       "grace",
