@@ -18,9 +18,13 @@ button,select,input{font:inherit;color:inherit}
 
 /* ─── шапка ─── */
 .top{position:sticky;top:0;z-index:50;height:var(--top);display:flex;align-items:center;gap:18px;padding:0 22px;background:rgba(26,23,22,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.brandwrap{display:flex;flex-direction:column;gap:3px}
 .brand{font:900 15px var(--disp);letter-spacing:.05em;color:var(--text);white-space:nowrap}
 .brand:hover{text-decoration:none}
 .brand small{font:11px var(--mono);letter-spacing:0;color:var(--mute);margin-left:6px}
+.backbtn{all:unset;cursor:pointer;font:11px var(--mono);color:var(--mute);white-space:nowrap}
+.backbtn:hover{color:var(--ochre)}
+.backbtn:disabled{opacity:.4;cursor:default;pointer-events:none}
 .nav{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
 .nav a{padding:7px 11px;border-radius:8px;color:var(--mute);font-weight:400;white-space:nowrap}
 .nav a:hover{color:var(--text);text-decoration:none;background:var(--panel)}

@@ -45,6 +45,20 @@ $('#nav').innerHTML = NAV.map(([k, label]) => '<a href="#/' + k + '" data-k="' +
 
 const view = $('#view');
 let cleanup = null;
+
+/* кнопка «назад» — свой стек посещённых хэшей, а не history.length (та считает всю вкладку) */
+const backBtn = $('#backBtn');
+let navStack = [location.hash || '#/'];
+let goingBack = false;
+backBtn.onclick = () => {
+  if (navStack.length < 2) return;
+  navStack.pop();
+  goingBack = true;
+  location.hash = navStack[navStack.length - 1];
+};
+function updateBackBtn(){ backBtn.disabled = navStack.length < 2; }
+updateBackBtn();
+
 function route(){
   const parts = (location.hash.replace(/^#\/?/, '') || '').split('/').filter(Boolean).map(decodeURIComponent);
   const [head = '', ...rest] = parts;
@@ -63,6 +77,9 @@ function route(){
   if (!rest.length || head !== 'world') scrollTo(0, 0);
   const title = view.querySelector('[data-title]');
   document.title = (title ? title.dataset.title + ' · ' : '') + 'Кордим';
+  if (goingBack){ goingBack = false; }
+  else if (navStack[navStack.length - 1] !== location.hash){ navStack.push(location.hash); }
+  updateBackBtn();
 }
 addEventListener('hashchange', route);
 route();
