@@ -13,6 +13,18 @@
       "port": 8791
     },
     {
+      "name": "wiki-py",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8791",
+        "--directory",
+        "wiki"
+      ],
+      "port": 8791
+    },
+    {
       "name": "faces",
       "runtimeExecutable": "python",
       "runtimeArgs": [

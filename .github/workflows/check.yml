@@ -1,0 +1,29 @@
+name: Проверка мира
+
+# Гоняется на каждый push и на каждый pull request: мастер канона собран из
+# актуальных блоков, снятые формулировки не всплыли, данные вики не ссылаются
+# на несуществующих людей/места. Ничего не чинит и не публикует — только
+# сообщает "зелёным" или "красным", красным — со строкой, где смотреть.
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Канон собирается из блоков без расхождений
+        run: node канон/_build/build.mjs --check
+
+      - name: В блоках нет снятых формулировок
+        run: node канон/_build/validate.mjs
+
+      - name: В данных вики нет битых ссылок
+        run: node канон/_build/check-data.mjs
