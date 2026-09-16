@@ -288,12 +288,37 @@ body[data-season="autumn"] .rain{opacity:.55}
 .pres a:hover,.pres a.on{background:var(--raise);text-decoration:none}
 .pres small{margin-left:auto;color:var(--mute);font:12px var(--mono)}
 
+/* до 900px строка шапки не вмещает и бренд, и разделы, и поиск: разделы схлопывались
+   в ноль ширины и с телефона были недоступны. Переносим их отдельной полосой вниз. */
+@media (max-width:900px){
+  :root{--top:102px}
+  .top{flex-wrap:wrap;align-content:center;gap:6px 14px;padding:0 14px}
+  .brand{order:1}
+  .findbtn{order:2;margin-left:auto}
+  .findbtn kbd{display:none}
+  .nav{order:3;flex-basis:100%;width:100%;margin:0 -14px;padding:0 14px;
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 14px,#000 calc(100% - 14px),transparent);
+    mask-image:linear-gradient(90deg,transparent,#000 14px,#000 calc(100% - 14px),transparent)}
+  .nav a{padding:6px 10px}
+  .page{padding:20px 16px 50px}
+}
+
 @media (max-width:1100px){
   .frame,.short,.place,.home-hero,.row2,.qgrid,.world-grid{grid-template-columns:1fr}
   .frame{grid-template-rows:none;grid-template-areas:"photo" "name" "desc" "story" "stats" "time" "map" "talk" "items"}
   .toc{position:static;grid-auto-flow:column;overflow:auto}
   .chron{margin-left:70px}.ev .yr{left:-96px;width:60px;font-size:11px}
-  .atlas-card{left:14px;width:auto}
+  .atlas-card{left:14px;width:auto;max-height:44vh;overflow:auto}
+  /* карточка тракта здесь во всю ширину и легла бы ровно на подсказку */
+  .atlas-hint{display:none}
+}
+@media (max-width:700px){
+  .atlas-card{max-height:32vh;padding:12px 14px}
+  .atlas-card .bignums{gap:16px;margin:8px 0}
+  .atlas-card .bignums div{font-size:22px}
+  .atlas-card .feed{max-height:96px}
+  .atlas-bar{gap:6px;padding:5px}
+  .seg button{padding:5px 9px;font-size:12px}
 }
 /* ─── иконки и кнопки ─── */
 .ico{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-3px}
@@ -577,6 +602,26 @@ a.fac::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;backg
 .canon-text p{margin:0 0 10px;font-size:14px;line-height:1.6;color:#d6cec4}
 .canon-text p:last-child{margin-bottom:0}
 .canon-text code{font:12px var(--mono);background:var(--raise);border-radius:4px;padding:1px 5px}
-@media (max-width:700px){.canon-h{flex-wrap:wrap}.canon-part{margin-left:36px}}
+@media (max-width:700px){
+  .canon-h{flex-wrap:wrap}.canon-part{margin-left:36px}
+  .canon-bar .seg{flex-wrap:wrap;max-width:100%}
+  .canon-bar .seg button{flex:1 0 auto}
+}
+
+/* «Главное» рисовалось на 720px в высоту с линией на 580px: на телефоне экран открывался
+   пустым, а карточка события уезжала за верхний и правый край. */
+@media (max-width:700px){
+  .ks-wrap{padding:0 14px}
+  .ks{height:430px;min-width:780px}
+  .ks-line{top:300px}
+  .ks-ev{top:300px}
+  .ks-h{width:104px;font-size:12px}
+  .ks-card{width:min(300px,84vw);bottom:145px}
+  .ks-card .im{height:110px}
+  .ks-card .tx{padding:10px 14px 12px}
+  .ks-card h3{font-size:17px}
+  .hc-head{padding-left:0;padding-right:0}
+  .hc-hint,.hc-det{font-size:13px}
+}
 
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}

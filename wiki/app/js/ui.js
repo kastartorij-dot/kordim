@@ -70,6 +70,8 @@ export function closedFor(r, season, mode){
   return season === 'winter' && (r.k === 'water' || (r.k === 'rough' && mode === 'cart'));
 }
 export const fmt = d => d.toFixed(1).replace('.0', '').replace('.', ',');
+/* склонение по числу: plural(2, ['связь','связи','связей']) → 'связи' */
+export const plural = (n, f) => { const a = Math.abs(n) % 100, b = a % 10; return a > 10 && a < 20 ? f[2] : b > 1 && b < 5 ? f[1] : b === 1 ? f[0] : f[2]; };
 
 /* путешествие: токен идёт по линии, дни и события — в колбэки */
 export function travel(r, {token, days, onDay, onEvent, onDone, speed = 90}){
@@ -122,23 +124,27 @@ export function mountChat(box, tree, {onGain, gains = {}, typing = 24} = {}){
   const log = document.createElement('div'); log.className = 'chat-log';
   const opts = document.createElement('div'); opts.className = 'chat-opts';
   box.append(log, opts);
-  let timer = null;
+  /* два таймера: печать реплики и пауза перед следующей. Гасить надо оба, иначе
+     разговор доигрывает себя на уже снесённой странице (и пишет вещь в никуда). */
+  let timer = null, hop = null;
+  const stop = () => { clearInterval(timer); clearTimeout(hop); };
   const add = (cls, html) => { const d = document.createElement('div'); d.className = 'msg ' + cls; d.innerHTML = html; log.appendChild(d); log.scrollTop = 1e9; return d; };
   function step(key){
+    stop();
     const n = tree[key]; opts.innerHTML = '';
     if (n.note) add('sys', esc(n.note));
     const m = add(n.who ? 'them' : 'sys', n.who ? '<b>' + esc(n.who) + '</b><span></span>' : '<span></span>');
     const span = m.querySelector('span'); let k = 0;
-    clearInterval(timer);
     timer = setInterval(() => {
       span.textContent = n.say.slice(0, ++k); log.scrollTop = 1e9;
       if (k < n.say.length) return;
       clearInterval(timer);
       if (n.gain && onGain && gains[n.gain]) onGain(gains[n.gain]);
-      if (n.next) return setTimeout(() => step(n.next), 700);
+      if (n.next) return hop = setTimeout(() => step(n.next), 700);
       if (n.final){
         const b = document.createElement('button'); b.textContent = '↺ Сначала';
-        b.onclick = () => mountChat(box, tree, {onGain, gains, typing}); opts.appendChild(b); return;
+        /* перезапуск внутри того же разговора: снаружи уже держат его stop(), новый заводить нельзя */
+        b.onclick = () => { log.innerHTML = ''; step('start'); }; opts.appendChild(b); return;
       }
       (n.opts || []).forEach(([label, to]) => {
         const b = document.createElement('button'); b.textContent = label;
@@ -148,7 +154,7 @@ export function mountChat(box, tree, {onGain, gains = {}, typing = 24} = {}){
     }, typing);
   }
   step('start');
-  return () => clearInterval(timer);
+  return stop;
 }
 
 export function countUp(nodes, from, to, ms = 500){

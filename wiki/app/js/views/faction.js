@@ -2,7 +2,7 @@
    Базовый костяк один на все фракции, но каждая несёт archetype — official/crime/wild —
    и получает лёгкий грим по CSS (см. app.css, .arche-*). Одна фракция может нести
    special:'herb' — тогда рисуется отдельная штучная страница (сейчас Свинцовые клинки). */
-import { $, $$, esc, IMG, mapHTML, drawRoutes, drawPins, markPlace, placeChip } from '../ui.js';
+import { $, $$, esc, IMG, mapHTML, drawRoutes, drawPins, markPlace, placeChip, plural } from '../ui.js';
 import { factionById, relationsOf, REL_LABEL } from '../../data/factions.js';
 import { personById } from '../../data/people.js';
 import { placeById } from '../../data/places.js';
@@ -85,7 +85,7 @@ function renderHerb(root, f, { people, rels, evs, seat }){
     <div class="eyebrow"><a href="#/factions">← фракции</a> · ${esc(f.kind)}</div>
     <h1 class="h1">${esc(f.name)}</h1>
     ${f.quote ? '<div class="fherb-quote">' + esc(f.quote) + '</div>' : ''}
-    <div class="fherb-stats">${f.guarantee ? '<div><b>' + esc(f.guarantee) + '</b>ручается</div>' : ''}${f.size ? '<div><b>' + esc(f.size.split(',')[0]) + '</b>сила</div>' : ''}<div><b>${rels.length}</b>связ${rels.length === 1 ? 'ь' : 'ей'}</div></div>
+    <div class="fherb-stats">${f.guarantee ? '<div><b>' + esc(f.guarantee) + '</b>ручается</div>' : ''}${f.size ? '<div><b>' + esc(f.size.split(',')[0]) + '</b>сила</div>' : ''}<div><b>${rels.length}</b>${plural(rels.length, ['связь', 'связи', 'связей'])}</div></div>
     ${rels.length ? `<div class="fherb-orbit"><div class="core">${esc(f.name)}</div>${orbit}</div>` : ''}
     <div class="fherb-prose">${f.text.map(t => '<p>' + esc(t) + '</p>').join('')}</div>
     ${f.hooks && f.hooks.length ? '<div class="fherb-hooks">' + f.hooks.map(h => '<div>' + esc(h) + '</div>').join('') + '</div>' : ''}

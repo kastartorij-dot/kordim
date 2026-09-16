@@ -49,6 +49,9 @@ function route(){
   if (DETAIL[head]){ [mod, navKey] = DETAIL[head]; }
   else { const n = NAV.find(x => x[0] === head) || NAV[0]; mod = n[2]; navKey = n[0]; }
   $$('#nav a').forEach(a => a.setAttribute('aria-current', a.dataset.k === navKey ? 'page' : 'false'));
+  /* на телефоне разделы лежат прокручиваемой полосой — подводим текущий в поле зрения */
+  const cur = $('#nav a[aria-current="page"]'), nav = $('#nav');
+  if (cur && nav.scrollWidth > nav.clientWidth + 4) cur.scrollIntoView({inline:'center', block:'nearest'});
   if (cleanup){ try { cleanup(); } catch (e) {} cleanup = null; }
   document.body.removeAttribute('data-season'); document.body.removeAttribute('data-night');
   view.innerHTML = '';
@@ -67,14 +70,16 @@ const INDEX = [
   ...PLACES.map(p => ({t:p.name, k:'место', h:'#/place/' + p.id})),
   ...FACTIONS.map(f => ({t:f.name, k:'фракция', h:'#/faction/' + f.id})),
   ...ARTICLES.map(a => ({t:a.title, k:'мир', h:'#/world/' + a.id})),
-  ...EVENTS.map(e => ({t:e.y + ' — ' + e.t, k:'хроника', h:'#/chronicle'})),
-  ...CANON.записи.map(r => ({t:r.title, k:'канон', h:'#/canon'}))
+  ...EVENTS.map((e, i) => ({t:e.y + ' — ' + e.h, s:e.y + ' ' + e.h + ' ' + e.t, k:'хроника', h:'#/chronicle/' + i})),
+  /* весь канон, не только лорбук: герои, правила ведения и приложения искались мимо */
+  ...['герои', 'правила', 'записи', 'приложения'].flatMap(g => CANON[g].map(r =>
+    ({t:r.title, s:r.title + ' ' + (r.ключи || []).join(' '), k:'канон', h:'#/canon/' + encodeURIComponent(canon.canonKey(g, r))})))
 ];
 const pal = $('#pal'), inp = $('#palIn'), res = $('#palRes');
 let hits = [], at = 0;
 function paint(){
   const q = inp.value.trim().toLowerCase();
-  hits = (q ? INDEX.filter(x => x.t.toLowerCase().includes(q)) : INDEX.slice(0, 12)).slice(0, 30);
+  hits = (q ? INDEX.filter(x => (x.s || x.t).toLowerCase().includes(q)) : INDEX.slice(0, 12)).slice(0, 30);
   at = Math.min(at, Math.max(0, hits.length - 1));
   res.innerHTML = hits.length ? hits.map((x, i) => '<a href="' + x.h + '" class="' + (i === at ? 'on' : '') + '">' + esc(x.t) + '<small>' + x.k + '</small></a>').join('') : '<div class="empty" style="padding:14px 18px">Ничего не нашлось.</div>';
 }

@@ -15,12 +15,14 @@ const MASTER = path.join(KANON, '00_КАНОН_Мастер_Кордим.md');
 const CHECK = process.argv.includes('--check');
 
 function readBody(relPath) {
-  const text = fs.readFileSync(path.join(KANON, relPath), 'utf8');
+  // Снимаем все \r: почти все блоки пересохранены редактором в CRLF, а мастер живёт в LF,
+  // где-то попадается и одиночный \r в конце файла. Без этого --check всегда показывал
+  // расхождение на первой же строке, а пересборка переписывала переносами весь мастер.
+  const text = fs.readFileSync(path.join(KANON, relPath), 'utf8').replace(/\r/g, '');
   const lines = text.split('\n');
-  // редактор мог пересохранить файл с \r\n целиком (в т.ч. разделители шапки) — не зависим от этого
-  if (lines[0].replace(/\r$/, '') !== '---') throw new Error(`${relPath}: нет YAML-шапки`);
+  if (lines[0] !== '---') throw new Error(`${relPath}: нет YAML-шапки`);
   let close = -1;
-  for (let i = 1; i < lines.length; i++) if (lines[i].replace(/\r$/, '') === '---') { close = i; break; }
+  for (let i = 1; i < lines.length; i++) if (lines[i] === '---') { close = i; break; }
   if (close < 0) throw new Error(`${relPath}: не нашёл закрывающую черту шапки`);
   return lines.slice(close + 1).join('\n');
 }

@@ -140,7 +140,7 @@ function full(root, p){
     $('#talkWhere', root).innerHTML = t ? (t.draft ? '<span class="badge draft">набросок</span> ' : '') + esc(t.where) : '';
     if (!t){ box.innerHTML = '<p class="locked">В этом году разговора нет. Годы с разговором: ' + Object.keys(P.talks || {}).join(', ') + '.</p>'; return; }
     box.innerHTML = '<div id="chat"></div>';
-    stopChat = mountChat($('#chat', root), t.tree, {gains:P.gains || {}, onGain:g => { const b = slot(g, $('#debts', root), 'new'); b.focus({preventScroll:true}); }});
+    stopChat = mountChat($('#chat', root), t.tree, {gains:P.gains || {}, onGain:g => { const box = $('#debts', root); if (box) slot(g, box, 'new').focus({preventScroll:true}); }});
   }
   stops.push(() => { stopTrip && stopTrip(); stopChat && stopChat(); });
 
