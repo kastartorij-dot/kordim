@@ -448,6 +448,13 @@
         .picker { border-radius: 0; border: 2px solid var(--border); }
         .chip { border-radius: 0; border: 2px solid var(--border); }
         .msg-icon { border-radius: 0; }
+        .seg { display: flex; gap: 10px; margin: 8px 0 4px; }
+        .mode-btn { flex: 1; background: var(--raise); color: var(--text); border-color: var(--border); }
+        .mode-btn[aria-pressed="true"] { background: var(--accent); color: #1a1510; border-color: #000; }
+        .mode-btn:hover { background: #352f2b; }
+        .mode-btn[aria-pressed="true"]:hover { background: var(--accent-hover); }
+        #scenario-picker { padding: 12px 14px; background: var(--raise); border: 2px solid var(--border); }
+        #scenario-select option:disabled { color: #6b625b; }
         .slot-active { outline: 2px dashed var(--accent); outline-offset: 3px; }
         ::selection { background: var(--accent); color: #1a1510; }
         @media (max-width: 600px) {
@@ -542,20 +549,35 @@
             <button class="btn-gray" onclick="switchScreen('screen-setup')">&larr; В меню</button>
         </div>
         <h1>Создание персонажа</h1>
+
+        <label>Режим игры:</label>
+        <div class="seg" id="mode-seg" role="group">
+            <button type="button" class="mode-btn" data-mode="free" aria-pressed="true">Свободная игра</button>
+            <button type="button" class="mode-btn" data-mode="scenario" aria-pressed="false">По сценарию</button>
+        </div>
+
+        <div id="scenario-picker" style="display:none;margin:14px 0 4px">
+            <label>Сценарий:</label>
+            <select id="scenario-select"></select>
+            <p id="scenario-desc" style="font-size:13px;color:var(--mute);margin:8px 0 0;line-height:1.5"></p>
+        </div>
+
         <label>Пол персонажа:</label>
         <select id="char-gender">
             <option value="мужской">мужской</option>
             <option value="женский">женский</option>
         </select>
-        
+
         <label>Возраст:</label>
         <input type="number" id="char-age" placeholder="25" min="15" max="70">
 
-        <label>Где начинаем:</label>
-        <select id="char-location">
-            <option value="">Случайно</option>
-        </select>
-        
+        <div id="location-row">
+            <label>Где начинаем:</label>
+            <select id="char-location">
+                <option value="">Случайно</option>
+            </select>
+        </div>
+
         <button id="btn-generate">Сгенерировать варианты</button>
         <div id="char-loader" class="loader">Судьба плетёт нити...</div>
         
@@ -611,6 +633,19 @@
     /* === БАЗА ДАННЫХ И КОНТЕКСТ === */
     const START_LOCATIONS = ["Столица", "Порт Теней", "Ошерск", "Смитгард", "Монтин",
                              "Врата", "Ручейный", "Топь", "Морской"];
+
+    /* Сценарии — готовые завязки поверх свободной игры. Пока один, слот под
+       следующие уже есть (disabled-пункт в selectOptions ниже и просто новая
+       запись в этом массиве). */
+    const SCENARIOS = [
+        {
+            id: 'blue-hour-yarna',
+            title: 'Синий час у Ярны Сотт',
+            location: 'Порт Теней',
+            desc: 'Вечер в «Синем часе» — салоне Ярны Сотт в торговом квартале Порта Теней. Поход в дом свиданий, а не в трактир: другие правила, другая цена за слово.',
+            brief: 'Сцена начинается у дверей «Синего часа», салона Ярны Сотт, в торговом квартале Порта Теней, в час, когда зажигают синие фонари над входом. Персонаж — гость, работница дома или человек по делу, попавший туда в этот вечер.'
+        }
+    ];
     
     const CORE_PROMPT = `Ты — рассказчик и режиссёр текстовой ролевой игры в мире Кордим. Ты невидим: ты не персонаж и не участник событий. Ты ведёшь мир, всех NPC и ход сцены. Обращаться к себе как к рассказчику, выходить из роли и комментировать игру нельзя.
 
@@ -1133,7 +1168,8 @@
     let isSummarizing = false;
     
     let character = { name: "", gender: "", age: "", origin: "", trade: "", flaw: "" };
-    let gameState = { location: "", money: 0, wounds: [], inventory: [], date: "1 День Месяца Пепла, 1026 год", day: 1 };
+    let gameState = { location: "", money: 0, wounds: [], inventory: [], date: "1 День Месяца Пепла, 1026 год", day: 1, scenario: null };
+    let gameMode = 'free';
     
     let chatHistory = [];
     let events = [];
@@ -1204,6 +1240,36 @@
             opt.textContent = loc;
             locSelect.appendChild(opt);
         });
+
+        const scenarioSelect = document.getElementById('scenario-select');
+        SCENARIOS.forEach(sc => {
+            const opt = document.createElement('option');
+            opt.value = sc.id;
+            opt.textContent = sc.title;
+            scenarioSelect.appendChild(opt);
+        });
+        const soonOpt = document.createElement('option');
+        soonOpt.textContent = 'Скоро — ещё сценарии';
+        soonOpt.disabled = true;
+        scenarioSelect.appendChild(soonOpt);
+
+        const updateScenarioDesc = () => {
+            const sc = SCENARIOS.find(s => s.id === scenarioSelect.value);
+            document.getElementById('scenario-desc').textContent = sc ? sc.desc : '';
+        };
+        scenarioSelect.addEventListener('change', updateScenarioDesc);
+        updateScenarioDesc();
+
+        document.querySelectorAll('#mode-seg .mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                gameMode = btn.dataset.mode;
+                document.querySelectorAll('#mode-seg .mode-btn').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+                const isScenario = gameMode === 'scenario';
+                document.getElementById('scenario-picker').style.display = isScenario ? 'block' : 'none';
+                document.getElementById('location-row').style.display = isScenario ? 'none' : 'block';
+            });
+        });
+        document.querySelector('#mode-seg .mode-btn[data-mode="free"]').setAttribute('aria-pressed', 'true');
 
         const statePanel = document.getElementById('state-panel');
         statePanel.classList.add('collapsed');
@@ -1409,13 +1475,22 @@
         checkSavesUI();
         sessionId = generateUUID();
         character = { name: "", gender: "", age: "", origin: "", trade: "", flaw: "" };
-        gameState = { location: "", money: 0, wounds: [], inventory: [], date: "1 День Месяца Пепла, 1026 год", day: 1 };
+        gameState = { location: "", money: 0, wounds: [], inventory: [], date: "1 День Месяца Пепла, 1026 год", day: 1, scenario: null };
         chatHistory = [];
         events = [];
         archivedTurns = 0;
         stateSnapshots = [];
         sessionTokens = { prompt: 0, completion: 0, cached: 0 };
-        
+
+        /* Каждая новая игра начинается с чистого выбора режима. */
+        gameMode = 'free';
+        const freeBtn = document.querySelector('#mode-seg .mode-btn[data-mode="free"]');
+        if (freeBtn) {
+            document.querySelectorAll('#mode-seg .mode-btn').forEach(b => b.setAttribute('aria-pressed', String(b === freeBtn)));
+            document.getElementById('scenario-picker').style.display = 'none';
+            document.getElementById('location-row').style.display = 'block';
+        }
+
         switchScreen('screen-char-gen');
     }
 
@@ -2149,8 +2224,14 @@
     async function generateCharacters() {
         const gender = document.getElementById('char-gender').value || "неизвестно";
         const age = document.getElementById('char-age').value || "неизвестно";
-        const chosenLoc = document.getElementById('char-location').value;
-        gameState.location = chosenLoc || START_LOCATIONS[Math.floor(Math.random() * START_LOCATIONS.length)];
+        const scenario = gameMode === 'scenario' ? SCENARIOS.find(s => s.id === document.getElementById('scenario-select').value) : null;
+        gameState.scenario = scenario ? scenario.id : null;
+        if (scenario) {
+            gameState.location = scenario.location;
+        } else {
+            const chosenLoc = document.getElementById('char-location').value;
+            gameState.location = chosenLoc || START_LOCATIONS[Math.floor(Math.random() * START_LOCATIONS.length)];
+        }
 
         const btn = document.getElementById('btn-generate');
         const loader = document.getElementById('char-loader');
@@ -2162,8 +2243,9 @@
         loader.style.display = 'block';
         let failed = false;
 
+        const scenarioLine = scenario ? `Сценарий: ${scenario.brief}\nВарианты персонажа должны логично попадать в эту сцену (гость, работница дома, человек по делу и т.п.).\n` : '';
         const prompt = `Сгенерируй 4 варианта персонажа для старта. Пол: ${gender}. Возраст: ${age}. Стартовая локация: ${gameState.location}.
-Пол всех четверых должен совпадать с запрошенным. Если персонаж выдаёт себя за другой пол, это допустимо только как содержание поля «уязвимость», и в поле «имя» тогда стоит имя, под которым он живёт.
+${scenarioLine}Пол всех четверых должен совпадать с запрошенным. Если персонаж выдаёт себя за другой пол, это допустимо только как содержание поля «уязвимость», и в поле «имя» тогда стоит имя, под которым он живёт.
 Не заключай поля в квадратные скобки — только текст, разделённый вертикальной чертой.
 Формат СТРОГО:
 <текст>Атмосферное вступление.</текст>
@@ -2225,8 +2307,10 @@
 
     function startGame(characterDesc) {
         chatHistory = [];
+        const scenario = gameState.scenario ? SCENARIOS.find(s => s.id === gameState.scenario) : null;
+        const scenarioLine = scenario ? `\nСценарий: ${scenario.brief}` : '';
         const initPrompt = `Я выбрал персонажа: ${characterDesc}.
-Локация: ${gameState.location}.
+Локация: ${gameState.location}.${scenarioLine}
 Опиши, где я сейчас нахожусь, что делаю и дай 4 варианта действий.
 Отвечай СТРОГО в формате: <текст>...</текст><выборы>...</выборы><состояние>...</состояние>`;
 
