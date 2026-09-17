@@ -59,5 +59,28 @@ if (fs.existsSync(PROZA)) {
   }
 }
 
+// wiki/app/data — данные сайта пишутся руками, мимо канона, и снятые формулировки туда
+// просачиваются так же легко. canon.js и scenes.js не смотрим: они собираются из уже
+// проверенных выше блоков и прозы (в canon.js к тому же лежит журнал правок с историей отмен).
+// Мини-игру не проверяем намеренно — у неё свой лорбук и своя сессия.
+const DATA = path.join(ROOT, 'wiki', 'app', 'data');
+const GENERATED = new Set(['canon.js', 'scenes.js']);
+function walk(dir) {
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap(d =>
+    d.isDirectory() ? walk(path.join(dir, d.name)) : d.name.endsWith('.js') ? [path.join(dir, d.name)] : []);
+}
+if (fs.existsSync(DATA)) {
+  for (const file of walk(DATA)) {
+    if (GENERATED.has(path.basename(file))) continue;
+    const text = fs.readFileSync(file, 'utf8');
+    for (const term of bans) {
+      if (text.includes(term)) {
+        console.log(`⚠ ${path.relative(ROOT, file).replace(/\\/g, '/')}: снятая формулировка «${term}»`);
+        problems++;
+      }
+    }
+  }
+}
+
 console.log(problems ? `\nНайдено ${problems} проблем.` : '\nOK: запретов не найдено, ключи на месте.');
 process.exit(problems ? 1 : 0);
