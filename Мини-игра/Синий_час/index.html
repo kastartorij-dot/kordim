@@ -498,11 +498,28 @@ function времяИдёт(n){
 
 const $ = id => document.getElementById(id);
 
+/* Картинок может не быть — тогда остаются заглушки. Как только файл положат
+   в wiki/img/, он подхватится сам. Путь разный у копии на сайте и у оригинала. */
+const БАЗА = location.pathname.includes('/game/') ? '../../img/' : '../../wiki/img/';
+const проверено = {};
+function естьФайл(путь, ок){
+  if(проверено[путь]!==undefined){ if(проверено[путь]) ок(); return; }
+  const i = new Image();
+  i.onload = ()=>{ проверено[путь]=true; ок(); };
+  i.onerror = ()=>{ проверено[путь]=false; };
+  i.src = путь;
+}
+
 function экран(){
   if(S.конец){ рисоватьФинал(); return; }
   рисоватьHUD();
   const к = КОМНАТЫ[S.комната];
-  $('bg').style.background = фонДля(S.комната);
+  const град = фонДля(S.комната);
+  $('bg').style.background = град;
+  const фп = БАЗА+'siniy-chas/'+S.комната+'.jpg';
+  естьФайл(фп, ()=>{
+    if(S.комната && $('bg')) $('bg').style.background = 'url('+фп+') center/cover no-repeat, '+град;
+  });
   $('bgtag').textContent = '[ фон: '+к.фон+' ]';
   $('tint').style.background = тинт();
   рисоватьТемы();
@@ -659,6 +676,11 @@ function рисоватьРазговор(){
   const p = $('portrait');
   p.style.display='flex';
   p.innerHTML = '[ портрет 3:4 ]<br>'+ч.портрет;
+  const пп = БАЗА+'faces/'+ч.портрет;
+  естьФайл(пп, ()=>{
+    if(S.собеседник===S.собеседник && p)
+      p.innerHTML = '<img src="'+пп+'" alt="'+ч.имя+'" style="width:100%;height:100%;object-fit:cover;object-position:50% 20%">';
+  });
   const р = расп(S.собеседник);
   const тепло = р>=3?'доверяет':(р>=1?'слушает с интересом':(р<=-1?'держит дистанцию':'терпит'));
   $('who').innerHTML = '<b>'+ч.имя.toUpperCase()+'</b><span>'+ч.место+' · '+тепло+'</span>';
