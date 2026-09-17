@@ -3,7 +3,10 @@ export function render(root){
   root.innerHTML = `<div class="game" data-title="Игра">
     <div class="gbar"><b>Кордим RPG</b>
       <span>Текстовая игра по миру через OpenRouter. Лорбук игры причёсан под канон 13.09: контора Сайдена вместо Гильдии, марка = 10 грошей.</span>
-      <a href="../game/Index.html" target="_blank" rel="noopener">Открыть отдельно ↗</a></div>
+      <span class="glinks">
+        <a href="../game/siniy-chas/index.html" target="_blank" rel="noopener">Синий час ↗</a>
+        <a href="../game/Index.html" target="_blank" rel="noopener">Открыть отдельно ↗</a>
+      </span></div>
     <div class="gwrap"><iframe src="../game/Index.html" title="Кордим RPG"></iframe></div>
   </div>`;
 }
