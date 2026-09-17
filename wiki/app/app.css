@@ -31,6 +31,13 @@ button,select,input{font:inherit;color:inherit}
 .nav a:hover{color:var(--text);text-decoration:none;background:var(--panel)}
 .nav a[aria-current="page"]{color:var(--ochre);background:var(--panel)}
 .findbtn{margin-left:auto;display:flex;align-items:center;gap:10px;padding:6px 10px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--mute);cursor:pointer;white-space:nowrap}
+.updbtn{position:relative;display:grid;place-items:center;width:34px;height:34px;flex:none;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--mute);font-size:17px;line-height:1;cursor:pointer}
+.updbtn:hover{color:var(--ochre)}
+.updbtn.has-update{color:var(--ochre);border-color:color-mix(in srgb,var(--ochre) 55%,transparent)}
+.updbtn.has-update::after{content:"";position:absolute;top:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:var(--ochre);box-shadow:0 0 0 2px var(--ground)}
+.updbtn.busy span{animation:updspin .8s linear infinite}
+@keyframes updspin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.updbtn.busy span{animation:none;opacity:.5}}
 kbd{font:11px var(--mono);border:1px solid var(--line);border-radius:4px;padding:0 5px}
 main{min-height:calc(100vh - var(--top));outline:none}
 .enter{animation:enter .45s var(--ease)}
@@ -330,6 +337,7 @@ body[data-season="autumn"] .rain{opacity:.55}
   .top{flex-wrap:wrap;align-content:center;gap:6px 14px;padding:0 14px}
   .brand{order:1}
   .findbtn{order:2;margin-left:auto}
+  .updbtn{order:2}
   .findbtn kbd{display:none}
   .nav{order:3;flex-basis:100%;width:100%;margin:0 -14px;padding:0 14px;
     -webkit-mask-image:linear-gradient(90deg,transparent,#000 14px,#000 calc(100% - 14px),transparent);

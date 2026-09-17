@@ -54,8 +54,11 @@ while ($listener.IsListening) {
       $ctx.Response.ContentType = $type
       # без кеша: иначе браузер держит старые модули проекта после правок
       $ctx.Response.Headers.Add('Cache-Control', 'no-store')
+      # по дате правки кнопка «обновить» (js/update.js) понимает, что файл поменялся
+      $ctx.Response.Headers.Add('Last-Modified', [System.IO.File]::GetLastWriteTimeUtc($full).ToString('R'))
       $ctx.Response.ContentLength64 = $bytes.Length
-      $ctx.Response.OutputStream.Write($bytes, 0, $bytes.Length)
+      # на HEAD тело не пишем: HttpListener бросает исключение, и соединение повисало незакрытым
+      if ($ctx.Request.HttpMethod -ne 'HEAD') { $ctx.Response.OutputStream.Write($bytes, 0, $bytes.Length) }
     } else {
       $ctx.Response.StatusCode = 404
       $msg = [System.Text.Encoding]::UTF8.GetBytes('404')

@@ -22,6 +22,7 @@ import * as canon from './views/canon.js';
 import * as game from './views/game.js';
 import { CANON } from '../data/canon.js';
 import { SCENES } from '../data/scenes.js';
+import './update.js';
 
 /* нет файла портрета — вместо картинки буква имени */
 window.kordimNoImg = img => { const s = document.createElement('span'); s.className = img.className; s.textContent = img.dataset.initial || ''; img.replaceWith(s); };
