@@ -415,6 +415,44 @@
             #tokens-bar { margin: 14px -16px -18px; border-radius: 0 0 16px 16px; }
         }
     </style>
+    <!-- Пиксельный RPG-HUD поверх «Хроники» (вариант B из макетов раздела «Игра»): 8-bit рамки,
+         ступенчатые тени, Press Start 2P в заголовках. Логика игры не тронута. -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body::after {
+            content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 1;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 3px, rgba(0,0,0,.06) 4px);
+        }
+        .container { position: relative; z-index: 2; }
+        h1::before { font-family: 'Press Start 2P', var(--mono); font-size: 9px; letter-spacing: .08em; }
+        h2 { font-family: 'Press Start 2P', var(--disp); font-size: 10px; letter-spacing: .04em; border-bottom: 2px dashed var(--border); padding-bottom: 12px; }
+        .screen {
+            border-radius: 0; border: 4px solid var(--text);
+            box-shadow: 0 0 0 4px var(--bg), 0 0 0 8px var(--accent), 6px 6px 0 8px #000;
+        }
+        button, .choice-btn {
+            border-radius: 0; border: 2px solid #000; box-shadow: 3px 3px 0 #000;
+            font-family: var(--mono); transition: transform .05s linear, box-shadow .05s linear;
+        }
+        button:hover, .choice-btn:hover { transform: translate(2px,2px); box-shadow: 1px 1px 0 #000; }
+        button:active, .choice-btn:active { transform: translate(3px,3px); box-shadow: 0 0 0 #000; }
+        button:disabled { box-shadow: 3px 3px 0 #000; }
+        .choice-btn:hover { border-color: var(--accent); }
+        input[type="text"], input[type="number"], input[type="password"], select, textarea {
+            border-radius: 0; border: 2px solid var(--border);
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(217,164,65,.25); }
+        #state-panel { border-radius: 0; border: 2px solid var(--border); border-left: 4px solid var(--accent); }
+        #tokens-bar { border-radius: 0; border-top: 2px solid var(--border); }
+        .picker { border-radius: 0; border: 2px solid var(--border); }
+        .chip { border-radius: 0; border: 2px solid var(--border); }
+        .msg-icon { border-radius: 0; }
+        .slot-active { outline: 2px dashed var(--accent); outline-offset: 3px; }
+        ::selection { background: var(--accent); color: #1a1510; }
+        @media (max-width: 600px) {
+            .screen { box-shadow: 0 0 0 3px var(--bg), 0 0 0 6px var(--accent), 4px 4px 0 6px #000; }
+        }
+    </style>
 </head>
 <body>
 
