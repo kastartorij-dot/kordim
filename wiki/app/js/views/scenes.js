@@ -9,6 +9,7 @@
 import { $, esc, personChip, placeChip, proseHTML, plural } from '../ui.js';
 import { SCENES, scenesOf } from '../../data/scenes.js';
 import { EVENTS, LINES, LINE_COLOR } from '../../data/events.js';
+import { UNPLAYED } from '../../data/unplayed.js';
 
 export function render(root, [arc]) {
   return arc ? arcView(root, arc) : listView(root);
@@ -31,6 +32,14 @@ function listView(root) {
         ${draft ? '<span class="badge draft">есть черновики</span>' : ''}
       </a>`;
     }).join('') : '<p class="empty">Пока ничего не написано — сцены появятся здесь по мере готовности.</p>'}</div>
+    ${UNPLAYED.length ? `<h3 class="scene-todo-h">В РАБОТЕ <small>${UNPLAYED.length}</small></h3>
+    <div class="scene-arcs">${UNPLAYED.map(a => `<div class="card scene-arc todo">
+        <b>${esc(a.h)}</b>
+        <span>${esc(a.y)}</span>
+        <p>${esc(a.t)}</p>
+        <div>${a.people.map(personChip).join('')}</div>
+        <span class="badge">не отыграно</span>
+      </div>`).join('')}</div>` : ''}
   </div>`;
 }
 

@@ -282,6 +282,10 @@ body[data-season="autumn"] .rain{opacity:.55}
 .scene-arc b{display:block;font:700 18px var(--disp);margin-bottom:6px}
 .scene-arc span{display:block;color:var(--mute);font-size:13px}
 .scene-arc .badge{margin-top:8px;display:inline-block}
+.scene-todo-h{margin:34px 0 12px;color:var(--mute);letter-spacing:.08em}
+.scene-arc.todo{border-top-color:var(--mute);opacity:.6;filter:grayscale(1)}
+.scene-arc.todo:hover{transform:none;opacity:.8}
+.scene-arc.todo p{margin:8px 0;color:var(--mute);font-size:14px;line-height:1.45}
 .scene-page{max-width:820px}
 .scene-chap{margin:40px 0 18px;padding-top:28px;border-top:2px solid var(--c,var(--line))}
 .scene-chap:first-child{margin-top:0;padding-top:0;border-top:0}
