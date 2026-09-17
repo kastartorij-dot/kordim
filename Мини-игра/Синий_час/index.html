@@ -129,7 +129,11 @@ button{font:inherit;color:inherit;cursor:pointer}
     <div class="meter"><span class="lbl">ВЕЧЕР</span><div class="pips" id="pips"></div></div>
     <div class="meter"><span class="coin"></span><span class="mono" id="money" style="font-size:13px;color:#f0dcb4"></span></div>
     <div class="meter"><span class="lbl">ДОМ</span><span class="mono" id="dom" style="font-size:12px;color:#9fb4dd"></span></div>
-    <button class="b px" id="btn-map" style="font-size:9px;margin-left:auto;padding:9px 12px">КАРТА</button>
+    <button class="b" id="btn-back" disabled style="margin-left:auto;padding:8px 12px;font-size:14px;line-height:1"
+      title="Отменить последний шаг" aria-label="Отменить последний шаг">&#8592;</button>
+    <button class="b px" id="btn-map" style="font-size:9px;padding:9px 12px">КАРТА</button>
+    <button class="b" id="btn-restart" style="padding:8px 11px;font-size:13px;line-height:1;background:#141824;color:#5c6478"
+      title="Начать вечер заново" aria-label="Начать вечер заново">&#8635;</button>
   </div>
 
   <div id="scene">
@@ -474,7 +478,7 @@ function начать(персИд){
   S = { перс:п.id, имяПерс:п.имя, жетон:п.жетон, ножПри:п.нож,
         час:0, гроши:п.деньги, дом:п.дом, долг:0,
         распол:{}, темы:['ni_o_chem'].concat(п.темы), флаги:[], осмотрено:[], спрошено:[],
-        комната:'krylco', собеседник:null, подход:'мягко',
+        комната:'krylco', собеседник:null, подход:'мягко', история:[],
         реплика:'', заголовок:'', конец:null, вошёл:false };
   сохранить(); экран();
 }
@@ -483,6 +487,32 @@ function датьТему(т){ if(т && !S.темы.includes(т)) S.темы.pus
 function флаг(ф){ if(!S.флаги.includes(ф)) S.флаги.push(ф); }
 function есть(ф){ return S.флаги.includes(ф); }
 function расп(кто){ return S.распол[кто]||0; }
+
+const ГЛУБИНА_ОТКАТА = 40;
+
+function снимок(){
+  if(!S) return;
+  const копия = Object.assign({}, S);
+  delete копия.история;                       /* иначе снимок внутри снимка */
+  if(!S.история) S.история = [];
+  S.история.push(JSON.stringify(копия));
+  if(S.история.length > ГЛУБИНА_ОТКАТА) S.история.shift();
+}
+
+function назад(){
+  if(!S || !S.история || !S.история.length) return;
+  const ист = S.история;
+  const пред = JSON.parse(ист.pop());
+  S = пред; S.история = ист;
+  document.querySelectorAll('.ov').forEach(o=>o.remove());   /* в том числе экран финала */
+  экран();
+}
+
+function заново(){
+  if(!confirm('Начать вечер заново? Текущий вечер пропадёт.')) return;
+  localStorage.removeItem('siniy_chas');
+  location.reload();
+}
 
 function применить(э){
   if(!э) return;
@@ -524,7 +554,10 @@ function экран(){
   $('bg').style.background = град;
   const фп = БАЗА+'siniy-chas/'+S.комната+'.jpg';
   естьФайл(фп, ()=>{
-    if(S.комната && $('bg')) $('bg').style.background = 'url('+фп+') center/cover no-repeat, '+град;
+    if(!S.комната || !$('bg')) return;
+    /* 40% по высоте: низ кадра всё равно перекрыт плашкой, а главное обычно выше середины */
+    $('bg').style.background = 'url('+фп+') center 40%/cover no-repeat, '+град;
+    $('bgtag').textContent = '';          /* подпись нужна только пока картинки нет */
   });
   $('bgtag').textContent = '[ фон: '+к.фон+' ]';
   $('tint').style.background = тинт();
@@ -563,6 +596,8 @@ function рисоватьHUD(){
   $('money').textContent = S.гроши+' гр.'+(S.долг?' (долг '+S.долг+')':'');
   const имена = {'-3':'чужой','-2':'чужой','-1':'настороже','0':'гость','1':'гость','2':'почти свой','3':'свой'};
   $('dom').textContent = имена[String(S.дом)]||'гость';
+  const бб = $('btn-back');
+  if(бб) бб.disabled = !(S.история && S.история.length);
 }
 
 function рисоватьТемы(){
@@ -577,7 +612,7 @@ function кнопка(текст, цена, действие, выкл){
   b.className = 'b';
   b.disabled = !!выкл;
   b.innerHTML = '<span class="row"><span>'+текст+'</span>'+(цена?'<span class="cost'+(цена.includes('гр')?' gr':'')+'">'+цена+'</span>':'')+'</span>';
-  if(!выкл) b.onclick = действие;
+  if(!выкл) b.onclick = ()=>{ снимок(); действие(); };
   return b;
 }
 
@@ -840,9 +875,13 @@ function рисоватьФинал(){
     '<h2>СЧЁТ ВЕЧЕРА</h2><div class="fin">'+
     строки.map(s=>'<div class="ln"><span>'+s[0]+'</span><span>'+s[1]+'</span></div>').join('')+'</div>'+
     (утечки.length?'<h2>ЧТО ОСТАЛОСЬ ПОСЛЕ ТЕБЯ</h2>'+утечки.map(u=>'<p style="color:#c6cddb;font-size:15px">— '+u+'</p>').join(''):'')+
-    '<button class="b" id="again" style="margin-top:18px">Начать вечер заново</button></div>';
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">'+
+      (S.история && S.история.length ? '<button class="b" id="undo">&#8592; Отменить последний шаг</button>' : '')+
+      '<button class="b" id="again">Начать вечер заново</button></div></div>';
   document.body.appendChild(ov);
   ov.querySelector('#again').onclick=()=>{ localStorage.removeItem('siniy_chas'); location.reload(); };
+  const u = ov.querySelector('#undo');
+  if(u) u.onclick = назад;
 }
 
 /* ═══════════════════ КАРТА ═══════════════════ */
@@ -887,11 +926,13 @@ function выборПерсонажа(){
 }
 
 $('btn-map').onclick = карта;
+$('btn-back').onclick = назад;
+$('btn-restart').onclick = заново;
 
 (function(){
   let сейв=null;
   try{ сейв = JSON.parse(localStorage.getItem('siniy_chas')||'null'); }catch(e){}
-  if(сейв && !сейв.конец){ S=сейв; if(!S.спрошено) S.спрошено=[]; экран(); }
+  if(сейв && !сейв.конец){ S=сейв; if(!S.спрошено) S.спрошено=[]; if(!S.история) S.история=[]; экран(); }
   else { localStorage.removeItem('siniy_chas'); выборПерсонажа(); }
 })();
 </script>
