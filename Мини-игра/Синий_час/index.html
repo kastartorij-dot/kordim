@@ -677,9 +677,11 @@ function рисоватьРазговор(){
   p.style.display='flex';
   p.innerHTML = '[ портрет 3:4 ]<br>'+ч.портрет;
   const пп = БАЗА+'faces/'+ч.портрет;
+  p.style.padding = '0 8px 14px';   /* отступ нужен подписи-заглушке */
   естьФайл(пп, ()=>{
-    if(S.собеседник===S.собеседник && p)
-      p.innerHTML = '<img src="'+пп+'" alt="'+ч.имя+'" style="width:100%;height:100%;object-fit:cover;object-position:50% 20%">';
+    if(!p) return;
+    p.style.padding = '0';           /* с фото отступ давал светлые поля */
+    p.innerHTML = '<img src="'+пп+'" alt="'+ч.имя+'" style="display:block;width:100%;height:100%;object-fit:cover;object-position:50% 18%">';
   });
   const р = расп(S.собеседник);
   const тепло = р>=3?'доверяет':(р>=1?'слушает с интересом':(р<=-1?'держит дистанцию':'терпит'));
