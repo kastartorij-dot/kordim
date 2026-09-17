@@ -5,6 +5,7 @@
 //
 // node канон/_build/check-data.mjs
 
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 
@@ -62,6 +63,15 @@ ROUTES.forEach(r => {
 CHARGED.forEach(([title, , ppl], i) => {
   (ppl || []).forEach(id => { if (!peopleIds.has(id)) bad(`questions.js: CHARGED «${title}»`, 'человек', id); });
 });
+
+// «Заряжено» на сайте переписано руками с приложения канона и уже однажды отстало (11 из 16).
+// Смысл не сверяем — только число пунктов, чтобы новый пункт в каноне не потерялся по дороге.
+const chargedMd = fs.readFileSync(path.join(ROOT, 'канон', 'приложения', 'что-заряжено.md'), 'utf8');
+const chargedCanon = (chargedMd.match(/^\d+\.\s/gm) || []).length;
+if (chargedCanon !== CHARGED.length) {
+  console.log(`⚠ questions.js: «Заряжено» ${CHARGED.length} пунктов, в канон/приложения/что-заряжено.md — ${chargedCanon}`);
+  problems++;
+}
 
 console.log(problems ? `\nНайдено ${problems} проблем.` : '\nOK: все перекрёстные ссылки в данных вики целы.');
 process.exit(problems ? 1 : 0);
