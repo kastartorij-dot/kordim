@@ -15,7 +15,7 @@ const load = rel => import(pathToFileURL(path.join(DATA, rel)).href);
 const { PEOPLE } = await load('people.js');
 const { PLACES } = await load('places.js');
 const { FACTIONS, RELATIONS } = await load('factions.js');
-const { EVENTS } = await load('events.js');
+const { EVENTS, LINES } = await load('events.js');
 const { ROUTES } = await load('routes.js');
 const { CHARGED } = await load('questions.js');
 
@@ -44,6 +44,14 @@ RELATIONS.forEach(([a, b], i) => {
 EVENTS.forEach((e, i) => {
   if (e.place && !placeIds.has(e.place)) bad(`events.js: EVENTS[${i}] (${e.h})`, 'место', e.place);
   (e.people || []).forEach(id => { if (!peopleIds.has(id)) bad(`events.js: EVENTS[${i}] (${e.h})`, 'человек', id); });
+  (e.lines || []).forEach(id => { if (!(id in LINES)) bad(`events.js: EVENTS[${i}] (${e.h})`, 'сюжетная линия', id); });
+});
+// slug нужен каждому событию: по нему к событию привязывается сцена из проза/*.md
+const slugSeen = new Map();
+EVENTS.forEach((e, i) => {
+  if (!e.slug) { console.log(`⚠ events.js: EVENTS[${i}] (${e.h}): нет slug — сцену к событию не привязать`); problems++; return; }
+  if (slugSeen.has(e.slug)) { console.log(`⚠ events.js: slug «${e.slug}» повторяется (${slugSeen.get(e.slug)} и ${e.h})`); problems++; }
+  slugSeen.set(e.slug, e.h);
 });
 
 ROUTES.forEach(r => {
