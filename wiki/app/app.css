@@ -210,7 +210,10 @@ select{background:var(--raise);border:1px solid var(--line);border-radius:8px;pa
 @keyframes pulse{0%,100%{box-shadow:0 0 0 4px rgba(217,164,65,.3)}50%{box-shadow:0 0 0 14px rgba(217,164,65,0)}}
 .token{position:absolute;transform:translate(-50%,-80%);font-size:22px;filter:drop-shadow(0 2px 3px #000);pointer-events:none;transition:left .09s linear,top .09s linear}
 
-.atlas{position:relative;height:calc(100vh - var(--top));overflow:hidden;cursor:grab;background:#0f0d0c}
+.atlas{position:relative;height:calc(100vh - var(--top));overflow:hidden;cursor:grab;background:#0f0d0c;touch-action:none}
+.atlas-zoom{right:14px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;padding:4px;gap:4px;cursor:default}
+.atlas-zoom button{width:36px;height:36px;border:0;border-radius:7px;background:transparent;color:var(--text);font:500 20px var(--mono);line-height:1;cursor:pointer}
+.atlas-zoom button:hover{background:var(--raise);color:var(--ochre)}
 .atlas.drag{cursor:grabbing}
 .atlas .world{position:absolute;left:0;top:0;width:2000px;transform-origin:0 0;will-change:transform}
 .atlas .world .map{border-radius:0}

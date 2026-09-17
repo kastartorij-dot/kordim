@@ -14,7 +14,8 @@ export function render(root){
       <div class="seg" role="group" aria-label="Способ">${Object.entries(MODE_LABEL).map(([k, l]) => '<button data-m="' + k + '" aria-pressed="' + (k === 'horse') + '">' + l[0].toUpperCase() + l.slice(1) + '</button>').join('')}</div>
     </div>
     <section class="float atlas-card" id="card"></section>
-    <div class="float atlas-hint">тяни карту · колесо — масштаб · нажми тракт или город</div>
+    <div class="float atlas-zoom" role="group" aria-label="Масштаб"><button id="zin" aria-label="Приблизить">+</button><button id="zout" aria-label="Отдалить">−</button></div>
+    <div class="float atlas-hint">тяни карту · колесо или щипок — масштаб · нажми тракт или город</div>
   </div>`;
 
   const atlas = $('#atlas', root), world = $('#world', root), map = $('#map', root), svg = $('svg', map);
@@ -27,12 +28,28 @@ export function render(root){
   function fit(){ const w = world.offsetWidth, h = world.offsetHeight; z = Math.max(atlas.clientWidth / w, atlas.clientHeight / h) * 1.02; tx = (atlas.clientWidth - w * z) / 2; ty = (atlas.clientHeight - h * z) / 2; apply(); }
   fit();
   const onResize = () => fit(); addEventListener('resize', onResize);
-  atlas.onpointerdown = e => { if (e.target.closest('.float,.route,.pin')) return; drag = [e.clientX - tx, e.clientY - ty]; atlas.classList.add('drag'); atlas.setPointerCapture(e.pointerId); };
-  atlas.onpointermove = e => { if (!drag) return; tx = e.clientX - drag[0]; ty = e.clientY - drag[1]; apply(); };
-  atlas.onpointerup = () => { drag = null; atlas.classList.remove('drag'); };
-  atlas.onwheel = e => { if (e.target.closest('.float')) return; e.preventDefault(); const r = atlas.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
-    const nz = Math.min(3, Math.max(.35, z * (e.deltaY < 0 ? 1.12 : .89))); tx = mx - (mx - tx) * nz / z; ty = my - (my - ty) * nz / z; z = nz; apply(); };
-
+  /* масштаб вокруг точки (mx, my) в координатах карты-окна */
+  function zoomAt(mx, my, nz){ nz = Math.min(3, Math.max(.35, nz)); tx = mx - (mx - tx) * nz / z; ty = my - (my - ty) * nz / z; z = nz; apply(); }
+  /* пальцы и мышь — через pointer events: один указатель тянет, два — щипок */
+  const ptrs = new Map(); let pinch = null;
+  const local = e => { const r = atlas.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  function pinchState(){ const [a, b] = [...ptrs.values()]; return {d: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, m: [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]}; }
+  atlas.onpointerdown = e => { if (e.target.closest('.float,.route,.pin')) return;
+    ptrs.set(e.pointerId, local(e)); try { atlas.setPointerCapture(e.pointerId); } catch {}
+    if (ptrs.size === 2){ drag = null; pinch = {...pinchState(), z}; }
+    else if (ptrs.size === 1){ drag = [e.clientX - tx, e.clientY - ty]; atlas.classList.add('drag'); } };
+  atlas.onpointermove = e => { if (!ptrs.has(e.pointerId)) return; ptrs.set(e.pointerId, local(e));
+    if (pinch && ptrs.size >= 2){ const s = pinchState();
+      tx += s.m[0] - pinch.m[0]; ty += s.m[1] - pinch.m[1]; pinch.m = s.m;   // двумя пальцами можно и двигать
+      zoomAt(s.m[0], s.m[1], pinch.z * s.d / pinch.d); return; }
+    if (drag){ tx = e.clientX - drag[0]; ty = e.clientY - drag[1]; apply(); } };
+  atlas.onpointerup = atlas.onpointercancel = e => { ptrs.delete(e.pointerId); pinch = null;
+    const rest = [...ptrs.entries()][0];   // убрали один палец из двух — продолжаем тянуть оставшимся без скачка
+    if (rest){ const r = atlas.getBoundingClientRect(); drag = [rest[1][0] + r.left - tx, rest[1][1] + r.top - ty]; }
+    else { drag = null; atlas.classList.remove('drag'); } };
+  atlas.onwheel = e => { if (e.target.closest('.float')) return; e.preventDefault(); const [mx, my] = local(e); zoomAt(mx, my, z * (e.deltaY < 0 ? 1.12 : .89)); };
+  $('#zin', root).onclick = () => zoomAt(atlas.clientWidth / 2, atlas.clientHeight / 2, z * 1.3);
+  $('#zout', root).onclick = () => zoomAt(atlas.clientWidth / 2, atlas.clientHeight / 2, z / 1.3);
   $$('[data-s]', root).forEach(b => b.onclick = () => { S.season = b.dataset.s; document.body.dataset.season = S.season; $$('[data-s]', root).forEach(x => x.setAttribute('aria-pressed', x === b)); paint(); });
   $$('[data-m]', root).forEach(b => b.onclick = () => { S.mode = b.dataset.m; $$('[data-m]', root).forEach(x => x.setAttribute('aria-pressed', x === b)); paint(); });
   $('#night', root).onclick = e => { S.night = !S.night; document.body.dataset.night = S.night ? 1 : 0; e.currentTarget.setAttribute('aria-pressed', S.night); };
