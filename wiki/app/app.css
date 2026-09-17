@@ -309,6 +309,15 @@ body[data-season="autumn"] .rain{opacity:.55}
 .q:last-child{border:0}
 .q b{font-weight:500}
 .q p{margin:4px 0 0;color:#d6cec4;font-size:14px}
+.sil{margin-top:18px}
+.sil-grid{display:grid;grid-template-columns:1fr 1fr}
+.sil-grid>div{border-bottom:1px solid var(--line)}
+.sil-grid .q{border:0}
+.sil-row b small{font:12px var(--mono);color:var(--mute);margin-left:6px}
+.sil-items{margin-top:8px}
+.sil-wait{font:12px var(--mono);color:var(--mute)}
+.sil-ok{font:12px var(--mono);color:var(--sage)}
+@media (max-width:900px){.sil-grid{grid-template-columns:1fr}}
 
 /* ─── игра ─── */
 .game{height:calc(100vh - var(--top));display:grid;grid-template-rows:auto 1fr;background:#0f0d0c}

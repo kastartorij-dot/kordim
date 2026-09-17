@@ -62,7 +62,7 @@ while ($listener.IsListening) {
     } else {
       $ctx.Response.StatusCode = 404
       $msg = [System.Text.Encoding]::UTF8.GetBytes('404')
-      $ctx.Response.OutputStream.Write($msg, 0, $msg.Length)
+      if ($ctx.Request.HttpMethod -ne 'HEAD') { $ctx.Response.OutputStream.Write($msg, 0, $msg.Length) }
     }
     $ctx.Response.Close()
   } catch {
