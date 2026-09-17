@@ -38,7 +38,9 @@ for (const app of manifest.приложения) parts.push(readBody(app));
 const assembled = parts.join('\n');
 
 if (CHECK) {
-  const original = fs.readFileSync(MASTER, 'utf8');
+  // На Windows git (core.autocrlf=true) выкладывает мастер в CRLF, хотя в репозитории он LF,
+  // поэтому сравниваем без \r — иначе --check ложно падает на первой строке.
+  const original = fs.readFileSync(MASTER, 'utf8').replace(/\r/g, '');
   if (assembled === original) {
     console.log('OK: сборка из блоков совпадает с мастером байт-в-байт.');
     process.exit(0);

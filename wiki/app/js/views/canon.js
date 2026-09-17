@@ -18,7 +18,17 @@ const STATUS = {
   'канон': { label: 'канон', c: 'var(--sage)' },
   'открытый вопрос': { label: 'открытый вопрос', c: 'var(--ember)' },
   'черновик': { label: 'черновик', c: 'var(--dusk)' },
+  'заморожен': { label: 'заморожен', c: 'var(--mute)' },
 };
+
+/* статус в шапке блока бывает с пояснением: «заморожен — выведен из сюжета 15.09…».
+   Ярлык берём по слову до тире, пояснение показываем внутри раскрытого блока. */
+function statusOf(raw) {
+  const s = String(raw || 'канон');
+  const i = s.indexOf(' — ');
+  const key = (i < 0 ? s : s.slice(0, i)).trim();
+  return { ...(STATUS[key] || { label: key, c: 'var(--mute)' }), note: i < 0 ? '' : s.slice(i + 3).trim() };
+}
 
 /* лёгкий markdown: абзацы, **жирный**, `код` */
 function md(text) {
@@ -64,16 +74,17 @@ export function render(root, [param]) {
   }
 
   function card(item) {
-    const st = STATUS[item.статус] || STATUS['канон'];
+    const st = statusOf(item.статус);
     const gLabel = GROUPS.find(g => g.k === item.группа)?.label || item.группа;
     return `<article class="canon-item" data-id="${esc(canonKey(item.группа, item))}">
       <button class="canon-h">
         ${typeof item.id === 'number' || /^\d+$/.test(item.id) ? `<span class="canon-num">${esc(item.id)}</span>` : ''}
         <h3>${esc(item.title)}</h3>
-        <span class="canon-st" style="--c:${st.c}">${st.label}</span>
+        <span class="canon-st" style="--c:${st.c}"${st.note ? ` title="${esc(st.note)}"` : ''}>${esc(st.label)}</span>
         <span class="canon-part">${esc(gLabel)}</span>
       </button>
       <div class="canon-body" hidden>
+        ${st.note ? `<p class="canon-note" style="--c:${st.c}">${esc(st.label)}: ${esc(st.note)}</p>` : ''}
         ${item.ключи && item.ключи.length ? `<div class="canon-keys">${item.ключи.map(k => `<span>${esc(k)}</span>`).join('')}</div>` : ''}
         <div class="canon-text">${md(item.текст)}</div>
       </div>
@@ -90,7 +101,7 @@ export function render(root, [param]) {
 
   /* пришли по ссылке из поиска — раскрыть нужный блок и подвести к нему */
   if (param) {
-    const art = $(`.canon-item[data-id="${param}"]`, root);
+    const art = $(`.canon-item[data-id="${CSS.escape(param)}"]`, root);
     if (art) {
       $('.canon-body', art).hidden = false;
       art.classList.add('open');

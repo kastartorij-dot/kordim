@@ -630,6 +630,7 @@ a.fac::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;backg
 .canon-part{font:11px var(--mono);color:var(--mute)}
 .canon-item.open .canon-h{border-bottom:1px solid var(--line)}
 .canon-body{padding:14px 18px 18px}
+.canon-note{font:12px var(--mono);color:var(--c);border-left:2px solid var(--c);padding:2px 0 2px 10px;margin:0 0 12px}
 .canon-keys{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
 .canon-keys span{font:11px var(--mono);color:var(--mute);background:var(--raise);border-radius:20px;padding:2px 10px}
 .canon-text p{margin:0 0 10px;font-size:14px;line-height:1.6;color:#d6cec4}
