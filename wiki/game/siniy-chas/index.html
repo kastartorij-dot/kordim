@@ -144,8 +144,8 @@ button{font:inherit;color:inherit;cursor:pointer}
     <button class="b" id="btn-back" disabled style="margin-left:auto;padding:8px 12px;font-size:14px;line-height:1"
       title="Отменить последний шаг" aria-label="Отменить последний шаг">&#8592;</button>
     <button class="b px" id="btn-map" style="font-size:9px;padding:9px 12px">КАРТА</button>
-    <button class="b" id="btn-restart" style="padding:8px 11px;font-size:13px;line-height:1;background:#141824;color:#5c6478"
-      title="Начать вечер заново" aria-label="Начать вечер заново">&#8635;</button>
+    <button class="b" id="btn-settings" style="padding:8px 11px;font-size:15px;line-height:1"
+      title="Настройки" aria-label="Настройки">&#9881;</button>
   </div>
 
   <div id="scene">
@@ -1142,6 +1142,19 @@ function карта(){
   ov.querySelector('#closemap').onclick=()=>ov.remove();
 }
 
+/* ═══════════════════ НАСТРОЙКИ ═══════════════════ */
+
+function настройки(){
+  const ov=document.createElement('div');
+  ov.className='ov';
+  ov.innerHTML='<div class="ovbox"><h1>НАСТРОЙКИ</h1>'+
+    '<button class="card" id="opt-restart"><b>Начать вечер заново</b><span>Сотрёт текущий вечер и вернёт на выбор персонажа. Не отменяется.</span></button>'+
+    '<button class="b" id="opt-close" style="margin-top:6px">Закрыть</button></div>';
+  document.body.appendChild(ov);
+  ov.querySelector('#opt-restart').onclick=()=>{ ov.remove(); заново(); };
+  ov.querySelector('#opt-close').onclick=()=>ov.remove();
+}
+
 /* ═══════════════════ СТАРТ И СОХРАНЕНИЕ ═══════════════════ */
 
 function сохранить(){ try{ localStorage.setItem('siniy_chas', JSON.stringify(S)); }catch(e){} }
@@ -1162,7 +1175,7 @@ function выборПерсонажа(){
 
 $('btn-map').onclick = карта;
 $('btn-back').onclick = назад;
-$('btn-restart').onclick = заново;
+$('btn-settings').onclick = настройки;
 
 (function(){
   let сейв=null;
