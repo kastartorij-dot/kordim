@@ -121,7 +121,7 @@ button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
 #tone .lbl{font:10px var(--mono);color:var(--mute);letter-spacing:.06em}
 #tone .b{padding:6px 12px;font-size:13px;box-shadow:2px 2px 0 #000}
 #acts{display:flex;flex-direction:column;gap:7px}
-.ov.мест{padding:20px;overflow-y:auto}
+.ов.мест{padding:20px;overflow-y:auto}
 .ovbox{width:min(760px,100%);background:var(--panel);border:4px solid var(--text);
   box-shadow:0 0 0 4px var(--noch),0 0 0 8px var(--svecha),6px 6px 0 8px #000;padding:22px 24px;text-align:left}
 .ovbox h1{font:13px var(--px);color:var(--svecha);font-weight:400;margin:0 0 14px;line-height:1.7}
@@ -155,10 +155,61 @@ button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
   .ovbox{padding:16px 14px;border-width:2px;box-shadow:0 0 0 2px var(--noch),0 0 0 4px var(--svecha),3px 3px 0 4px #000}
   #mapgrid{grid-template-columns:repeat(2,1fr)}
 }
+
+/* ── этап 5: карта города, экран района, нижняя панель, экраны поверх ── */
+#панель{flex:none;height:52px;display:flex;gap:8px;padding:6px 10px;background:var(--panel);border-top:2px solid #000;z-index:30}
+#панель .b{flex:1;padding:8px 6px;font-size:10px;text-align:center}
+#панель .b.on{background:var(--svecha);color:#171308}
+#панель .b:disabled{opacity:.4;cursor:default}
+/* окна поверх города оставляют панель видимой */
+.ов:not(.меню){bottom:52px}
+.город{width:min(960px,100%);display:flex;flex-direction:column;gap:12px}
+.город-полотно{position:relative;width:100%;line-height:0;border:4px solid var(--text);background:#0f1018;overflow:hidden}
+.город-картинка{display:block;width:100%;height:auto;image-rendering:pixelated}
+.зона{position:absolute;border-radius:50%;background:transparent;border:2px dashed transparent;padding:0;cursor:pointer;z-index:2}
+.зона:hover{border-color:rgba(239,230,216,.55);background:rgba(239,230,216,.08)}
+.табличка-место{position:absolute;transform:translate(-50%,-50%);z-index:3;pointer-events:none;text-align:center;line-height:1.3}
+.табличка{display:inline-block;background:rgba(11,13,20,.86);color:var(--text);border:2px solid #000;box-shadow:2px 2px 0 #000;padding:5px 8px;font-size:9px}
+.табличка.тут{background:var(--svecha);color:#171308}
+.табличка small{display:block;font:9px var(--mono);margin-top:2px}
+.значки{display:flex;flex-direction:column;gap:2px;margin-top:4px}
+.значок{font:9px var(--mono);background:#22314f;color:#dfe8ff;padding:1px 5px}
+.туман{position:absolute;inset:0;z-index:4;pointer-events:none;
+  background:radial-gradient(60% 50% at 30% 40%,rgba(190,200,220,.35),transparent 70%),radial-gradient(60% 50% at 75% 65%,rgba(190,200,220,.30),transparent 70%),rgba(20,26,44,.45)}
+.город-кнопки{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.район-кнопка{text-align:left}
+.район-кнопка .табличка{background:none;border:0;box-shadow:none;padding:0;color:inherit;font-size:11px}
+.город-карточка{background:var(--panel);border:4px solid var(--text);padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.район-шапка{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.пан-бокс{width:min(720px,100%);max-height:100%;overflow:auto;text-align:left}
+.пан-шапка{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.пан-шапка h2{margin:0}
+.пан-блок{margin:0 0 14px}
+.пан-блок h3{font-size:10px;color:var(--sin);margin:0 0 8px;font-weight:400}
+.пан-имя{margin:0 0 12px}
+.строка-тела{display:flex;gap:12px;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.строка-тела .полоска{flex:0 0 150px;font-size:10px}
+.строка-тела .описание{flex:1;min-width:180px;font-size:14px;color:#c6cddb}
+.строка-тела.тело-0 .полоска{color:var(--krov)}
+.строка-тела.тело-1 .полоска{color:#d2a45c}
+.слот-вещи{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}
+.слот-вещи.пусто{color:var(--mute)}
+.слот-вещи .b{margin-left:auto;padding:6px 12px;font-size:10px}
+.тема-журнала{padding:6px 0;border-bottom:1px solid var(--line)}
+.тема-журнала.враньё{opacity:.55}
+.тема-журнала p{margin:4px 0 0;font-size:14px;color:#c6cddb}
+.ушла{color:var(--krov);margin-left:6px}
+.день-журнала{margin-bottom:10px}
+@media (max-width:820px){
+  .табличка{font-size:7px;padding:3px 4px}
+  .табличка small,.значок{font-size:7px}
+  .строка-тела .полоска{flex-basis:100%}
+  #панель .b{font-size:9px}
+}
 </style>
 </head>
 <body>
-<div class="плашка">Ранняя сборка · этап 4 из 9</div>
+<div class="плашка">Ранняя сборка · этап 5 из 9</div>
 <div id="hud">
   <span id="hud-день" class="px"></span>
   <span id="hud-отрезок" class="px"></span>
@@ -167,11 +218,13 @@ button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
   <span id="hud-кнопки"><button class="b" id="hud-помощь">Как играть</button><button class="b" id="hud-меню">Меню</button></span>
 </div>
 <div id="экран"></div>
+<nav id="панель"></nav>
 
 <script type="module">
 import { новоеСостояние, сохранить, загрузить } from './движок/состояние.js';
 import { рендерHUD, рендерКарту, рендерКонецДня, рендерСтарт } from './движок/экраны.js';
 import { рендерМесто } from './движок/экраны-места.js';
+import { рендерПанель } from './движок/экраны-панель.js';
 import { рендерМеню, рендерПомощь, рендерВступление, подтверждено18, рендерВзрослым } from './движок/меню.js';
 
 document.getElementById('hud-помощь').onclick = () => рендерПомощь();
@@ -189,6 +242,8 @@ function перерисовать() {
     // на старте шапка скрыта, но меню нужно (загрузить слот), поэтому прячем только показатели
     document.getElementById('hud').hidden = false;
     ['hud-день', 'hud-отрезок', 'hud-кошель', 'hud-тело'].forEach(id => document.getElementById(id).textContent = '');
+    document.getElementById('панель').innerHTML = ''; // до начала игры панели нет
+    document.querySelectorAll('.ов.пан').forEach(o => o.remove());
     рендерСтарт(началоId => {
       S = новоеСостояние(началоId);
       document.getElementById('hud').hidden = false;
@@ -200,7 +255,8 @@ function перерисовать() {
     return;
   }
   рендерHUD(S);
-  document.querySelectorAll('.ov.мест').forEach(o => o.remove());
+  рендерПанель(S, продолжить);
+  document.querySelectorAll('.ов.мест').forEach(o => o.remove());
   document.getElementById('экран').classList.toggle('в-месте', !!S.сцена && !S.мир.конецДня);
   if (S.мир.конецДня) {
     рендерКонецДня(S, продолжить);
