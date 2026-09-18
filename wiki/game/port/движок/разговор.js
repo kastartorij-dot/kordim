@@ -507,14 +507,19 @@ function тинт(S) {
   return '';
 }
 
-function тепло(S, кто) {
+function тепло(S, кто, модуль = Д(S)) {
   const р = расп(S, кто);
-  for (const т of Д(S).ЭКРАН.тепло) {
+  for (const т of модуль.ЭКРАН.тепло) {
     if (т.от !== undefined && р >= т.от) return т.текст;
     if (т.до !== undefined && р <= т.до) return т.текст;
     if (т.от === undefined && т.до === undefined) return т.текст;
   }
   return '';
+}
+
+// Отношение словами — те же слова, что в шапке разговора (для экрана «Журнал»).
+export function словоОтношения(S, кто, модуль) {
+  return тепло(S, кто, модуль);
 }
 
 export function видСцены(S) {

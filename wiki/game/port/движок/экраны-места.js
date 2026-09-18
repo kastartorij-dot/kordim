@@ -33,7 +33,7 @@ const МЕТКИ = { слышал: ' (слух)', опровергнуто: ' (�
 const читатьСцену = id => fetch(`./сцены/близость/${id}.md`).then(р => (р.ok ? р.text() : null));
 
 function убратьОверлеи() {
-  document.querySelectorAll('.ov.мест').forEach(o => o.remove());
+  document.querySelectorAll('.ов.мест').forEach(o => o.remove());
 }
 
 export function рендерМесто(S, onШаг) {
@@ -167,7 +167,7 @@ export function рендерМесто(S, onШаг) {
 function показатьИтог(S, итог, onШаг) {
   const Э = описаниеМеста(S), Ч = данныеМеста(S).СЧЁТ, сл = Э.подпись;
   const ov = document.createElement('div');
-  ov.className = 'ov мест finov';
+  ov.className = 'ов мест finov';
   ov.innerHTML = '<div class="ovbox"><h1>' + экр(итог.заг) + '</h1><p style="white-space:pre-wrap">' + экр(итог.текст) + '</p>' +
     '<h2>' + Ч.заг + '</h2><div class="fin">' +
     итог.строки.map(с => '<div class="ln"><span>' + экр(с[0]) + '</span><span>' + экр(с[1]) + '</span></div>').join('') + '</div>' +
@@ -184,7 +184,7 @@ function показатьИтог(S, итог, onШаг) {
 function показатьПлан(S) {
   const п = видПлана(S);
   const ov = document.createElement('div');
-  ov.className = 'ov мест';
+  ov.className = 'ов мест';
   ov.innerHTML = '<div class="ovbox"><h1>' + п.заг + '</h1>' +
     '<p style="color:#9aa3b5;font-size:14px">' + экр(п.вступление) + '</p>' +
     '<div id="mapgrid">' + п.клетки.map(к => '<div class="' + к.класс + '">' + экр(к.имя) + '<small>' + экр(к.подпись) + '</small></div>').join('') + '</div>' +
