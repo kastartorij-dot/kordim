@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Порт Теней</title>
-<!-- Стадия 1 «Каркас» (ГДД Мини-игра/Порт_ГДД.md, §22): выбор начала, карта
+<!-- Стадия 2 «Жизнь» (ГДД Мини-игра/Порт_ГДД.md, §22): выбор начала, карта
      пяти районов, день из четырёх отрезков, ночь, переходы, конец дня. Без картинок — подложки
      подключаются позже, экран рисуется и без них (см. движок/экраны.js). -->
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Geologica:wght@300;400;500&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -24,6 +24,13 @@ button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
 
 .b{background:var(--raise);color:var(--text);border:2px solid #000;box-shadow:3px 3px 0 #000;
    padding:11px 14px;font-family:var(--px);font-size:11px;line-height:1.5;text-align:center;cursor:pointer}
+.b:disabled{opacity:.45;cursor:default;box-shadow:none}
+.b{overflow-wrap:anywhere}
+.группа-имя{color:var(--mute);font-size:12px;margin-bottom:6px}
+.журнал{margin:0;padding-left:18px;font-size:12px;color:var(--mute);text-align:left}
+.предупр{color:var(--krov)}
+.овбокс{max-height:90vh;overflow:auto}
+.плашка{background:#0b0d14;color:var(--mute);font:10px var(--mono);text-align:center;padding:3px}
 .b:active{box-shadow:1px 1px 0 #000;transform:translate(2px,2px)}
 .b.sin{background:#22314f}
 .b.здесь{background:var(--svecha);color:#171308;cursor:default}
@@ -51,6 +58,7 @@ button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
 </style>
 </head>
 <body>
+<div class="плашка">Ранняя сборка · этап 2 из 9</div>
 <div id="hud">
   <span id="hud-день" class="px"></span>
   <span id="hud-отрезок" class="px"></span>
