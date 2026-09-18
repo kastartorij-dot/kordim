@@ -38,8 +38,19 @@ button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
 
 #hud{display:flex;align-items:center;gap:18px;padding:11px 18px;background:var(--panel);
      border-bottom:2px solid #000;font-family:var(--px);font-size:11px;flex-wrap:wrap}
-#hud-тело{display:flex;gap:6px}
-.стат{width:20px;height:20px;display:flex;align-items:center;justify-content:center;
+#hud-тело{display:flex;gap:6px;flex-wrap:wrap}
+#hud-кнопки{margin-left:auto;display:flex;gap:8px}
+#hud-кнопки .b{padding:7px 10px;font-size:9px}
+.меню-бокс{text-align:left;width:min(560px,92%)}
+.меню-бокс h2{text-align:center}
+.меню-мелко{color:var(--mute);font-size:14px}
+.слот{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.слот-кнопки{display:flex;gap:8px}
+.слот-кнопки .b,.меню-низ .b{padding:8px 10px;font-size:9px}
+.меню-низ{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+.помощь p{margin:0 0 12px;font-size:15px}
+.меню-бокс #помощь-ок{display:block;margin:6px auto 0}
+.стат{min-width:20px;height:20px;padding:0 6px;display:flex;align-items:center;justify-content:center;
       border:2px solid #000;background:var(--raise);font-family:var(--px);font-size:9px}
 .стат-0{background:var(--krov)}
 .стат-1{background:#7a5a3a}
@@ -151,6 +162,7 @@ button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
   <span id="hud-отрезок" class="px"></span>
   <span id="hud-кошель" class="mono"></span>
   <span id="hud-тело"></span>
+  <span id="hud-кнопки"><button class="b" id="hud-помощь">Как играть</button><button class="b" id="hud-меню">Меню</button></span>
 </div>
 <div id="экран"></div>
 
@@ -158,17 +170,29 @@ button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
 import { новоеСостояние, сохранить, загрузить } from './движок/состояние.js';
 import { рендерHUD, рендерКарту, рендерКонецДня, рендерСтарт } from './движок/экраны.js';
 import { рендерМесто } from './движок/экраны-места.js';
+import { рендерМеню, рендерПомощь } from './движок/меню.js';
+
+document.getElementById('hud-помощь').onclick = () => рендерПомощь();
+document.getElementById('hud-меню').onclick = () => рендерМеню(!!S, {
+  сохранитьВ: n => сохранить(S, n),
+  загрузить: n => { const З = загрузить(n); if (!З) return; S = З; сохранить(S, 'авто'); перерисовать(); },
+  заново: () => { localStorage.removeItem('порт-теней-авто'); S = null; перерисовать(); },
+  помощь: () => рендерПомощь(),
+});
 
 let S = загрузить('авто');
 
 function перерисовать() {
   if (!S) {
-    document.getElementById('hud').hidden = true;
+    // на старте шапка скрыта, но меню нужно (загрузить слот), поэтому прячем только показатели
+    document.getElementById('hud').hidden = false;
+    ['hud-день', 'hud-отрезок', 'hud-кошель', 'hud-тело'].forEach(id => document.getElementById(id).textContent = '');
     рендерСтарт(началоId => {
       S = новоеСостояние(началоId);
       document.getElementById('hud').hidden = false;
       сохранить(S, 'авто');
       перерисовать();
+      рендерПомощь(); // новичку сразу — что это и чего от него хотят
     });
     return;
   }
