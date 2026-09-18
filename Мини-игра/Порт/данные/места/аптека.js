@@ -128,6 +128,7 @@ export const АПТЕКА = {
   },
   ОТГОВОРКИ: { sibilla: "— Об этом я не знаю ничего, что стоило бы тебе сказать." },
   обмен: {
+    кто: "sibilla",
     текст: "Предложить сведения",
     подпись: "1 ход",
     запас: ["gorm_chetnye", "mayak_ogon", "kladbishche_kitov", "seraya_radost", "dorry_dvoe"],
