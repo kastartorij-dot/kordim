@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Порт Теней</title>
+<!-- Стадия 1 «Каркас» (ГДД Мини-игра/Порт_ГДД.md, §22): выбор начала, карта
+     пяти районов, день из четырёх отрезков, ночь, переходы, конец дня. Без картинок — подложки
+     подключаются позже, экран рисуется и без них (см. движок/экраны.js). -->
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Geologica:wght@300;400;500&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --noch:#0b0d14; --panel:#10131d; --raise:#1b2030; --line:#2a3145;
+  --text:#efe6d8; --mute:#7c8699; --sin:#6f8fd0; --svecha:#e0a95a; --krov:#b4614e; --trava:#8fae86;
+  --px:'Press Start 2P',monospace; --body:'Geologica',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--noch);color:var(--text);font:300 16px/1.6 var(--body);overflow:hidden;
+     display:flex;flex-direction:column;height:100vh}
+button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
+.px{font-family:var(--px);font-weight:400}
+.mono{font-family:var(--mono)}
+
+.b{background:var(--raise);color:var(--text);border:2px solid #000;box-shadow:3px 3px 0 #000;
+   padding:11px 14px;font-family:var(--px);font-size:11px;line-height:1.5;text-align:center;cursor:pointer}
+.b:active{box-shadow:1px 1px 0 #000;transform:translate(2px,2px)}
+.b.sin{background:#22314f}
+.b.здесь{background:var(--svecha);color:#171308;cursor:default}
+.b.здесь:active{box-shadow:3px 3px 0 #000;transform:none}
+
+#hud{display:flex;align-items:center;gap:18px;padding:11px 18px;background:var(--panel);
+     border-bottom:2px solid #000;font-family:var(--px);font-size:11px;flex-wrap:wrap}
+#hud-тело{display:flex;gap:6px}
+.стат{width:20px;height:20px;display:flex;align-items:center;justify-content:center;
+      border:2px solid #000;background:var(--raise);font-family:var(--px);font-size:9px}
+.стат-0{background:var(--krov)}
+.стат-1{background:#7a5a3a}
+.стат-2,.стат-3{background:var(--trava)}
+
+#экран{flex:1;overflow:auto;padding:20px;display:flex;justify-content:center}
+.карта{width:min(720px,100%);display:flex;flex-direction:column;gap:14px}
+.карта-подложка{height:180px;border:4px solid var(--text);background:linear-gradient(180deg,#151a2a,#0f1018) center/cover no-repeat}
+.карта-подпись{font-size:16px}
+.карта-описание{color:var(--mute);margin:0}
+.карта-районы{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+
+.ов{position:fixed;inset:0;background:rgba(6,8,14,.92);z-index:20;display:flex;align-items:center;justify-content:center}
+.овбокс{width:min(520px,90%);background:var(--panel);border:4px solid var(--text);padding:24px;text-align:center}
+.овбокс h2{margin-top:0}
+</style>
+</head>
+<body>
+<div id="hud">
+  <span id="hud-день" class="px"></span>
+  <span id="hud-отрезок" class="px"></span>
+  <span id="hud-кошель" class="mono"></span>
+  <span id="hud-тело"></span>
+</div>
+<div id="экран"></div>
+
+<script type="module">
+import { новоеСостояние, сохранить, загрузить } from './движок/состояние.js';
+import { рендерHUD, рендерКарту, рендерКонецДня, рендерСтарт } from './движок/экраны.js';
+
+let S = загрузить('авто');
+
+function перерисовать() {
+  if (!S) {
+    document.getElementById('hud').hidden = true;
+    рендерСтарт(началоId => {
+      S = новоеСостояние(началоId);
+      document.getElementById('hud').hidden = false;
+      сохранить(S, 'авто');
+      перерисовать();
+    });
+    return;
+  }
+  рендерHUD(S);
+  if (S.мир.конецДня) {
+    рендерКонецДня(S, продолжить);
+  } else {
+    рендерКарту(S, продолжить);
+  }
+}
+
+// Автосейв — на каждом шаге, где день закончился (ГДД §18: «в конце каждого
+// дня»); итог дня лежит в состоянии, поэтому после перезагрузки экран конца
+// дня покажется снова, а не потеряется.
+function продолжить(состояние) {
+  S = состояние;
+  if (S.мир.конецДня) сохранить(S, 'авто');
+  перерисовать();
+}
+
+перерисовать();
+</script>
+</body>
+</html>
