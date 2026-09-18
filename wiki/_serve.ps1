@@ -46,6 +46,16 @@ while ($listener.IsListening) {
     # адрес папки (/app/) открывает её index.html
     if (Test-Path $full -PathType Container) { $full = Join-Path $full 'index.html' }
 
+    # копии игр для сайта лежат в wiki/game/ (например, port/ — копия «Мини-игра/Порт»):
+    # чего нет в «Мини-игре», ищем там, чтобы ссылки вкладки «Игра» работали и локально
+    if ($base -eq $gameRoot -and -not (Test-Path $full -PathType Leaf)) {
+      $alt = [System.IO.Path]::GetFullPath((Join-Path (Join-Path $root 'game') $rel))
+      if ($alt.StartsWith([System.IO.Path]::GetFullPath((Join-Path $root 'game')))) {
+        if (Test-Path $alt -PathType Container) { $alt = Join-Path $alt 'index.html' }
+        if (Test-Path $alt -PathType Leaf) { $full = $alt }
+      }
+    }
+
     if (Test-Path $full -PathType Leaf) {
       $ext = [System.IO.Path]::GetExtension($full).ToLower()
       $type = $mime[$ext]
