@@ -32,6 +32,16 @@
         "8793"
       ],
       "port": 8793
+    },
+    {
+      "name": "repo-py",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8795"
+      ],
+      "port": 8795
     }
   ]
 }
