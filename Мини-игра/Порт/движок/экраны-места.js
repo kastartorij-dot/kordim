@@ -1,7 +1,7 @@
 // Экран места (сейчас — «Синий час»): вёрстка старой игры — фон, тинт по часам, полоска часов, портрет,
 // реплика, «КАК СКАЗАТЬ», «ЧТО ТЫ ЗНАЕШЬ», план дома, откат. Единственный файл места, что трогает DOM.
 // Что показывать и что нажимать — решает движок/разговор.js (видСцены, действияСцены).
-import { видСцены, видПлана, действияСцены, выбратьПодход, назад, вернутьсяВГород, догрузитьСцену, описаниеМеста, данныеМеста } from './разговор.js';
+import { видСцены, видПлана, действияСцены, выбратьПодход, показатьТему, назад, вернутьсяВГород, догрузитьСцену, описаниеМеста, данныеМеста } from './разговор.js';
 
 const $ = id => document.getElementById(id);
 const экр = т => String(т).replace(/&/g, '&amp;').replace(/</g, '&lt;');
@@ -27,6 +27,9 @@ function перваяКартинка(пути, ок) {
   шаг(0);
 }
 
+// Служебные пометки верности темы в панели «ЧТО ТЫ ЗНАЕШЬ».
+const МЕТКИ = { слышал: ' (слух)', опровергнуто: ' (враньё)' };
+
 const читатьСцену = id => fetch(`./сцены/близость/${id}.md`).then(р => (р.ok ? р.text() : null));
 
 function убратьОверлеи() {
@@ -49,10 +52,10 @@ export function рендерМесто(S, onШаг) {
     <div id="место">
       <div id="полоса">
         <div class="meter"><span class="lbl">${сл.вечер}</span><div class="pips">${пипсы}</div></div>
-        <div class="meter"><span class="lbl">${сл.дом}</span><span class="mono" id="дом" style="font-size:12px;color:#9fb4dd">${экр(в.дом)}</span></div>
-        <span class="mono" id="долг" style="font-size:12px;color:var(--krov)">${S.мир.места[S.сцена.место].долг ? '(долг ' + S.мир.места[S.сцена.место].долг + ')' : ''}</span>
+        ${в.дом === null ? '' : `<div class="meter"><span class="lbl">${сл.дом}</span><span class="mono" id="дом" style="font-size:12px;color:#9fb4dd">${экр(в.дом)}</span></div>
+        <span class="mono" id="долг" style="font-size:12px;color:var(--krov)">${S.мир.места[S.сцена.место].долг ? '(долг ' + S.мир.места[S.сцена.место].долг + ')' : ''}</span>`}
         <button class="b" id="назад" ${в.можноНазад ? '' : 'disabled'} style="margin-left:auto;padding:8px 12px;font-size:14px;line-height:1" title="${сл.назад}" aria-label="${сл.назад}">&#8592;</button>
-        <button class="b px" id="карта" style="font-size:9px;padding:9px 12px">${сл.карта}</button>
+        ${в.план ? `<button class="b px" id="карта" style="font-size:9px;padding:9px 12px">${сл.карта}</button>` : ''}
       </div>
       <div id="scene">
         <div id="bg"></div><div id="tint"></div><div id="scan"></div><div id="bgtag"></div>
@@ -77,8 +80,15 @@ export function рендерМесто(S, onШаг) {
   });
   $('tint').style.background = в.тинт;
 
-  $('temy').innerHTML = в.темы.length
-    ? `<div class="h">${сл.знаешь}</div>` + в.темы.map(т => `<div class="t">${экр(т)}</div>`).join('') : '';
+  // Панель тем: у слуха — «(слух)», у опровергнутого — «(враньё)» и приглушённо; нажал — текст темы в поле реплики.
+  $('temy').innerHTML = в.темы.length ? `<div class="h">${сл.знаешь}</div>` : '';
+  for (const т of в.темы) {
+    const d = document.createElement(т.можно ? 'button' : 'div');
+    d.className = 't' + (т.верность === 'опровергнуто' ? ' враньё' : '') + (т.можно ? ' жми' : '');
+    d.textContent = т.ярлык + (МЕТКИ[т.верность] ?? '');
+    if (т.можно) d.onclick = () => { if (показатьТему(S, т.id)) onШаг(S); };
+    $('temy').appendChild(d);
+  }
 
   // портрет
   const п = $('portrait');
@@ -114,8 +124,15 @@ export function рендерМесто(S, onШаг) {
       const b = document.createElement('button');
       b.className = 'b' + (ход.активен ? ' on' : '');
       b.textContent = ход.id;
-      b.onclick = () => { выбратьПодход(S, ход.id); onШаг(S); };
+      if (ход.можно) b.onclick = () => { выбратьПодход(S, ход.id); onШаг(S); };
+      else { b.disabled = true; b.title = ход.почему; }
       т.appendChild(b);
+      if (!ход.можно) {
+        const п = document.createElement('span');
+        п.className = 'lbl';
+        п.textContent = ход.почему;
+        т.appendChild(п);
+      }
     }
     if (в.любит) {
       const s = document.createElement('span');
@@ -139,7 +156,7 @@ export function рендерМесто(S, onШаг) {
   }
 
   $('назад').onclick = () => { if (назад(S)) onШаг(S); };
-  $('карта').onclick = () => показатьПлан(S);
+  if (в.план) $('карта').onclick = () => показатьПлан(S);
 
   if (в.итог) показатьИтог(S, в.итог, onШаг);
 
