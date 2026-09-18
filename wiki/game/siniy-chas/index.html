@@ -46,7 +46,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .coin{width:12px;height:12px;border-radius:50%;background:var(--svecha);border:2px solid #000}
 
 /* ── сцена ── */
-#scene{flex:1;position:relative;min-height:0;overflow:hidden}
+#scene{flex:1;position:relative;min-height:34vh;overflow:hidden}
 #bg{position:absolute;inset:0;background:linear-gradient(180deg,#151a2a,#0f1018)}
 #tint{position:absolute;inset:0;pointer-events:none;transition:background 1.2s ease}
 #scan{position:absolute;inset:0;pointer-events:none;
@@ -74,6 +74,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 #who span{font:11px var(--mono);color:var(--mute)}
 #say{margin:0 0 14px;font-size:17px;line-height:1.55;color:#e7dfd2;white-space:pre-wrap}
 #say em{color:var(--mute);font-style:italic}
+#say .my{color:var(--sin);font-style:italic}
 #tone{display:flex;gap:8px;align-items:center;margin-bottom:11px;flex-wrap:wrap}
 #tone .lbl{font:10px var(--mono);color:var(--mute);letter-spacing:.06em}
 #tone .b{padding:6px 12px;font-size:13px;box-shadow:2px 2px 0 #000}
@@ -105,16 +106,27 @@ button{font:inherit;color:inherit;cursor:pointer}
 .fin .ln{padding:8px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:14px}
 .fin .ln span:last-child{color:var(--svecha);font-family:var(--mono);font-size:13px;text-align:right}
 
+@media (max-width:430px){ #hud .ttl{display:none} }   /* на узких экранах название только мешает */
 @media (max-width:820px){
   body{font-size:15px}
-  #hud{gap:12px;padding:9px 11px}
-  #portrait{right:12px;width:132px;height:176px;font-size:9px;border-width:2px;
+  /* шапка уезжала в три ряда и съедала треть экрана */
+  #hud{gap:9px;padding:7px 9px;flex-wrap:nowrap;overflow:hidden}
+  #hud .ttl{font-size:8px}
+  #hud .meter .lbl{display:none}
+  #hud .pip{width:6px;height:9px;border-width:1px}
+  #hud #money,#hud .ttl,#hud #dom{white-space:nowrap}
+  #hud #money{font-size:11px}
+  #hud #dom{font-size:11px}
+  #hud .b{padding:7px 9px!important;font-size:11px!important}
+  #hud #btn-map{font-size:8px!important;padding:8px 8px!important}
+  #tone .b{padding:6px 10px;font-size:12px}
+  #portrait{right:10px;width:31vw;max-width:150px;height:auto;aspect-ratio:3/4;font-size:9px;border-width:2px;
     box-shadow:0 0 0 2px var(--noch),0 0 0 4px var(--sin),3px 3px 0 4px #000}
   #portrait.sprite{width:auto;height:88%;right:0;border-width:0;box-shadow:none;
     filter:drop-shadow(0 4px 16px rgba(0,0,0,.75))}
   #temy{width:150px;top:36px;left:10px}
   #temy .t{font-size:11px;padding:5px 7px}
-  #plate{margin:0 8px 8px;padding:12px 13px 13px;border-width:2px;max-height:58vh;
+  #plate{margin:0 8px 8px;padding:12px 13px 13px;border-width:2px;max-height:56vh;
     box-shadow:0 0 0 2px var(--noch),0 0 0 4px var(--sin),3px 3px 0 4px #000}
   #say{font-size:16px}
   .ovbox{padding:16px 14px;border-width:2px;box-shadow:0 0 0 2px var(--noch),0 0 0 4px var(--svecha),3px 3px 0 4px #000}
@@ -183,6 +195,49 @@ const ТЕМЫ = {
   pigment:     { ярлык:'синий пигмент' },
   muzykant:    { ярлык:'музыкант' }
 };
+
+/* Что игрок говорит вслух. Одна и та же тема звучит по-разному в зависимости
+   от тона — это и есть выбор, а не «нажать на существительное». */
+const ФРАЗЫ = {
+  ni_o_chem:   { прямо:'Ну? Как тут у вас.',
+                 мягко:'Хороший вечер. Тихо у вас.',
+                 деньгами:'Это тебе. За компанию, не за дело.' },
+  dom_pravila: { прямо:'Какие тут правила?',
+                 мягко:'Подскажешь, чего у вас не делают?',
+                 деньгами:'Это за правила. Не хочу узнавать их на своей шкуре.' },
+  ceny:        { прямо:'Сколько тут всё стоит?',
+                 мягко:'Не сочти за грубость: во сколько мне обойдётся вечер?',
+                 деньгами:'Это вперёд. Теперь скажи, на что я могу рассчитывать.' },
+  nakolki:     { прямо:'Кто тебе бил?',
+                 мягко:'Красивая работа. Сама выбирала?',
+                 деньгами:'Это за работу, которую я вижу на твоей коже.' },
+  dolgi_doma:  { прямо:'Кому этот дом должен?',
+                 мягко:'Тут тяжело с деньгами, да?',
+                 деньгами:'Это за разговор о деньгах. Так честнее.' },
+  sib:         { прямо:'Что за человек на дверях?',
+                 мягко:'Сиб у вас давно?',
+                 деньгами:'Это за пару слов о том, кто стоит на дверях.' },
+  yarna:       { прямо:'Кто такая Ярна Сотт?',
+                 мягко:'А хозяйка — она какая?',
+                 деньгами:'Это за хозяйку. Про неё, не для неё.' },
+  knigi:       { прямо:'Почему у вас нет книг?',
+                 мягко:'Вы правда ничего не записываете?',
+                 деньгами:'Это за то, чего вы не пишете.' },
+  gore:        { прямо:'Что у старшей случилось?',
+                 мягко:'Цветок на окне — он чей?',
+                 деньгами:'Это за старшую. Если можно.' },
+  pigment:     { прямо:'Откуда у вас синий пигмент?',
+                 мягко:'Синее тут повсюду. Почему именно оно?',
+                 деньгами:'Это за синее. Оно ведь не отсюда.' },
+  muzykant:    { прямо:'Кто играет?',
+                 мягко:'Хорошо играет. Давно он у вас?',
+                 деньгами:'Это ему, не тебе. Пусть сыграет своё.' }
+};
+
+function фраза(тид, подход){
+  const т = ФРАЗЫ[тид];
+  return (т && т[подход]) || (т && т['прямо']) || ТЕМЫ[тид].ярлык;
+}
 
 const ЛЮДИ = {
   sib:       { имя:'Сиб',                портрет:'siniy_chas_sib.jpg',       любит:'прямо',    место:'у двери' },
@@ -601,6 +656,12 @@ function тинт(){
   return 'linear-gradient(180deg, rgba(8,10,20,.42), rgba(4,5,10,.52))';
 }
 
+function экранируй(т){ return String(т).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+function сказать(текст, моя){
+  $('say').innerHTML = (моя ? '<span class="my">— '+экранируй(моя)+'</span>\n\n' : '')+экранируй(текст);
+}
+
 function рисоватьHUD(){
   let p='';
   for(let i=0;i<ВЕЧЕР;i++){
@@ -636,7 +697,7 @@ function рисоватьКомнату(){
   const к = КОМНАТЫ[S.комната];
   $('portrait').style.display='none';
   $('who').innerHTML = '<b>'+к.имя.toUpperCase()+'</b><span>'+часСловами()+'</span>';
-  $('say').textContent = S.реплика || к.текст;
+  сказать(S.реплика || к.текст);
   $('tone').innerHTML = '';
   const a = $('acts'); a.innerHTML='';
 
@@ -644,7 +705,7 @@ function рисоватьКомнату(){
 
   к.люди.forEach(id=>{
     a.appendChild(кнопка('Заговорить с: '+ЛЮДИ[id].имя, '', ()=>{
-      S.собеседник=id; S.реплика=''; экран();
+      S.собеседник=id; S.реплика=''; S.мояреплика=''; экран();
     }));
   });
 
@@ -694,7 +755,7 @@ function рисоватьКомнату(){
 }
 
 function дверь(a){
-  if(!S.реплика) $('say').textContent = КОМНАТЫ.krylco.текст+'\n\nВ дверях стоит человек, широкий, как створка. Он не загораживает вход — просто стоит так, что мимо не пройти.\n\n— Оружие на стол. Двадцать грошей за вход, вино отдельно.';
+  if(!S.реплика) сказать(КОМНАТЫ.krylco.текст+'\n\nВ дверях стоит человек, широкий, как створка. Он не загораживает вход — просто стоит так, что мимо не пройти.\n\n— Оружие на стол. Двадцать грошей за вход, вино отдельно.');
   if(S.ножПри){
     a.appendChild(кнопка('Сдать нож и заплатить', '20 гр.', ()=>{
       S.гроши-=ВХОД; S.ножПри=false; S.вошёл=true; применить({дом:1,распол:{sib:1}});
@@ -754,7 +815,7 @@ function рисоватьРазговор(){
   const р = расп(S.собеседник);
   const тепло = р>=3?'доверяет':(р>=1?'слушает с интересом':(р<=-1?'держит дистанцию':'терпит'));
   $('who').innerHTML = '<b>'+ч.имя.toUpperCase()+'</b><span>'+ч.место+' · '+тепло+'</span>';
-  $('say').textContent = S.реплика || вступление(S.собеседник);
+  сказать(S.реплика || вступление(S.собеседник), S.мояреплика);
 
   const t = $('tone'); t.innerHTML='<span class="lbl">КАК СКАЗАТЬ:</span>';
   ['прямо','мягко','деньгами'].forEach(п=>{
@@ -777,9 +838,9 @@ function рисоватьРазговор(){
   const a=$('acts'); a.innerHTML='';
   S.темы.forEach(тид=>{
     const было = S.спрошено.includes(S.собеседник+':'+тид+':'+S.подход);
-    a.appendChild(кнопка((было?'· ':'')+'«'+ТЕМЫ[тид].ярлык+'»', было?'уже':'1 ч.', ()=>спросить(тид)));
+    a.appendChild(кнопка((было?'· ':'')+'— '+фраза(тид, S.подход), было?'уже':'1 ч.', ()=>спросить(тид)));
   });
-  a.appendChild(кнопка('Отойти', '', ()=>{ S.собеседник=null; S.реплика=''; экран(); }));
+  a.appendChild(кнопка('Отойти', '', ()=>{ S.собеседник=null; S.реплика=''; S.мояреплика=''; экран(); }));
 }
 
 function знаетЛюбит(кто){ return (S.распол[кто]||0) >= 1; }
@@ -804,6 +865,8 @@ function спросить(тид){
 
   const ключ = кто+':'+тид+':'+S.подход;
   const повтор = S.спрошено.includes(ключ);
+
+  S.мояреплика = фраза(тид, S.подход);
 
   if(!р){
     S.реплика = ОТГОВОРКИ[кто];
