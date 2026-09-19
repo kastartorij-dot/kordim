@@ -38,7 +38,6 @@ button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
 
 #hud{display:flex;align-items:center;gap:18px;padding:11px 18px;background:var(--panel);
      border-bottom:2px solid #000;font-family:var(--px);font-size:11px;flex-wrap:wrap}
-#hud-тело{display:flex;gap:6px;flex-wrap:wrap}
 #hud-кнопки{margin-left:auto;display:flex;gap:8px}
 #hud-кнопки .b{padding:7px 10px;font-size:9px}
 .овбокс.меню-бокс{text-align:left;width:min(560px,92%)}
@@ -49,14 +48,12 @@ button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
 .слот-кнопки .b,.меню-низ .b{padding:8px 10px;font-size:9px}
 .меню-низ{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
 .помощь p{margin:0 0 12px;font-size:15px}
+.листалка{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:6px}
+.листалка .b{padding:8px 14px;font-size:12px}
+.листалка-счёт{color:var(--mute);font-size:12px}
 .вступление{white-space:pre-wrap;font-size:16px;line-height:1.65}
 .меню-бокс #вступление-дальше{display:block;margin:10px auto 0}
 .меню-бокс #помощь-ок{display:block;margin:6px auto 0}
-.стат{min-width:20px;height:20px;padding:0 6px;display:flex;align-items:center;justify-content:center;
-      border:2px solid #000;background:var(--raise);font-family:var(--px);font-size:9px}
-.стат-0{background:var(--krov)}
-.стат-1{background:#7a5a3a}
-.стат-2,.стат-3{background:var(--trava)}
 
 #экран{flex:1;overflow:auto;padding:20px;display:flex;justify-content:center}
 .карта{width:min(720px,100%);display:flex;flex-direction:column;gap:14px}
@@ -215,7 +212,6 @@ button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
   <span id="hud-день" class="px"></span>
   <span id="hud-отрезок" class="px"></span>
   <span id="hud-кошель" class="mono"></span>
-  <span id="hud-тело"></span>
   <span id="hud-кнопки"><button class="b" id="hud-помощь">Как играть</button><button class="b" id="hud-меню">Меню</button></span>
 </div>
 <div id="экран"></div>
@@ -242,16 +238,15 @@ function перерисовать() {
   if (!S) {
     // на старте шапка скрыта, но меню нужно (загрузить слот), поэтому прячем только показатели
     document.getElementById('hud').hidden = false;
-    ['hud-день', 'hud-отрезок', 'hud-кошель', 'hud-тело'].forEach(id => document.getElementById(id).textContent = '');
+    ['hud-день', 'hud-отрезок', 'hud-кошель'].forEach(id => document.getElementById(id).textContent = '');
     document.getElementById('панель').innerHTML = ''; // до начала игры панели нет
     document.querySelectorAll('.ов.пан').forEach(o => o.remove());
     рендерСтарт(началоId => {
       S = новоеСостояние(началоId);
-      document.getElementById('hud').hidden = false;
       сохранить(S, 'авто');
-      перерисовать();
-      // новичку сразу: сцена прибытия, потом — что это за игра и чего она хочет
-      рендерВступление(началоId, () => рендерПомощь());
+      // город за кадром уже готов, но экран (карта) до вступления и подсказки не перерисовываем —
+      // а шапку и нижнюю панель на время обоих окон прячет сам движок/меню.js (рендерВступление/рендерПомощь)
+      рендерВступление(началоId, () => рендерПомощь(перерисовать));
     });
     return;
   }
