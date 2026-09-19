@@ -20,8 +20,11 @@ const закрыть = () => document.querySelectorAll('.ов.меню').forEach
 // чтобы вернуть как было одной строкой и не терять навешанные на кнопки обработчики.
 function прячемГород(да) {
   const hud = document.getElementById('hud'), панель = document.getElementById('панель');
+  const шторкаТаб = document.getElementById('шторка-таб'), шторка = document.getElementById('шторка');
   if (hud) hud.hidden = да;
   if (панель) панель.style.display = да ? 'none' : '';
+  if (шторкаТаб) шторкаТаб.style.display = да ? 'none' : '';
+  if (шторка) шторка.style.display = да ? 'none' : '';
 }
 
 function подпись(с) {

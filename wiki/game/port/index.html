@@ -55,7 +55,20 @@ button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
 .меню-бокс #вступление-дальше{display:block;margin:10px auto 0}
 .меню-бокс #помощь-ок{display:block;margin:6px auto 0}
 
+#тело-макета{flex:1;display:flex;min-height:0}
 #экран{flex:1;overflow:auto;padding:20px;display:flex;justify-content:center}
+
+/* ── шторка «Герой»: слева, там, где на широком экране всё равно пусто ── */
+#шторка-таб{flex:none;writing-mode:vertical-rl;transform:rotate(180deg);padding:16px 8px;font-size:10px;border-radius:0 6px 6px 0}
+#шторка{flex:none;width:0;overflow:hidden;transition:width .18s ease;background:var(--panel);border-right:0 solid var(--text)}
+#шторка.открыта{width:min(300px,78vw);border-right-width:4px}
+#шторка-тело{width:min(300px,78vw);height:100%;overflow-y:auto;padding:16px}
+#шторка-тело .пан-имя{margin-top:0}
+/* хватает места — шторка открыта всегда сама, вкладка-таб не нужна */
+@media (min-width:1180px){
+  #шторка-таб{display:none}
+  #шторка{width:min(300px,22vw)!important;border-right-width:4px!important}
+}
 .карта{width:min(720px,100%);display:flex;flex-direction:column;gap:14px}
 .карта-подложка{height:180px;border:4px solid var(--text);background:linear-gradient(180deg,#151a2a,#0f1018) center/cover no-repeat}
 .карта-подпись{font-size:16px}
@@ -214,17 +227,24 @@ button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
   <span id="hud-кошель" class="mono"></span>
   <span id="hud-кнопки"><button class="b" id="hud-помощь">Как играть</button><button class="b" id="hud-меню">Меню</button></span>
 </div>
-<div id="экран"></div>
+<div id="тело-макета">
+  <button id="шторка-таб" class="b px">Герой ›</button>
+  <aside id="шторка"><div id="шторка-тело"></div></aside>
+  <div id="экран"></div>
+</div>
 <nav id="панель"></nav>
 
 <script type="module">
 import { новоеСостояние, сохранить, загрузить } from './движок/состояние.js';
 import { рендерHUD, рендерКарту, рендерКонецДня, рендерСтарт } from './движок/экраны.js';
 import { рендерМесто } from './движок/экраны-места.js';
-import { рендерПанель } from './движок/экраны-панель.js';
+import { рендерПанель, рендерШторку } from './движок/экраны-панель.js';
 import { рендерМеню, рендерПомощь, рендерВступление, подтверждено18, рендерВзрослым } from './движок/меню.js';
 
 document.getElementById('hud-помощь').onclick = () => рендерПомощь();
+// Открыть/закрыть вручную нужно только на узком экране — на широком шторка держится открытой
+// через CSS-медиазапрос независимо от этого класса (см. index.html, #шторка).
+document.getElementById('шторка-таб').onclick = () => document.getElementById('шторка').classList.toggle('открыта');
 document.getElementById('hud-меню').onclick = () => рендерМеню(!!S, {
   сохранитьВ: n => сохранить(S, n),
   загрузить: n => { const З = загрузить(n); if (!З) return; S = З; сохранить(S, 'авто'); перерисовать(); },
@@ -241,6 +261,9 @@ function перерисовать() {
     ['hud-день', 'hud-отрезок', 'hud-кошель'].forEach(id => document.getElementById(id).textContent = '');
     document.getElementById('панель').innerHTML = ''; // до начала игры панели нет
     document.querySelectorAll('.ов.пан').forEach(o => o.remove());
+    document.getElementById('шторка-таб').hidden = true;
+    document.getElementById('шторка').classList.remove('открыта');
+    рендерШторку(null);
     рендерСтарт(началоId => {
       S = новоеСостояние(началоId);
       сохранить(S, 'авто');
@@ -252,6 +275,8 @@ function перерисовать() {
   }
   рендерHUD(S);
   рендерПанель(S, продолжить);
+  рендерШторку(S);
+  document.getElementById('шторка-таб').hidden = false;
   document.querySelectorAll('.ов.мест').forEach(o => o.remove());
   document.getElementById('экран').classList.toggle('в-месте', !!S.сцена && !S.мир.конецДня);
   if (S.мир.конецДня) {
