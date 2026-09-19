@@ -387,7 +387,10 @@ export const КОМНАТЫ = {
     градиент: "radial-gradient(360px 300px at 35% 55%, rgba(224,169,90,.26), transparent 70%), linear-gradient(180deg,#221720,#100c12)",
     хозяйка: "niya",
     близость: {
-      сцена: "niya_1",
+      сцены: [
+        { от: 0, сцена: "niya_1" },
+        { от: 3, сцена: "niya_2" },
+      ],
       флаги: ["nsfw_niya", "вышла_niya"],
       после: "lestnica",
       распол: 1,
@@ -416,7 +419,10 @@ export const КОМНАТЫ = {
     градиент: "radial-gradient(420px 340px at 60% 40%, rgba(180,190,215,.20), transparent 72%), linear-gradient(180deg,#1b1e28,#101219)",
     хозяйка: "freya",
     близость: {
-      сцена: "freya_1",
+      сцены: [
+        { от: 0, сцена: "freya_1" },
+        { от: 3, сцена: "freya_2" },
+      ],
       флаги: ["nsfw_freya", "вышла_freya"],
       после: "lestnica",
       распол: 1,
