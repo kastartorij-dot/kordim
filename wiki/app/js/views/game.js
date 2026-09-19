@@ -5,7 +5,6 @@ export function render(root){
       <span>Текстовая игра по миру через OpenRouter. Лорбук игры причёсан под канон 13.09: контора Сайдена вместо Гильдии, марка = 10 грошей.</span>
       <span class="glinks">
         <a href="../game/port/index.html" target="_blank" rel="noopener">Порт Теней ↗</a>
-        <a href="../game/siniy-chas/index.html" target="_blank" rel="noopener">Синий час ↗</a>
         <a href="../game/Index.html" target="_blank" rel="noopener">Открыть отдельно ↗</a>
       </span></div>
     <div class="gwrap"><iframe src="../game/Index.html" title="Кордим RPG"></iframe></div>
