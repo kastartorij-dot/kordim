@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Порт — макет экрана разговора</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;600&family=JetBrains+Mono:wght@400;600&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--noch:#0b0d14;--panel:#10131d;--raise:#1b2030;--line:#2a3145;--text:#efe6d8;--mute:#7c8699;--sin:#6f8fd0;--svecha:#e0a95a;--krov:#b4614e;--trava:#8fae86;--px:'Press Start 2P',monospace;--body:'Geologica',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace}
+*{box-sizing:border-box}[hidden]{display:none!important}html,body{margin:0;height:100%}
+body{background:#05060a;color:var(--text);font:300 15px/1.55 var(--body);display:flex;justify-content:center}
+.app{width:100%;max-width:430px;height:100dvh;display:flex;flex-direction:column;background:var(--noch);border-inline:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
+:focus-visible{outline:2px solid var(--svecha);outline-offset:2px}
+.top{flex:none;display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--panel);border-bottom:1px solid var(--line);font:10px var(--px)}
+.pips{display:flex;gap:4px}.pips i{width:10px;height:10px;border:2px solid var(--svecha)}.pips i.on{background:var(--svecha)}
+.sp{flex:1}.top b{font-weight:400;color:var(--svecha)}
+.top button{padding:7px 10px;background:var(--raise);border:2px solid #000;box-shadow:2px 2px 0 #000;font:10px var(--px);text-align:center}
+.top button:disabled{opacity:.4;box-shadow:none;cursor:default}
+.demo{flex:none;display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:6px 12px;background:#0d1019;border-bottom:1px solid var(--line);font:11px var(--mono);color:var(--mute)}
+.demo button{padding:3px 8px;border:1px solid var(--line);color:var(--mute);text-align:center}
+.demo button[aria-pressed=true]{color:#171308;background:var(--svecha);border-color:var(--svecha)}
+.scene{position:relative;height:124px;flex:none;overflow:hidden;background:linear-gradient(#141a2c,#0b0d14 78%)}
+.door{position:absolute;left:16%;bottom:0;width:76px;height:92px;background:#0e1220;border:2px solid #1f2740;border-bottom:0}
+.lamp{position:absolute;top:14px;width:12px;height:12px;background:#8aa8ee;border-radius:50%;box-shadow:0 0 24px 12px #4a6ab066}
+.fig{position:absolute;left:56%;bottom:0;width:46px;height:98px}
+.fig i{position:absolute;background:#080910;box-shadow:0 0 0 1px #1c2640}
+.stone{position:absolute;inset:auto 0 0 0;height:14px;background:linear-gradient(#1a2135,#10131d)}
+.plate{position:absolute;left:12px;bottom:22px;font:9px var(--px);background:#000b;padding:5px 7px}
+.main{flex:1;min-height:0;display:flex;flex-direction:column}
+.log{flex:1;overflow:auto;padding:12px 14px 6px;scroll-behavior:smooth}
+.log>*{margin:0 0 11px}
+.nar{color:var(--mute);font-style:italic}
+.npc b,.voice b{display:block;font:400 9px var(--px);margin-bottom:5px}
+.npc b{color:var(--sin)}
+.voice{border-left:3px solid var(--c);padding-left:10px}
+.voice b{color:var(--c)}.voice span{color:#cfc8bb}
+.me{padding-left:14px}
+.roll{font:12px var(--mono);background:var(--raise);border-left:3px solid var(--c);padding:6px 10px;color:var(--mute)}
+.roll em{font-style:normal;font-weight:600}.ok{color:var(--trava)}.bad{color:var(--krov)}
+.sep{display:flex;align-items:center;gap:8px;font:11px var(--mono);color:var(--mute)}
+.sep:before,.sep:after{content:"";height:1px;background:var(--line);flex:1}
+.opts{flex:none;max-height:50%;overflow:auto;border-top:1px solid var(--line);background:var(--panel);padding:4px 6px}
+.o{display:grid;grid-template-columns:20px 1fr auto;gap:8px;align-items:start;width:100%;min-height:44px;padding:9px 8px;border-bottom:1px solid #171c2b}
+.o:hover:not(.lock){background:var(--raise)}
+.o .n{font:10px var(--px);color:var(--mute);padding-top:4px}
+.o .r{font:11px var(--mono);color:var(--svecha);white-space:nowrap;padding-top:3px}
+.o small{display:block;color:var(--mute);font-size:12px}
+.chip{display:inline-block;font:8px var(--px);padding:3px 5px;margin-right:6px;color:#111;background:var(--c);vertical-align:1px}
+.chip.line{background:none;color:var(--c);border:1px solid var(--c)}
+.o.lock{opacity:.5;cursor:default}
+.nav{flex:none;display:flex;background:var(--panel);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.nav button{flex:1;text-align:center;padding:14px 4px;font:9px var(--px);color:var(--mute)}
+.nav button[aria-selected=true]{color:var(--svecha);box-shadow:inset 0 3px var(--svecha)}
+.pane{flex:1;min-height:0;overflow:auto;padding:12px 14px}
+.grp{font:9px var(--px);color:var(--mute);margin:16px 0 4px}.grp:first-child{margin-top:2px}
+.vr{display:grid;grid-template-columns:96px 1fr;gap:3px 10px;padding:9px 0;border-bottom:1px solid var(--line);align-items:center}
+.vr .chip{margin:0;justify-self:start}
+.pp{display:flex;gap:3px;align-items:center;font:11px var(--mono);color:var(--mute)}
+.pp i{width:9px;height:9px;border:2px solid var(--c)}.pp i.on{background:var(--c)}.pp span{margin-left:6px}
+.vr small{grid-column:1/3;color:var(--mute);font-size:13px}
+.card{background:var(--panel);border:1px solid var(--line);padding:12px 14px}
+.card h3{margin:0 0 8px;font:400 10px/1.5 var(--px)}
+.card p{margin:6px 0;font-size:14px}.card p b{font-weight:600}
+</style></head><body>
+<div class="app">
+  <div class="top"><span class="pips" id="pips" aria-label="ходы"></span><span class="sp"></span><b id="gr"></b><button id="back" title="Назад" aria-label="Назад">←</button></div>
+  <div class="demo" aria-label="Что менять в макете">
+    <span>сыт</span><button data-s="1" aria-pressed="true">1</button><button data-s="3" aria-pressed="false">3</button>
+    <span>бросок</span><button data-r="успех" aria-pressed="true">успех</button><button data-r="провал" aria-pressed="false">провал</button>
+  </div>
+  <div class="scene" aria-hidden="true"><div class="door"></div><div class="lamp" style="left:12%"></div><div class="lamp" style="left:44%"></div>
+    <div class="fig"><i style="left:12px;top:0;width:22px;height:22px"></i><i style="left:2px;top:24px;width:42px;height:44px"></i><i style="left:6px;top:68px;width:14px;height:30px"></i><i style="left:26px;top:68px;width:14px;height:30px"></i></div>
+    <div class="stone"></div><div class="plate">СИБ · у двери</div></div>
+  <div class="main" id="talk"><div class="log" id="log" aria-live="polite"></div><div class="opts" id="opts"></div></div>
+  <div class="pane" id="voices" hidden></div>
+  <div class="pane" id="people" hidden></div>
+  <div class="nav" role="tablist"><button role="tab" data-t="talk" aria-selected="true">Разговор</button><button role="tab" data-t="voices" aria-selected="false">Голоса</button><button role="tab" data-t="people" aria-selected="false">Люди</button></div>
+</div>
+<script>
+const V={мера:['МЕРА','#e0a95a'],брюхо:['БРЮХО','#a67c52'],кости:['КОСТИ','#8ea0b8'],хмель:['ХМЕЛЬ','#8fae86'],жар:['ЖАР','#c86b7c'],молва:['МОЛВА','#6f8fd0'],чутьё:['ЧУТЬЁ','#9b86c9'],отец:['ОТЕЦ','#efe6d8'],дым:['ДЫМ','#7c8699']};
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+let сыт=1, исход='успех', S, H=[];
+const chip=(k,l)=>`<span class="chip${l?' line':''}" style="--c:${V[k][1]}">${V[k][0]}</span>`;
+function start(){
+  H=[]; S={ход:0,гр:47,нода:'старт',ф:{},лог:[]};
+  S.лог.push(['nar','Два фонаря над дверью забраны синим стеклом. Дождь кончился час назад, камень ещё блестит. Изнутри слышно струну и смех — негромко.']);
+  S.лог.push(['npc','Он поворачивает к тебе голову, не меняя позы. Ждёт.'+(сыт<=1?'<br><i>Взгляд задерживается на твоих руках — на том, как ты держишь сумку. Крепко. Как держат последнее.</i>':'')+'<br>— Двадцать. Вперёд. Внутри не бьют и не торгуются.']);
+  S.лог.push(['voice','мера','Пудов шесть, если по-нашему. Стоит на левой, правую бережёт. Такого не сдвинешь и не перекричишь — только объяснишь, и то коротко.']);
+  if(сыт<=1) S.лог.push(['voice','брюхо','Из-за двери тянет жареным луком. Двадцать грошей — две миски похлёбки и хлеб. Просто арифметика.']);
+  draw();
+}
+function options(){
+  if(S.нода==='конец') return [{id:'заново',t:'Начать сначала.'}];
+  const o=[{id:'pay',t:'«Держи. Двадцать.»',r:'20 гр.'}];
+  if(!S.ф.колено) o.push({id:'chk',v:'мера',t:'«Колено бережёшь. Правое.»',r:'Средне · 58%'});
+  else if(S.ф.колено==='нет') o.push({id:'lock',v:'мера',t:'«Колено бережёшь. Правое.»',why:'закрыто, пока МЕРА не вырастет'});
+  if(!S.ф.давно) o.push({id:'давно',t:'«Давно тут стоишь?»',why:'манера: прямота'});
+  if(!S.ф.деньги) o.push({id:'деньги',t:'«Это за пару слов.»',r:'5 гр.',m:1});
+  o.push({id:'leave',t:'Отойти.'});
+  return o;
+}
+function pick(id){
+  H.push(JSON.stringify(S)); const L=S.лог;
+  const me=t=>L.push(['me','— '+t]);
+  if(id==='заново'){start();return}
+  if(id==='pay'){me('Держи. Двадцать.');L.push(['nar','Он берёт монеты, не считая, и отступает в сторону. Из открытой двери тянет воском и тёплым вином.']);L.push(['sep','дальше зал «Синего часа» — макет заканчивается']);S.гр-=20;S.нода='конец'}
+  if(id==='leave'){me('Отойти.');L.push(['nar','Ты отступаешь на шаг. Он не провожает тебя взглядом.']);L.push(['sep','конец макета']);S.нода='конец'}
+  if(id==='chk'){
+    me('Колено бережёшь. Правое.');
+    if(исход==='успех'){
+      L.push(['roll','мера','МЕРА · порог 8 · мод +1 · 4+5 → 10 · <em class="ok">УСПЕХ</em>']);
+      L.push(['npc','Он опускает взгляд на ногу, потом поднимает.<br>— Мешок соли на сходне. Не мой, чужой, — и не спрашивай чей. Шесть лет.<br>Первый раз за вечер он смотрит на тебя, а не мимо.']);
+      L.push(['voice','мера','Такие ломаются раз, а помнят всю жизнь. Не дави — сам скажет.']);
+      L.push(['sep','доверие +1 · зарубка МЕРЕ · ход +1']);S.ход++;S.ф.колено='да';
+    }else{
+      L.push(['roll','мера','МЕРА · порог 8 · мод +1 · 2+3 → 6 · <em class="bad">ПРОВАЛ</em>']);
+      L.push(['voice','мера','Левое. Ты перепутал ногу. Свет от фонаря лежит вкось — бывает.']);
+      L.push(['npc','— Левое, — говорит он без выражения. — Для человека, у которого вся жизнь в сумке, глаз так себе.<br>Он не злится. Кажется, ему даже чуть весело.']);
+      L.push(['sep','факт: Сиб видел промах']);S.ф.колено='нет';
+    }
+  }
+  if(id==='давно'){me('Давно тут стоишь?');L.push(['npc','— Четвёртый год. До этого на барже, до этого нигде. Тут не врут про то, за что платят.']);
+    L.push(['voice','отец','Бренн Скарре говорил про весы то же самое. Верные весы не хвастаются. Проверь — потом верь.']);
+    L.push(['sep','Сиб отзывается на прямоту: доверие +1 · ход +1']);S.ход++;S.ф.давно=1}
+  if(id==='деньги'){me('Это за пару слов.');L.push(['npc','Ты тянешься к кошельку, и он поднимает ладонь.<br>— Мне платит дом. Убери, пока не увидели.']);
+    L.push(['voice','чутьё','У соседнего фонаря двое. Один смотрел на кошелёк, не на тебя.']);L.push(['sep','дом −1']);S.ф.деньги=1}
+  draw();
+}
+function draw(){
+  $('#pips').innerHTML=Array.from({length:6},(_,i)=>`<i class="${i<S.ход?'on':''}"></i>`).join('');
+  $('#gr').textContent=S.гр+' гр.'; $('#back').disabled=!H.length;
+  $('#log').innerHTML=S.лог.map(e=>{
+    if(e[0]==='nar')return `<p class="nar">${e[1]}</p>`;
+    if(e[0]==='npc')return `<p class="npc"><b>СИБ</b>${e[1]}</p>`;
+    if(e[0]==='voice')return `<div class="voice" style="--c:${V[e[1]][1]}"><b>${V[e[1]][0]}</b><span>${e[2]}</span></div>`;
+    if(e[0]==='me')return `<p class="me">${e[1]}</p>`;
+    if(e[0]==='roll')return `<div class="roll" style="--c:${V[e[1]][1]}">${e[2]}</div>`;
+    return `<div class="sep">${e[1]}</div>`;
+  }).join('');
+  $('#opts').innerHTML=options().map((o,i)=>`<button class="o${o.id==='lock'?' lock':''}" data-id="${o.id}" ${o.id==='lock'?'disabled':''}><span class="n">${i+1}</span><span>${o.v?chip(o.v):''}${o.m?'<span class="chip line" style="--c:#e0a95a">ДЕНЬГИ</span>':''}${o.t}${o.why?`<small>${o.why}</small>`:''}</span><span class="r">${o.r||''}</span></button>`).join('');
+  const lg=$('#log'); lg.scrollTop=lg.scrollHeight;
+  panes();
+}
+function panes(){
+  const row=(k,g,n,lab,txt)=>`<div class="vr">${chip(k)}<div class="pp" style="--c:${V[k][1]}">${[0,1,2].map(i=>`<i class="${i<n?'on':''}"></i>`).join('')}<span>${lab}</span></div><small>${txt}</small></div>`;
+  const гр=сыт<=1?1:0, зар=S.ф.колено==='да'?1:0;
+  $('#voices').innerHTML=`<div class="grp">НУЖДЫ — громкость = состояние</div>`+
+   row('брюхо','',гр,'громкость '+гр,гр?'Из-за двери тянет жареным луком.':'молчит: на 3 и 2 ничего не происходит')+
+   row('кости','',0,'громкость 0','молчит')+row('хмель','',0,'громкость 0','молчит')+row('жар','',0,'громкость 0','молчит')+
+   `<div class="grp">УМ — ступень растёт зарубками</div>`+
+   row('мера','',1,'ступень 1',`глаз на вес: вещь, человек · зарубок ${зар}/3`)+
+   row('молва','',0,'ступень 0','подтверждённых тем: 0')+row('чутьё','',1,'ступень 1','тень 0: говорит редко')+
+   `<div class="grp">ПРОШЛОЕ — раскрывается по очереди</div>`+
+   row('отец','',0,'ступень 0',S.ф.давно?'проснулся: заговорил про весы':'молчит')+row('дым','',0,'ступень 0','спит');
+  $('#people').innerHTML=`<div class="card"><h3>Сиб · у двери · тир A</h3>
+   <p><b>Манера:</b> ${S.ф.давно?'ценит прямоту':'пока не понятно'}</p>
+   <p><b>Деньги:</b> ${S.ф.деньги?'не берёт':'не проверял'}</p>
+   <p><b>Знает о тебе:</b> ${S.ф.колено==='да'?'ты угадал про колено':S.ф.колено==='нет'?'видел, как ты промахнулся с коленом':'почти ничего'}</p></div>`;
+}
+$('#opts').onclick=e=>{const b=e.target.closest('.o');if(b&&!b.disabled)pick(b.dataset.id)};
+$('#back').onclick=()=>{if(H.length){S=JSON.parse(H.pop());draw()}};
+$$('.demo [data-s]').forEach(b=>b.onclick=()=>{сыт=+b.dataset.s;$$('.demo [data-s]').forEach(x=>x.setAttribute('aria-pressed',x===b));start()});
+$$('.demo [data-r]').forEach(b=>b.onclick=()=>{исход=b.dataset.r;$$('.demo [data-r]').forEach(x=>x.setAttribute('aria-pressed',x===b));start()});
+$$('.nav button').forEach(b=>b.onclick=()=>{$$('.nav button').forEach(x=>x.setAttribute('aria-selected',x===b));['talk','voices','people'].forEach(id=>{$('#'+id).hidden=id!==b.dataset.t})});
+start();
+</script></body></html>
