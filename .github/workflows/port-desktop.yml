@@ -1,0 +1,46 @@
+name: Сборка Порта Теней для Windows
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "Порт/desktop/**"
+      - ".github/workflows/port-desktop.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    name: Windows x64
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: Порт/desktop/package-lock.json
+
+      - name: Установить Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Кэш Rust
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: Порт/desktop/src-tauri -> target
+
+      - name: Установить зависимости Tauri
+        working-directory: Порт/desktop
+        run: npm ci
+
+      - name: Собрать установщик
+        uses: tauri-apps/tauri-action@v1
+        with:
+          projectPath: Порт/desktop
+          args: --bundles nsis
+          uploadWorkflowArtifacts: true
+          workflowArtifactNamePattern: port-teney-windows-[arch]
