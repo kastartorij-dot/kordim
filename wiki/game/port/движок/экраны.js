@@ -9,9 +9,11 @@ import { можноВойти } from './разговор.js';
 
 const $ = id => document.getElementById(id);
 
-// Изображения лежат внутри проекта и работают по одному пути локально и на сайте.
-const БАЗА_ПОДЛОЖЕК = new URL('../assets/районы/', import.meta.url).href;
-const БАЗА_КАРТЫ = new URL('../assets/', import.meta.url).href;
+// Путь разный у копии на сайте и у оригинала — тот же приём, что в «Синем часе».
+const БАЗА_ПОДЛОЖЕК = location.pathname.includes('/game/')
+  ? '../../img/port/районы/'
+  : '../../wiki/img/port/районы/';
+const БАЗА_КАРТЫ = location.pathname.includes('/game/') ? '../../img/port/' : '../../wiki/img/port/';
 const КАРТА = 'карта.webp';
 
 // «Пойти» здесь больше нет: переходы только с карты (этап 5).
@@ -187,3 +189,5 @@ function подложка(районId) {
   const р = район(районId);
   return р?.подложка ? БАЗА_ПОДЛОЖЕК + р.подложка : '';
 }
+
+

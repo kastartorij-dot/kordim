@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 300" role="img" aria-label="Портрет Одвина Скарре">
+  <defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#54636b"/><stop offset="1" stop-color="#202b36"/></linearGradient></defs>
+  <path fill="url(#sky)" d="M0 0h240v300H0z"/>
+  <path fill="#87908e" opacity=".25" d="M0 84h240v26H0zM0 123h240v8H0z"/>
+  <path fill="#26333a" d="M0 206h240v94H0z"/><path fill="#3e4b4c" d="M0 237h240v63H0z"/>
+  <path fill="#151d24" d="M36 300v-34l23-38 37-18h61l33 18 21 36v36z"/>
+  <path fill="#596268" d="M65 225l29-17 26 22 24-21 31 20-17 71H79z"/>
+  <path fill="#777065" d="M94 208l25 22 25-21-5-38H98z"/>
+  <path fill="#aa8972" d="M99 174h42v32l-22 24-20-22z"/>
+  <path fill="#6f5040" d="M68 94l11-30 25-19 38-3 24 18 13 31-4 49-11 37-22 26-39 1-25-27-11-38z"/>
+  <path fill="#b8987d" d="M72 99l11-29 27-14 36 2 22 23-1 62-13 35-22 16-29-3-20-17-10-34z"/>
+  <path fill="#c9a58a" d="M85 111l24-8 44 5-5 50-17 24-26-2-16-17z"/>
+  <path fill="#3c342f" d="M70 93l7-35 28-22 38 2 29 21 8 32-15 22-7-26-19-17-31 1-17 18-5 31-13-8z"/>
+  <path fill="#242625" d="M86 117l23-4 5 5-27 5zM139 115l20 3 3 6-24-4z"/>
+  <path fill="#ece1c8" d="M91 124h17v7H91zM140 126h16v7h-16z"/>
+  <path fill="#435359" d="M98 124h6v7h-6zM146 126h6v7h-6z"/>
+  <path fill="#8c6252" d="M122 127l-5 28 14 2-4 5-18-5 5-31z"/>
+  <path fill="#694b3f" d="M109 170l18 3 16-3-12 9-17-2z"/>
+  <path fill="#e0bd9a" d="M137 111l15-18 3 3-13 19z"/>
+  <path fill="#725142" d="M70 132l8 12-1 18-9-17zM171 133l-7 13-2 18 10-15z"/>
+  <path fill="#272d30" d="M59 230l31-22 29 26-18 26-25-15-18 55H31zM177 228l-30-20-28 26 20 25 26-16 15 57h34z"/>
+  <path fill="#8b785e" d="M119 233l-18 26 17 41h12l13-41z"/>
+  <path fill="#334148" opacity=".55" d="M0 274h240v26H0z"/>
+</svg>

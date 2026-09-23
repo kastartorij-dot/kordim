@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Порт Теней</title>
-<!-- Текущий этап и открытые вопросы — в документы/Порт_ГДД.md и README.md. -->
+<!-- Стадия 2 «Жизнь» (ГДД Мини-игра/Порт_ГДД.md, §22): выбор начала, карта
+     пяти районов, день из четырёх отрезков, ночь, переходы, конец дня. Без картинок — подложки
+     подключаются позже, экран рисуется и без них (см. движок/экраны.js). -->
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Geologica:wght@300;400;500&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -56,17 +58,39 @@ button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
 #тело-макета{flex:1;display:flex;min-height:0}
 #экран{flex:1;min-width:0;overflow:auto;padding:20px;display:flex;justify-content:center}
 
-/* ── шторка «Герой»: слева, там, где на широком экране всё равно пусто ── */
-#шторка-таб{flex:none;writing-mode:vertical-rl;transform:rotate(180deg);padding:16px 8px;font-size:10px;border-radius:0 6px 6px 0}
-#шторка{flex:none;width:0;overflow:hidden;transition:width .18s ease;background:var(--panel);border-right:0 solid var(--text)}
-#шторка.открыта{width:min(300px,78vw);border-right-width:4px}
-#шторка-тело{width:min(300px,78vw);height:100%;overflow-y:auto;padding:16px}
-#шторка-тело .пан-имя{margin-top:0}
-/* хватает места — шторка открыта всегда сама, вкладка-таб не нужна */
-@media (min-width:1180px){
-  #шторка-таб{display:none}
-  #шторка{width:min(300px,22vw)!important;border-right-width:4px!important}
-}
+/* Карточка героя: раскрывается и на широком экране, и на телефоне. */
+#шторка{flex:none;width:54px;overflow:hidden;transition:width .18s ease;background:var(--panel);border-right:3px solid var(--text);display:flex;flex-direction:column;min-height:0}
+#шторка[hidden]{display:none}
+#шторка.открыта{width:min(300px,78vw)}
+#шторка-таб{flex:none;align-self:stretch;min-height:40px;padding:8px 10px;text-align:right;font:10px var(--mono);background:var(--raise);border-bottom:1px solid var(--line)}
+#шторка:not(.открыта) #шторка-таб{text-align:center;font-size:18px}
+#шторка-тело{width:min(297px,calc(78vw - 3px));height:100%;overflow-y:auto;padding:0 15px 15px}
+#шторка:not(.открыта) #шторка-тело{display:none}
+#шторка-кратко{display:none;flex-direction:column;align-items:center;gap:13px;padding-top:13px}
+#шторка:not(.открыта) #шторка-кратко{display:flex}
+.герой-шапка{display:flex;align-items:center;gap:12px;padding:15px 0;border-bottom:1px solid var(--line)}
+.герой-портрет{display:block;width:83px;height:105px;object-fit:cover;border:2px solid var(--svecha);background:#29343d;flex:none}
+.герой-имя{font-size:20px;line-height:1.2;font-weight:500}
+.герой-начало{font:11px/1.5 var(--mono);color:var(--mute);margin-top:7px}
+.герой-состояния{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:13px 0}
+.герой-состояние{min-width:0;text-align:center;border:1px solid #475164;background:var(--raise);padding:7px 2px 5px;position:relative}
+.герой-состояние svg{display:block;width:30px;height:30px;margin:auto;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.герой-состояние .состояние-имя{display:block;font:9px var(--mono);margin-top:4px}
+.герой-состояние .состояние-деления{display:flex;justify-content:center;gap:2px;margin-top:6px}
+.состояние-деления i{display:block;width:8px;height:3px;background:#444b55}
+.состояние-деления i.есть{background:currentColor}
+.герой-состояние.уровень-3{color:#dcb773}.герой-состояние.уровень-2{color:#b9b6a1}.герой-состояние.уровень-1{color:#dc9d68;border-color:#a46c4d}.герой-состояние.уровень-0{color:#dc7465;border-color:#a2504a;background:#322228}
+.герой-состояние.уровень-0:after{content:'!';position:absolute;right:3px;top:1px;font:13px var(--mono)}
+.герой-тревога{font:11px/1.5 var(--mono);color:#d5a16f;margin:0 0 11px}
+.герой-тревога strong{color:var(--text)}
+.герой-снаряжение{width:100%;margin:0 0 13px;font-size:9px!important;text-align:left!important;padding:9px!important}
+.герой-раздел{border-top:1px solid var(--line);padding:11px 0}
+.герой-раздел h3{font:9px var(--px);color:var(--sin);margin:0 0 7px}
+.герой-строка{display:flex;justify-content:space-between;gap:8px;font-size:13px;margin:5px 0}
+.герой-строка span:last-child{text-align:right;color:#aeb9c8}
+.герой-значок{width:33px;height:33px;border:1px solid #56606b;display:grid;place-items:center;color:var(--svecha)}
+.герой-значок svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@media(prefers-reduced-motion:reduce){#шторка{transition:none}}
 .карта{width:min(720px,100%);display:flex;flex-direction:column;gap:14px}
 .карта-подложка{height:180px;border:4px solid var(--text);background:linear-gradient(180deg,#151a2a,#0f1018) center/cover no-repeat}
 .карта-подпись{font-size:16px}
@@ -237,7 +261,7 @@ import { новоеСостояние, сохранить, загрузить } 
 import { рендерHUD, рендерКарту, рендерКонецДня, рендерСтарт } from './движок/экраны.js';
 import { рендерМесто } from './движок/экраны-места.js';
 import { рендерПанель, рендерШторку } from './движок/экраны-панель.js';
-import { рендерМеню, рендерГлавноеМеню, рендерПомощь, рендерВступление, подтверждено18, рендерВзрослым } from './движок/меню.js';
+import { рендерМеню, рендерПомощь, рендерВступление, подтверждено18, рендерВзрослым } from './движок/меню.js';
 
 document.getElementById('hud-помощь').onclick = () => рендерПомощь();
 // Открыть/закрыть вручную нужно только на узком экране — на широком шторка держится открытой
@@ -296,11 +320,8 @@ function продолжить(состояние) {
   перерисовать();
 }
 
-const показатьГлавноеМеню = () => рендерГлавноеМеню(!!S, {
-  продолжить: () => перерисовать(),
-  новая: () => { S = null; перерисовать(); },
-});
-if (подтверждено18()) показатьГлавноеМеню(); else рендерВзрослым(показатьГлавноеМеню);
+if (подтверждено18()) перерисовать(); else рендерВзрослым(перерисовать);
 </script>
 </body>
 </html>
+
