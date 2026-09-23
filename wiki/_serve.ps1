@@ -46,7 +46,7 @@ while ($listener.IsListening) {
     # адрес папки (/app/) открывает её index.html
     if (Test-Path $full -PathType Container) { $full = Join-Path $full 'index.html' }
 
-    # копии игр для сайта лежат в wiki/game/ (например, port/ — копия «Мини-игра/Порт»):
+    # копии игр для сайта лежат в wiki/game/ (port/ собирается из корневого «Порт»):
     # чего нет в «Мини-игре», ищем там, чтобы ссылки вкладки «Игра» работали и локально
     if ($base -eq $gameRoot -and -not (Test-Path $full -PathType Leaf)) {
       $alt = [System.IO.Path]::GetFullPath((Join-Path (Join-Path $root 'game') $rel))
