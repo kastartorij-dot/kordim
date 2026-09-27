@@ -36,7 +36,10 @@
 Нужен Node.js. Из корня репозитория:
 
 ```powershell
-Get-ChildItem Порт/тест/*.mjs | ForEach-Object { node $_.FullName }
+Get-ChildItem Порт/тест/*.mjs | ForEach-Object {
+  node $_.FullName
+  if ($LASTEXITCODE -ne 0) { throw "Провал: $($_.Name)" }
+}
 node Порт/scripts/publish.mjs
 ```
 
