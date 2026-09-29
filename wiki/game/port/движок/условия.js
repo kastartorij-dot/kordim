@@ -4,6 +4,8 @@ import { рыночныйДень, нечётныйДень } from '../данн�
 import { ступеньНомер } from './ремёсла.js';
 import { СТУПЕНИ } from './ремёсла.js';
 import { верностьТемы, ушлоК } from './знание.js';
+import { естьВещь } from './вещи.js';
+import { видОдежды } from './одежда.js';
 
 const вДиапазоне = (v, у) => v >= (у.от ?? -1e9) && v <= (у.до ?? 1e9);
 const список = v => (Array.isArray(v) ? v : [v]);
@@ -35,11 +37,11 @@ export function условие(S, у) {
   if (у.репутация && !вДиапазоне(м.репутация ?? 0, у.репутация)) return false;
   if (у.тень && !вДиапазоне(м.тень ?? 0, у.тень)) return false;
   if (у.тело) for (const [к, д] of Object.entries(у.тело)) if (!вДиапазоне(г.тело[к], д)) return false;
-  if (у.вид && !вДиапазоне(г.вид ?? 3, у.вид)) return false;
+  if (у.вид && !вДиапазоне(видОдежды(S), у.вид)) return false;
   if (у.деньги && !вДиапазоне(г.кошель, у.деньги)) return false;
   if (у.распол) for (const [кто, д] of Object.entries(у.распол)) if (!вДиапазоне(м.люди?.[кто]?.распол ?? 0, д)) return false;
-  if (у.предмет && !список(у.предмет).every(п => г.при_себе.includes(п))) return false;
-  if (у.безПредмета && список(у.безПредмета).some(п => г.при_себе.includes(п))) return false;
+  if (у.предмет && !список(у.предмет).every(п => естьВещь(S, п))) return false;
+  if (у.безПредмета && список(у.безПредмета).some(п => естьВещь(S, п))) return false;
   if (у.дом) for (const [место, д] of Object.entries(у.дом)) if (!вДиапазоне(м.места?.[место]?.дом ?? 0, д)) return false;
   return true;
 }

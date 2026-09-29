@@ -230,9 +230,11 @@ button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
 .строка-тела .описание{flex:1;min-width:180px;font-size:14px;color:#c6cddb}
 .строка-тела.тело-0 .полоска{color:var(--krov)}
 .строка-тела.тело-1 .полоска{color:#d2a45c}
-.слот-вещи{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}
+.слот-вещи{display:flex;align-items:flex-start;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}
 .слот-вещи.пусто{color:var(--mute)}
 .слот-вещи .b{margin-left:auto;padding:6px 12px;font-size:10px}
+.вещь-действия{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.вещь-действия .b{margin-left:0}
 .тема-журнала{padding:6px 0;border-bottom:1px solid var(--line)}
 .тема-журнала.враньё{opacity:.55}
 .тема-журнала p{margin:4px 0 0;font-size:14px;color:#c6cddb}
@@ -304,7 +306,7 @@ body{font-size:var(--text-body)}
 </style>
 </head>
 <body>
-<div class="плашка">Ранняя сборка · этап 5 из 9</div>
+<div class="плашка">Ранняя сборка · Порт</div>
 <div id="hud">
   <span id="hud-день" class="px"></span>
   <span id="hud-отрезок" class="px"></span>
