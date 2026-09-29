@@ -288,6 +288,14 @@ body{font-size:var(--text-body)}
 .ovbox{width:min(900px,100%)}
 .ovbox h1{font-size:var(--text-title)}
 .ovbox .b{font-size:var(--text-control)}
+.смена-экран{width:min(1040px,100%);min-height:100%;margin:auto;display:flex;align-items:center;justify-content:center}
+.смена-карточка{width:min(860px,100%);background:var(--panel);border:4px solid var(--text);padding:clamp(20px,2vw,36px);display:flex;flex-direction:column;gap:clamp(14px,1.2vw,22px)}
+.смена-карточка h1{font-size:var(--text-title);line-height:1.6;margin:0;color:var(--svecha)}
+.смена-текст{font-size:var(--text-body);line-height:1.7;white-space:pre-wrap;margin:0}
+.смена-итог{font-size:var(--text-small);color:var(--sin);margin:0;padding-left:1.4em}
+.смена-кнопки{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:clamp(10px,.9vw,18px)}
+.смена-кнопки .b{min-height:64px}
+.смена-кнопки .mono{font-size:var(--text-small);color:var(--mute)}
 @media (max-height:780px) and (min-width:821px){
   .карта-подложка{height:clamp(170px,28vh,300px)}
   .город{width:min(1280px,100%,133vh)}
@@ -312,7 +320,7 @@ body{font-size:var(--text-body)}
 
 <script type="module">
 import { новоеСостояние, сохранить, загрузить } from './движок/состояние.js';
-import { рендерHUD, рендерКарту, рендерКонецДня, рендерСтарт } from './движок/экраны.js';
+import { рендерHUD, рендерКарту, рендерСмены, рендерКонецДня, рендерСтарт } from './движок/экраны.js';
 import { рендерМесто } from './движок/экраны-места.js';
 import { рендерПанель, рендерШторку } from './движок/экраны-панель.js';
 import { рендерМеню, рендерПомощь, рендерВступление, подтверждено18, рендерВзрослым } from './движок/меню.js';
@@ -359,6 +367,8 @@ function перерисовать() {
     рендерКонецДня(S, продолжить);
   } else if (S.сцена) {
     рендерМесто(S, продолжить); // визит в место живёт, пока не нажато «Выйти в город»
+  } else if (S.мир.смена) {
+    рендерСмены(S, продолжить); // работа остаётся отдельной карточкой, пока игрок её не закроет
   } else {
     рендерКарту(S, продолжить);
   }
@@ -367,10 +377,12 @@ function перерисовать() {
 // Автосейв — на каждом шаге, где день закончился (ГДД §18: «в конце каждого
 // дня»); итог дня лежит в состоянии, поэтому после перезагрузки экран конца
 // дня покажется снова, а не потеряется.
-function продолжить(состояние) {
+function продолжить(состояние, сохранитьПослеСмены = false) {
   S = состояние;
   // Внутри места сохраняем на каждом шаге (перезагрузка вернёт в то же место), в городе — как раньше.
-  if (S.мир.конецДня || S.сцена) сохранить(S, 'авто');
+  // Незакрытая смена сохраняется, и закрытие тоже записывается, чтобы после перезагрузки
+  // не воскресал устаревший экран «Дальше».
+  if (S.мир.конецДня || S.сцена || S.мир.смена || сохранитьПослеСмены) сохранить(S, 'авто');
   перерисовать();
 }
 
