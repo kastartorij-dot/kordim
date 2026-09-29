@@ -13,6 +13,11 @@
   --noch:#0b0d14; --panel:#10131d; --raise:#1b2030; --line:#2a3145;
   --text:#efe6d8; --mute:#7c8699; --sin:#6f8fd0; --svecha:#e0a95a; --krov:#b4614e; --trava:#8fae86;
   --px:'Press Start 2P',monospace; --body:'Geologica',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+  --text-small:clamp(12px,calc(10px + .28vw),16px);
+  --text-control:clamp(13px,calc(11px + .35vw),18px);
+  --text-body:clamp(16px,calc(15px + .2vw),20px);
+  --text-title:clamp(18px,calc(16px + .4vw),26px);
+  --panel-height:clamp(56px,3.2vw,68px);
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
@@ -238,6 +243,55 @@ button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
   .табличка small,.значок{font-size:7px}
   .строка-тела .полоска{flex-basis:100%}
   #панель .b{font-size:9px}
+}
+
+/* Масштаб следует за доступной шириной окна: ноутбуки остаются компактными,
+   а широкие мониторы получают читаемые надписи и крупные рабочие области. */
+body{font-size:var(--text-body)}
+#экран{padding:clamp(12px,1.4vw,32px)}
+#hud{font-size:var(--text-control);gap:clamp(10px,1.2vw,24px);padding:clamp(10px,.9vw,20px) clamp(12px,1.4vw,28px)}
+#hud-кнопки .b,.слот-кнопки .b,.меню-низ .b{font-size:var(--text-small);padding:9px 12px}
+.плашка,.группа-имя,.журнал,.меню-мелко,.листалка-счёт{font-size:var(--text-small)}
+.b{font-size:var(--text-control)}
+.листалка .b{font-size:var(--text-small)}
+.вступление,.карта-описание,.тема-журнала p{font-size:var(--text-body)}
+.карта{width:min(1240px,100%);margin-block:auto;gap:clamp(12px,1vw,20px)}
+.карта-подложка{height:clamp(210px,32vh,420px)}
+.карта-подпись{font-size:var(--text-title)}
+.карта-районы{grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:clamp(10px,.9vw,18px)}
+.город{width:min(1900px,100%,133vh);margin-block:auto;gap:clamp(12px,1vw,20px)}
+.табличка,.табличка small,.значок,.район-кнопка .табличка{font-size:var(--text-small)}
+.значки{gap:4px;margin-top:6px}
+.значок{padding:3px 6px}
+.город-кнопки{grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:clamp(10px,.9vw,18px)}
+.город-карточка{padding:clamp(16px,1.2vw,24px);gap:12px}
+.пан-бокс{width:min(1120px,100%)}
+.пан-блок h3,.строка-тела .полоска,.слот-вещи .b{font-size:var(--text-small)}
+.строка-тела .описание,.тема-журнала p{font-size:var(--text-body)}
+#шторка{width:72px}
+#шторка-таб{font-size:var(--text-small)}
+#шторка.открыта{width:min(360px,78vw)}
+#шторка-тело{width:min(357px,calc(78vw - 3px))}
+.герой-начало,.герой-состояние .состояние-имя,.герой-тревога,.герой-раздел h3{font-size:var(--text-small)}
+.герой-снаряжение{font-size:var(--text-small)!important}
+#панель{height:var(--panel-height);gap:clamp(6px,.5vw,12px);padding:6px clamp(8px,.8vw,16px)}
+#панель .b{font-size:var(--text-control);padding:9px 8px}
+.ов:not(.меню){bottom:var(--panel-height)}
+.овбокс{width:min(760px,92%)}
+.овбокс.меню-бокс{width:min(840px,92%)}
+#полоса .meter .lbl,#bgtag,#portrait,#who span,#tone .lbl,.cost,.mroom small{font-size:var(--text-small)}
+#temy .h,#who b,.ovbox h2{font-size:var(--text-small)}
+#temy{width:min(300px,26vw)}
+#temy .t{font-size:var(--text-small)}
+#say{font-size:var(--text-body)}
+#tone .b{font-size:var(--text-small)}
+.ovbox{width:min(900px,100%)}
+.ovbox h1{font-size:var(--text-title)}
+.ovbox .b{font-size:var(--text-control)}
+@media (max-height:780px) and (min-width:821px){
+  .карта-подложка{height:clamp(170px,28vh,300px)}
+  .город{width:min(1280px,100%,133vh)}
+  #экран{padding-block:12px}
 }
 </style>
 </head>

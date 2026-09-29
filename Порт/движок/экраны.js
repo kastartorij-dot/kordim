@@ -9,11 +9,9 @@ import { можноВойти } from './разговор.js';
 
 const $ = id => document.getElementById(id);
 
-// Путь разный у копии на сайте и у оригинала — тот же приём, что в «Синем часе».
-const БАЗА_ПОДЛОЖЕК = location.pathname.includes('/game/')
-  ? '../../img/port/районы/'
-  : '../../wiki/img/port/районы/';
-const БАЗА_КАРТЫ = location.pathname.includes('/game/') ? '../../img/port/' : '../../wiki/img/port/';
+// Ресурсы лежат рядом с игрой. Путь от URL модуля работает и на сайте, и в приложении.
+const БАЗА_ПОДЛОЖЕК = new URL('../assets/районы/', import.meta.url).href;
+const БАЗА_КАРТЫ = new URL('../assets/', import.meta.url).href;
 const КАРТА = 'карта.webp';
 
 // «Пойти» здесь больше нет: переходы только с карты (этап 5).
