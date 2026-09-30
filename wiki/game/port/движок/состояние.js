@@ -84,10 +84,12 @@ export function сохранить(S, слотN) {
   const ключ = слотN === 'авто' ? `${КЛЮЧ}-авто` : слот(слотN);
   const прежнее = localStorage.getItem(ключ);
   if (прежнее && !разобрать(прежнее).можно) {
-    const резерв = `${ключ}-резерв-${Date.now()}`;
+    let резерв = `${ключ}-резерв-${Date.now()}`;
+    for (let i = 1; localStorage.getItem(резерв); i++) резерв = `${ключ}-резерв-${Date.now()}-${i}`;
     localStorage.setItem(резерв, прежнее);
   }
   localStorage.setItem(ключ, JSON.stringify(S));
+  ошибка = null;
 }
 
 function разобрать(сырое) {
@@ -103,7 +105,7 @@ function разобрать(сырое) {
 export function загрузить(слотN) {
   const ключ = слотN === 'авто' ? `${КЛЮЧ}-авто` : слот(слотN);
   const сырое = localStorage.getItem(ключ);
-  if (!сырое) return null;
+  if (!сырое) { ошибка = null; return null; }
   const р = разобрать(сырое);
   if (!р.можно) { ошибка = р.причина; return null; }
   try { ошибка = null; return мигрировать(р.S); }
