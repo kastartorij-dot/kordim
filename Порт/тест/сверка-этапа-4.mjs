@@ -30,7 +30,8 @@ const данные = new Set();
 (function обойти(v, ключ) {
   if (typeof v === 'string') данные.add(v);
   else if (Array.isArray(v)) v.forEach(x => обойти(x));
-  else if (v && typeof v === 'object') for (const [к, x] of Object.entries(v)) if (к !== 'ЭКРАН' && к !== 'КАРТИНКИ') обойти(x, к);
+  // Нора и Дана добавлены позднее: их реплики не относятся к исходному файлу этапа 4.
+  else if (v && typeof v === 'object') for (const [к, x] of Object.entries(v)) if (!['ЭКРАН', 'КАРТИНКИ', 'nora', 'dana'].includes(к)) обойти(x, к);
 })([АПТЕКА, ТАВЕРНА, БАНЯ, Object.fromEntries(Object.entries(РЕЕСТР).filter(([, т]) => т.текст))]);
 
 // ── разбор файла

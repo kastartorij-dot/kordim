@@ -99,7 +99,7 @@ for (const id of новые) {
   S.версия = 8;
   delete S.мир.свидетельства;
   мигрировать(S);
-  assert.equal(S.версия, 9);
+  assert.equal(S.версия, 10);
   assert.deepEqual(S.мир.свидетельства, []);
 }
 

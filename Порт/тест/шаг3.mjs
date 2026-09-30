@@ -13,7 +13,7 @@ const итоги = () => ({ причины: [] });
 
 {
   const S = создать();
-  assert.equal(ВЕРСИЯ, 9);
+  assert.equal(ВЕРСИЯ, 10);
   assert.equal(S.герой.одежда.база.тип, 'рабочая');
   assert.equal(S.герой.вид, 1);
   assert.equal(положить(S, 'бинт', 3), true);
@@ -35,7 +35,7 @@ const итоги = () => ({ причины: [] });
   S.герой.при_себе = ['пирог', 'нож', 'пирог'];
   S.герой.одежда = null;
   мигрировать(S);
-  assert.equal(S.версия, 9);
+  assert.equal(S.версия, 10);
   assert.deepEqual(S.герой.при_себе.map(x => x.тип), ['пирог', 'нож', 'пирог']);
   assert.equal(new Set(S.герой.при_себе.map(x => x.uid)).size, 3);
   assert.equal(естьВещь(S, 'нож'), true);
