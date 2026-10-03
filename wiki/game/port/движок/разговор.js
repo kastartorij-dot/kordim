@@ -56,6 +56,7 @@ export function выполнено(S, у, ctx = {}) {
   if (!у) return true;
   const м = М(S);
   if (у.флаг && !есть(S, у.флаг)) return false;
+  if (у.флагМира && !S.мир.флаги.includes(у.флагМира)) return false;
   if (у.нетФлага && есть(S, у.нетФлага)) return false;
   if (у.домОт !== undefined && м.дом < у.домОт) return false;
   if (у.домДо !== undefined && м.дом >= у.домДо) return false;
@@ -285,7 +286,8 @@ function финал(S, причина) {
 function посчитатьИтог(S, причина) {
   const д = Д(S), м = М(S), Ч = д.СЧЁТ;
   const с = д.ЛЮДИ;
-  const ключи = Object.keys(S.мир.люди).filter(к => typeof S.мир.люди[к].распол === 'number');
+  // только люди этого места: работы тоже пишут в S.мир.люди («старшой», «весовщик»), и им нет карточки в комнатах
+  const ключи = Object.keys(S.мир.люди).filter(к => с[к] && typeof S.мир.люди[к].распол === 'number');
   const лучший = ключи.sort((a, b) => S.мир.люди[b].распол - S.мир.люди[a].распол)[0];
   const тепло = лучший ? S.мир.люди[лучший].распол : 0;
   const ctx = { причина, тепло };

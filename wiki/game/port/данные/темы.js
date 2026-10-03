@@ -95,7 +95,9 @@ const НОВЫЕ = {
 const ЦЕННОСТИ_ДОМА = { ni_o_chem: 0, dom_pravila: 0, ceny: 0, nakolki: 0, muzykant: 0, dolgi_doma: 1, sib: 1, yarna: 1, pigment: 1, knigi: 2, gore: 2 };
 const ЛИЧНЫЕ = ['gore'];
 
-export const РЕЕСТР = { ...НОВЫЕ };
+import { ТЕМЫ_РАБОТ, ТЕМА_ПОСЛЕДСТВИЯ } from './темы-работ.js';
+
+export const РЕЕСТР = { ...НОВЫЕ, ...ТЕМЫ_РАБОТ, ...ТЕМА_ПОСЛЕДСТВИЯ };
 for (const [тид, ценность] of Object.entries(ЦЕННОСТИ_ДОМА)) {
   РЕЕСТР[тид] = { ...ТЕМЫ_ДОМА[тид], ценность, фразы: ФРАЗЫ_ДОМА[тид], ...(ЛИЧНЫЕ.includes(тид) ? { личная: true } : {}) };
 }
