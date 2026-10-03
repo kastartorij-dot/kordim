@@ -303,6 +303,25 @@ body{font-size:var(--text-body)}
   .город{width:min(1280px,100%,133vh)}
   #экран{padding-block:12px}
 }
+
+/* Диалог-граф: лента реплик, врезки голосов, строки кубиков, варианты с чипами проверок (П05) */
+#say.лента{max-height:34vh;overflow-y:auto;display:flex;flex-direction:column;gap:7px;padding-right:4px;white-space:normal}
+#say .з{font-size:16px;line-height:1.5}
+#say .з.нар{color:#b9b2a4}
+#say .з.нпс{color:#e7dfd2}
+#say .з.гер{color:var(--sin);font-style:italic}
+#say .з.вид{color:#8e97a8;font-size:14px;border-left:2px solid #4b5568;padding-left:8px}
+#say .з.гол{color:#d8d2c4;font-size:15px;border-left:3px solid var(--г,#888);padding-left:9px}
+#say .з.гол b{font:10px var(--px);font-weight:400;color:var(--г,#888);margin-right:4px}
+#say .з.бр{font:12px var(--mono);color:var(--г,#9aa3b5);padding:4px 8px;background:#1a1f2b;border:1px solid #2c3446}
+#say .з.бр.ок{border-color:#4f7a52}#say .з.бр.не{border-color:#8a4b4b}
+.b.вар .ном{color:var(--mute);margin-right:6px;font-family:var(--mono)}
+.b.вар.закреплён{opacity:.8}
+.b.вар.красная{border-color:#9b4b4b}
+.чип{font:11px var(--mono);padding:2px 7px;margin-left:8px;border:1px solid #5c6b86;color:#b9c6e4;white-space:nowrap;cursor:help}
+.чип.кр{border-color:#b26060;color:#f0b4b4}
+.b.вар .почему{display:block;font-size:12px;color:#8a93a6;margin-top:3px}
+.b.вар .разбор{display:block;font:12px var(--mono);color:#aeb8cf;margin-top:6px;white-space:normal}
 </style>
 </head>
 <body>
