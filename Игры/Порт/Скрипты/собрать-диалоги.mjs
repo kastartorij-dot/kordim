@@ -3,9 +3,9 @@ import { existsSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { МЕСТА } from '../Данные/места.js';
 import { РЕЕСТР, ФРАЗЫ_ЕМУ_ГОРОДА } from '../Данные/темы.js';
-import { ЛОР_НПС } from '../Документы/лор-для-диалогов.js';
+import { ЛОР_НПС } from '../Документы/Разработка/Шаг_10_Жители_и_разговоры/лор-для-диалогов.js';
 
-const файл = fileURLToPath(new URL('../Документы/ВСЕ_ДИАЛОГИ_НПС.md', import.meta.url));
+const файл = fileURLToPath(new URL('../Документы/Разработка/Шаг_10_Жители_и_разговоры/ВСЕ_ДИАЛОГИ_НПС.md', import.meta.url));
 const роль = {
   sib: 'Привратник дома', starshaya: 'Старшая работница', ola: 'Работница дома',
   niya: 'Работница дома', freya: 'Работница дома', povariha: 'Повариха дома', yarna: 'Хозяйка дома',

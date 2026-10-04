@@ -61,7 +61,7 @@ const КОЛОДЫ = { разгрузка: РАЗГРУЗКА, весы: ВЕС�
 // 3. Снимок текстов игры хранит проверенную редактуру отдельно от исходника другой ИИ.
 {
   const скрипт = fileURLToPath(new URL('./тексты-работ-в-md.mjs', import.meta.url));
-  const образец = fileURLToPath(new URL('../Документы/Разработка/Состояние/Шаг_5_тексты_игры.md', import.meta.url));
+  const образец = fileURLToPath(new URL('../Документы/Разработка/Шаг_05_Работы/Шаг_5_тексты_игры.md', import.meta.url));
   const выгрузка = execFileSync('node', [скрипт], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 });
   assert.equal(выгрузка.replace(/\r\n/g, '\n'), readFileSync(образец, 'utf8').replace(/\r\n/g, '\n'), 'выгрузка из игровых данных = Шаг_5_тексты_игры.md');
 }
