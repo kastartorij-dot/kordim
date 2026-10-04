@@ -8,7 +8,7 @@
         "-ExecutionPolicy",
         "Bypass",
         "-File",
-        "wiki/_serve.ps1"
+        "Порт/site/_serve.ps1"
       ],
       "port": 8791
     },
@@ -20,7 +20,7 @@
         "http.server",
         "8791",
         "--directory",
-        "wiki"
+        "Порт/site"
       ],
       "port": 8791
     },

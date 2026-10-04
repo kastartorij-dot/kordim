@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const source = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const repository = resolve(source, '..');
-const published = join(repository, 'wiki', 'game', 'port');
+const published = join(source, 'site', 'game', 'port');
 const entries = ['index.html', 'данные', 'движок', 'сцены', 'assets'];
 
 async function filesUnder(path, prefix = '') {
@@ -36,8 +36,8 @@ for (const file of sourceFiles) {
 
 if (missing.length || extra.length || different.length) {
   console.error('Копия игры не синхронна. Запусти: npm run publish');
-  if (missing.length) console.error('Нет в wiki/game/port:', missing.join(', '));
-  if (extra.length) console.error('Лишнее в wiki/game/port:', extra.join(', '));
+  if (missing.length) console.error('Нет в Порт/site/game/port:', missing.join(', '));
+  if (extra.length) console.error('Лишнее в Порт/site/game/port:', extra.join(', '));
   if (different.length) console.error('Отличается:', different.join(', '));
   process.exitCode = 1;
 } else {

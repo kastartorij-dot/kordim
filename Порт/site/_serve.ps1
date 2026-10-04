@@ -2,7 +2,7 @@
 # Запуск:  powershell -ExecutionPolicy Bypass -File _serve.ps1
 # Остановка: закрыть окно или Ctrl+C
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-# папку мини-игры ищем по её файлу, а не по имени: скрипт может читаться не в UTF-8
+# сайт и игра находятся внутри одной папки Порт/site
 $prefix = 'http://localhost:8791/'
 
 $mime = @{
@@ -29,9 +29,8 @@ while ($listener.IsListening) {
     $rel = [System.Uri]::UnescapeDataString($ctx.Request.Url.AbsolutePath).TrimStart('/')
     if ([string]::IsNullOrWhiteSpace($rel)) { $rel = 'index.html' }
 
-    # /game/… отдаётся из wiki/game/; игра «Порт» собирается туда из Порт/
+    # /game/… отдаётся из Порт/site/game/; игра «Порт» собирается туда из Порт/
     $base = $root
-    if ($rel -like 'game/*') { $rel = $rel.Substring(5) }
     $path = Join-Path $base $rel
     # не выпускаем запросы за пределы папки
     $full = [System.IO.Path]::GetFullPath($path)

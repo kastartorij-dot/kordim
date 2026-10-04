@@ -12,7 +12,7 @@ import { БАНЯ } from '../данные/места/баня.js';
 import { РЕЕСТР } from '../данные/темы.js';
 
 const ПОРТ = join(dirname(fileURLToPath(import.meta.url)), '..');
-const МД = join(ПОРТ, 'документы', 'Порт-тексты-4.md');
+const МД = join(ПОРТ, 'документы', 'архив', 'задания-этапов-2-5', 'Порт-тексты-4.md');
 const текст = fs.readFileSync(МД, 'utf8').replace(/\r\n/g, '\n');
 const строки = текст.split('\n');
 

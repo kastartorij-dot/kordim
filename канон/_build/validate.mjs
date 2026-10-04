@@ -59,11 +59,11 @@ if (fs.existsSync(PROZA)) {
   }
 }
 
-// wiki/app/data — данные сайта пишутся руками, мимо канона, и снятые формулировки туда
+// Порт/site/app/data — данные сайта пишутся руками, мимо канона, и снятые формулировки туда
 // просачиваются так же легко. canon.js и scenes.js не смотрим: они собираются из уже
 // проверенных выше блоков и прозы (в canon.js к тому же лежит журнал правок с историей отмен).
 // Мини-игру не проверяем намеренно — у неё свой лорбук и своя сессия.
-const DATA = path.join(ROOT, 'wiki', 'app', 'data');
+const DATA = path.join(ROOT, 'Порт', 'site', 'app', 'data');
 const GENERATED = new Set(['canon.js', 'scenes.js']);
 function walk(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap(d =>

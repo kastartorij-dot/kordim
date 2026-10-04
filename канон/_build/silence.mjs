@@ -9,8 +9,8 @@ import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-const DATA = path.join(ROOT, 'wiki', 'app', 'data');
-const IMG = path.join(ROOT, 'wiki', 'img');
+const DATA = path.join(ROOT, 'Порт', 'site', 'app', 'data');
+const IMG = path.join(ROOT, 'Порт', 'site', 'img');
 const load = rel => import(pathToFileURL(path.join(DATA, rel)).href);
 const img = rel => rel && fs.existsSync(path.join(IMG, rel));
 

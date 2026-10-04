@@ -1,4 +1,4 @@
-// Собирает только игровые файлы в wiki/game/port/. Документы, тесты и исходники арта
+// Собирает только игровые файлы в Порт/site/game/port/. Документы, тесты и исходники арта
 // остаются в проекте, но не попадают в публичные статические файлы.
 import { cp, mkdir, readdir, rename, rm, stat } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
@@ -6,13 +6,13 @@ import { fileURLToPath } from 'node:url';
 
 const source = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const repository = resolve(source, '..');
-const output = resolve(repository, 'wiki', 'game', 'port');
+const output = resolve(source, 'site', 'game', 'port');
 const parent = dirname(output);
 const temporary = join(parent, `.port-build-${process.pid}`);
 const backup = join(parent, `.port-backup-${process.pid}`);
 const entries = ['index.html', 'данные', 'движок', 'сцены', 'assets'];
 
-if (output !== join(repository, 'wiki', 'game', 'port') || source === repository) {
+if (output !== join(source, 'site', 'game', 'port') || source === repository) {
   throw new Error('Неверный путь сборки Порта');
 }
 for (const entry of entries) await stat(join(source, entry));

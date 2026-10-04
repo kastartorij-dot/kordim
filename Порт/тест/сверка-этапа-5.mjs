@@ -8,7 +8,7 @@ import { dirname, join } from 'node:path';
 import { ТЕЛО, ФРАКЦИИ, СТУПЕНИ, ТЕНЬ, РЕПУТАЦИЯ, В_ПОРЯДКЕ } from '../данные/состояния.js';
 import { словоРепутации } from '../движок/сводка.js';
 
-const МД = join(dirname(fileURLToPath(import.meta.url)), '..', 'документы', 'Порт-задание-5.md');
+const МД = join(dirname(fileURLToPath(import.meta.url)), '..', 'документы', 'архив', 'задания-этапов-2-5', 'Порт-задание-5.md');
 const строки = fs.readFileSync(МД, 'utf8').replace(/\r\n/g, '\n').split('\n');
 const ошибки = [];
 const плохо = с => ошибки.push(с);

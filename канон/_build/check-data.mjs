@@ -1,4 +1,4 @@
-// Проверяет данные вики (wiki/app/data) на битые перекрёстные ссылки: событие ссылается
+// Проверяет данные вики (Порт/site/app/data) на битые перекрёстные ссылки: событие ссылается
 // на несуществующего человека, фракция — на несуществующее место, и так далее. Не проверяет
 // смысл (совпадение с каноном) — только что все id, на которые ссылаются, реально существуют.
 // Ничего не чинит, только печатает отчёт.
@@ -10,7 +10,7 @@ import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-const DATA = path.join(ROOT, 'wiki', 'app', 'data');
+const DATA = path.join(ROOT, 'Порт', 'site', 'app', 'data');
 const load = rel => import(pathToFileURL(path.join(DATA, rel)).href);
 
 const { PEOPLE } = await load('people.js');

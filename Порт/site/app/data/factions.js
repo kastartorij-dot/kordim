@@ -2,7 +2,7 @@
    guarantee — чем ручается, size — силы, hooks — крючки, routes — тракты, line — линия хроники.
    archetype — грим страницы: official (по умолчанию, ровные линии) / crime (резче, штриховка) /
    wild (мягкие органичные углы). special:'herb' — штучная авторская страница вместо шаблона.
-   Картинка-баннер (если есть): wiki/img/factions/<id>.jpg */
+   Картинка-баннер (если есть): /img/factions/<id>.jpg */
 export const FACTIONS = [
   {id:'kontora', name:'Контора Сайдена', kind:'Частная контора · Столица', seat:'capital', head:['sayden','marra','sedrik'],
    color:'#d9a441', icon:'seal', guarantee:'собственным карманом', size:'~100 имён в книге',

@@ -1,4 +1,4 @@
-// Собирает проза/*.md в wiki/app/data/scenes.js для раздела «Арки».
+// Собирает проза/*.md в Порт/site/app/data/scenes.js для раздела «Арки».
 // Шапка сцены — title/event/status, plus необязательный arc. Люди, место и сюжетная линия
 // (line) НЕ дублируются — берутся из связанного события в events.js по полю event (slug).
 // arc — ключ плитки-группировки на странице «Арки»: своя история, не сюжетная линия.
@@ -16,9 +16,9 @@ import { fileURLToPath, pathToFileURL } from 'url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const PROZA = path.join(ROOT, 'проза');
-const OUT = path.join(ROOT, 'wiki', 'app', 'data', 'scenes.js');
+const OUT = path.join(ROOT, 'Порт', 'site', 'app', 'data', 'scenes.js');
 
-const { EVENTS } = await import(pathToFileURL(path.join(ROOT, 'wiki', 'app', 'data', 'events.js')).href);
+const { EVENTS } = await import(pathToFileURL(path.join(ROOT, 'Порт', 'site', 'app', 'data', 'events.js')).href);
 const eventBySlug = slug => EVENTS.find(e => e.slug === slug);
 
 function readScene(file) {
@@ -65,5 +65,5 @@ export const sceneById = id => SCENES.find(s => s.id === id);
 export const scenesOf = arc => SCENES.filter(s => s.arc === arc).sort((a, b) => a.s - b.s);
 `;
 fs.writeFileSync(OUT, out);
-console.log(`OK: ${scenes.length} сцен(ы) → wiki/app/data/scenes.js`);
+console.log(`OK: ${scenes.length} сцен(ы) → Порт/site/app/data/scenes.js`);
 for (const s of scenes) console.log(`  ${s.id} · арка «${s.arc}» · ${s.words} слов · ${s.status}`);

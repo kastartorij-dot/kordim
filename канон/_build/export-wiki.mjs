@@ -1,4 +1,4 @@
-// Экспортирует блоки канона в wiki/app/data/canon.json — для вкладки «Канон» в вики.
+// Экспортирует блоки канона в Порт/site/app/data/canon.json — для вкладки «Канон» в вики.
 // Читает манифест.json, снимает с тела служебные заголовки (они уже есть в шапке
 // блока как title/id) и строку `Ключи: ...` (она уже есть как ключи[]).
 //
@@ -10,7 +10,7 @@ import { fileURLToPath } from 'url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const KANON = path.join(ROOT, 'канон');
-const OUT = path.join(ROOT, 'wiki', 'app', 'data', 'canon.js');
+const OUT = path.join(ROOT, 'Порт', 'site', 'app', 'data', 'canon.js');
 
 function readBlock(rel) {
   // \r\n -> \n сразу: файл мог быть пересохранён редактором целиком в CRLF (в т.ч. автором
