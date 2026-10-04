@@ -3,8 +3,6 @@
 # Остановка: закрыть окно или Ctrl+C
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 # папку мини-игры ищем по её файлу, а не по имени: скрипт может читаться не в UTF-8
-$gameDir = Get-ChildItem (Split-Path -Parent $root) -Directory | Where-Object { Test-Path (Join-Path $_.FullName 'kordim-rpg-handoff.md') } | Select-Object -First 1
-$gameRoot = if ($gameDir) { $gameDir.FullName } else { $root }
 $prefix = 'http://localhost:8791/'
 
 $mime = @{
@@ -31,9 +29,9 @@ while ($listener.IsListening) {
     $rel = [System.Uri]::UnescapeDataString($ctx.Request.Url.AbsolutePath).TrimStart('/')
     if ([string]::IsNullOrWhiteSpace($rel)) { $rel = 'index.html' }
 
-    # /game/… отдаётся из папки «Мини-игра» рядом с вики
+    # /game/… отдаётся из wiki/game/; игра «Порт» собирается туда из Порт/
     $base = $root
-    if ($rel -like 'game/*') { $base = $gameRoot; $rel = $rel.Substring(5) }
+    if ($rel -like 'game/*') { $rel = $rel.Substring(5) }
     $path = Join-Path $base $rel
     # не выпускаем запросы за пределы папки
     $full = [System.IO.Path]::GetFullPath($path)
@@ -45,16 +43,6 @@ while ($listener.IsListening) {
 
     # адрес папки (/app/) открывает её index.html
     if (Test-Path $full -PathType Container) { $full = Join-Path $full 'index.html' }
-
-    # копии игр для сайта лежат в wiki/game/ (port/ собирается из корневого «Порт»):
-    # чего нет в «Мини-игре», ищем там, чтобы ссылки вкладки «Игра» работали и локально
-    if ($base -eq $gameRoot -and -not (Test-Path $full -PathType Leaf)) {
-      $alt = [System.IO.Path]::GetFullPath((Join-Path (Join-Path $root 'game') $rel))
-      if ($alt.StartsWith([System.IO.Path]::GetFullPath((Join-Path $root 'game')))) {
-        if (Test-Path $alt -PathType Container) { $alt = Join-Path $alt 'index.html' }
-        if (Test-Path $alt -PathType Leaf) { $full = $alt }
-      }
-    }
 
     if (Test-Path $full -PathType Leaf) {
       $ext = [System.IO.Path]::GetExtension($full).ToLower()

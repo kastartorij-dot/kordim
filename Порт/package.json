@@ -2,6 +2,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "publish": "node scripts/publish.mjs"
+    "publish": "node scripts/publish.mjs",
+    "check": "node scripts/check-published.mjs"
   }
 }

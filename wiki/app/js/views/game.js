@@ -1,12 +1,11 @@
-/* Мини-игра: отдельный проект в папке «Мини-игра», сервер отдаёт его по адресу /game/. */
+/* Игра «Порт Теней»: исходники лежат в Порт/, сайт получает собранную копию по адресу /game/port/. */
 export function render(root){
   root.innerHTML = `<div class="game" data-title="Игра">
     <div class="gbar"><b>Кордим RPG</b>
-      <span>Текстовая игра по миру через OpenRouter. Лорбук игры причёсан под канон 13.09: контора Сайдена вместо Гильдии, марка = 10 грошей.</span>
+      <span>Текстовая игра «Порт Теней» по миру Кордима.</span>
       <span class="glinks">
-        <a href="../game/port/index.html" target="_blank" rel="noopener">Порт Теней ↗</a>
-        <a href="../game/Index.html" target="_blank" rel="noopener">Открыть отдельно ↗</a>
+        <a href="../game/port/index.html" target="_blank" rel="noopener">Открыть отдельно ↗</a>
       </span></div>
-    <div class="gwrap"><iframe src="../game/Index.html" title="Кордим RPG"></iframe></div>
+    <div class="gwrap"><iframe src="../game/port/index.html" title="Порт Теней"></iframe></div>
   </div>`;
 }

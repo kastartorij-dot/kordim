@@ -31,6 +31,9 @@ try {
     await rename(output, backup);
     oldMoved = true;
   }
+  // На Windows каталог может оставаться видимым сразу после rename.
+  // Удаляем только уже сохранённую копию выпуска, исходники не затрагиваются.
+  await rm(output, { recursive: true, force: true });
   await rename(temporary, output);
   if (oldMoved) await rm(backup, { recursive: true });
   console.log(`Собрано: ${output}`);
