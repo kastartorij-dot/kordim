@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кордим · Б2 · Мягкий пиксель</title>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=PT+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#1c1a22; --stone:#2a2731; --stone-2:#35313d; --mortar:#121016;
+  --parch:#ece2cb; --dust:#aaa08e;
+  --torch:#e8a14a; --blood:#b8504a; --moss:#86a35c; --river:#6c96b0;
+  --px:'Pixelify Sans',monospace;      /* только заголовки и цифры */
+  --body:'PT Sans',system-ui,sans-serif; /* читаемый текст */
+  --px-amt:3;                           /* толщина ступеньки рамки */
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--night);color:var(--parch);font:17px/1.5 var(--body)}
+body{min-height:100vh;background:radial-gradient(1200px 600px at 30% 0%,#26222d,var(--night))}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--torch);outline-offset:2px}
+/* рамка «игрового окна»: ступенчатые углы, но сама панель гладкая */
+.win{background:linear-gradient(180deg,var(--stone-2),var(--stone) 40px);border-radius:3px;position:relative;
+  box-shadow:0 0 0 2px var(--mortar),0 0 0 4px #4a4452,0 0 0 6px var(--mortar),0 18px 40px rgba(0,0,0,.45)}
+.win>h2{margin:0;padding:10px 16px;font:700 14px var(--px);letter-spacing:.1em;color:var(--torch);border-bottom:2px solid var(--mortar);display:flex;justify-content:space-between;align-items:center}
+.win>h2 small{font:500 12px var(--px);color:var(--dust);letter-spacing:.04em}
+.scan{position:fixed;inset:0;pointer-events:none;z-index:80;background:repeating-linear-gradient(0deg,rgba(0,0,0,calc(var(--crt,0)*.22)) 0 1px,transparent 1px 3px)}
+
+header{display:flex;align-items:center;gap:14px;padding:18px 24px}
+.logo{font:700 22px var(--px);color:var(--torch);letter-spacing:.08em;text-shadow:3px 3px 0 var(--mortar)}
+.tabs{display:flex;gap:8px}
+.tab{all:unset;cursor:pointer;padding:6px 14px;font:700 15px var(--px);color:var(--dust);background:var(--mortar);border-radius:2px}
+.tab[aria-selected="true"]{background:var(--torch);color:var(--mortar)}
+.tune{margin-left:auto;display:flex;gap:16px;align-items:center;padding:8px 14px;font:500 13px var(--px);color:var(--dust)}
+.tune input[type=range]{width:120px;accent-color:var(--torch)}
+.tune b{color:var(--torch);min-width:74px;display:inline-block}
+.tune label{display:flex;gap:8px;align-items:center}
+.others{font:500 13px var(--px);color:var(--dust)}.others a{color:var(--river)}
+
+.view{display:none;padding:6px 24px 30px}.view.on{display:grid}
+#sheet{grid-template-columns:300px 1fr 330px;gap:26px;align-items:start}
+
+.pf{padding:14px}
+.pf .frame{position:relative;aspect-ratio:3/4;background:#000;overflow:hidden;border-radius:2px;box-shadow:inset 0 0 0 2px var(--mortar)}
+.pf img,.pf canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 22%}
+.pf canvas{image-rendering:pixelated}
+.pf .name{margin:12px 0 2px;font:700 26px var(--px);text-shadow:3px 3px 0 var(--mortar)}
+.pf .role{color:var(--torch);font:500 15px var(--px)}
+.stats{margin-top:14px;display:grid;gap:9px}
+.stat{display:grid;grid-template-columns:86px 1fr 20px;gap:8px;align-items:center;font:500 14px var(--px);color:var(--dust)}
+.pips{display:grid;grid-template-columns:repeat(10,1fr);gap:2px;height:12px}
+.pips i{background:var(--mortar);border-radius:1px;transition:background .2s}
+.pips i.f{background:var(--moss)}.stat.warm .pips i.f{background:var(--torch)}.stat.hot .pips i.f{background:var(--blood)}
+.stat em{font-style:normal;color:var(--parch);text-align:right}
+
+.lore{padding:0}
+.lore .in{padding:16px 22px 20px}
+.lore h3{font:700 15px var(--px);color:var(--torch);margin:18px 0 6px;letter-spacing:.06em}
+.lore h3:first-child{margin-top:0}
+.lore p{margin:0 0 10px}
+.hl{color:var(--torch)}.q{color:var(--blood);font-style:italic}
+
+.side{display:grid;gap:26px}
+.slots{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:14px}
+.slot{all:unset;aspect-ratio:1;display:grid;place-items:center;font-size:22px;background:var(--mortar);cursor:pointer;position:relative;border-radius:2px;box-shadow:inset 2px 2px 0 #000,inset -2px -2px 0 #3c3844;transition:transform .15s}
+.slot:hover,.slot:focus-visible,.slot.on{box-shadow:inset 0 0 0 2px var(--torch);transform:translateY(-2px)}
+.slot.debt::after{content:"";position:absolute;right:4px;top:4px;width:6px;height:6px;background:var(--blood)}
+.slot.new{animation:pop .5s steps(5)}
+@keyframes pop{0%{transform:scale(.2)}60%{transform:scale(1.2)}100%{transform:none}}
+.slot.empty{opacity:.4;cursor:default}
+.tip{margin:0 14px 14px;padding:10px 12px;background:var(--mortar);min-height:72px;font-size:15px;border-radius:2px}
+.tip b{color:var(--torch);font-family:var(--px);font-weight:500}
+
+/* разговор внизу, как в игре */
+.talk{grid-column:1/-1;display:grid;grid-template-columns:110px 1fr;gap:16px;padding:14px 18px}
+.talk canvas,.talk img{width:110px;height:110px;object-fit:cover;object-position:50% 22%;image-rendering:pixelated;border-radius:2px;box-shadow:0 0 0 2px var(--mortar)}
+.chat-log{max-height:170px;overflow:auto;display:grid;gap:4px;padding-right:6px}
+.msg{font-size:17px}
+.msg.them b{font:700 14px var(--px);color:var(--torch);margin-right:8px}
+.msg.me{color:var(--river)}.msg.me::before{content:"▸ "}
+.msg.sys{color:var(--dust);font-style:italic}
+.chat-opts{display:grid;gap:4px;margin-top:10px}
+.chat-opts button{all:unset;cursor:pointer;padding:5px 10px;font-size:16px;color:var(--parch);border-left:3px solid transparent}
+.chat-opts button::before{content:counter(o) ". ";color:var(--dust);font-family:var(--px)}
+.chat-opts{counter-reset:o}.chat-opts button{counter-increment:o}
+.chat-opts button:hover,.chat-opts button:focus-visible{background:rgba(232,161,74,.12);border-left-color:var(--torch)}
+
+/* карта */
+#map{grid-template-columns:1fr 340px;gap:26px;align-items:start}
+.mapin{padding:12px}
+.map{position:relative;aspect-ratio:1280/698;background:#000;overflow:hidden}
+.map img,.map canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.map canvas{image-rendering:pixelated}
+.map svg{position:absolute;inset:0;width:100%;height:100%}
+.route{fill:none;stroke:var(--parch);stroke-width:3;vector-effect:non-scaling-stroke;stroke-dasharray:8 6;opacity:.55;cursor:pointer;animation:march 1s linear infinite}
+@keyframes march{to{stroke-dashoffset:-14}}
+.route.water{stroke:var(--river)}.route.rough{stroke:var(--blood)}
+.route.sel{stroke:var(--torch);opacity:1;stroke-width:5}
+.flow{display:none}
+.pin{position:absolute;transform:translate(-50%,-50%);border:0;padding:0;background:none}
+.pin i{display:block;width:12px;height:12px;background:var(--parch);box-shadow:2px 2px 0 var(--mortar)}
+.pin span{position:absolute;left:16px;top:-9px;white-space:nowrap;font:700 15px var(--px);text-shadow:2px 2px 0 #000}
+.horse{position:absolute;transform:translate(-50%,-80%);font-size:26px;filter:drop-shadow(2px 2px 0 #000);pointer-events:none;transition:left .1s linear,top .1s linear}
+.jr{padding:0}.jr .in{padding:16px}
+.day{font:700 40px var(--px);line-height:1;margin:6px 0}
+.day small{font:500 14px var(--px);color:var(--dust)}
+.btn{all:unset;cursor:pointer;display:inline-block;padding:8px 14px;background:var(--torch);color:var(--mortar);font:700 16px var(--px);box-shadow:3px 3px 0 var(--mortar)}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--mortar)}
+.log{margin-top:12px;background:var(--mortar);padding:10px;height:180px;overflow:auto;font-size:15px;color:var(--dust);border-radius:2px}
+.log .bad{color:#e08a82}.log .ok{color:var(--moss)}
+select{background:var(--mortar);color:var(--parch);border:0;padding:6px;font:500 14px var(--px);width:100%;margin-top:8px}
+@media (max-width:1150px){#sheet{grid-template-columns:1fr 1fr}.side{grid-column:1/-1;grid-template-columns:1fr 1fr}#map{grid-template-columns:1fr}}
+@media (max-width:700px){#sheet{grid-template-columns:1fr}.side{grid-template-columns:1fr}.tune{display:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="scan" id="scan"></div>
+<header>
+  <div class="logo">КОРДИМ</div>
+  <div class="tabs" role="tablist"><button class="tab" data-v="sheet" aria-selected="true">Персонаж</button><button class="tab" data-v="map" aria-selected="false">Карта</button></div>
+  <div class="tune win">
+    <label>Пиксель <input type="range" id="amt" min="0" max="4" value="1" aria-label="Сила пикселизации"> <b id="amtl"></b></label>
+    <label><input type="checkbox" id="crt"> строки ЭЛТ</label>
+  </div>
+  <div class="others"><a href="v1-dossier.html">В1</a> · <a href="v2-atlas.html">В2</a> · <a href="v3-chronicle.html">В3</a> · Б2</div>
+</header>
+
+<section class="view on" id="sheet">
+  <div class="win pf">
+    <div class="frame"><img src="../Изображения/Лица/elowen.jpg" alt="Элоуэн" id="pfImg"><canvas id="pfCv" data-ratio="1.3333" hidden></canvas></div>
+    <div class="name">Элоуэн</div><div class="role">«Игла» · хирург · 29</div>
+    <div class="stats" id="stats"></div>
+  </div>
+
+  <div class="win lore"><h2>ЗАПИСЬ <small>Ошерск · Приречье</small></h2><div class="in">
+    <h3>Кто она</h3>
+    <p>Полевой хирург, <span class="hl">изгнанница Алхимической Ложи</span>. Живёт в подвале «Утопленника» под крышей Крайма Руфуса и штопает его людей без вопросов.</p>
+    <p>Пахнет спиртом, кровью и сушёным болотным маком. На левом запястье — химический ожог, метка изгнания.</p>
+    <h3>Две встречи с Никто</h3>
+    <p><span class="hl">1021, Столица.</span> Двор бывшей дубильни. Позвала его посмотреть руку в среду. В среду двор был пуст — за ней пришла Ложа.</p>
+    <p><span class="hl">1023, Ошерск.</span> Он принёс на спине раненого и узнал её на пороге. <span class="q">«Ты».</span> Микстуру взяла в долг.</p>
+    <h3>Чего не знает</h3>
+    <p>Об Образце №4 не слышала. Имени алхимика и места лаборатории не знает.</p>
+  </div></div>
+
+  <div class="side">
+    <div class="win"><h2>ВЕЩИ <small id="cnt"></small></h2><div class="slots" id="items"></div></div>
+    <div class="win"><h2>ДОЛГИ И ОБЕЩАНИЯ</h2><div class="slots" id="debts"></div><div class="tip" id="tip">Наведи на ячейку.</div></div>
+  </div>
+
+  <div class="win talk"><div><img src="../Изображения/Лица/elowen.jpg" alt="" id="tImg"><canvas id="tCv" data-ratio="1" hidden></canvas></div><div id="chat"></div></div>
+</section>
+
+<section class="view" id="map">
+  <div class="win mapin"><div class="map" id="mapbox"><img src="../Изображения/Карты/kordim.jpg" alt="Карта" id="mImg"><canvas id="mCv" data-ratio="0.5453" hidden></canvas><svg viewBox="0 0 100 100" preserveAspectRatio="none" id="svg"></svg><div class="horse" id="horse" hidden>🐴</div></div></div>
+  <div class="win jr"><h2>ДОРОГА</h2><div class="in" id="jr"></div></div>
+</section>
+
+<script src="shared.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+/* 0 — без пикселя, 4 — жёсткий */
+const LEVELS=[null,{size:220,levels:0,label:'лёгкий'},{size:140,levels:8,label:'средний'},{size:96,levels:6,label:'заметный'},{size:64,levels:4,label:'жёсткий'}];
+const TARGETS=[['#pfImg','#pfCv',1],['#tImg','#tCv',.5],['#mImg','#mCv',3.2]];
+function applyPixel(){const L=LEVELS[+$('#amt').value];$('#amtl').textContent=L?L.label:'выключен';
+  TARGETS.forEach(([im,cv,mul])=>{const img=$(im),c=$(cv);if(!L){img.hidden=false;c.hidden=true;return}
+    img.hidden=true;c.hidden=false;pixelate(img.getAttribute('src'),c,{size:Math.round(L.size*mul),levels:L.levels,focusY:.22})})}
+$('#amt').oninput=applyPixel;applyPixel();
+$('#crt').onchange=e=>$('#scan').style.setProperty('--crt',e.target.checked?1:0);
+
+$('#stats').innerHTML=ELOWEN.stats.map(s=>'<div class="stat '+(s.tone||'')+'"><span>'+s.k+'</span><div class="pips">'+'<i></i>'.repeat(10)+'</div><em>'+s.v+'</em></div>').join('');
+document.querySelectorAll('.stat').forEach((el,i)=>el.querySelectorAll('i').forEach((x,k)=>setTimeout(()=>x.classList.toggle('f',k<ELOWEN.stats[i].v),200+k*55+i*90)));
+
+const tip=$('#tip');
+function slot(it,box,cls=''){const b=document.createElement('button');b.className='slot '+cls;b.textContent=it.i;
+  const show=()=>{document.querySelectorAll('.slot').forEach(s=>s.classList.remove('on'));b.classList.add('on');tip.innerHTML='<b>'+it.n+'</b><br>'+it.t};
+  b.onmouseenter=show;b.onfocus=show;b.onclick=show;box.appendChild(b);return b}
+ELOWEN.items.forEach(it=>slot(it,$('#items')));for(let k=ELOWEN.items.length;k<10;k++){const e=document.createElement('div');e.className='slot empty';$('#items').appendChild(e)}
+$('#cnt').textContent=ELOWEN.items.length+'/10';
+ELOWEN.debts.forEach(it=>slot(it,$('#debts'),'debt'));
+for(let k=0;k<4;k++){const e=document.createElement('div');e.className='slot empty';$('#debts').appendChild(e)}
+mountChat($('#chat'),{onGain:g=>{const empty=$('#debts .slot.empty');const b=slot(g,$('#debts'),'debt new');if(empty)$('#debts').insertBefore(b,empty)}});
+addEventListener('keydown',e=>{if(/^[1-9]$/.test(e.key)){const b=document.querySelectorAll('.chat-opts button')[+e.key-1];b&&b.click()}});
+
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',x===b));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id===b.dataset.v))});
+
+const svg=$('#svg');let cur=1,stop=null;
+drawRoutes(svg,i=>{cur=i;pick()});drawPins($('#mapbox'));
+function pick(){stop&&stop();$('#horse').hidden=true;markRoute(svg,cur);const r=ROUTES[cur],d=Math.round(daysFor(r,'autumn','horse'));
+  $('#jr').innerHTML='<div style="font:700 20px var(--px)">'+r.n+'</div><div style="color:var(--dust)">'+r.e+'</div><select id="sel">'+ROUTES.map((x,i)=>'<option value="'+i+'"'+(i===cur?' selected':'')+'>'+x.n+'</option>').join('')+'</select><div class="day" id="day">0<small> / '+d+' дн. осенью верхом</small></div><button class="btn" id="go">▶ В путь</button><div class="log" id="log"><div>'+r.note+'</div></div>';
+  $('#sel').onchange=e=>{cur=+e.target.value;pick()};
+  $('#go').onclick=()=>{const log=$('#log');log.innerHTML='';
+    stop=travel(r,{token:$('#horse'),days:daysFor(r,'autumn','horse'),speed:100,
+      onDay:k=>$('#day').firstChild.textContent=k,
+      onEvent:(t,k,bad)=>{const x=document.createElement('div');x.className=bad?'bad':'ok';x.textContent='День '+k+'. '+t;log.appendChild(x);log.scrollTop=1e9},
+      onDone:()=>{const x=document.createElement('div');x.className='ok';x.textContent='Прибыли.';log.appendChild(x)}})}}
+pick();
+</script>
+</body>
+</html>

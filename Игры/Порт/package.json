@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "publish": "node Скрипты/publish.mjs",
+    "check": "node Скрипты/check-published.mjs",
+    "publish-stories": "node Скрипты/publish-stories.mjs",
+    "publish-all": "npm run publish && npm run publish-stories"
+  }
+}

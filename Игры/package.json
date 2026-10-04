@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "publish": "node Порт/Скрипты/publish.mjs && node Порт/Скрипты/publish-stories.mjs",
+    "check": "node Порт/Скрипты/check-published.mjs"
+  }
+}

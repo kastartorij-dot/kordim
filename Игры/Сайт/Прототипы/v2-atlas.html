@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кордим · В2 · Атлас</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#10171a;   /* ночной сланец */
+  --glass:rgba(22,31,35,.78);
+  --line:rgba(160,190,200,.14);
+  --text:#e6ebe8; --mute:#8fa1a6;
+  --lamp:#f0b35a;     /* фонарь: выбранное, путь */
+  --river:#6aa8b8; --danger:#d4674f; --moss:#8fb074;
+  --sans:'Manrope',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--ground);color:var(--text);font:15px/1.55 var(--sans);overflow:hidden}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--lamp);outline-offset:2px}
+.glass{background:var(--glass);backdrop-filter:blur(14px) saturate(1.2);border:1px solid var(--line);border-radius:16px}
+
+/* карта на весь экран, панорама мышью */
+.viewport{position:fixed;inset:0;overflow:hidden;cursor:grab}
+.viewport.drag{cursor:grabbing}
+.world{position:absolute;left:50%;top:50%;width:min(160vw,2200px);aspect-ratio:1280/698;transform-origin:0 0;will-change:transform}
+.world img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:filter 1.2s var(--ease);user-select:none;-webkit-user-drag:none}
+.world svg{position:absolute;inset:0;width:100%;height:100%}
+/* времена года и ночь */
+body[data-season="summer"] .world img{filter:saturate(1.15) brightness(.92) contrast(1.05)}
+body[data-season="autumn"] .world img{filter:sepia(.35) saturate(1.1) hue-rotate(-12deg) brightness(.85)}
+body[data-season="winter"] .world img{filter:grayscale(.7) brightness(1.05) contrast(.95) hue-rotate(170deg) saturate(.35)}
+body[data-night="1"] .world img{filter:brightness(.38) saturate(.6) hue-rotate(190deg) contrast(1.2)}
+.weather{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 1s}
+body[data-season="winter"] .snow{opacity:1}
+body[data-season="autumn"] .rain{opacity:.6}
+.snow{background-image:radial-gradient(2px 2px at 20% 30%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 70% 60%,#fff 50%,transparent 51%),radial-gradient(2.5px 2.5px at 40% 80%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 85% 15%,#fff 50%,transparent 51%);background-size:180px 180px;animation:snow 9s linear infinite}
+@keyframes snow{to{background-position:60px 180px,-40px 180px,30px 180px,-20px 180px}}
+.rain{background-image:repeating-linear-gradient(105deg,transparent 0 22px,rgba(180,200,210,.18) 22px 23px);animation:rain .6s linear infinite}
+@keyframes rain{to{background-position:-40px 120px}}
+.route{fill:none;stroke:var(--lamp);stroke-width:2.4;vector-effect:non-scaling-stroke;stroke-linecap:round;opacity:.45;cursor:pointer;transition:opacity .3s}
+.route.water{stroke:var(--river)}
+.route.closed{stroke:var(--danger);stroke-dasharray:5 6;opacity:.55}
+.route.sel{opacity:1;stroke-width:4.5}
+.flow{fill:none;stroke:#fff;stroke-width:2.2;vector-effect:non-scaling-stroke;stroke-dasharray:1 16;stroke-linecap:round;opacity:0;pointer-events:none;animation:flow 1.1s linear infinite}
+.flow.sel{opacity:.95}@keyframes flow{to{stroke-dashoffset:-17}}
+.pin{position:absolute;transform:translate(-50%,-50%);border:0;padding:0;background:none;cursor:pointer}
+.pin i{display:block;width:12px;height:12px;border-radius:50%;background:var(--text);box-shadow:0 0 0 4px rgba(16,23,26,.7);transition:.3s}
+.pin span{position:absolute;left:17px;top:-9px;white-space:nowrap;font:600 14px var(--sans);text-shadow:0 1px 5px #000,0 0 12px #000}
+body[data-night="1"] .pin i{background:var(--lamp);box-shadow:0 0 0 4px rgba(240,179,90,.2),0 0 24px 6px rgba(240,179,90,.55)}
+.pin.here i{background:var(--lamp);animation:pulse 1.8s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 4px rgba(240,179,90,.3),0 0 0 18px rgba(240,179,90,0)}}
+.caravan{position:absolute;transform:translate(-50%,-85%);font-size:26px;filter:drop-shadow(0 3px 4px #000);pointer-events:none;transition:left .08s linear,top .08s linear}
+
+/* интерфейс поверх */
+.topbar{position:fixed;top:16px;left:16px;right:16px;display:flex;gap:10px;align-items:center;z-index:10;pointer-events:none}
+.topbar>*{pointer-events:auto}
+.brand{padding:9px 14px;font:800 16px var(--sans);display:flex;gap:8px;align-items:center}
+.brand small{font:11px var(--mono);color:var(--mute)}
+.seg{display:flex;padding:4px;gap:2px}
+.seg button{all:unset;cursor:pointer;padding:6px 12px;border-radius:10px;font:600 13px var(--sans);color:var(--mute)}
+.seg button[aria-pressed="true"]{background:rgba(240,179,90,.16);color:var(--lamp)}
+.spacer{flex:1}
+.others{padding:9px 12px;font:12px var(--mono);color:var(--mute)}.others a{color:var(--river)}
+
+.card{position:fixed;left:16px;top:84px;bottom:16px;width:360px;z-index:10;display:flex;flex-direction:column;overflow:hidden;transition:transform .5s var(--ease)}
+.card.hide{transform:translateX(-400px)}
+.card .img{height:190px;position:relative;flex:none}
+.card .img img{width:100%;height:100%;object-fit:cover;object-position:50% 20%}
+.card .img::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(22,31,35,.95))}
+.card .img h1{position:absolute;left:18px;bottom:8px;margin:0;font:800 30px/1 var(--sans);z-index:1}
+.card .img h1 small{display:block;font:500 12px var(--mono);color:var(--lamp);margin-bottom:4px}
+.card .in{padding:12px 18px 18px;overflow:auto}
+.statrow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.ring{text-align:center;font:500 11px var(--mono);color:var(--mute)}
+.ring svg{width:52px;height:52px;display:block;margin:0 auto 2px}
+.ring circle{fill:none;stroke-width:5}
+.ring .bg{stroke:rgba(255,255,255,.08)}
+.ring .fg{stroke:var(--moss);stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset 1.2s var(--ease)}
+.ring.warm .fg{stroke:var(--lamp)}.ring.hot .fg{stroke:var(--danger)}
+.ring b{position:relative;top:-38px;font:800 15px var(--sans);color:var(--text);display:block;height:0}
+.card p{margin:0 0 10px;font-size:14px;color:#d2dad8}
+.mini{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}
+.mini span{padding:4px 9px;border-radius:99px;border:1px solid var(--line);font-size:13px}
+.mini .debt{border-color:rgba(212,103,79,.5);color:#eaa493}
+.hbtn{all:unset;cursor:pointer;display:block;text-align:center;margin-top:8px;padding:8px;border-radius:10px;border:1px solid var(--line);font:600 13px var(--sans);color:var(--river)}
+
+.trip{position:fixed;right:16px;bottom:16px;width:380px;z-index:10;padding:16px 18px}
+.trip h2{margin:0;font:800 20px var(--sans)}
+.trip .ends{color:var(--mute);font-size:13px}
+.nums{display:flex;gap:22px;margin:12px 0}
+.nums div{font:800 28px var(--sans);font-variant-numeric:tabular-nums;line-height:1}
+.nums small{display:block;font:500 11px var(--mono);color:var(--mute);margin-top:4px}
+.go{all:unset;cursor:pointer;background:var(--lamp);color:#1b140a;font:800 14px var(--sans);padding:10px 16px;border-radius:12px;box-shadow:0 8px 24px rgba(240,179,90,.3)}
+.go[disabled]{opacity:.4;cursor:not-allowed;box-shadow:none}
+.note{font-size:13px;color:#cfd8d6;margin-top:10px}.note.warn{color:#eaa493}
+.feed{margin-top:10px;max-height:140px;overflow:auto;display:grid;gap:4px}
+.feed div{font-size:13px;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.04);animation:in .4s var(--ease)}
+.feed .bad{background:rgba(212,103,79,.12);color:#f0b2a4}
+@keyframes in{from{opacity:0;transform:translateX(10px)}}
+.hint{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:9;padding:7px 12px;font:12px var(--mono);color:var(--mute)}
+@media (max-width:900px){.card{width:auto;right:16px;top:auto;height:44vh}.trip{display:none}.hint{display:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body data-season="autumn" data-night="0">
+<div class="viewport" id="vp">
+  <div class="world" id="world">
+    <img src="../Изображения/Карты/kordim.jpg" alt="Карта Кордима" draggable="false">
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" id="svg"></svg>
+    <div class="weather snow"></div><div class="weather rain"></div>
+    <div class="caravan" id="caravan" hidden>🐴</div>
+  </div>
+</div>
+
+<div class="topbar">
+  <div class="brand glass">Кордим <small>атлас · 1026</small></div>
+  <div class="seg glass" role="group" aria-label="Время года">
+    <button data-s="summer" aria-pressed="false">☀ Лето</button><button data-s="autumn" aria-pressed="true">🍂 Осень</button><button data-s="winter" aria-pressed="false">❄ Зима</button>
+  </div>
+  <div class="seg glass"><button id="night" aria-pressed="false">☾ Ночь</button></div>
+  <div class="seg glass" role="group" aria-label="Как едем">
+    <button data-m="horse" aria-pressed="true">Верхом</button><button data-m="foot" aria-pressed="false">Пешком</button><button data-m="cart" aria-pressed="false">Обоз</button>
+  </div>
+  <div class="spacer"></div>
+  <div class="others glass"><a href="v1-dossier.html">В1</a> · В2 · <a href="v3-chronicle.html">В3</a> · <a href="b2-soft.html">Б2</a></div>
+</div>
+
+<article class="card glass" id="card">
+  <div class="img"><img src="../Изображения/Лица/elowen.jpg" alt=""><h1><small>Ошерск · Приречье</small>Элоуэн «Игла»</h1></div>
+  <div class="in">
+    <div class="statrow" id="rings"></div>
+    <p>Полевой хирург, изгнанница Ложи, 29 лет. Подвал «Утопленника», крыша Крайма Руфуса.</p>
+    <p>С Никто знакома пять лет. Нож на полке между дурманом и живицей она так и не убрала.</p>
+    <div class="mini"><span>🔪 скальпель</span><span>🔥 ожог Ложи</span><span class="debt">🧪 микстура в долг</span><span class="debt">🌿 плеть и желчь</span></div>
+    <button class="hbtn" id="findher">Показать на карте</button>
+  </div>
+</article>
+
+<section class="trip glass" id="trip"></section>
+<div class="hint glass">Тяни карту мышью · колесо — приблизить · нажми на тракт</div>
+
+<script src="shared.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const S={season:'autumn',mode:'horse',route:1,night:false};
+const svg=$('#svg'),world=$('#world');
+drawRoutes(svg,i=>{S.route=i;paint()});drawPins(world);
+
+/* кольца статов */
+$('#rings').innerHTML=ELOWEN.stats.map(s=>'<div class="ring '+(s.tone||'')+'"><svg viewBox="0 0 52 52"><circle class="bg" cx="26" cy="26" r="21"/><circle class="fg" cx="26" cy="26" r="21" stroke-dasharray="132" stroke-dashoffset="132"/></svg><b>'+s.v+'</b>'+s.k+'</div>').join('');
+setTimeout(()=>document.querySelectorAll('.ring .fg').forEach((c,i)=>c.style.strokeDashoffset=132-132*ELOWEN.stats[i].v/10),300);
+
+/* панорама и масштаб */
+let z=.75,tx=0,ty=0;
+function fit(){const w=world.offsetWidth,h=world.offsetHeight;tx=innerWidth/2-w*z/2+150;ty=innerHeight/2-h*z/2;apply()}
+function apply(){world.style.transform='translate('+(tx-innerWidth/2)+'px,'+(ty-innerHeight/2)+'px) scale('+z+')'}
+fit();addEventListener('resize',fit);
+const vp=$('#vp');let dragging=null;
+vp.onpointerdown=e=>{if(e.target.closest('.route,.pin'))return;dragging=[e.clientX-tx,e.clientY-ty];vp.classList.add('drag');vp.setPointerCapture(e.pointerId)};
+vp.onpointermove=e=>{if(!dragging)return;tx=e.clientX-dragging[0];ty=e.clientY-dragging[1];apply()};
+vp.onpointerup=()=>{dragging=null;vp.classList.remove('drag')};
+vp.onwheel=e=>{e.preventDefault();const nz=Math.min(2.2,Math.max(.45,z*(e.deltaY<0?1.12:.89)));tx=e.clientX-(e.clientX-tx)*nz/z;ty=e.clientY-(e.clientY-ty)*nz/z;z=nz;apply()};
+function focusOn(x,y,nz=1.3){z=nz;const w=world.offsetWidth,h=world.offsetHeight;tx=innerWidth/2+180-w*z*x/100;ty=innerHeight/2-h*z*y/100;world.style.transition='transform .9s cubic-bezier(.2,.8,.2,1)';apply();setTimeout(()=>world.style.transition='',950)}
+$('#findher').onclick=()=>{const p=PLACES[0];world.querySelectorAll('.pin').forEach(x=>x.classList.toggle('here',x.dataset.i==='0'));focusOn(p.x,p.y,1.6)};
+
+/* переключатели */
+document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{S.season=b.dataset.s;document.body.dataset.season=S.season;document.querySelectorAll('[data-s]').forEach(x=>x.setAttribute('aria-pressed',x===b));paint()});
+document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{S.mode=b.dataset.m;document.querySelectorAll('[data-m]').forEach(x=>x.setAttribute('aria-pressed',x===b));paint()});
+$('#night').onclick=e=>{S.night=!S.night;document.body.dataset.night=S.night?1:0;e.currentTarget.setAttribute('aria-pressed',S.night)};
+
+let stop=null;
+function paint(){stop&&stop();$('#caravan').hidden=true;
+  markRoute(svg,S.route,S.season,S.mode);
+  const r=ROUTES[S.route],c=closedFor(r,S.season,S.mode),d=daysFor(r,S.season,S.mode);
+  const mode={horse:'верхом',foot:'пешком',cart:'обозом'}[S.mode];
+  $('#trip').innerHTML='<h2>'+r.n+'</h2><div class="ends">'+r.e+' · ~'+r.miles+' миль · '+mode+'</div>'+
+    '<div class="nums"><div id="dd">'+(c?'—':d.toFixed(1).replace('.0',''))+'<small>'+(c?'закрыто':'дней')+'</small></div><div>'+(c?'—':Math.round(d)*5)+'<small>грошей в пути</small></div><div id="dn">0<small>день</small></div></div>'+
+    '<button class="go" id="go"'+(c?' disabled':'')+'>▶ В путь</button><div class="note'+(c?' warn':'')+'">'+(c?r.winter:r.note)+'</div><div class="feed" id="feed"></div>';
+  $('#go').onclick=()=>{const feed=$('#feed');feed.innerHTML='';
+    const mid=r.p[Math.floor(r.p.length/2)];focusOn(mid[0],mid[1],1.05);
+    stop=travel(r,{token:$('#caravan'),days:d,speed:S.mode==='cart'?120:80,
+      onDay:k=>$('#dn').firstChild.textContent=k,
+      onEvent:(t,k,bad)=>{const x=document.createElement('div');x.className=bad?'bad':'';x.textContent='День '+k+' · '+t;feed.appendChild(x);feed.scrollTop=1e9},
+      onDone:()=>{const x=document.createElement('div');x.textContent='Прибыли.';feed.appendChild(x)}})};
+}
+paint();
+</script>
+</body>
+</html>

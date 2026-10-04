@@ -20,10 +20,13 @@ jobs:
           node-version: 22
 
       - name: Канон собирается из блоков без расхождений
-        run: node канон/_build/build.mjs --check
+        run: node Канон/_Сборка/build.mjs --check
 
       - name: В блоках нет снятых формулировок
-        run: node канон/_build/validate.mjs
+        run: node Канон/_Сборка/validate.mjs
 
       - name: В данных вики нет битых ссылок
-        run: node канон/_build/check-data.mjs
+        run: node Канон/_Сборка/check-data.mjs
+
+      - name: Публичные копии обеих игр совпадают с исходниками
+        run: node Игры/Порт/Скрипты/check-published.mjs

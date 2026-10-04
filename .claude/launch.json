@@ -2,25 +2,25 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "wiki",
+      "name": "Сайт",
       "runtimeExecutable": "powershell",
       "runtimeArgs": [
         "-ExecutionPolicy",
         "Bypass",
         "-File",
-        "Порт/site/_serve.ps1"
+        "Игры/Сайт/_serve.ps1"
       ],
       "port": 8791
     },
     {
-      "name": "wiki-py",
+      "name": "Сайт-Python",
       "runtimeExecutable": "python3",
       "runtimeArgs": [
         "-m",
         "http.server",
         "8791",
         "--directory",
-        "Порт/site"
+        "Игры/Сайт"
       ],
       "port": 8791
     },
@@ -28,7 +28,7 @@
       "name": "faces",
       "runtimeExecutable": "python",
       "runtimeArgs": [
-        "персонажи/_serve.py",
+        "Персонажи/_serve.py",
         "8793"
       ],
       "port": 8793

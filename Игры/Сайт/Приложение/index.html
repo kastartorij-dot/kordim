@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кордим</title>
+<meta name="description" content="Реестр мира «Грейс и Никто» — люди, места, фракции, карта, хроника.">
+<meta name="theme-color" content="#1a1716">
+<link rel="icon" href="Иконки/icon.svg" type="image/svg+xml">
+<link rel="icon" href="Иконки/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="Иконки/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Geologica:wght@300;400;500&family=JetBrains+Mono:wght@400&family=Press+Start+2P&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="brandwrap">
+    <a class="brand" href="#/">КОРДИМ <small>1026 · осень</small></a>
+    <button class="backbtn" id="backBtn" type="button">← назад</button>
+  </div>
+  <nav class="nav" id="nav" aria-label="Разделы"></nav>
+  <button class="findbtn" id="findbtn" aria-label="Поиск">Найти <kbd>Ctrl K</kbd></button>
+  <button class="updbtn" id="updBtn" type="button" aria-label="Обновить сайт" title="Загрузить свежую версию"><span aria-hidden="true">↻</span></button>
+</header>
+<main id="view" tabindex="-1"></main>
+
+<div class="pal" id="pal" hidden>
+  <div class="pbox" role="dialog" aria-label="Поиск по миру">
+    <input id="palIn" placeholder="Имя, место, фракция, событие…" autocomplete="off">
+    <div class="pres" id="palRes"></div>
+  </div>
+</div>
+
+<script type="module" src="Скрипты/main.js"></script>
+</body>
+</html>

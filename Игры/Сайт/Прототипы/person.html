@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кордим · Персонаж · раскладки</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Geologica:wght@300;400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#1a1716; --panel:#221e1c; --raise:#2c2724; --line:#3a3431;
+  --text:#ece5dc; --mute:#9d938a;
+  --ochre:#d9a441; --dusk:#8ea7d6; --ember:#d46a4a; --sage:#9bb383;
+  --disp:'Unbounded',system-ui,sans-serif; --body:'Geologica',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+  --ease:cubic-bezier(.2,.8,.2,1); --gap:18px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--ground);color:var(--text);font:300 15px/1.55 var(--body)}
+button,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ochre);outline-offset:2px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;min-width:0}
+.card>h3{margin:0;padding:12px 16px 0;font:700 11px var(--disp);letter-spacing:.14em;color:var(--mute);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.card>h3 small{font:11px var(--mono);letter-spacing:0;color:var(--mute)}
+
+/* верхняя полоса: раскладки и навигация */
+.bar{display:flex;align-items:center;gap:14px;padding:12px 24px;border-bottom:1px solid var(--line)}
+.brand{font:900 14px var(--disp);letter-spacing:.04em}
+.crumb{color:var(--mute);font-size:13px}
+.seg{display:flex;gap:2px;padding:3px;background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.seg button{all:unset;cursor:pointer;padding:5px 11px;border-radius:7px;font:500 13px var(--body);color:var(--mute)}
+.seg button[aria-pressed="true"]{background:var(--raise);color:var(--ochre)}
+.bar .sp{flex:1}
+.bar a{color:var(--dusk);font-size:13px}
+
+/* ─── компоненты ─── */
+.c-name{padding:4px 2px}
+.bigname{font:900 clamp(40px,5.2vw,86px)/.9 var(--disp);letter-spacing:-.03em;margin:0}
+.bigname span{display:block;font:500 13px var(--disp);letter-spacing:.2em;color:var(--ochre);margin-top:10px}
+.now{display:flex;gap:16px;align-items:center;margin-top:18px}
+.yearbig{font:900 52px/1 var(--disp);color:var(--ochre);font-variant-numeric:tabular-nums}
+.where small{display:block;font:11px var(--mono);color:var(--mute)}
+.where{font-weight:500}
+
+.c-story .in{padding:10px 16px 16px}
+.story{font-size:18px;line-height:1.55;margin:0}
+.swap{animation:swap .55s var(--ease)}
+@keyframes swap{from{opacity:0;transform:translateY(10px);filter:blur(3px)}}
+
+.c-stats .in{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px 16px 16px}
+.st{font:11px var(--mono);color:var(--mute)}
+.st .tr{height:46px;background:var(--raise);border-radius:9px;position:relative;overflow:hidden;margin-bottom:5px}
+.st .v{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(0deg,var(--sage),rgba(155,179,131,.35));transition:height .8s var(--ease)}
+.st.warm .v{background:linear-gradient(0deg,var(--ochre),rgba(217,164,65,.3))}
+.st.hot .v{background:linear-gradient(0deg,var(--ember),rgba(212,106,74,.3))}
+.st b{position:absolute;left:9px;top:5px;font:700 15px var(--disp);color:var(--text)}
+.st .d{position:absolute;right:7px;top:7px;font:11px var(--mono)}
+.up{color:var(--sage)}.down{color:var(--ember)}
+
+.c-photo{position:relative;overflow:hidden;min-height:260px}
+.c-photo img,.c-photo canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 25%;transition:filter .8s var(--ease)}
+.c-photo canvas{image-rendering:pixelated}
+.c-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(26,23,22,.9));pointer-events:none}
+.c-photo .stamp{position:absolute;left:14px;bottom:12px;z-index:1;font:700 11px var(--disp);letter-spacing:.14em;color:var(--ochre)}
+.c-photo .pxbtn{position:absolute;right:10px;top:10px;z-index:2;all:unset;cursor:pointer;background:rgba(26,23,22,.75);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:8px;padding:4px 9px;font:11px var(--mono)}
+.c-photo .pxbtn[aria-pressed="true"]{color:var(--ochre);border-color:var(--ochre)}
+
+/* хронология: горизонтальная по умолчанию, вертикальная в раскладке «Сцена» */
+.c-time{position:relative;padding:14px 22px 12px}
+.tl{position:relative;height:66px}
+.tl .ax{position:absolute;left:0;right:0;top:30px;height:2px;background:var(--line)}
+.tl .fill{position:absolute;left:0;top:30px;height:2px;background:var(--ochre);transition:width .7s var(--ease)}
+.tick{all:unset;position:absolute;top:0;transform:translateX(-50%);text-align:center;cursor:pointer;white-space:nowrap}
+.tick .yr{font:700 12px var(--disp);color:var(--mute)}
+.tick .dot{display:block;width:11px;height:11px;margin:9px auto 0;border-radius:50%;background:var(--ground);border:2px solid var(--line);transition:.3s}
+.tick .lab{display:block;font:10px var(--mono);color:var(--mute);margin-top:5px}
+.tick[aria-current="true"] .yr{color:var(--ochre);font-size:16px}
+.tick[aria-current="true"] .dot{background:var(--ochre);border-color:var(--ochre);box-shadow:0 0 0 6px rgba(217,164,65,.18)}
+.tick.era{cursor:default}.tick.era .dot{width:7px;height:7px;margin-top:11px}
+
+/* карта с двумя режимами */
+.c-map{display:flex;flex-direction:column}
+.c-map .mhead{display:flex;gap:8px;align-items:center;padding:10px 12px 8px;flex-wrap:wrap}
+.c-map .mhead a{margin-left:auto;font-size:12px;color:var(--dusk)}
+.map{position:relative;aspect-ratio:1280/698;margin:0 12px;border-radius:12px;overflow:hidden;background:#000}
+.map img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(.55) brightness(.58) contrast(1.2) sepia(.2)}
+.map svg{position:absolute;inset:0;width:100%;height:100%}
+.route{fill:none;stroke:var(--dusk);stroke-width:2;vector-effect:non-scaling-stroke;opacity:0;transition:opacity .4s;cursor:pointer}
+.mode-trip .route{opacity:.35}
+.route.sel{opacity:1!important;stroke-width:3.5}
+.route.water{stroke:#7fb0c2}
+.flow{fill:none;stroke:#fff;stroke-width:2;vector-effect:non-scaling-stroke;stroke-dasharray:1 14;stroke-linecap:round;opacity:0;pointer-events:none;animation:flow 1.1s linear infinite}
+.flow.sel{opacity:.9}@keyframes flow{to{stroke-dashoffset:-15}}
+.pin{position:absolute;transform:translate(-50%,-50%);border:0;padding:0;background:none}
+.pin i{display:block;width:7px;height:7px;border-radius:50%;background:rgba(236,229,220,.55)}
+.pin span{position:absolute;left:10px;top:-8px;font:400 11px var(--body);white-space:nowrap;color:rgba(236,229,220,.65);text-shadow:0 1px 3px #000}
+.pin.here i{width:13px;height:13px;background:var(--ochre);animation:pulse 1.8s infinite}
+.pin.here span{color:var(--text);font-weight:500;font-size:12px}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 4px rgba(217,164,65,.3)}50%{box-shadow:0 0 0 14px rgba(217,164,65,0)}}
+.token{position:absolute;transform:translate(-50%,-80%);font-size:20px;filter:drop-shadow(0 2px 3px #000);pointer-events:none;transition:left .09s linear,top .09s linear}
+.mfoot{padding:10px 14px 14px;font-size:13px;color:#d6cec4;min-height:58px}
+.mfoot .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.mfoot select{background:var(--raise);border:1px solid var(--line);border-radius:8px;padding:4px 6px;color:var(--text)}
+.go{all:unset;cursor:pointer;background:var(--ochre);color:#1a1510;font:500 13px var(--body);padding:5px 12px;border-radius:8px}
+.nums{font:700 20px var(--disp);margin-top:6px}.nums small{font:11px var(--mono);color:var(--mute);margin-left:4px}
+.evline{margin-top:4px;color:var(--mute)}.evline.bad{color:#eeac98}
+
+/* разговор */
+.c-talk .in{padding:8px 16px 14px;display:flex;flex-direction:column;min-height:0;height:calc(100% - 30px)}
+.chat{display:flex;flex-direction:column;flex:1;min-height:0}
+.chat-log{display:grid;gap:7px;overflow:auto;align-content:start;flex:1;min-height:60px;max-height:260px}
+.msg{font-size:15px;animation:swap .35s var(--ease)}
+.msg.them b{font:700 10px var(--disp);letter-spacing:.1em;color:var(--ochre);margin-right:8px}
+.msg.me{color:var(--dusk);padding-left:12px;border-left:2px solid var(--dusk)}
+.msg.sys{color:var(--mute);font-style:italic}
+.chat-opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chat-opts button{all:unset;cursor:pointer;padding:6px 12px;border-radius:99px;background:var(--raise);font-size:14px}
+.chat-opts button:hover,.chat-opts button:focus-visible{background:var(--dusk);color:#141414}
+.locked{color:var(--mute);font-size:14px}
+.draft{font:10px var(--mono);color:var(--ember);border:1px solid rgba(212,106,74,.4);border-radius:5px;padding:1px 5px;letter-spacing:0}
+
+/* предметы */
+.c-items .in{padding:10px 16px 14px}
+.sub{font:10px var(--mono);color:var(--mute);margin:8px 0 6px;text-transform:uppercase;letter-spacing:.08em}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(42px,1fr));gap:6px}
+.slot{all:unset;aspect-ratio:1;display:grid;place-items:center;font-size:19px;background:var(--raise);border:1px solid var(--line);border-radius:10px;cursor:pointer;position:relative;transition:transform .2s var(--ease),border-color .2s}
+.slot:hover,.slot:focus-visible,.slot.on{border-color:var(--ochre);transform:translateY(-2px)}
+.slot.debt{border-color:rgba(212,106,74,.5);background:linear-gradient(180deg,rgba(212,106,74,.14),var(--raise))}
+.slot.new{animation:drop .6s var(--ease)}
+@keyframes drop{from{transform:scale(.3) translateY(-16px);opacity:0}}
+.slot.ghost{opacity:.28;cursor:default}
+.tip{margin-top:10px;font-size:13px;color:#d6cec4;min-height:38px}
+.tip b{color:var(--text);font-weight:500}
+
+/* ─── РАСКЛАДКИ ─── */
+.frame{display:grid;gap:var(--gap);padding:var(--gap) 24px 30px;min-height:calc(100vh - 57px)}
+
+/* 1. Кадр: время сверху, слева человек, справа фото и карта, внизу разговор и вещи */
+.L1{grid-template-columns:1.15fr .85fr;grid-template-areas:
+  "time time" "name photo" "story photo" "stats map" "talk map" "talk items"}
+.L1 .c-photo{min-height:320px}
+
+/* 2. Сцена: хронология вертикально слева, фото фоном под именем, справа карта и вещи, разговор внизу как в игре */
+.L2{grid-template-columns:180px 1fr 400px;grid-template-rows:auto auto auto 1fr;grid-template-areas:
+  "time photo map" "time story map" "time stats items" "time talk items"}
+.L2 .c-photo{min-height:340px}
+.L2 .c-name{display:none}
+.L2 .c-photo .ovname{display:block}
+.L2 .tl{height:auto;min-height:420px}
+.L2 .tl .ax,.L2 .tl .fill{left:18px;right:auto;top:0;width:2px!important;height:100%}
+.L2 .tl .fill{height:var(--tlpos,0%);transition:height .7s var(--ease)}
+.L2 .tick{position:absolute;left:0!important;transform:translateY(-50%);display:grid;grid-template-columns:38px 1fr;align-items:center;text-align:left;top:var(--pos)}
+.L2 .tick .dot{grid-row:1/3;margin:0 0 0 12px}
+.L2 .tick .yr{grid-column:2}.L2 .tick .lab{grid-column:2;margin:0}
+
+/* 3. Панели: колонка человека, колонка истории, колонка карты во весь рост */
+.L3{grid-template-columns:300px 1fr 1fr;grid-template-rows:auto auto auto 1fr;grid-template-areas:
+  "photo time time" "photo name map" "stats story map" "items talk map"}
+.L3 .c-photo{min-height:380px}
+.L3 .c-map .map{flex:1;aspect-ratio:auto;min-height:340px}
+.L3 .bigname{font-size:clamp(36px,4vw,64px)}
+
+.c-time{grid-area:time}.c-name{grid-area:name}.c-story{grid-area:story}.c-stats{grid-area:stats}
+.c-photo{grid-area:photo}.c-map{grid-area:map}.c-talk{grid-area:talk}.c-items{grid-area:items}
+.ovname{display:none;position:absolute;left:18px;bottom:34px;z-index:1}
+.ovname h1{margin:0;font:900 clamp(40px,4.6vw,72px)/.9 var(--disp);letter-spacing:-.03em;text-shadow:0 4px 30px rgba(0,0,0,.6)}
+.ovname div{font:500 12px var(--disp);letter-spacing:.2em;color:var(--ochre);margin-top:8px}
+.ovname .yr2{font:900 34px var(--disp);color:var(--ochre);letter-spacing:0}
+
+@media (max-width:1100px){.L1,.L2,.L3{grid-template-columns:1fr;grid-template-rows:none;grid-template-areas:"time" "photo" "name" "story" "stats" "map" "talk" "items"}
+  .L2 .c-name{display:block}.L2 .ovname{display:none}.L2 .tl{min-height:0;height:66px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="bar">
+  <span class="brand">КОРДИМ</span><span class="crumb">Люди · Элоуэн «Игла»</span>
+  <div class="seg" role="group" aria-label="Раскладка">
+    <button data-l="L1" aria-pressed="false">1 · Кадр</button><button data-l="L2" aria-pressed="false">2 · Сцена</button><button data-l="L3" aria-pressed="true">3 · Панели</button>
+  </div>
+  <span class="sp"></span><a href="v2-atlas.html">Общая карта →</a>
+</div>
+
+<div class="frame L3" id="frame">
+  <section class="card c-time"><div class="tl" id="tl"><div class="ax"></div><div class="fill" id="fill"></div></div></section>
+
+  <section class="c-name">
+    <h1 class="bigname">Элоуэн<span>«ИГЛА» · ПОЛЕВОЙ ХИРУРГ</span></h1>
+    <div class="now"><div class="yearbig yearN">1023</div><div class="where"><small>ГДЕ</small><span class="whereN"></span></div></div>
+  </section>
+
+  <section class="card c-photo">
+    <img src="../Изображения/Лица/elowen.jpg" alt="Элоуэн" id="pImg"><canvas id="pCv" data-ratio="1.25" hidden></canvas>
+    <button class="pxbtn" id="px" aria-pressed="false">пиксель</button>
+    <div class="ovname"><div class="yr2 yearN">1023</div><h1>Элоуэн</h1><div class="whereN"></div></div>
+    <span class="stamp" id="stamp"></span>
+  </section>
+
+  <section class="card c-story"><h3>ЧТО ПРОИСХОДИТ</h3><div class="in"><p class="story" id="story"></p></div></section>
+
+  <section class="card c-stats"><h3>СОСТОЯНИЕ <small>к этому году</small></h3><div class="in" id="stats"></div></section>
+
+  <section class="card c-map" id="cmap">
+    <div class="mhead">
+      <div class="seg" role="group" aria-label="Режим карты"><button data-mm="path" aria-pressed="true">Путь героя</button><button data-mm="trip" aria-pressed="false">Как добраться</button></div>
+      <a href="v2-atlas.html">на общую карту</a>
+    </div>
+    <div class="map" id="map"><img src="../Изображения/Карты/kordim.jpg" alt="Карта"><svg viewBox="0 0 100 100" preserveAspectRatio="none" id="svg"></svg><div class="token" id="token" hidden>🐴</div></div>
+    <div class="mfoot" id="mfoot"></div>
+  </section>
+
+  <section class="card c-talk"><h3>РАЗГОВОР <small id="talkWhere"></small></h3><div class="in" id="talk"></div></section>
+
+  <section class="card c-items"><h3>ВЕЩИ И ДОЛГИ <small>к этому году</small></h3><div class="in">
+    <div class="sub">При ней</div><div class="slots" id="items"></div>
+    <div class="sub">Долги и обещания</div><div class="slots" id="debts"></div>
+    <div class="tip" id="tip">Наведи на ячейку.</div>
+  </div></section>
+</div>
+
+<script src="shared.js"></script>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const YEARS=[1019,1021,1023,1026], MIN=1017, MAX=1027, ERAS=[[1024,'Грейс и Никто'],[1025,'дело Дюра']];
+const pct=y=>((y-MIN)/(MAX-MIN)*100);
+
+/* что при ней и какие долги — по годам (from: с какого года появляется) */
+const THINGS=[
+  {from:1019,i:'🔪',n:'Скальпель',t:'Столичный инструмент. Не боец, но в переулке вскроет сонную артерию на рефлексах.'},
+  {from:1019,i:'🌺',n:'Болотный мак',t:'Основа её дешёвых аналогов микстур. За это Ложа и выгнала.'},
+  {from:1021,i:'🔥',n:'Ожог Ложи',t:'Метка изгнания на левом запястье. Сломать руки не успели.'},
+  {from:1023,i:'🥖',n:'Мешок муки',t:'Подарок Крайма. «Она врач. Ей несут — она шьёт».'},
+  {from:1026,i:'🗡️',n:'Нож Никто',t:'На полке между дурманом и живицей. Она его не убрала.',debt:true}
+];
+const PROMISES=[
+  {from:1019,to:1022,i:'📜',n:'Правило',t:'Никогда не врать о том, кто был у неё на столе. Сломает в 1023-м.'},
+  {from:1021,to:1021,i:'📅',n:'Среда',t:'Обещала посмотреть руку Никто в среду. В среду двор был пуст.',debt:true},
+  {from:1023,i:'🧪',n:'Микстура в долг',t:'Тридцать кордов. Взяла одолжением, которое держала три года.',debt:true}
+];
+
+/* мини-разговоры по годам. 1023 — канон, остальное — набросок */
+const TALKS={
+  1021:{draft:true,where:'двор дубильни',tree:{
+    start:{who:'Элоуэн',say:'Не стой в дверях. Держи здесь.',opts:[['Ты из Ложи.','loge'],['Что со стариком?','old']]},
+    old:{who:'Элоуэн',say:'Распорол о багор. Заживёт, если не полезет обратно в канал.',opts:[['Посмотришь мою руку?','hand']]},
+    loge:{who:'Элоуэн',say:'Ты смотришь на мой инструмент, а не на меня. Шрам у тебя тоже не от ножа.',opts:[['Знаешь, чем лили?','acid']]},
+    acid:{who:'Элоуэн',say:'Кислота Ложи. Лили на лежащего.',opts:[['Посмотришь мою руку?','hand']]},
+    hand:{who:'Элоуэн',say:'Левая срослась плохо. Приходи в среду. Бесплатно.',final:true,gain:'wed'}}},
+  1023:{where:'Синий двор, ночь',tree:DIALOG},
+  1026:{draft:true,where:'подвал «Утопленника»',tree:{
+    start:{who:'Элоуэн',say:'Если за помощью — клади на стол. Если платить — поздно.',opts:[['Я принёс плеть.','late'],['Нож ещё у тебя?','knife']]},
+    late:{who:'Элоуэн',say:'Весна была два года назад.',opts:[['Знаю.','knife']]},
+    knife:{who:'Элоуэн',say:'Лежит. Я его не трогаю.',note:'Врёт — рукоять тёплая.',final:true}}}
+};
+const LOCAL_GAINS={wed:{i:'📅',n:'Среда',t:'Обещание. В среду двор будет пуст.',debt:true}};
+
+/* ─── хронология ─── */
+const tl=$('#tl');
+YEARS.forEach(y=>{const b=document.createElement('button');b.className='tick';b.dataset.y=y;b.style.left=pct(y)+'%';b.style.setProperty('--pos',pct(y)+'%');
+  b.innerHTML='<span class="dot"></span><span class="yr">'+y+'</span><span class="lab">'+ELOWEN.years[y].mark+'</span>';b.onclick=()=>show(y);tl.appendChild(b)});
+ERAS.forEach(([y,l])=>{const d=document.createElement('div');d.className='tick era';d.style.left=pct(y)+'%';d.dataset.ey=y;
+  d.innerHTML='<span class="dot"></span><span class="yr">'+y+'</span><span class="lab">'+l+'</span>';tl.appendChild(d)});
+/* в вертикальной шкале отметки идут через равный шаг, иначе близкие годы слипаются */
+const ALL=[...YEARS,...ERAS.map(e=>e[0])].sort((a,b)=>a-b);
+const vpos=y=>(6+ALL.indexOf(y)/(ALL.length-1)*88);
+$$('.tick').forEach(t=>t.style.setProperty('--pos',vpos(+(t.dataset.y||t.dataset.ey))+'%'));
+
+/* ─── статы ─── */
+const K=['Ремесло','Выдержка','Доверие','Риск'],T=['','','warm','hot'];
+$('#stats').innerHTML=K.map((k,i)=>'<div class="st '+T[i]+'"><div class="tr"><div class="v"></div><b>0</b><span class="d"></span></div>'+k+'</div>').join('');
+
+/* ─── карта ─── */
+const svg=$('#svg');drawRoutes(svg,i=>{if(mapMode==='trip'){trip.route=i;paintMap()}});drawPins($('#map'));
+let mapMode='path',year=1023,prev=null,stopTrip=null;
+const trip={route:0,mode:'horse'};
+$$('[data-mm]').forEach(b=>b.onclick=()=>{mapMode=b.dataset.mm;$$('[data-mm]').forEach(x=>x.setAttribute('aria-pressed',x===b));$('#cmap').classList.toggle('mode-trip',mapMode==='trip');paintMap()});
+function paintMap(){
+  stopTrip&&stopTrip();$('#token').hidden=true;
+  const s=ELOWEN.years[year],lines=svg.querySelectorAll('.route'),flows=svg.querySelectorAll('.flow');
+  $$('#map .pin').forEach(p=>p.classList.toggle('here',+p.dataset.i===s.place));
+  if(mapMode==='path'){
+    lines.forEach((l,i)=>{l.classList.toggle('sel',i===s.route);flows[i].classList.toggle('sel',i===s.route)});
+    $('#mfoot').innerHTML='<b>'+s.where+'</b>'+(s.route!=null?'<div class="evline">Путь года: '+ROUTES[s.route].n+', '+ROUTES[s.route].e+'.</div>':'<div class="evline">В этом году она не уезжала.</div>');
+  } else {
+    lines.forEach((l,i)=>{l.classList.toggle('sel',i===trip.route);flows[i].classList.toggle('sel',i===trip.route)});
+    const r=ROUTES[trip.route],d=daysFor(r,'autumn',trip.mode);
+    $('#mfoot').innerHTML='<div class="row"><select id="rsel" aria-label="Тракт">'+ROUTES.map((x,i)=>'<option value="'+i+'"'+(i===trip.route?' selected':'')+'>'+x.n+' · '+x.e+'</option>').join('')+'</select>'+
+      '<select id="msel" aria-label="Как">'+[['horse','верхом'],['foot','пешком'],['cart','обозом']].map(([k,l])=>'<option value="'+k+'"'+(k===trip.mode?' selected':'')+'>'+l+'</option>').join('')+'</select><button class="go" id="go">В путь</button></div>'+
+      '<div class="nums"><span id="dn">0</span> / '+Math.round(d)+'<small>дней осенью</small></div><div class="evline" id="ev">'+r.note+'</div>';
+    $('#rsel').onchange=e=>{trip.route=+e.target.value;paintMap()};
+    $('#msel').onchange=e=>{trip.mode=e.target.value;paintMap()};
+    $('#go').onclick=()=>{stopTrip&&stopTrip();stopTrip=travel(r,{token:$('#token'),days:d,
+      onDay:k=>$('#dn').textContent=k,
+      onEvent:(t,k,bad)=>{const ev=$('#ev');ev.className='evline'+(bad?' bad':'');ev.textContent='День '+k+'. '+t},
+      onDone:()=>$('#ev').textContent+=' Прибыли.'})};
+  }
+}
+
+/* ─── вещи ─── */
+const tip=$('#tip');
+function slot(it,box,cls=''){const b=document.createElement('button');b.className='slot '+cls+(it.debt?' debt':'');b.textContent=it.i;
+  const sh=()=>{$$('.slot').forEach(s=>s.classList.remove('on'));b.classList.add('on');tip.innerHTML='<b>'+it.n+'.</b> '+it.t};
+  b.onmouseenter=sh;b.onfocus=sh;b.onclick=sh;box.appendChild(b);return b}
+function paintItems(){
+  const it=$('#items'),db=$('#debts');it.innerHTML='';db.innerHTML='';tip.textContent='Наведи на ячейку.';
+  THINGS.filter(x=>x.from<=year).forEach(x=>slot(x,it));
+  PROMISES.filter(x=>x.from<=year&&(x.to==null||x.to>=year)).forEach(x=>slot(x,db));
+  for(let k=it.children.length;k<6;k++){const g=document.createElement('div');g.className='slot ghost';it.appendChild(g)}
+}
+
+/* ─── разговор ─── */
+function paintTalk(){
+  const t=TALKS[year],box=$('#talk');
+  $('#talkWhere').innerHTML=t?(t.draft?'<span class="draft">набросок</span> ':'')+t.where:'';
+  if(!t){box.innerHTML='<p class="locked">В этом году разговора нет. Выбери 1021, 1023 или 1026.</p>';return}
+  const saved=window.DIALOG;window.DIALOG=t.tree;
+  box.innerHTML='<div class="chat" id="chat"></div>';
+  Object.assign(GAINS,LOCAL_GAINS);
+  /* mountChat читает глобальный DIALOG — подставляем дерево года */
+  DIALOG_SWAP(t.tree);
+  mountChat($('#chat'),{onGain:g=>{const b=slot(g,$('#debts'),'new');b.focus()}});
+}
+function DIALOG_SWAP(tree){for(const k in DIALOG)delete DIALOG[k];Object.assign(DIALOG,JSON.parse(JSON.stringify(tree)))}
+const DIALOG_1023=JSON.parse(JSON.stringify(DIALOG));TALKS[1023].tree=DIALOG_1023;
+
+/* ─── год ─── */
+function show(y){
+  year=y;const s=ELOWEN.years[y];
+  $$('.tick[data-y]').forEach(t=>t.setAttribute('aria-current',+t.dataset.y===y));
+  $('#fill').style.width=pct(y)+'%';tl.style.setProperty('--tlpos',vpos(y)+'%');
+  countYear(prev||y,y);
+  $$('.whereN').forEach(e=>e.textContent=s.where);
+  const st=$('#story');st.classList.remove('swap');void st.offsetWidth;st.classList.add('swap');st.textContent=s.text;
+  $$('.st').forEach((b,i)=>{const v=s.stats[i],o=prev?ELOWEN.years[prev].stats[i]:v,d=v-o;
+    b.querySelector('.v').style.height=v*10+'%';b.querySelector('b').textContent=v;
+    const el=b.querySelector('.d');el.textContent=d?(d>0?'+'+d:d):'';el.className='d '+(d>0?'up':'down')});
+  const age=(y-1019)/7;$('#pImg').style.filter='saturate('+(1.1-age*.5)+') brightness('+(1.05-age*.2)+')';
+  $('#stamp').textContent=(y-997)+' ЛЕТ · '+y;
+  paintMap();paintItems();paintTalk();
+  prev=y;
+}
+function countYear(a,b){const t0=performance.now();(function f(t){const k=Math.min(1,(t-t0)/500),v=Math.round(a+(b-a)*(1-Math.pow(1-k,3)));$$('.yearN').forEach(e=>e.textContent=v);if(k<1)requestAnimationFrame(f)})(t0)}
+
+/* пиксель — средний, как понравилось */
+$('#px').onclick=e=>{const on=e.currentTarget.getAttribute('aria-pressed')!=='true';e.currentTarget.setAttribute('aria-pressed',on);
+  $('#pImg').hidden=on;$('#pCv').hidden=!on;if(on)pixelate('../Изображения/Лица/elowen.jpg',$('#pCv'),{size:140,levels:8,focusY:.22})};
+
+/* раскладки */
+$$('[data-l]').forEach(b=>b.onclick=()=>{$('#frame').className='frame '+b.dataset.l;$$('[data-l]').forEach(x=>x.setAttribute('aria-pressed',x===b));try{localStorage.setItem('kordim-layout',b.dataset.l)}catch(e){}});
+try{const l=localStorage.getItem('kordim-layout');if(l)document.querySelector('[data-l="'+l+'"]').click()}catch(e){}
+
+addEventListener('keydown',e=>{if(e.target.closest('.chat-opts,select'))return;const i=YEARS.indexOf(year);
+  if(e.key==='ArrowRight'&&i<YEARS.length-1)show(YEARS[i+1]);if(e.key==='ArrowLeft'&&i>0)show(YEARS[i-1])});
+show(1023);
+</script>
+</body>
+</html>

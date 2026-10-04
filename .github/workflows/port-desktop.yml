@@ -5,7 +5,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "Порт/desktop/**"
+      - "Игры/Порт/Приложение_Для_ПК/**"
       - ".github/workflows/port-desktop.yml"
 
 permissions:
@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: Порт/desktop/package-lock.json
+          cache-dependency-path: Игры/Порт/Приложение_Для_ПК/package-lock.json
 
       - name: Установить Rust
         uses: dtolnay/rust-toolchain@stable
@@ -31,16 +31,16 @@ jobs:
       - name: Кэш Rust
         uses: swatinem/rust-cache@v2
         with:
-          workspaces: Порт/desktop/src-tauri -> target
+          workspaces: Игры/Порт/Приложение_Для_ПК/src-tauri -> target
 
       - name: Установить зависимости Tauri
-        working-directory: Порт/desktop
+        working-directory: Игры/Порт/Приложение_Для_ПК
         run: npm ci
 
       - name: Собрать установщик
         uses: tauri-apps/tauri-action@v1
         with:
-          projectPath: Порт/desktop
+          projectPath: Игры/Порт/Приложение_Для_ПК
           args: --bundles nsis
           uploadWorkflowArtifacts: true
           workflowArtifactNamePattern: port-teney-windows-[arch]
