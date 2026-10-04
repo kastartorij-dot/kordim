@@ -123,7 +123,7 @@ export function рендерПанель(S, onШаг) {
   if (!э) return;
   const ов = document.createElement('div');
   ов.className = 'ов пан';
-  ов.innerHTML = `<div class="овбокс пан-бокс"><div class="пан-шапка"><h2 class="px">${э[0]}</h2><button class="b" id="пан-закрыть">Закрыть</button></div>${э[1](<S, onШаг>)}</div>`;
+  ов.innerHTML = `<div class="овбокс пан-бокс"><div class="пан-шапка"><h2 class="px">${э[0]}</h2><button class="b" id="пан-закрыть">Закрыть</button></div>${э[1](S, onШаг)}</div>`;
   document.body.appendChild(ов);
   ов.style.bottom = `${панель.offsetHeight}px`; // панель остаётся видимой под окном
   ов.querySelector('#пан-закрыть').onclick = () => { ПАН.вкладка = 'город'; рендерПанель(S, onШаг); };
