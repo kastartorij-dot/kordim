@@ -5,11 +5,12 @@ const html=await readFile(new URL('../Index.html',import.meta.url),'utf8');
 const core=html.match(/<script>([\s\S]*?)<\/script>/)[1];
 const modules=await Promise.all(['chronicles.js','ai-models.js','ai.js'].map(p=>readFile(new URL('../'+p,import.meta.url),'utf8')));
 const store=new Map(),nodes=new Map();
-const node=()=>({value:'',checked:false,style:{},innerHTML:'',textContent:'',disabled:false,classList:{add(){},remove(){},contains(){return false}},setAttribute(){},addEventListener(){},appendChild(){},append(){},replaceChildren(){},close(){},showModal(){},focus(){},select(){},click(){}});
+const node=()=>({value:'',checked:false,style:{},innerHTML:'',textContent:'',disabled:false,classList:{add(){},remove(){},contains(){return false},toggle(){}},setAttribute(){},addEventListener(){},appendChild(){},append(){},replaceChildren(){},close(){},showModal(){},focus(){},select(){},click(){}});
 const document={body:{dataset:{}},addEventListener(){},querySelectorAll(){return []},getElementById(id){if(!nodes.has(id))nodes.set(id,node());return nodes.get(id)},createElement:node};
 const ctx=vm.createContext({document,console,localStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)},window:{location:{protocol:'http:',origin:'http://localhost'},scrollTo(){},matchMedia:()=>({matches:false})},URL,Blob,AbortController,TextDecoder,TextEncoder,setTimeout,clearTimeout,crypto:{randomUUID:()=>Math.random().toString(16)},alert(){},confirm:()=>true});
 vm.runInContext(core+'\n'+modules.join('\n'),ctx);
 const run=s=>vm.runInContext(s,ctx),data=s=>JSON.parse(JSON.stringify(run(s)));
+ctx.realSave=run('saveGame');
 run('renderAIOverview=()=>{};updateTokenDisplay=()=>{};saveGame=()=>{};renderGameUI=()=>{};allModelsData=AI_CATALOG_SNAPSHOT.map(catalogRow);apiKey="mock-key";aiSettings.budget=3;aiSettings.requestBudget=0.25;');
 let requests=[];
 ctx.fetch=async(url,options)=>{requests.push({url,body:JSON.parse(options.body)});return {ok:true,json:async()=>({choices:[{message:{content:'Ответ'},finish_reason:'stop'}],usage:{prompt_tokens:100,completion_tokens:20,cost:0.01}})}};
@@ -46,5 +47,8 @@ run('imageCache.clear()');await run('loadSessionImages(sessionId,false)');assert
 let exported;ctx.URL=class extends URL{static createObjectURL(blob){exported=blob;return 'blob:mock'}static revokeObjectURL(){}};
 store.set('kordim_save_1',JSON.stringify({sessionId:'image-session',character:data('character'),gameState:data('gameState'),chatHistory:data('chatHistory'),aiLedger:data('aiLedger()')}));run('activeSlot=1');document.getElementById('export-with-key').checked=false;
 await run('exportSave()');const bundle=JSON.parse(await exported.text());assert.equal(bundle.images.length,1);assert.equal(bundle.save.character.portraitKey,bundle.images[0].id);assert.equal(bundle.settings,undefined);assert.ok(!JSON.stringify(bundle).includes('mock-key'));
+
+
+run('gameStarted=false;selectedHero={name:"Выбранный герой",age:35,trade:"Столяр"};saveGame=realSave;isTurnRunning=false;');await run('generateGameImage("selected-portrait")');const draft=JSON.parse(store.get('kordim_save_1'));assert.equal(draft.draft,true);assert.equal(draft.character.name,'Выбранный герой');assert.ok(draft.character.portraitKey);assert.ok(imageStore.has(draft.character.portraitKey));
 
 console.log('PASS: roles/pricing, reasoning options, budgets, split SSE usage, billed truncation, journal extraction/fallback, checkpoint current action, protected state fields, image request/reference validation, manual reply, image generation/storage/export. No paid requests.');
