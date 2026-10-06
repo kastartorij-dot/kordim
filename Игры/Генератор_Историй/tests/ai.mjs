@@ -51,4 +51,13 @@ await run('exportSave()');const bundle=JSON.parse(await exported.text());assert.
 
 run('gameStarted=false;selectedHero={name:"Выбранный герой",age:35,trade:"Столяр"};saveGame=realSave;isTurnRunning=false;');await run('generateGameImage("selected-portrait")');const draft=JSON.parse(store.get('kordim_save_1'));assert.equal(draft.draft,true);assert.equal(draft.character.name,'Выбранный герой');assert.ok(draft.character.portraitKey);assert.ok(imageStore.has(draft.character.portraitKey));
 
+// Regression cases from the paid five-turn playtest.
+assert.deepEqual(data('parseResponse("<выборы>1. Осмотреть дверь</выборы><выборы>2. Спросить цену</выборы><выборы>3. Уйти</выборы><выборы>4. Подождать</выборы>").choicesArr'),['Осмотреть дверь','Спросить цену','Уйти','Подождать']);
+assert.deepEqual(data('parseResponse("<выборы>1. Осмотреть 2) Спросить 3. Уйти 4) Подождать</выборы>").choicesArr'),['Осмотреть','Спросить','Уйти','Подождать']);
+const scalarJournal=data('normalizeJournal({events:[{who:"Грегор",what:"Заплатил Дарену",keys:"ставень"}]},3)');assert.deepEqual(scalarJournal.events[0].who,['Грегор']);assert.deepEqual(scalarJournal.events[0].keys,['ставень']);
+document.getElementById('model-main').value='deepseek/deepseek-v4-pro';document.getElementById('model-summary').value='qwen/qwen3.8-flash';run('isTurnRunning=false;aiBusy=false;isDemo=false;gameStarted=true;apiKey="";');
+ctx.origApply=run('applySettings');run('applySettings=()=>{currentModel=document.getElementById("model-main").value;summaryModel=document.getElementById("model-summary").value;};saveAISettings()');
+assert.equal(JSON.parse(store.get('kordim_save_1')).summaryModel,'qwen/qwen3.8-flash');assert.equal(JSON.parse(store.get('kordim_save_1')).currentModel,'deepseek/deepseek-v4-pro');
+const settingsBefore=store.get('kordim_save_1');run('isTurnRunning=true;currentModel="blocked";saveAISettings()');assert.equal(store.get('kordim_save_1'),settingsBefore);run('isTurnRunning=false;applySettings=origApply');
+
 console.log('PASS: roles/pricing, reasoning options, budgets, split SSE usage, billed truncation, journal extraction/fallback, checkpoint current action, protected state fields, image request/reference validation, manual reply, image generation/storage/export. No paid requests.');

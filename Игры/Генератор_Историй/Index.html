@@ -57,7 +57,7 @@
         </div>
         <div class="picker" id="picker-summary"></div>
 
-        <label for="model-image">Модель изображений · портреты и сцены:</label><div class="model-field"><input type="text" id="model-image" readonly><button type="button" class="btn-gray" onclick="openImagePicker()">Выбрать</button></div><p class="muted">Картинки генерируются только по кнопке. Портрет доступен после выбора героя.</p><label><input id="ai-memory" type="checkbox" checked onchange="applySettings()"> Обновлять журнал и энциклопедию архивариусом после каждого хода</label><label><input id="remember-key" type="checkbox" checked onchange="applySettings()"> Запоминать API-ключ в этом браузере</label><div class="settings-row"><div><label for="ai-budget">Бюджет истории, USD</label><input id="ai-budget" type="number" min="0.05" max="100" step="0.1" value="3" onchange="applySettings()"></div><div><label for="ai-call-budget">Лимит запроса, USD</label><input id="ai-call-budget" type="number" min="0.005" max="10" step="0.005" value="0.25" onchange="applySettings()"></div></div><p id="ai-overview" class="ai-overview"></p><p class="muted">Лимиты сравниваются с оценкой до отправки. Это не лимит списания у провайдера: русские токены, кэш и reasoning меняют цену. Ограничение расходов аккаунта настрой в OpenRouter.</p><p id="ai-catalog-status" class="muted"></p><div class="dialog-actions"><button class="btn-gray" onclick="useBalancedPreset()">Баланс · бюджет истории $3</button><button class="btn-gray" onclick="openModelComparison()">Сравнить текст моделей</button><button class="btn-gray" onclick="applySettings()">Сохранить настройки</button></div><div class="settings-row">
+        <label for="model-image">Модель изображений · портреты и сцены:</label><div class="model-field"><input type="text" id="model-image" readonly><button type="button" class="btn-gray" onclick="openImagePicker()">Выбрать</button></div><p class="muted">Картинки генерируются только по кнопке. Портрет доступен после выбора героя.</p><label><input id="ai-memory" type="checkbox" checked onchange="applySettings()"> Обновлять журнал и энциклопедию архивариусом после каждого хода</label><label><input id="remember-key" type="checkbox" checked onchange="applySettings()"> Запоминать API-ключ в этом браузере</label><div class="settings-row"><div><label for="ai-budget">Бюджет истории, USD</label><input id="ai-budget" type="number" min="0.05" max="100" step="0.1" value="3" onchange="applySettings()"></div><div><label for="ai-call-budget">Лимит запроса, USD</label><input id="ai-call-budget" type="number" min="0.005" max="10" step="0.005" value="0.25" onchange="applySettings()"></div></div><p id="ai-overview" class="ai-overview"></p><p class="muted">Лимиты сравниваются с оценкой до отправки. Это не лимит списания у провайдера: русские токены, кэш и reasoning меняют цену. Ограничение расходов аккаунта настрой в OpenRouter.</p><p id="ai-catalog-status" class="muted"></p><div class="dialog-actions"><button class="btn-gray" onclick="useBalancedPreset()">Баланс · бюджет истории $3</button><button class="btn-gray" onclick="openModelComparison()">Сравнить текст моделей</button><button class="btn-gray" onclick="saveAISettings()">Сохранить настройки</button></div><div class="settings-row">
             <div>
                 <label>Температура (<span id="temp-val">0.7</span>):</label>
                 <input type="range" id="setting-temp" min="0" max="2" step="0.1" value="0.7">
@@ -1433,14 +1433,14 @@
 
         /* Ответ, обрезанный по max_tokens, теряет закрывающие теги: раньше
            это давало сырой текст с видимым "<выборы>" и без кнопок. */
-        let choicesStr = extract('выборы');
+        let choicesStr = [...text.matchAll(/<выборы>([\s\S]*?)<\/выборы>/gi)].map(m => m[1].trim()).join('\n') || null;
         if (choicesStr === null) {
             const open = text.search(/<выборы>/i);
             if (open !== -1) {
                 choicesStr = text.slice(open + 8).split(/<(?:состояние|лор)>/i)[0].trim();
             }
         }
-        const choicesArr = choicesStr ? choicesStr.split('\n').filter(l => l.trim()).map(c => c.replace(/^\d+\.\s*/, '')) : [];
+        const choicesArr = choicesStr ? choicesStr.split(/\r?\n|\s+(?=[1-4][.)]\s)/).map(l => l.trim()).filter(Boolean).map(c => c.replace(/^\d+[.)]\s*/, '')) : [];
 
         return {
             text: (function () {
@@ -1772,7 +1772,7 @@ ${scenarioLine}Пол всех четверых должен совпадать 
 
         tail.push(`ТЕКУЩЕЕ СОСТОЯНИЕ: ${JSON.stringify(promptState)}
 Деньги в состоянии — целое число ГРОШЕЙ. Сейчас при себе: ${formatMoney(gameState.money)}. Корд = 200 грошей, марка = 10 грошей.
-ПРАВИЛО ОТВЕТА: всегда возвращай <текст>, <выборы> (4 штуки списком) и обновлённый JSON в <состояние>. Обязательно двигай date и day вперёд при смене сцены, ночлеге и дороге.
+ПРАВИЛО ОТВЕТА: один блок <текст>проза</текст>, затем ОДИН блок <выборы> с ровно четырьмя разными доступными действиями, каждое с номером на отдельной строке, затем <состояние>обновлённый JSON</состояние>. Не оборачивай каждый вариант в отдельный тег. Заканчивай сцену там, где нужно следующее решение игрока; не сочиняй его реплик и не продолжай путь без его действия. Ночлег до утра и дорога двигают дату и day; обычный разговор в том же дне — нет. Деньги пересчитывай в грошах, проверяй баланс по заявленным доходам и расходам.
 После состояния добавь <лор>JSON-массив новых или изменившихся записей ЭТОЙ СЕССИИ</лор>. До 6 записей, только появившееся в этом ответе. Формат: [{"kind":"person|place|item|fact","name":"точное устойчивое имя","description":"краткое описание или договорённость","certainty":"факт|слух|предположение"}]. Если ничего нового — []. Используй прежние имена из памяти для обновлений, не дублируй. Слухи и догадки не выдавай за факты; предметы описывай отдельно от владения ими. Новые детали не меняют канон мира. Не показывай эти служебные записи внутри художественного текста.
 Добавь <журнал>{"summary":"кратко о сцене","events":[{"day":1,"who":[],"where":"место","what":"факт или договорённость","keys":[],"weight":3}]}</журнал>. До 6 событий, без выдуманных изменений.`);
 

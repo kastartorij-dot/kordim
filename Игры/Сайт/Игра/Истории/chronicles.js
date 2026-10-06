@@ -155,7 +155,7 @@ function showLoreEntry(key) {
 }
 function openJournal() {
  switchScreen('screen-journal');const box=document.getElementById('journal-entries');box.replaceChildren();
- events.concat(gameState.journal||[]).forEach(e=>{const row=document.createElement('article');row.className='journal-entry';row.innerHTML='<span class="eyebrow">ХРОНИКА · ДЕНЬ '+safeText(e.day)+'</span><p>'+safeText(e.what)+'</p>';box.appendChild(row);});
+ events.concat(gameState.journal||[]).forEach(e=>{const row=document.createElement('article');row.className='journal-entry';row.innerHTML='<span class="eyebrow">ХРОНИКА · ДЕНЬ '+safeText(e.day)+'</span><p class="muted">'+safeText([...(Array.isArray(e.who)?e.who:typeof e.who==='string'?[e.who]:[]),e.where].filter(Boolean).join(' · '))+'</p><p>'+safeText(e.what)+'</p>';box.appendChild(row);});
  allStoryMessages().forEach((msg,i)=>{if(msg.role!=='assistant')return;const row=document.createElement('article');row.className='journal-entry';const parsed=parseResponse(msg.content);const after=msg.stateAfter;row.innerHTML='<span class="eyebrow">ГЛАВА '+(msg.chapter||Math.floor(i/2)+1)+'</span><h3>'+safeText(after?.location||parsed.stateDelta.location||'История продолжается')+'</h3><p>'+safeText(parsed.text.slice(0,400))+(parsed.text.length>400?'…':'')+'</p>'+((parsed.loreDelta||[]).map(e=>'<p><b>'+safeText(e.name)+':</b> '+safeText(e.description)+'</p>').join(''))+(after?'<div class="snapshot">'+safeText(after.date)+' · '+safeText(formatMoney(after.money))+'<br>Вещи: '+safeText((after.inventory||[]).join(', ')||'нет')+'<br>Раны: '+safeText((after.wounds||[]).join(', ')||'нет')+'</div>':'');box.appendChild(row);});
  if(!box.childElementCount)box.innerHTML='<div class="empty-panel">Пока нет событий.</div>';window.scrollTo(0,0);
 }
