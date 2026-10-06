@@ -4,485 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Кордим: Хроники</title>
-    <style>
-        :root {
-            --bg: #121212;
-            --text: #e0e0e0;
-            --accent: #5e1818;
-            --accent-hover: #7a2222;
-            --border: #333;
-            --panel-bg: #1e1e1e;
-        }
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Georgia', serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
-        .container {
-            width: 100%;
-            max-width: 800px;
-        }
-        .screen {
-            display: none;
-            background: var(--panel-bg);
-            padding: 30px;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-        .screen.active {
-            display: block;
-        }
-        h1, h2 {
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 10px;
-            margin-top: 0;
-        }
-        input[type="text"], input[type="number"], input[type="password"], select, textarea {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            background: #2a2a2a;
-            border: 1px solid var(--border);
-            color: var(--text);
-            box-sizing: border-box;
-            font-family: sans-serif;
-        }
-        input[type="range"] {
-            width: 100%;
-            margin: 10px 0 20px;
-        }
-        input[type="checkbox"] {
-            margin-right: 10px;
-        }
-        button {
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            font-size: 14px;
-            border-radius: 2px;
-            transition: background 0.2s;
-            margin-top: 5px;
-        }
-        button:hover {
-            background: var(--accent-hover);
-        }
-        button:disabled {
-            background: #555;
-            cursor: not-allowed;
-        }
-        .btn-green { background: #2e4a2e; }
-        .btn-green:hover { background: #3a5c3a; }
-        .btn-gray { background: #444; }
-        .btn-gray:hover { background: #555; }
-
-        .saves-panel {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        .saves-panel button { flex: 1; }
-
-        #story-text {
-            font-size: 18px;
-            line-height: 1.6;
-            margin-bottom: 30px;
-        }
-        /* --- реплики --- */
-        .msg { display: flex; gap: 12px; margin-bottom: 24px; align-items: flex-start; }
-        .msg-icon {
-            flex: 0 0 30px; width: 30px; height: 30px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-family: sans-serif; font-size: 13px; margin-top: 3px; user-select: none;
-        }
-        .msg-user .msg-icon { background: #3a3a3a; color: #ddd; }
-        .msg-ai .msg-icon { background: var(--accent); color: #fff; }
-        .msg-body { flex: 1; min-width: 0; white-space: pre-wrap; }
-        .msg-user .msg-body {
-            color: #b9b9b9; font-style: italic;
-            border-left: 2px solid #3a3a3a; padding-left: 12px;
-        }
-        .msg-actions {
-            display: flex; align-items: center; gap: 4px;
-            margin-top: 12px; white-space: normal;
-        }
-        .icon-btn {
-            background: transparent; border: 1px solid transparent; color: #6f6f6f;
-            padding: 5px 6px; margin: 0; border-radius: 4px; line-height: 0; cursor: pointer;
-        }
-        .icon-btn:hover { background: #2a2a2a; color: #ddd; }
-        .icon-btn:disabled { background: transparent; color: #3a3a3a; cursor: not-allowed; }
-        .archive-note {
-            font-family: sans-serif;
-            font-size: 12px;
-            color: #6f6f6f;
-            text-align: center;
-            margin-bottom: 22px;
-            padding-bottom: 12px;
-            border-bottom: 1px dashed #333;
-        }
-        .swipe-count {
-            font-family: sans-serif; font-size: 12px; color: #777;
-            min-width: 40px; text-align: center;
-        }
-        .actions-sep { width: 1px; height: 16px; background: #333; margin: 0 4px; }
-
-        /* --- выбор модели --- */
-        .model-field { display: flex; gap: 10px; align-items: center; }
-        .model-field input { margin: 10px 0; }
-        .model-field button { margin: 0; white-space: nowrap; }
-        .picker {
-            display: none; border: 1px solid var(--border);
-            background: #161616; border-radius: 4px; margin-bottom: 10px;
-        }
-        .picker.on { display: block; }
-        .pick-head { padding: 10px; border-bottom: 1px solid var(--border); }
-        .pick-search { margin: 0 0 8px !important; }
-        .pick-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-        .chip {
-            background: #2a2a2a; border: 1px solid var(--border); color: #bbb;
-            font-size: 12px; padding: 4px 10px; margin: 0; font-family: sans-serif;
-        }
-        .chip.on { background: var(--accent); color: #fff; border-color: var(--accent); }
-        .pick-rows { max-height: 320px; overflow-y: auto; }
-        .model-row {
-            display: flex; justify-content: space-between; gap: 10px;
-            padding: 8px 10px; border-bottom: 1px solid #222; cursor: pointer;
-            font-family: sans-serif; font-size: 13px;
-        }
-        .model-row:hover { background: #222; }
-        .model-row b { font-weight: normal; color: #ddd; overflow: hidden; text-overflow: ellipsis; }
-        .model-row span { color: #888; white-space: nowrap; }
-        .model-row.free b { color: #8fbf8f; }
-        .pick-none { padding: 12px; color: #777; font-family: sans-serif; font-size: 13px; }
-
-        /* --- слоты и меню --- */
-        .slot-active { outline: 1px solid #7ea87e; }
-        .saves-panel .slot-cell { flex: 1; display: flex; gap: 4px; min-width: 0; }
-        .saves-panel .slot-cell > button { flex: 0 0 auto; }
-        .saves-panel .slot-cell > .btn-green,
-        .saves-panel .slot-cell > .btn-gray:first-child { flex: 1 1 auto; min-width: 0; }
-        .slot-reset { padding: 10px 12px; font-size: 16px; line-height: 1; }
-        .newgame-row { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
-        .newgame-row label { margin: 0; }
-        .newgame-row select { width: auto; margin: 0; }
-        .newgame-row button { margin: 0; }
-        .back-row { margin-bottom: 15px; }
-
-        /* --- телефон --- */
-        @media (max-width: 600px) {
-            body { padding: 8px; }
-            .screen { padding: 16px 14px; }
-            h1, h2 { font-size: 24px; }
-
-            /* колонка текста: было 20 символов в строке, стало ~40 */
-            #story-text { font-size: 17px; line-height: 1.55; margin-bottom: 22px; }
-            .msg { gap: 8px; margin-bottom: 18px; }
-            .msg-icon { flex-basis: 24px; width: 24px; height: 24px; font-size: 11px; }
-            .msg-user .msg-body { padding-left: 9px; }
-
-            /* Строка состояния занимала шестую часть экрана до первого слова прозы,
-               и она растёт по мере накопления ран и вещей. На телефоне сворачиваем
-               до двух строк, разворот по нажатию. */
-            #state-panel { font-size: 11.5px; line-height: 1.45; padding: 8px; cursor: pointer; }
-            #state-panel.collapsed {
-                /* ровно две строки плюс отступы: line-clamp резал третью пополам */
-                max-height: calc(2 * 1.45em + 16px);
-                overflow: hidden;
-                position: relative;
-            }
-            #state-panel.collapsed::after {
-                content: '';
-                position: absolute;
-                left: 0; right: 0; bottom: 0; height: 14px;
-                background: linear-gradient(transparent, #0f0f0f);
-            }
-            #tokens-bar {
-                margin: 14px -14px -16px;
-                font-size: 10px;
-                justify-content: flex-start;
-                gap: 4px 12px;
-                padding: 6px 8px;
-            }
-
-            /* пальцем в иконку 30px не попасть */
-            .msg-actions { gap: 2px; margin-top: 14px; }
-            .icon-btn { padding: 11px 12px; }
-            .swipe-count { min-width: 44px; }
-
-            .choice-btn { font-size: 15px; padding: 11px; }
-            #custom-action-container { gap: 8px; }
-            #custom-action-container button { padding: 10px 14px; white-space: nowrap; }
-
-            /* температура и токены не помещались в один ряд */
-            .settings-row { flex-direction: column; gap: 0; }
-            .newgame-row { flex-wrap: wrap; }
-            .saves-panel { gap: 6px; }
-            .saves-panel button { font-size: 13px; padding: 10px 6px; }
-        }
-        .choice-btn {
-            display: block;
-            width: 100%;
-            text-align: left;
-            background: #2a2a2a;
-            border: 1px solid var(--border);
-            margin-bottom: 10px;
-            padding: 12px;
-            font-family: inherit;
-            font-size: 16px;
-        }
-        .choice-btn:hover {
-            background: #333;
-            border-color: var(--accent);
-        }
-        #custom-action-container {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        #custom-action-container input {
-            margin: 0;
-        }
-        #state-panel {
-            font-family: monospace;
-            font-size: 14px;
-            background: #0f0f0f;
-            padding: 10px;
-            margin-bottom: 5px;
-            border-left: 3px solid var(--accent);
-            color: #aaa;
-        }
-        #tokens-bar {
-            position: sticky;
-            bottom: 0;
-            z-index: 20;
-            font-size: 11px;
-            color: #7a7a7a;
-            font-family: sans-serif;
-            background: rgba(18,18,18,0.94);
-            border-top: 1px solid var(--border);
-            padding: 7px 10px;
-            margin: 14px -30px -30px;
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        #tokens-bar b { color: #a9a9a9; font-weight: normal; }
-        #tokens-bar .warn { color: #b06a6a; }
-        .char-field { margin-bottom: 12px; }
-        .char-field label { display: block; font-size: 12px; color: #888; margin-bottom: 2px; }
-        .char-field input { margin: 0; }
-        .ev-row {
-            display: flex; gap: 8px; align-items: flex-start;
-            border-bottom: 1px solid #262626; padding: 7px 0;
-        }
-        .ev-row textarea {
-            margin: 0; font-size: 13px; min-height: 46px; resize: vertical;
-            font-family: sans-serif;
-        }
-        .ev-meta { font-size: 11px; color: #777; white-space: nowrap; padding-top: 9px; min-width: 74px; }
-        .ev-del { background: #3a2020; padding: 6px 10px; margin: 0; align-self: center; }
-        .pick-toggles { display: flex; gap: 14px; flex-wrap: wrap; padding: 6px 0 2px; font-size: 12px; color: #999; }
-        .pick-toggles label { display: flex; align-items: center; gap: 5px; cursor: pointer; }
-        .pick-toggles input { margin: 0; }
-        .loader {
-            display: none;
-            font-style: italic;
-            color: #888;
-            margin: 20px 0;
-        }
-        .loader.error {
-            font-style: normal;
-            color: #d98a8a;
-            border-left: 3px solid #7a2222;
-            padding-left: 10px;
-            white-space: pre-wrap;
-        }
-        .settings-row {
-            display: flex;
-            gap: 15px;
-        }
-        .settings-row > div {
-            flex: 1;
-        }
-        .model-filter { margin-bottom: 5px !important; }
-        .game-controls { display: flex; gap: 10px; margin-bottom: 20px; }
-    </style>
-    <!-- Оформление под проект «Кордим» (Игры/Сайт/Приложение): те же цвета, шрифты и карточки. Логика игры не тронута. -->
     <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Geologica:wght@300;400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #1a1716; --panel-bg: #221e1c; --raise: #2c2724; --border: #3a3431;
-            --text: #ece5dc; --mute: #9d938a;
-            --accent: #d9a441; --accent-hover: #e6b55a;
-            --dusk: #8ea7d6; --ember: #d46a4a; --sage: #9bb383;
-            --disp: 'Unbounded', system-ui, sans-serif; --body: 'Geologica', system-ui, sans-serif; --mono: 'JetBrains Mono', ui-monospace, monospace;
-            --ease: cubic-bezier(.2,.8,.2,1);
-        }
-        body {
-            font: 300 16px/1.6 var(--body);
-            padding: 28px 20px 40px;
-            background: radial-gradient(1100px 520px at 50% -12%, rgba(217,164,65,.09), transparent 60%), var(--bg);
-            min-height: 100vh; box-sizing: border-box;
-        }
-        .container { max-width: 880px; }
-        .screen {
-            background: linear-gradient(180deg, #25201e, var(--panel-bg) 180px);
-            border: 1px solid var(--border); border-radius: 22px;
-            padding: 30px 34px; box-shadow: 0 30px 80px rgba(0,0,0,.45);
-        }
-        .screen.active { animation: kin .45s var(--ease); }
-        @keyframes kin { from { opacity: 0; transform: translateY(10px); } }
-        h1 {
-            font: 900 clamp(30px, 5vw, 48px)/1 var(--disp); letter-spacing: -.02em;
-            border: 0; padding: 0; margin: 0 0 24px;
-        }
-        h1::before {
-            content: "КОРДИМ · ХРОНИКИ"; display: block;
-            font: 400 11px var(--mono); letter-spacing: .14em; color: var(--mute); margin-bottom: 10px;
-        }
-        h2 {
-            font: 700 12px var(--disp); letter-spacing: .14em; text-transform: uppercase;
-            color: var(--mute); border-bottom: 1px solid var(--border); padding-bottom: 10px;
-        }
-        label { font-size: 14px; color: #d6cec4; }
-        input[type="text"], input[type="number"], input[type="password"], select, textarea {
-            background: var(--raise); border: 1px solid var(--border); border-radius: 10px;
-            font: 400 15px var(--body); color: var(--text); transition: border-color .2s;
-        }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
-        input[type="range"], input[type="checkbox"] { accent-color: var(--accent); }
-        button {
-            background: var(--accent); color: #1a1510; font: 500 14px var(--body);
-            border-radius: 10px; padding: 10px 18px; transition: background .2s, border-color .2s, transform .2s;
-        }
-        button:hover { background: var(--accent-hover); }
-        button:disabled { background: #3a3431; color: #7a716a; }
-        .btn-gray { background: var(--raise); color: var(--text); border: 1px solid var(--border); }
-        .btn-gray:hover { background: #352f2b; border-color: var(--accent); }
-        .btn-green { background: rgba(155,179,131,.12); color: #d6e4c7; border: 1px solid rgba(155,179,131,.38); }
-        .btn-green:hover { background: rgba(155,179,131,.22); }
-        .slot-active { outline: 2px solid var(--accent); outline-offset: 2px; }
-        #story-text { font: 300 19px/1.72 var(--body); }
-        .msg-icon { font: 700 12px var(--disp); }
-        .msg-ai .msg-icon { background: var(--accent); color: #1a1510; }
-        .msg-user .msg-icon { background: var(--raise); color: var(--dusk); }
-        .msg-user .msg-body { color: var(--dusk); border-left-color: var(--dusk); font-style: normal; }
-        .icon-btn { background: transparent; color: var(--mute); }
-        .icon-btn:hover { background: var(--raise); color: var(--text); }
-        .actions-sep { background: var(--border); }
-        .archive-note, .swipe-count { font-family: var(--mono); color: var(--mute); border-color: var(--border); }
-        .choice-btn {
-            background: var(--raise); border: 1px solid var(--border); border-radius: 14px;
-            color: var(--text); font: 400 16px/1.45 var(--body); padding: 13px 16px;
-        }
-        .choice-btn:hover { background: #342e2a; border-color: var(--accent); transform: translateX(4px); }
-        #custom-action-container input { border-radius: 10px; }
-        #state-panel {
-            font: 400 13px/1.6 var(--mono); background: var(--raise); color: #d6cec4;
-            border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 12px; padding: 10px 14px;
-        }
-        #tokens-bar {
-            font: 400 11px var(--mono); color: var(--mute);
-            background: rgba(26,23,22,.95); border-top: 1px solid var(--border);
-            border-radius: 0 0 22px 22px; margin: 16px -34px -30px; padding: 8px 16px;
-        }
-        #tokens-bar b { color: #cfc7bd; }
-        .loader { color: var(--mute); }
-        .loader.error { color: #eeac98; border-left-color: var(--ember); }
-        .picker { background: #1e1a18; border-color: var(--border); border-radius: 12px; overflow: hidden; }
-        .pick-head { border-color: var(--border); }
-        .chip { background: var(--raise); border-color: var(--border); border-radius: 99px; color: #cfc7bd; font: 400 12px var(--body); }
-        .chip.on { background: var(--accent); color: #1a1510; border-color: var(--accent); }
-        .model-row { font: 400 13px var(--body); border-color: #2c2724; }
-        .model-row:hover { background: var(--raise); }
-        .model-row.free b { color: var(--sage); }
-        .char-field label, .ev-meta { font-family: var(--mono); color: var(--mute); }
-        .ev-row { border-color: var(--border); }
-        .ev-del { background: rgba(212,106,74,.16); color: #eeac98; border: 1px solid rgba(212,106,74,.4); }
-        .ev-del:hover { background: rgba(212,106,74,.28); }
-        @media (max-width: 600px) {
-            body { padding: 10px; }
-            .screen { padding: 18px 16px; border-radius: 16px; }
-            #tokens-bar { margin: 14px -16px -18px; border-radius: 0 0 16px 16px; }
-        }
-    </style>
-    <!-- Пиксельный RPG-HUD поверх «Хроники» (вариант B из макетов раздела «Игра»): 8-bit рамки,
-         ступенчатые тени, Press Start 2P в заголовках. Логика игры не тронута. -->
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <style>
-        body::after {
-            content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 1;
-            background: repeating-linear-gradient(0deg, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 3px, rgba(0,0,0,.06) 4px);
-        }
-        .container { position: relative; z-index: 2; }
-        h1::before { font-family: 'Press Start 2P', var(--mono); font-size: 9px; letter-spacing: .08em; }
-        h2 { font-family: 'Press Start 2P', var(--disp); font-size: 10px; letter-spacing: .04em; border-bottom: 2px dashed var(--border); padding-bottom: 12px; }
-        .screen {
-            position: relative;
-            border-radius: 0; border: 4px solid var(--text);
-            box-shadow: 0 0 0 4px var(--bg), 0 0 0 8px var(--accent), 6px 6px 0 8px #000;
-        }
-        button, .choice-btn {
-            border-radius: 0; border: 2px solid #000; box-shadow: 3px 3px 0 #000;
-            font-family: var(--mono); transition: transform .05s linear, box-shadow .05s linear;
-        }
-        button:hover, .choice-btn:hover { transform: translate(2px,2px); box-shadow: 1px 1px 0 #000; }
-        button:active, .choice-btn:active { transform: translate(3px,3px); box-shadow: 0 0 0 #000; }
-        button:disabled { box-shadow: 3px 3px 0 #000; }
-        .choice-btn:hover { border-color: var(--accent); }
-        input[type="text"], input[type="number"], input[type="password"], select, textarea {
-            border-radius: 0; border: 2px solid var(--border);
-        }
-        input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(217,164,65,.25); }
-        #state-panel { border-radius: 0; border: 2px solid var(--border); border-left: 4px solid var(--accent); }
-        #tokens-bar { border-radius: 0; border-top: 2px solid var(--border); }
-        .picker { border-radius: 0; border: 2px solid var(--border); }
-        .chip { border-radius: 0; border: 2px solid var(--border); }
-        .msg-icon { border-radius: 0; }
-        .seg { display: flex; gap: 10px; margin: 8px 0 4px; }
-        .mode-btn { flex: 1; background: var(--raise); color: var(--text); border-color: var(--border); }
-        .mode-btn[aria-pressed="true"] { background: var(--accent); color: #1a1510; border-color: #000; }
-        .mode-btn:hover { background: #352f2b; }
-        .mode-btn[aria-pressed="true"]:hover { background: var(--accent-hover); }
-        #scenario-picker { padding: 12px 14px; background: var(--raise); border: 2px solid var(--border); }
-        #scenario-select option:disabled { color: #6b625b; }
-        .slot-active { outline: 2px dashed var(--accent); outline-offset: 3px; }
-        ::selection { background: var(--accent); color: #1a1510; }
-        @media (max-width: 600px) {
-            /* На телефоне тройное кольцо рамки съедало треть экрана — оставляем
-               тонкую рамку и «пиксельные» уголки поверх неё вместо толстых теней. */
-            body { padding: 6px; }
-            .container { max-width: 100%; }
-            .screen {
-                padding: 14px 12px !important;
-                border-width: 2px;
-                box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent), 3px 3px 0 4px #000;
-            }
-            .screen::before, .screen::after {
-                content: ''; position: absolute; width: 8px; height: 8px; background: var(--accent); z-index: 1;
-            }
-            .screen::before { top: -6px; left: -6px; }
-            .screen::after { bottom: -6px; right: -6px; }
-            h1::before { font-size: 8px; }
-            h1 { font-size: 26px !important; margin-bottom: 16px !important; }
-            #tokens-bar { margin: 12px -12px -14px !important; }
-        }
-    </style>
+    <link rel="stylesheet" href="chronicles.css">
 </head>
 <body>
 
+<header class="app-header"><button class="brand" onclick="switchScreen('screen-setup')" aria-label="Кордим: главное меню"><span class="brand-symbol">✦</span><span><b>КОРДИМ</b><small>ХРОНИКИ</small></span></button><nav class="header-links" aria-label="Разделы"><button data-nav="screen-setup" onclick="switchScreen('screen-setup')">Мои истории</button><button data-nav="screen-char-gen" onclick="beginNewStory()">Персонажи</button><button onclick="openSessionLore()">Энциклопедия</button></nav><span class="header-season">1026 · РАННЯЯ ОСЕНЬ</span></header>
 <div class="container">
     <div id="screen-setup" class="screen active">
-        <h1>Меню</h1>
+        <section class="welcome"><div class="welcome-copy"><span class="eyebrow">ОДИН МИР. МНОЖЕСТВО СУДЕБ.</span><h1>Твоя история<br>в Кордиме</h1><p>Города, дороги и люди, которым есть что рассказать. Выбери, чьими глазами увидеть этот мир.</p><div class="welcome-actions"><button onclick="beginNewStory()">Начать историю ↗</button><button class="btn-gray" onclick="startDemo()">Посмотреть пример</button></div></div></section><div class="section-heading"><div><span class="eyebrow">ПРОДОЛЖИТЬ ПУТЬ</span><h2>Мои истории</h2></div><span class="muted">Три независимые хроники</span></div>
 
         <button class="btn-gray" id="btn-resume" style="display:none; margin-bottom:15px;" onclick="switchScreen('screen-game')">&larr; Вернуться к игре</button>
 
@@ -500,7 +30,7 @@
                 <button class="btn-gray slot-reset" id="slot-reset-3" onclick="startNewGameProcess(3)" title="Начать в этом слоте заново">&#8635;</button>
             </div>
         </div>
-        <div class="saves-panel">
+        <div class="transfer-bar">
             <button class="btn-gray" onclick="exportSave()">Экспорт в файл</button>
             <button class="btn-gray" onclick="document.getElementById('import-file').click()">Импорт из файла</button>
             <input type="file" id="import-file" style="display:none" accept=".json" onchange="importSave(event)">
@@ -509,7 +39,8 @@
             <input type="checkbox" id="export-with-key"> Класть в файл ключ и настройки — для переноса на другое устройство
         </label>
 
-        <label>API Ключ (OpenRouter):</label>
+        <details class="connection-settings" id="connection-settings"><summary>Настройки рассказчика <small>Подключение OpenRouter и параметры генерации</small></summary><div class="connection-body">
+        <label for="api-key">API Ключ (OpenRouter):</label>
         <input type="password" id="api-key" placeholder="sk-or-v1-...">
 
         <label>Основная модель:</label>
@@ -542,71 +73,23 @@
             <span style="display:block;font-size:11px;color:#777;margin-left:26px;">Запись в кэш стоит 1.25x, чтение 0.1x: первый ход дороже, дальше кор почти бесплатный. У остальных провайдеров кэш работает сам, галка им не нужна и может вызвать ошибку.</span>
         </label>
 
+        </div></details>
     </div>
 
     <div id="screen-char-gen" class="screen">
-        <div class="back-row">
-            <button class="btn-gray" onclick="switchScreen('screen-setup')">&larr; В меню</button>
-        </div>
-        <h1>Создание персонажа</h1>
-
-        <label>Режим игры:</label>
-        <div class="seg" id="mode-seg" role="group">
-            <button type="button" class="mode-btn" data-mode="free" aria-pressed="true">Свободная игра</button>
-            <button type="button" class="mode-btn" data-mode="scenario" aria-pressed="false">По сценарию</button>
-        </div>
-
-        <div id="scenario-picker" style="display:none;margin:14px 0 4px">
-            <label>Сценарий:</label>
-            <select id="scenario-select"></select>
-            <p id="scenario-desc" style="font-size:13px;color:var(--mute);margin:8px 0 0;line-height:1.5"></p>
-        </div>
-
-        <label>Пол персонажа:</label>
-        <select id="char-gender">
-            <option value="мужской">мужской</option>
-            <option value="женский">женский</option>
-        </select>
-
-        <label>Возраст:</label>
-        <input type="number" id="char-age" placeholder="25" min="15" max="70">
-
-        <div id="location-row">
-            <label>Где начинаем:</label>
-            <select id="char-location">
-                <option value="">Случайно</option>
-            </select>
-        </div>
-
-        <button id="btn-generate">Сгенерировать варианты</button>
-        <div id="char-loader" class="loader">Судьба плетёт нити...</div>
-
-        <div id="char-options" style="margin-top: 20px;"></div>
+      <div class="creation-head"><div><span class="eyebrow">НАЧАЛО НОВОЙ ХРОНИКИ</span><h1>Чья это история?</h1><p class="muted">Обычные люди. Собственные причины отправиться в путь.</p></div><button class="btn-gray" onclick="switchScreen('screen-setup')">← Мои истории</button></div>
+      <div class="creation-layout"><aside class="creation-settings"><h3>Где начинаем</h3><label for="char-location">Место</label><select id="char-location"><option value="">Случайно</option></select><label for="char-gender">Пол для генерации</label><select id="char-gender"><option value="мужской">Мужской</option><option value="женский">Женский</option></select><label for="char-age">Возраст</label><input id="char-age" type="number" placeholder="25" min="15" max="90"><label for="char-idea">Твоя задумка</label><textarea id="char-idea" rows="4" maxlength="1200" placeholder="Например: швея ищет работу в новом городе…"></textarea><button id="btn-generate">Предложить героев</button><p class="muted" style="margin-top:12px">Четыре варианта от рассказчика. Или выбери набросок справа.</p><div id="char-loader" class="loader">Рассказчик придумывает героев…</div></aside>
+      <div><div id="starter-heroes" class="hero-grid"></div><div id="char-options" class="hero-grid"></div><details class="custom-character"><summary>Создать своего персонажа</summary><div class="custom-fields"><div><label for="new-name">Имя</label><input id="new-name" maxlength="100" placeholder="Как тебя зовут?"></div><div><label for="new-trade">Ремесло</label><input id="new-trade" maxlength="160" placeholder="Чем зарабатываешь?"></div><div class="wide-field"><label for="new-origin">Происхождение и история</label><textarea id="new-origin" rows="3" maxlength="1200" placeholder="Откуда ты и что привело сюда?"></textarea></div><div class="wide-field"><label for="new-flaw">Уязвимость или забота</label><input id="new-flaw" maxlength="300" placeholder="Что может осложнить путь?"></div></div><button onclick="chooseCustomHero()">Выбрать этого героя →</button></details></div></div>
+      <div hidden><div id="mode-seg"><button class="mode-btn" data-mode="free" aria-pressed="true"></button><button class="mode-btn" data-mode="scenario" aria-pressed="false"></button></div><div id="scenario-picker"><select id="scenario-select"></select><p id="scenario-desc"></p></div><div id="location-row"></div></div>
     </div>
 
-    <div id="screen-game" class="screen">
-        <div class="game-controls">
-            <button class="btn-gray" onclick="switchScreen('screen-setup')">&larr; В меню</button>
-            <button class="btn-gray" onclick="openCharacterScreen()">Персонаж</button>
-        </div>
-        <div id="state-panel"></div>
-
-        <div id="story-text"></div>
-        <div id="choices-container"></div>
-
-        <div id="custom-action-container">
-            <input type="text" id="custom-action" placeholder="Или напишите своё действие...">
-            <button id="btn-custom-action">Действовать</button>
-        </div>
-        <div id="game-loader" class="loader">Рассказчик думает...</div>
-        <div id="tokens-bar">
-            <span id="tok-turn">ход: —</span>
-            <span id="tok-total">сессия: 0</span>
-            <span id="tok-cost">~$0.0000</span>
-            <span id="tok-cache">кэш: 0</span>
-        </div>
-    </div>
-
+    <div id="screen-game" class="screen"><div class="game-layout">
+      <aside class="hero-sidebar"><p class="eyebrow">ГЛАВНЫЙ ГЕРОЙ</p><div id="sidebar-portrait" class="sidebar-portrait"></div><h2 id="sidebar-name" class="sidebar-name"></h2><div id="sidebar-trade" class="sidebar-trade"></div><div class="sidebar-state"><div><small>Сейчас</small><strong id="sidebar-location"></strong></div><div><small>При себе</small><strong id="sidebar-money"></strong></div><div><small>Состояние</small><strong id="sidebar-health"></strong></div></div><div class="sidebar-tools"><button class="btn-gray" onclick="showHeroCard()">◈ Карточка героя</button><button class="btn-gray" onclick="openInventory()">▤ Вещи и снаряжение</button><button class="btn-gray" onclick="openJournal()">☷ Журнал истории</button><button class="btn-gray" onclick="openCharacterScreen()">Изменить сведения</button></div><p class="session-note">Эта хроника хранится в твоём браузере. Для переноса сохрани её в файл.</p></aside>
+      <main class="story-column"><div class="story-toolbar"><span class="eyebrow">ТВОЯ ХРОНИКА <span class="demo-badge">ПРИМЕР</span></span><div><button class="btn-gray mobile-tools" onclick="showHeroCard()">Герой</button><button class="btn-gray" onclick="openSessionLore()">Энциклопедия ↗</button><button class="btn-gray" onclick="switchScreen('screen-setup')">Меню</button></div></div><div class="story-cover"><h2 id="story-place">Кордим</h2></div><div id="state-panel"></div><div id="story-text"></div><div class="composer"><div id="choices-container"></div><div id="custom-action-container"><input type="text" id="custom-action" aria-label="Твоё действие" placeholder="Что ты сделаешь?"><button id="btn-custom-action">Действовать →</button></div><div class="composer-tools"><button class="btn-gray" onclick="openInventory()">Вещи</button><button class="btn-gray" onclick="openJournal()">Журнал</button><button class="btn-gray" onclick="openDirection()">Указание рассказчику</button></div><div id="game-loader" class="loader">Рассказчик думает…</div><p class="demo-notice" id="demo-notice" hidden>Пример интерфейса без запросов к нейросети. Начни свою историю из меню.</p></div><div id="tokens-bar"><span id="tok-turn">ход: —</span><span id="tok-total">сессия: 0</span><span id="tok-cost">~$0.0000</span><span id="tok-cache">кэш: 0</span></div></main>
+      <aside class="chapter-sidebar"><p class="eyebrow">ГЛАВЫ</p><div id="chapter-list" class="chapter-list"></div><div style="margin-top:30px"><p class="eyebrow">ПАМЯТЬ СЕССИИ</p><p id="lore-count" class="muted"></p><button class="btn-gray" onclick="openSessionLore()" style="width:100%;font-size:11px">Все записи ↗</button></div></aside>
+    </div></div>
+    <div id="screen-lore" class="screen"><div class="back-row"><button class="btn-gray" onclick="switchScreen('screen-game')">← К истории</button></div><div class="lore-banner"><span class="eyebrow">ПАМЯТЬ ЭТОЙ ИСТОРИИ</span><h1>Энциклопедия сессии</h1><p class="muted">Встреченные люди, открытые места и узнанные факты. Записи этой партии сохраняются отдельно от канона Кордима.</p></div><div class="lore-controls"><div id="lore-tabs" class="lore-tabs"></div><input id="lore-search" type="text" aria-label="Поиск по энциклопедии" placeholder="Найти запись…" oninput="renderLoreCards()"></div><div id="lore-cards" class="lore-grid"></div></div>
+    <div id="screen-journal" class="screen"><div class="back-row"><button class="btn-gray" onclick="switchScreen('screen-game')">← К истории</button></div><span class="eyebrow">СОБЫТИЯ И ПОСЛЕДСТВИЯ</span><h1>Журнал истории</h1><p class="muted">Что случилось и что изменилось после каждого хода.</p><div id="journal-entries" class="journal-list"></div></div>
     <div id="screen-character" class="screen">
         <h1>Персонаж</h1>
         <button class="btn-gray" onclick="switchScreen('screen-game')">&larr; К игре</button>
@@ -1172,6 +655,7 @@
     let gameMode = 'free';
 
     let chatHistory = [];
+    let storyArchive = []; // Полный текст старых глав для чтения; в запросы модели не отправляется.
     let events = [];
     let archivedTurns = 0;   // сколько сообщений ушло в хронику и исчезло с экрана
     let stateSnapshots = [];
@@ -1288,8 +772,16 @@
 
     /* === УТИЛИТЫ === */
     function switchScreen(screenId) {
+        if (isTurnRunning && screenId === "screen-char-gen") return;
+        if (screenId === "screen-setup" && isDemo) gameStarted = false;
+        document.body.dataset.screen = screenId;
+        document.querySelectorAll("[data-nav]").forEach(b => {
+            if (b.dataset.nav === screenId) b.setAttribute("aria-current", "page");
+            else b.removeAttribute("aria-current");
+        });
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(screenId).classList.add('active');
+        if (screenId !== 'screen-game') window.scrollTo(0, 0);
     }
 
     function escapeRegExp(string) {
@@ -1394,8 +886,9 @@
     }
 
     function saveGame() {
+        if (isDemo || activeSlot < 1) return;
         cleanEvents();
-        const saveObj = { sessionId, character, gameState, chatHistory, events, archivedTurns, currentModel, summaryModel };
+        const saveObj = { sessionId, character, gameState, chatHistory, storyArchive, events, archivedTurns, currentModel, summaryModel };
         let serialized = JSON.stringify(saveObj);
 
         try {
@@ -1424,6 +917,7 @@
     }
 
     function loadGame(slot) {
+        if (isTurnRunning) return;
         const savedData = lsGet(`kordim_save_${slot}`);
         if (!savedData) return alert("Слот пуст");
 
@@ -1434,7 +928,10 @@
             sessionId = parsed.sessionId || generateUUID();
             character = parsed.character || character;
             gameState = parsed.gameState || gameState;
+            gameState.sessionLore = normalizeLore(gameState.sessionLore);
+            isDemo = false;
             chatHistory = parsed.chatHistory || [];
+            storyArchive = Array.isArray(parsed.storyArchive) ? parsed.storyArchive : [];
             events = parsed.events || [];
             archivedTurns = parsed.archivedTurns || 0;
 
@@ -1444,7 +941,7 @@
             applySettings();
 
             stateSnapshots = [];
-            if (!apiKey) return alert('Введите ключ API перед загрузкой');
+            // Чтение сохранений доступно без ключа API.
 
             gameStarted = true;
             checkSavesUI();
@@ -1463,13 +960,14 @@
     }
 
     function startNewGameProcess(slot) {
+        if (isTurnRunning) return;
         slot = parseInt(slot, 10) || 1;
         if (lsGet(`kordim_save_${slot}`) &&
             !confirm(`В слоте ${slot} уже есть сохранение. Оно будет затёрто первым же ходом. Продолжить?`)) return;
 
         activeSlot = slot;
         applySettings();
-        if (!apiKey) { alert('Нужен ключ API'); return; }
+        isDemo = false;
 
         gameStarted = false;
         checkSavesUI();
@@ -1477,6 +975,7 @@
         character = { name: "", gender: "", age: "", origin: "", trade: "", flaw: "" };
         gameState = { location: "", money: 0, wounds: [], inventory: [], date: "1 День Месяца Пепла, 1026 год", day: 1, scenario: null };
         chatHistory = [];
+        storyArchive = [];
         events = [];
         archivedTurns = 0;
         stateSnapshots = [];
@@ -1491,6 +990,9 @@
             document.getElementById('location-row').style.display = 'block';
         }
 
+        document.getElementById('char-options').replaceChildren();
+        document.getElementById('custom-action').disabled = false;
+        renderStarterHeroes();
         switchScreen('screen-char-gen');
     }
 
@@ -1501,9 +1003,11 @@
             if (!btn) continue;
             const isActive = gameStarted && i === activeSlot;
 
-            btn.textContent = isActive ? `Слот ${i} · идёт игра`
-                            : hasSave  ? `Слот ${i} · Загрузить`
-                                       : `Слот ${i} · Новая игра`;
+            let info = null;
+            try { info = JSON.parse(lsGet('kordim_save_' + i) || 'null'); } catch {}
+            btn.textContent = info?.character?.name
+                ? info.character.name + '\n' + (info.gameState?.location || 'Кордим') + (isActive ? ' · В игре' : ' · Продолжить →')
+                : 'История ' + i + '\nНачать новый путь →';
             btn.classList.toggle('slot-active', isActive);
             btn.classList.toggle('btn-green', hasSave || isActive);
             btn.classList.toggle('btn-gray', !hasSave && !isActive);
@@ -1557,6 +1061,7 @@
     }
 
     function importSave(event) {
+        if (isTurnRunning) return;
         const file = event.target.files[0];
         if (!file) return;
         event.target.value = '';   // иначе повторный выбор того же файла не сработает
@@ -1885,6 +1390,7 @@
 
     /* === РЕНДЕР И ПАРСИНГ === */
     function updateStatePanel() {
+        updateChronicleUI();
         document.getElementById('state-panel').textContent =
             `[${gameState.date} (День ${gameState.day})] | Локация: ${gameState.location} | При себе: ${formatMoney(gameState.money)} | Раны: ${gameState.wounds.join(', ') || 'нет'} | Инвентарь: ${gameState.inventory.join(', ') || 'пусто'}`;
     }
@@ -1895,6 +1401,7 @@
         choicesArr.forEach(cleanText => {
             const btn = document.createElement('button');
             btn.className = 'choice-btn';
+            btn.disabled = isTurnRunning || isDemo;
             btn.textContent = cleanText;
             btn.addEventListener('click', () => makeGameTurn(cleanText));
             container.appendChild(btn);
@@ -1932,7 +1439,8 @@
         b.className = 'icon-btn';
         b.innerHTML = ICONS[iconKey];
         b.title = title;
-        b.disabled = !!disabled;
+        b.disabled = !!disabled || isTurnRunning || isDemo;
+        b.setAttribute('aria-label', title);
         if (!disabled) b.addEventListener('click', handler);
         return b;
     }
@@ -1968,14 +1476,14 @@
         if (archivedTurns > 0) {
             const note = document.createElement('div');
             note.className = 'archive-note';
-            note.textContent = `— ранее: ${archivedTurns} ${plural(archivedTurns, 'сообщение свёрнуто', 'сообщения свёрнуты', 'сообщений свёрнуто')} в хронику, `
+            note.textContent = `— ранее: ${archivedTurns} ${plural(archivedTurns, 'сообщение включено', 'сообщения включены', 'сообщений включено')} в хронику, `
                              + `${events.length} ${plural(events.length, 'событие', 'события', 'событий')} в памяти —`;
             storyDiv.appendChild(note);
         }
 
-        let msgsToRender = chatHistory;
+        let msgsToRender = storyArchive.concat(chatHistory);
         if (skipLast && chatHistory.length > 0 && chatHistory[chatHistory.length - 1].role === 'assistant') {
-            msgsToRender = chatHistory.slice(0, -1);
+            msgsToRender = msgsToRender.slice(0, -1);
         }
 
         msgsToRender.forEach((msg, index) => {
@@ -1985,9 +1493,16 @@
             } else {
                 const textDiv = document.createElement('div');
                 textDiv.textContent = parseResponse(msg.content).text;
+                body.parentElement.id = 'chapter-' + index;
+                const heading = document.createElement('div');
+                heading.className = 'chapter-label';
+                heading.textContent = 'ГЛАВА ' + (msg.chapter || Math.floor((Math.max(0, archivedTurns - storyArchive.length) + index) / 2) + 1) + ' · РАССКАЗЧИК';
+                body.appendChild(heading);
+                renderNarrative(textDiv, parseResponse(msg.content).text);
                 body.appendChild(textDiv);
+                appendDiscoveries(body, msg);
 
-                if (!skipLast && index === chatHistory.length - 1) {
+                if (!skipLast && index === storyArchive.length + chatHistory.length - 1) {
                     body.appendChild(buildActionsRow(msg));
                 }
             }
@@ -2006,6 +1521,8 @@
             document.getElementById('choices-container').innerHTML = '';
         }
 
+        document.getElementById('custom-action').disabled = isDemo || isTurnRunning;
+        document.getElementById('btn-custom-action').disabled = isDemo || isTurnRunning;
         window.scrollTo(0, document.body.scrollHeight);
     }
 
@@ -2038,7 +1555,7 @@
         if (choicesStr === null) {
             const open = text.search(/<выборы>/i);
             if (open !== -1) {
-                choicesStr = text.slice(open + 8).split(/<состояние>/i)[0].trim();
+                choicesStr = text.slice(open + 8).split(/<(?:состояние|лор)>/i)[0].trim();
             }
         }
         const choicesArr = choicesStr ? choicesStr.split('\n').filter(l => l.trim()).map(c => c.replace(/^\d+\.\s*/, '')) : [];
@@ -2049,13 +1566,14 @@
                 if (t === null) {
                     const open = text.search(/<текст>/i);
                     t = open !== -1 ? text.slice(open + 7) : text;
-                    t = t.split(/<выборы>/i)[0].split(/<состояние>/i)[0];
-                    t = t.replace(/<\/?(текст|выборы|состояние)>/gi, '').trim();
+                    t = t.split(/<(?:выборы|состояние|лор)>/i)[0];
+                    t = t.replace(/<\/?(текст|выборы|состояние|лор)>/gi, '').trim();
                 }
                 return t;
             })(),
             choicesArr: choicesArr,
-            stateDelta: stateDelta
+            stateDelta: stateDelta,
+            loreDelta: (() => { try { return normalizeLore(JSON.parse(extract("лор") || "[]")); } catch { return []; } })()
         };
     }
 
@@ -2222,6 +1740,8 @@
 
     /* === СЮЖЕТ И ХОДЫ === */
     async function generateCharacters() {
+        applySettings();
+        if (!apiKey) { document.getElementById("char-loader").textContent = "Для генерации нужен ключ OpenRouter в настройках рассказчика. Можно выбрать набросок или создать героя вручную."; document.getElementById("char-loader").style.display = "block"; return; }
         const gender = document.getElementById('char-gender').value || "неизвестно";
         const age = document.getElementById('char-age').value || "неизвестно";
         const scenario = gameMode === 'scenario' ? SCENARIOS.find(s => s.id === document.getElementById('scenario-select').value) : null;
@@ -2244,7 +1764,8 @@
         let failed = false;
 
         const scenarioLine = scenario ? `Сценарий: ${scenario.brief}\nВарианты персонажа должны логично попадать в эту сцену (гость, работница дома, человек по делу и т.п.).\n` : '';
-        const prompt = `Сгенерируй 4 варианта персонажа для старта. Пол: ${gender}. Возраст: ${age}. Стартовая локация: ${gameState.location}.
+        const idea = document.getElementById("char-idea").value.trim();
+        const prompt = `Задумка игрока: ${idea || "нет"}. Сгенерируй 4 варианта персонажа для старта. Пол: ${gender}. Возраст: ${age}. Стартовая локация: ${gameState.location}.
 ${scenarioLine}Пол всех четверых должен совпадать с запрошенным. Если персонаж выдаёт себя за другой пол, это допустимо только как содержание поля «уязвимость», и в поле «имя» тогда стоит имя, под которым он живёт.
 Не заключай поля в квадратные скобки — только текст, разделённый вертикальной чертой.
 Формат СТРОГО:
@@ -2277,22 +1798,12 @@ ${scenarioLine}Пол всех четверых должен совпадать 
             p.textContent = parsed.text;
             optionsContainer.appendChild(p);
 
-            parsed.choicesArr.forEach(cleanText => {
-                const choiceBtn = document.createElement('button');
-                choiceBtn.className = 'choice-btn';
-                choiceBtn.textContent = cleanText;
-                choiceBtn.addEventListener('click', () => {
-                    const parts = cleanText.split('|').map(s => s.trim());
-                    character.gender = gender;
-                    character.age = age;
-                    character.name = parts[0] || "Неизвестный";
-                    character.origin = parts[1] || "";
-                    character.trade = parts[2] || "";
-                    character.flaw = parts[3] || "";
-                    startGame(cleanText);
-                });
-                optionsContainer.appendChild(choiceBtn);
+            const heroes = parsed.choicesArr.map(cleanText => {
+                const parts = cleanText.split('|').map(s => s.trim().replace(/^\[|\]$/g, ''));
+                return { name: parts[0] || 'Неизвестный', origin: parts[1] || '', trade: parts[2] || '', flaw: parts[3] || '', gender, age };
             });
+            renderHeroOptions(optionsContainer, heroes);
+            optionsContainer.prepend(p);
         } catch (e) {
             /* Сообщение остаётся на экране: alert на телефоне легко пропустить,
                а зависший лоадер без текста не объясняет вообще ничего. */
@@ -2319,6 +1830,7 @@ ${scenarioLine}Пол всех четверых должен совпадать 
     }
 
     function submitCustomAction() {
+        if (isTurnRunning || isDemo) return;
         const input = document.getElementById('custom-action');
         const action = input.value.trim();
         if (!action) return;
@@ -2327,6 +1839,9 @@ ${scenarioLine}Пол всех четверых должен совпадать 
     }
 
     function makeGameTurn(userText) {
+        if (isTurnRunning || isDemo) return;
+        applySettings();
+        if (!apiKey) { switchScreen("screen-setup"); document.getElementById("connection-settings").open = true; alert("Для продолжения нужен ключ OpenRouter."); return; }
         chatHistory.push({ role: "user", content: userText, display: userText });
         executeTurn(false);
     }
@@ -2368,6 +1883,14 @@ ${scenarioLine}Пол всех четверых должен совпадать 
                 })).filter(e => e.what);
 
                 events = events.concat(clean);
+                storyArchive.push(...messagesToSummarize.map(msg => {
+                    const archived = { role: msg.role, content: msg.content, display: msg.display, chapter: msg.chapter };
+                    if (msg.stateAfter) {
+                        archived.stateAfter = { ...msg.stateAfter };
+                        delete archived.stateAfter.sessionLore;
+                    }
+                    return archived;
+                }));
                 chatHistory.splice(0, countToSummarize);
                 archivedTurns += countToSummarize;
                 saveGame();
@@ -2389,6 +1912,10 @@ ${scenarioLine}Пол всех четверых должен совпадать 
 
     /* === ОСНОВНОЙ ЦИКЛ === */
     async function executeTurn(isInit, isRewrite = false) {
+        if (isTurnRunning || isDemo) return;
+        isTurnRunning = true;
+        const stateOnEntry = cloneData(gameState);
+        const pendingAction = !isRewrite ? cloneData(chatHistory[chatHistory.length - 1]) : null;
         const loader = document.getElementById('game-loader');
         const customBtn = document.getElementById('btn-custom-action');
 
@@ -2405,6 +1932,7 @@ ${scenarioLine}Пол всех четверых должен совпадать 
             if (lastMsg.stateBefore) stateBeforeTurn = JSON.parse(JSON.stringify(lastMsg.stateBefore));
         }
 
+        gameState = cloneData(stateBeforeTurn);
         updateStatePanel();
         renderGameUI(isRewrite);
 
@@ -2421,15 +1949,22 @@ ${scenarioLine}Пол всех четверых должен совпадать 
         messages = messages.concat(historyForContext.map(m => ({ role: m.role, content: m.content })));
 
         const tail = [];
+        const sessionMemory = sessionLoreContext(historyForContext);
+        if (sessionMemory) tail.push(sessionMemory);
+        if (gameState.direction) tail.push("УКАЗАНИЕ ИГРОКА РАССКАЗЧИКУ: " + gameState.direction);
+        const promptState = { ...gameState };
+        delete promptState.sessionLore;
+        delete promptState.direction;
         const lore = getLorebookContext(historyForContext);
         if (lore) tail.push(lore);
 
         const memory = getMemoryContext(historyForContext);
         if (memory) tail.push(memory);
 
-        tail.push(`ТЕКУЩЕЕ СОСТОЯНИЕ: ${JSON.stringify(gameState)}
+        tail.push(`ТЕКУЩЕЕ СОСТОЯНИЕ: ${JSON.stringify(promptState)}
 Деньги в состоянии — целое число ГРОШЕЙ. Сейчас при себе: ${formatMoney(gameState.money)}. Корд = 200 грошей, марка = 10 грошей.
-ПРАВИЛО ОТВЕТА: всегда возвращай <текст>, <выборы> (4 штуки списком) и обновлённый JSON в <состояние>. Обязательно двигай date и day вперёд при смене сцены, ночлеге и дороге.`);
+ПРАВИЛО ОТВЕТА: всегда возвращай <текст>, <выборы> (4 штуки списком) и обновлённый JSON в <состояние>. Обязательно двигай date и day вперёд при смене сцены, ночлеге и дороге.
+После состояния добавь <лор>JSON-массив новых или изменившихся записей ЭТОЙ СЕССИИ</лор>. До 6 записей, только появившееся в этом ответе. Формат: [{"kind":"person|place|item|fact","name":"точное устойчивое имя","description":"краткое описание или договорённость","certainty":"факт|слух|предположение"}]. Если ничего нового — []. Используй прежние имена из памяти для обновлений, не дублируй. Слухи и догадки не выдавай за факты; предметы описывай отдельно от владения ими. Новые детали не меняют канон мира. Не показывай эти служебные записи внутри художественного текста.`);
 
         messages.push({ role: "user", content: tail.join("\n\n") });
 
@@ -2456,32 +1991,54 @@ ${scenarioLine}Пол всех четверых должен совпадать 
             }
 
             applyState(parsed.stateDelta);
+            const chapter = (Number(stateBeforeTurn.chapter) || Math.floor(archivedTurns / 2) + chatHistory.filter(m => m.role === 'assistant').length - (isRewrite ? 1 : 0)) + 1;
+            gameState.chapter = chapter;
+            applySessionLore(parsed.loreDelta, chapter);
 
             if (isRewrite) {
                 let lastMsg = chatHistory[chatHistory.length - 1];
                 lastMsg.swipes.push(reply);
                 lastMsg.swipeIndex = lastMsg.swipes.length - 1;
                 lastMsg.content = reply;
+                lastMsg.chapter = chapter;
+                lastMsg.stateAfter = cloneData(gameState);
             } else {
-                chatHistory.push({ role: "assistant", content: reply, swipes: [reply], swipeIndex: 0, stateBefore: stateBeforeTurn });
+                chatHistory.push({ role: "assistant", content: reply, swipes: [reply], swipeIndex: 0, stateBefore: stateBeforeTurn, stateAfter: cloneData(gameState), chapter });
             }
 
-            if (chatHistory.length > 16) summarizeHistory();
+            if (chatHistory.length > 16) await summarizeHistory();
 
             gameStarted = true;
             saveGame();
+            isTurnRunning = false;
             renderGameUI();
         } catch (e) {
             failed = true;
             if (!isRewrite) {
                 chatHistory.pop();
-                gameState = stateBeforeTurn;
+                gameState = stateOnEntry;
+            } else {
+                gameState = stateOnEntry;
             }
+            isTurnRunning = false;
             renderGameUI();
             loader.classList.add('error');
-            loader.textContent = `Ход не прошёл. ${e.message}`;
+            loader.textContent = 'Ход не прошёл. ' + e.message;
+            if (pendingAction) {
+                const retry = document.createElement('button');
+                retry.textContent = 'Повторить действие';
+                retry.className = 'btn-gray';
+                retry.style.marginLeft = '12px';
+                retry.onclick = () => {
+                    if (isTurnRunning) return;
+                    chatHistory.push(pendingAction);
+                    executeTurn(isInit);
+                };
+                loader.appendChild(retry);
+            }
             loader.style.display = 'block';
         } finally {
+            isTurnRunning = false;
             if (!failed) loader.style.display = 'none';
             customBtn.disabled = false;
             /* На телефоне автофокус выдёргивал клавиатуру после каждого хода. */
@@ -2492,16 +2049,17 @@ ${scenarioLine}Пол всех четверых должен совпадать 
     }
 
     function rewriteTurn() {
+        if (isTurnRunning || isDemo) return;
         if (chatHistory.length < 2) return;
         const lastMsg = chatHistory[chatHistory.length - 1];
         if (lastMsg.role !== 'assistant') return;
         if (!lastMsg.swipes) { lastMsg.swipes = [lastMsg.content]; lastMsg.swipeIndex = 0; }
 
-        if (lastMsg.stateBefore) gameState = JSON.parse(JSON.stringify(lastMsg.stateBefore));
         executeTurn(false, true);
     }
 
     function undoTurn() {
+        if (isTurnRunning || isDemo) return;
         /* Откат самого первого хода оставлял пустой экран без кнопок и без
            выхода: истории нет, выборов нет, играть нечем. */
         if (chatHistory.length <= 2) {
@@ -2618,6 +2176,7 @@ ${scenarioLine}Пол всех четверых должен совпадать 
     }
 
     function saveCharacterScreen() {
+        if (isTurnRunning) return;
         CHAR_FIELDS.forEach(([key]) => {
             const el = document.getElementById('cf-' + key);
             if (el) character[key] = el.value.trim();
@@ -2647,6 +2206,7 @@ ${scenarioLine}Пол всех четверых должен совпадать 
     }
 
     function changeSwipe(direction) {
+        if (isTurnRunning || isDemo) return;
         const lastMsg = chatHistory[chatHistory.length - 1];
         if (lastMsg.role !== 'assistant' || !lastMsg.swipes || lastMsg.swipes.length <= 1) return;
 
@@ -2660,12 +2220,18 @@ ${scenarioLine}Пол всех четверых должен совпадать 
            деньги с ранами поплыли бы при каждом перещёлкивании. */
         if (lastMsg.stateBefore) {
             gameState = JSON.parse(JSON.stringify(lastMsg.stateBefore));
-            applyState(parseResponse(lastMsg.content).stateDelta);
+            const chosen = parseResponse(lastMsg.content);
+            applyState(chosen.stateDelta);
+            gameState.chapter = lastMsg.chapter || (Number(gameState.chapter) || 0) + 1;
+            applySessionLore(chosen.loreDelta, gameState.chapter);
+            lastMsg.stateAfter = cloneData(gameState);
         }
 
         saveGame();
         renderGameUI();
     }
 </script>
+<dialog id="detail-dialog" class="dialog" aria-labelledby="dialog-title"><button class="btn-gray dialog-close" onclick="closeDetail()" aria-label="Закрыть карточку">×</button><div id="dialog-body"></div></dialog>
+<script src="chronicles.js"></script>
 </body>
 </html>

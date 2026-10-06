@@ -1,7 +1,7 @@
 // Проверяет, что опубликованная копия игры совпадает с исходниками.
 import { createHash } from 'node:crypto';
 import { readdir, readFile, stat } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
+import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const source = resolve(fileURLToPath(new URL('..', import.meta.url)));
@@ -37,6 +37,15 @@ for (const file of sourceFiles) {
 const storiesSource = join(repository, 'Игры', 'Генератор_Историй', 'Index.html');
 const storiesPublished = join(repository, 'Игры', 'Сайт', 'Игра', 'Истории', 'index.html');
 if (await digest(storiesSource) !== await digest(storiesPublished)) different.push('Генератор_Историй/Index.html');
+const storiesDir = dirname(storiesSource);
+const storiesOutputDir = dirname(storiesPublished);
+for (const entry of ['chronicles.css', 'chronicles.js', 'assets']) {
+  for (const file of await filesUnder(join(storiesDir, entry), entry)) {
+    try {
+      if (await digest(join(storiesDir, file)) !== await digest(join(storiesOutputDir, file))) different.push('Генератор_Историй/' + file);
+    } catch { missing.push('Истории/' + file); }
+  }
+}
 
 if (missing.length || extra.length || different.length) {
   console.error('Копии игр не синхронны. Запусти: npm run publish-all');
@@ -45,5 +54,5 @@ if (missing.length || extra.length || different.length) {
   if (different.length) console.error('Отличается:', different.join(', '));
   process.exitCode = 1;
 } else {
-  console.log(`Копии игр синхронны: Порт — ${sourceFiles.size} файлов; Хроники — 1 файл.`);
+  console.log(`Копии игр синхронны: Порт — ${sourceFiles.size} файлов; Хроники — HTML, интерфейс и иллюстрации.`);
 }
