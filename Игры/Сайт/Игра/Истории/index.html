@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Кордим: Хроники</title>
     <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Geologica:wght@300;400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="chronicles.css">
+    <link rel="stylesheet" href="chronicles.css?v=20261006-playtest2">
 </head>
 <body>
 
@@ -701,6 +701,7 @@
 
     /* === ИНИЦИАЛИЗАЦИЯ === */
     document.addEventListener('DOMContentLoaded', () => {
+        migrateAIDefaults();
         initAI();
         const ls = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
         apiKey = ls('or_key') || '';
@@ -2043,8 +2044,8 @@ ${scenarioLine}Пол всех четверых должен совпадать 
     }
 </script>
 <dialog id="detail-dialog" class="dialog" aria-labelledby="dialog-title"><button class="btn-gray dialog-close" onclick="closeDetail()" aria-label="Закрыть карточку">×</button><div id="dialog-body"></div></dialog>
-<script src="chronicles.js"></script>
-<script src="ai-models.js"></script>
-<script src="ai.js"></script>
+<script src="chronicles.js?v=20261006-playtest2"></script>
+<script src="ai-models.js?v=20261006-playtest2"></script>
+<script src="ai.js?v=20261006-playtest2"></script>
 </body>
 </html>

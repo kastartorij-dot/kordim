@@ -1,9 +1,9 @@
 /* Роли ИИ, стоимость, перенос ответов и иллюстрации. Никаких секретов в исходниках. */
 const AI_RECOMMENDATIONS = [
- {id:'deepseek/deepseek-v4-pro',note:'Основной кандидат на баланс: большое окно и низкая цена каталога. Русскую прозу нужно сравнить на своей сцене.'},
- {id:'qwen/qwen3.8-flash',note:'Экономный рассказчик; первый выбор для журнала и извлечения фактов.'},
+ {id:'deepseek/deepseek-v4-pro',note:'Предвыбор рассказчика: в двух коротких пробах наиболее ровный текст; в проверке состояния верные деньги, день и четыре действия.'},
+ {id:'qwen/qwen3.8-flash',note:'Предвыбор архивариуса: сохранил устойчивую карточку и статус слуха. В художественной пробе были ошибки в деньгах; лучше использовать для памяти.'},
  {id:'openai/gpt-6-luna',note:'Недорогой универсальный кандидат для текста и структурированных записей.'},
- {id:'mistralai/mistral-large-2512',note:'Альтернатива для сравнения интонации и диалогов; без отдельного reasoning.'},
+ {id:'minimax/minimax-m3',note:'Замена Mistral: большая память контекста, несколько провайдеров, reasoning отключён. Кандидат для сравнения текста и соблюдения условий.'},
  {id:'google/gemini-3.1-flash-lite',note:'Ещё один недорогой кандидат с большим окном. Сравни диалоги и соблюдение правил; reasoning отключён.'}
 ];
 const MEMORY_RECOMMENDATIONS = ['qwen/qwen3.8-flash','openai/gpt-6-luna','google/gemma-4-26b-a4b-it','deepseek/deepseek-v4-pro','mistralai/mistral-small-2603'];
@@ -20,6 +20,14 @@ function modelMeta(id) { return allModelsData.find(m=>m.id===id); }
 function catalogRow(m) {
  const p=m.pricing||{};const inp=Number(p.prompt)*1e6,out=Number(p.completion)*1e6;
  return {id:m.id,name:m.name||m.id,inp,out,vary:!Number.isFinite(inp)||!Number.isFinite(out)||inp<0||out<0,free:inp===0&&out===0,ctx:m.context_length||m.ctx||0,parameters:m.supported_parameters||m.parameters||[],reasoning:m.reasoning,pricing:p};
+}
+function migrateAIDefaults(){
+ const revision='2026-10-06-pro-qwen';if(lsGet('or_defaults_revision')===revision)return;
+ const old='deepseek/deepseek-v4-flash';
+ if(lsGet('or_model')===old)lsSet('or_model',DEFAULT_MODEL);
+ if(lsGet('or_model_sum')===old)lsSet('or_model_sum',DEFAULT_MEMORY_MODEL);
+ for(let slot=1;slot<=3;slot++){try{const raw=lsGet('kordim_save_'+slot);if(!raw)continue;const save=JSON.parse(raw);let changed=false;if(save.currentModel===old){save.currentModel=DEFAULT_MODEL;changed=true;}if(save.summaryModel===old){save.summaryModel=DEFAULT_MEMORY_MODEL;changed=true;}if(changed)lsSet('kordim_save_'+slot,JSON.stringify(save));}catch{}}
+ lsSet('or_defaults_revision',revision);
 }
 function initAI() {
  try { aiSettings={...aiSettings,...JSON.parse(lsGet('or_ai_settings')||'{}')}; } catch {}
@@ -181,7 +189,7 @@ function openAISettings(){if(isTurnRunning)return;switchScreen('screen-setup');d
 /* Иллюстрации хранятся отдельно от текстовых слотов, чтобы не переполнить localStorage. */
 function imageDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open('kordim-images',1);r.onupgradeneeded=()=>r.result.createObjectStore('images',{keyPath:'id'});r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
 async function putImage(record){const db=await imageDB();try{await new Promise((resolve,reject)=>{const tx=db.transaction('images','readwrite');tx.objectStore('images').put(record);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||Error('Хранилище изображений недоступно'));});imageCache.set(record.id,record);}finally{db.close();}}
-async function loadSessionImages(id=sessionId,redraw=true){try{const db=await imageDB();const rows=await new Promise((resolve,reject)=>{const r=db.transaction('images').objectStore('images').getAll();r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});db.close();for(const r of rows)if(r.sessionId===id&&validImageRecord(r))imageCache.set(r.id,r);if(redraw&&id===sessionId&&gameStarted)renderGameUI();}catch{}}
+async function loadSessionImages(id=sessionId,redraw=true){try{const db=await imageDB();const rows=await new Promise((resolve,reject)=>{const r=db.transaction('images').objectStore('images').getAll();r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});db.close();for(const r of rows)if(r.sessionId===id&&validImageRecord(r))imageCache.set(r.id,r);if(redraw&&id===sessionId&&gameStarted&&document.body.dataset.screen==='screen-game')renderGameUI();}catch{}}
 function validImageRecord(r){return r&&typeof r.id==='string'&&r.id.length<200&&typeof r.sessionId==='string'&&typeof r.data==='string'&&r.data.length<15000000&&/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(r.data);}
 function imagePlan(id){const m=imageModels.find(x=>x.id===id);if(!m)throw Error('Выбери модель из каталога изображений.');const endpoint=m.endpoints?.find(e=>e.pricing?.some(p=>p.billable==='output_image'&&p.unit==='image'&&(!p.variant||p.variant.toLowerCase()==='1k')));if(!endpoint)throw Error('У этой модели нет известной фиксированной цены для 1K.');const p=endpoint.pricing.find(p=>p.billable==='output_image'&&p.unit==='image'&&(!p.variant||p.variant.toLowerCase()==='1k'));const ref=endpoint.pricing.find(p=>p.billable==='input_image'&&p.unit==='image');return {model:m,endpoint,cost:Number(p.cost_usd),refCost:ref?Number(ref.cost_usd):null};}
 async function refreshImageCatalog(){try{const res=await fetchWithTimeout('https://openrouter.ai/api/v1/images/models',{},15000);if(!res.ok)throw Error();const data=await res.json();const source=Array.isArray(data.data)?data.data:[];const updated=[];for(const snapshot of AI_IMAGE_SNAPSHOT){const model=source.find(m=>m.id===snapshot.id);if(!model)continue;const r=await fetchWithTimeout('https://openrouter.ai/api/v1/images/models/'+snapshot.id+'/endpoints',{},15000);if(!r.ok)continue;const d=await r.json();const endpoints=d.data?.endpoints||d.data||d.endpoints;if(Array.isArray(endpoints)&&endpoints.length)updated.push({...model,endpoints});}if(!updated.length)throw Error();imageModels=updated;return 'Цены изображений обновлены';}catch{return 'Нет связи. Используются резервные цены от 06.10.2026.';}}
