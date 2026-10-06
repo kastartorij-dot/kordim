@@ -65,4 +65,6 @@ store.delete('or_defaults_revision');store.set('or_model','deepseek/deepseek-v4-
 // Late image loading must not pull a user out of the settings screen.
 ctx.savedRender=run('renderGameUI');ctx.redrawCount=0;run('renderGameUI=()=>redrawCount++;gameStarted=true;sessionId="image-session";document.body.dataset.screen="screen-setup";');await run('loadSessionImages(sessionId)');assert.equal(ctx.redrawCount,0);run('document.body.dataset.screen="screen-game"');await run('loadSessionImages(sessionId)');assert.equal(ctx.redrawCount,1);run('renderGameUI=savedRender');
 
+assert.equal(run('DEFAULT_MODEL'),'deepseek/deepseek-v4-pro');assert.equal(run('DEFAULT_MEMORY_MODEL'),'qwen/qwen3.8-flash');assert.equal(run('recommendedModels("main").length'),5);assert.ok(data('recommendedModels("main").map(m=>m.id)').includes('z-ai/glm-5'));assert.ok(!data('recommendedModels("main").map(m=>m.id)').includes('mistralai/mistral-large-2512'));
+
 console.log('PASS: roles/pricing, reasoning options, budgets, split SSE usage, billed truncation, journal extraction/fallback, checkpoint current action, protected state fields, image request/reference validation, manual reply, image generation/storage/export. No paid requests.');
