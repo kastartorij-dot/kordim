@@ -48,7 +48,7 @@ function beginNewStory() {
  else { switchScreen('screen-setup');alert('Все три истории заняты. Экспортируй нужную и выбери кнопку начала заново у её слота.'); }
 }
 function portraitMarkup(hero,cls='hero-portrait') {
- const src=safePortrait(hero.portrait);
+ const src=portraitSource(hero);
  return '<div class="'+cls+'">'+(src?'<img src="'+src+'" alt="Портрет героя">':'<span class="hero-monogram">'+safeText((hero.name||'?').slice(0,1))+'</span>')+'</div>';
 }
 function renderHeroOptions(container,heroes) {
@@ -61,7 +61,7 @@ function renderHeroOptions(container,heroes) {
 }
 function renderStarterHeroes() {
  const sketches=HERO_SKETCHES.map(cloneData);
- for(let n=1;n<=3;n++){try{const c=JSON.parse(lsGet('kordim_save_'+n)||'null')?.character;if(c?.name&&!sketches.some(h=>h.name===c.name))sketches.push(c);}catch{}}
+ for(let n=1;n<=3;n++){try{const c=JSON.parse(lsGet('kordim_save_'+n)||'null')?.character;if(c?.name){const pos=sketches.findIndex(h=>h.name===c.name);if(pos<0)sketches.push(c);else if(c.portraitKey)sketches[pos]=c;}}catch{}}
  renderHeroOptions(document.getElementById('starter-heroes'),sketches);
 }
 function chooseCustomHero() {
@@ -70,18 +70,19 @@ function chooseCustomHero() {
  reviewHero({name,trade:document.getElementById('new-trade').value.trim()||'Без постоянного ремесла',origin:document.getElementById('new-origin').value.trim(),flaw:document.getElementById('new-flaw').value.trim(),gender:document.getElementById('char-gender').value,age:document.getElementById('char-age').value||'25'});
 }
 function showDetail(markup) {
+ if(aiBusy||(manualPending&&!markup.includes('manual-packet')))return;
  document.getElementById('dialog-body').innerHTML=markup;
  const dialog=document.getElementById('detail-dialog');if(!dialog.open)dialog.showModal();
 }
-function closeDetail(){document.getElementById('detail-dialog').close();}
+function closeDetail(){if(manualPending){cancelManual();return;}if(aiBusy)return;document.getElementById('detail-dialog').close();}
 function reviewHero(hero) {
  selectedHero=cloneData(hero);
- showDetail('<span class="eyebrow">ПЕРЕД НАЧАЛОМ ИСТОРИИ</span><h2 id="dialog-title">'+safeText(hero.name)+'</h2><div class="portrait-dialog">'+portraitMarkup(hero,'sidebar-portrait')+'<div><p>'+safeText(hero.trade)+' · '+safeText(hero.age)+' лет</p><p>'+safeText(hero.origin)+'</p><p>'+safeText(hero.flaw)+'</p></div></div><label for="start-goal">С чего начнём?</label><textarea id="start-goal" rows="3" maxlength="1200" placeholder="Твоё намерение или пожелание к первой сцене…"></textarea><div class="dialog-actions"><button onclick="confirmHero()">Начать историю →</button><button class="btn-gray" onclick="closeDetail()">Вернуться к выбору</button></div>');
+ showDetail('<span class="eyebrow">ПЕРЕД НАЧАЛОМ ИСТОРИИ</span><h2 id="dialog-title">'+safeText(hero.name)+'</h2><div class="portrait-dialog">'+portraitMarkup(hero,'sidebar-portrait')+'<div><p>'+safeText(hero.trade)+' · '+safeText(hero.age)+' лет</p><p>'+safeText(hero.origin)+'</p><p>'+safeText(hero.flaw)+'</p></div></div><label for="start-goal">С чего начнём?</label><textarea id="start-goal" rows="3" maxlength="1200" placeholder="Твоё намерение или пожелание к первой сцене…"></textarea><div class="dialog-actions"><button onclick="confirmHero()">Начать историю →</button><button class="btn-gray" onclick="openImageStudio(\'selected-portrait\')">Сгенерировать портрет</button><button class="btn-gray" onclick="closeDetail()">Вернуться к выбору</button></div>');
 }
 function confirmHero() {
  if(!selectedHero||isTurnRunning)return;
  applySettings();
- if(!apiKey){closeDetail();switchScreen('screen-setup');document.getElementById('connection-settings').open=true;document.getElementById('api-key').focus();alert('Для начала истории введи ключ OpenRouter в настройках рассказчика. Выбранный герой остаётся доступен на экране персонажей.');return;}
+ if(!apiKey&&aiSettings.mode!=='manual'){closeDetail();switchScreen('screen-setup');document.getElementById('connection-settings').open=true;document.getElementById('api-key').focus();alert('Для начала истории введи ключ OpenRouter в настройках рассказчика. Выбранный герой остаётся доступен на экране персонажей.');return;}
  character=cloneData(selectedHero);isDemo=false;document.body.dataset.demo='false';
  const chosen=document.getElementById('char-location').value;
  gameState.location=chosen||START_LOCATIONS[Math.floor(Math.random()*START_LOCATIONS.length)];
@@ -91,7 +92,7 @@ function confirmHero() {
 }
 function showHeroCard() {
  if(!character.name)return;
- showDetail('<span class="eyebrow">ГЕРОЙ ЭТОЙ ХРОНИКИ</span><h2 id="dialog-title">'+safeText(character.name)+'</h2><div class="portrait-dialog">'+portraitMarkup(character,'sidebar-portrait')+'<div><p>'+safeText(character.trade)+' · '+safeText(character.age)+' лет</p><p>'+safeText(character.origin)+'</p><p>'+safeText(character.flaw)+'</p></div></div><p>Сейчас: '+safeText(gameState.location)+'</p><p>При себе: '+safeText(formatMoney(gameState.money))+'</p><p>Раны: '+safeText((gameState.wounds||[]).join(', ')||'нет')+'</p><div class="dialog-actions"><button class="btn-gray" onclick="closeDetail();openCharacterScreen()" '+(isTurnRunning?'disabled':'')+'>Изменить сведения</button></div>');
+ showDetail('<span class="eyebrow">ГЕРОЙ ЭТОЙ ХРОНИКИ</span><h2 id="dialog-title">'+safeText(character.name)+'</h2><div class="portrait-dialog">'+portraitMarkup(character,'sidebar-portrait')+'<div><p>'+safeText(character.trade)+' · '+safeText(character.age)+' лет</p><p>'+safeText(character.origin)+'</p><p>'+safeText(character.flaw)+'</p></div></div><p>Сейчас: '+safeText(gameState.location)+'</p><p>При себе: '+safeText(formatMoney(gameState.money))+'</p><p>Раны: '+safeText((gameState.wounds||[]).join(', ')||'нет')+'</p><div class="dialog-actions"><button class="btn-gray" onclick="openImageStudio(\'portrait\')">Сгенерировать портрет</button><button class="btn-gray" onclick="closeDetail();openCharacterScreen()" '+(isTurnRunning?'disabled':'')+'>Изменить сведения</button></div>');
 }
 function openInventory() {
  showDetail('<span class="eyebrow">ПРИ СЕБЕ</span><h2 id="dialog-title">Вещи и снаряжение</h2><p class="muted">'+safeText(formatMoney(gameState.money))+'</p>'+((gameState.inventory||[]).map(x=>'<div class="journal-entry">'+safeText(x)+'</div>').join('')||'<p class="muted">Пока нет записанных вещей.</p>'));
@@ -154,7 +155,7 @@ function showLoreEntry(key) {
 }
 function openJournal() {
  switchScreen('screen-journal');const box=document.getElementById('journal-entries');box.replaceChildren();
- events.forEach(e=>{const row=document.createElement('article');row.className='journal-entry';row.innerHTML='<span class="eyebrow">ХРОНИКА · ДЕНЬ '+safeText(e.day)+'</span><p>'+safeText(e.what)+'</p>';box.appendChild(row);});
+ events.concat(gameState.journal||[]).forEach(e=>{const row=document.createElement('article');row.className='journal-entry';row.innerHTML='<span class="eyebrow">ХРОНИКА · ДЕНЬ '+safeText(e.day)+'</span><p>'+safeText(e.what)+'</p>';box.appendChild(row);});
  allStoryMessages().forEach((msg,i)=>{if(msg.role!=='assistant')return;const row=document.createElement('article');row.className='journal-entry';const parsed=parseResponse(msg.content);const after=msg.stateAfter;row.innerHTML='<span class="eyebrow">ГЛАВА '+(msg.chapter||Math.floor(i/2)+1)+'</span><h3>'+safeText(after?.location||parsed.stateDelta.location||'История продолжается')+'</h3><p>'+safeText(parsed.text.slice(0,400))+(parsed.text.length>400?'…':'')+'</p>'+((parsed.loreDelta||[]).map(e=>'<p><b>'+safeText(e.name)+':</b> '+safeText(e.description)+'</p>').join(''))+(after?'<div class="snapshot">'+safeText(after.date)+' · '+safeText(formatMoney(after.money))+'<br>Вещи: '+safeText((after.inventory||[]).join(', ')||'нет')+'<br>Раны: '+safeText((after.wounds||[]).join(', ')||'нет')+'</div>':'');box.appendChild(row);});
  if(!box.childElementCount)box.innerHTML='<div class="empty-panel">Пока нет событий.</div>';window.scrollTo(0,0);
 }

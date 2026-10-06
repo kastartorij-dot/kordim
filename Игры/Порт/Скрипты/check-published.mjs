@@ -39,7 +39,7 @@ const storiesPublished = join(repository, 'Игры', 'Сайт', 'Игра', '�
 if (await digest(storiesSource) !== await digest(storiesPublished)) different.push('Генератор_Историй/Index.html');
 const storiesDir = dirname(storiesSource);
 const storiesOutputDir = dirname(storiesPublished);
-for (const entry of ['chronicles.css', 'chronicles.js', 'assets']) {
+for (const entry of ['chronicles.css', 'chronicles.js', 'ai-models.js', 'ai.js', 'assets']) {
   for (const file of await filesUnder(join(storiesDir, entry), entry)) {
     try {
       if (await digest(join(storiesDir, file)) !== await digest(join(storiesOutputDir, file))) different.push('Генератор_Историй/' + file);
