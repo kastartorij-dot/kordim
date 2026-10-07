@@ -1,0 +1,51 @@
+[
+  {
+    "game": "Roadwarden",
+    "file": "Roadwarden_1.jpg",
+    "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1155970/ss_69b9728311fca16893c916d49230824ab05ff390.1920x1080.jpg?t=1771493971",
+    "page": "https://store.steampowered.com/app/1155970/",
+    "note": "Вступление: один спокойный фон, ясный текстовый блок и два выбора; не переносить размер пиксельного текста."
+  },
+  {
+    "game": "Roadwarden",
+    "file": "Roadwarden_2.jpg",
+    "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1155970/ss_ea20ca59e6c57abea7e3f72a50a40772e98000bf.1920x1080.jpg?t=1771493971",
+    "page": "https://store.steampowered.com/app/1155970/",
+    "note": "Иллюстрация и текст в устойчивых отдельных областях; сохранить понятные подписи вместо одних символов."
+  },
+  {
+    "game": "Pentiment",
+    "file": "Pentiment_1.jpg",
+    "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1205520/ss_115917c4fe73896ec794b7e8e1795db02f33a11b.1920x1080.jpg?t=1759874806",
+    "page": "https://store.steampowered.com/app/1205520/",
+    "note": "Выбор: крупное название, описание выбранного пункта и отдельная справка; избегать массы орнаментов."
+  },
+  {
+    "game": "Pentiment",
+    "file": "Pentiment_2.jpg",
+    "url": "https://d1079ywfijtdjs.cloudfront.net/images/pentiment/v1/menus/easy-fonts.jpg",
+    "page": "https://pentiment.obsidian.net/",
+    "note": "Настройки: вкладки, крупные строки и пояснение выбранного параметра; дать режим обычного шрифта."
+  },
+  {
+    "game": "Citizen Sleeper",
+    "file": "Citizen_Sleeper_1.jpg",
+    "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1578650/ss_6b528fa7988c1e5048871f3c530be67ce574eadb.1920x1080.jpg?t=1789539823",
+    "page": "https://store.steampowered.com/app/1578650/",
+    "note": "Разговор: портрет и сцена отдельно от длинного текста; держать длину строки под контролем."
+  },
+  {
+    "game": "Citizen Sleeper",
+    "file": "Citizen_Sleeper_2.jpg",
+    "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1578650/ss_9db68bf85c1d9e44331f5a8dd4134aae8a744076.1920x1080.jpg?t=1789539823",
+    "page": "https://store.steampowered.com/app/1578650/",
+    "note": "Навыки: тонкие разделители и читаемая группировка; не переносить неоновый цвет и число показателей."
+  },
+  {
+    "game": "Strange Horticulture",
+    "file": "Strange_Horticulture.jpg",
+    "url": "https://strangehorticulture.com/wp-content/uploads/2022/03/SH1.jpg",
+    "page": "https://www.strangehorticulture.com/",
+    "note": "Предмет крупным планом рядом с описанием; закладки разделяют материалы. Для ПОРТа избегать плотного стола и мелких приборов."
+  }
+]
