@@ -37,6 +37,10 @@ jobs:
         working-directory: Игры/Порт/Приложение_Для_ПК
         run: npm ci
 
+      - name: Проверить навигацию оболочки
+        working-directory: Игры/Порт/Приложение_Для_ПК/src-tauri
+        run: cargo test --lib
+
       - name: Собрать установщик
         uses: tauri-apps/tauri-action@v1
         with:
