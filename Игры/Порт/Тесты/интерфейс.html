@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Порт Теней</title>
+<!-- Стадия 2 «Жизнь» (ГДД Игры/Генератор_Историй/Порт_ГДД.md, §22): выбор начала, карта
+     пяти районов, день из четырёх отрезков, ночь, переходы, конец дня. Без картинок — подложки
+     подключаются позже, экран рисуется и без них (см. Движок/экраны.js). -->
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;500&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../Движок/интерфейс.css">
+</head>
+<body>
+<div class="плашка">Проверка интерфейса · сохранения не затрагиваются</div>
+<header id="hud">
+  <div class="hud-бренд">Порт Теней<small>Ранняя осень · 1026</small></div>
+  <div class="hud-время"><span id="hud-день"></span><div id="hud-отрезок"></div></div>
+  <div class="hud-контекст"><span id="hud-где"></span><small id="hud-погода"></small></div>
+  <span id="hud-кошель"></span>
+  <span id="hud-кнопки"><button class="b" id="hud-помощь">Как играть</button><button class="b" id="hud-меню">Меню <small>Esc</small></button></span>
+</header>
+<div id="тело-макета">
+  <div id="экран"></div>
+</div>
+<nav id="панель"></nav>
+
+<script type="module" src="./интерфейс-фикстуры.js"></script></body></html>

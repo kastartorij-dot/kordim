@@ -685,3 +685,21 @@ a.fac::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;backg
 }
 
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* Встроенный ПОРТ: спокойная рамка и панель ссылок, которая помещается на телефоне. */
+.game {height:calc(100dvh - var(--top)); grid-template-rows:auto minmax(0,1fr); min-width:0;}
+.game .gbar {flex-wrap:wrap; min-width:0;}
+.game .gbar b {font:500 15px var(--body); letter-spacing:.02em;}
+.game .gbar .glinks {min-width:0; flex-wrap:wrap;}
+.game .gbar a {display:flex; align-items:center; min-height:44px; font:400 13px/1.4 var(--body); border:1px solid var(--line); border-radius:3px; box-shadow:none; padding:8px 12px;}
+.game .gbar a:hover {transform:none; box-shadow:none;}
+.game .gwrap {min-width:0; padding:12px 18px 18px;}
+.game .gwrap iframe {border:1px solid var(--line); border-radius:4px; box-shadow:none;}
+@media(max-width:700px) {
+  .game .gbar {padding:8px 12px; gap:6px;}
+  .game .gbar b {width:100%;}
+  .game .gbar .glinks {display:flex; margin-left:0; width:100%;}
+  .game .gbar a {flex:1; min-width:0; padding:8px; font-size:12px;}
+  .game .gwrap {padding:8px;}
+  .game .gwrap iframe {border-width:1px; box-shadow:none;}
+}

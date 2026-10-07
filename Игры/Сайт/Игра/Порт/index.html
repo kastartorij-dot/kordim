@@ -7,368 +7,67 @@
 <!-- Стадия 2 «Жизнь» (ГДД Игры/Генератор_Историй/Порт_ГДД.md, §22): выбор начала, карта
      пяти районов, день из четырёх отрезков, ночь, переходы, конец дня. Без картинок — подложки
      подключаются позже, экран рисуется и без них (см. Движок/экраны.js). -->
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Geologica:wght@300;400;500&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-<style>
-:root{
-  --noch:#0b0d14; --panel:#10131d; --raise:#1b2030; --line:#2a3145;
-  --text:#efe6d8; --mute:#7c8699; --sin:#6f8fd0; --svecha:#e0a95a; --krov:#b4614e; --trava:#8fae86;
-  --px:'Press Start 2P',monospace; --body:'Geologica',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
-  --text-small:clamp(12px,calc(10px + .28vw),16px);
-  --text-control:clamp(13px,calc(11px + .35vw),18px);
-  --text-body:clamp(16px,calc(15px + .2vw),20px);
-  --text-title:clamp(18px,calc(16px + .4vw),26px);
-  --panel-height:clamp(56px,3.2vw,68px);
-}
-*{box-sizing:border-box}
-html,body{margin:0;height:100%}
-body{background:var(--noch);color:var(--text);font:300 16px/1.6 var(--body);overflow:hidden;
-     display:flex;flex-direction:column;height:100vh}
-button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
-.px{font-family:var(--px);font-weight:400}
-.mono{font-family:var(--mono)}
-
-.b{background:var(--raise);color:var(--text);border:2px solid #000;box-shadow:3px 3px 0 #000;
-   padding:11px 14px;font-family:var(--px);font-size:11px;line-height:1.5;text-align:center;cursor:pointer}
-.b:disabled{opacity:.45;cursor:default;box-shadow:none}
-.b{overflow-wrap:anywhere}
-.группа-имя{color:var(--mute);font-size:12px;margin-bottom:6px}
-.журнал{margin:0;padding-left:18px;font-size:12px;color:var(--mute);text-align:left}
-.предупр{color:var(--krov)}
-.овбокс{max-height:90vh;overflow:auto}
-.плашка{background:#0b0d14;color:var(--mute);font:10px var(--mono);text-align:center;padding:3px}
-.b:active{box-shadow:1px 1px 0 #000;transform:translate(2px,2px)}
-.b.sin{background:#22314f}
-.b.здесь{background:var(--svecha);color:#171308;cursor:default}
-.b.здесь:active{box-shadow:3px 3px 0 #000;transform:none}
-
-#hud{display:flex;align-items:center;gap:18px;padding:11px 18px;background:var(--panel);
-     border-bottom:2px solid #000;font-family:var(--px);font-size:11px;flex-wrap:wrap}
-#hud-кнопки{margin-left:auto;display:flex;gap:8px}
-#hud-кнопки .b{padding:7px 10px;font-size:9px}
-.овбокс.меню-бокс{text-align:left;width:min(560px,92%)}
-.меню-бокс h2{text-align:center}
-.меню-мелко{color:var(--mute);font-size:14px}
-.слот{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);flex-wrap:wrap}
-.слот-кнопки{display:flex;gap:8px}
-.слот-кнопки .b,.меню-низ .b{padding:8px 10px;font-size:9px}
-.меню-низ{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
-.помощь p{margin:0 0 12px;font-size:15px}
-.листалка{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:6px}
-.листалка .b{padding:8px 14px;font-size:12px}
-.листалка-счёт{color:var(--mute);font-size:12px}
-.вступление{white-space:pre-wrap;font-size:16px;line-height:1.65}
-.меню-бокс #вступление-дальше{display:block;margin:10px auto 0}
-.меню-бокс #помощь-ок{display:block;margin:6px auto 0}
-
-#тело-макета{flex:1;display:flex;min-height:0}
-#экран{flex:1;min-width:0;overflow:auto;padding:20px;display:flex;justify-content:center}
-
-/* Карточка героя: раскрывается и на широком экране, и на телефоне. */
-#шторка{flex:none;width:54px;overflow:hidden;transition:width .18s ease;background:var(--panel);border-right:3px solid var(--text);display:flex;flex-direction:column;min-height:0}
-#шторка[hidden]{display:none}
-#шторка.открыта{width:min(300px,78vw)}
-#шторка-таб{flex:none;align-self:stretch;min-height:40px;padding:8px 10px;text-align:right;font:10px var(--mono);background:var(--raise);border-bottom:1px solid var(--line)}
-#шторка:not(.открыта) #шторка-таб{text-align:center;font-size:18px}
-#шторка-тело{width:min(297px,calc(78vw - 3px));height:100%;overflow-y:auto;padding:0 15px 15px}
-#шторка:not(.открыта) #шторка-тело{display:none}
-#шторка-кратко{display:none;flex-direction:column;align-items:center;gap:13px;padding-top:13px}
-#шторка:not(.открыта) #шторка-кратко{display:flex}
-.герой-шапка{display:flex;align-items:center;gap:12px;padding:15px 0;border-bottom:1px solid var(--line)}
-.герой-портрет{display:block;width:83px;height:105px;object-fit:cover;border:2px solid var(--svecha);background:#29343d;flex:none}
-.герой-имя{font-size:20px;line-height:1.2;font-weight:500}
-.герой-начало{font:11px/1.5 var(--mono);color:var(--mute);margin-top:7px}
-.герой-состояния{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:13px 0}
-.герой-состояние{min-width:0;text-align:center;border:1px solid #475164;background:var(--raise);padding:7px 2px 5px;position:relative}
-.герой-состояние svg{display:block;width:30px;height:30px;margin:auto;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.герой-состояние .состояние-имя{display:block;font:9px var(--mono);margin-top:4px}
-.герой-состояние .состояние-деления{display:flex;justify-content:center;gap:2px;margin-top:6px}
-.состояние-деления i{display:block;width:8px;height:3px;background:#444b55}
-.состояние-деления i.есть{background:currentColor}
-.герой-состояние.уровень-3{color:#dcb773}.герой-состояние.уровень-2{color:#b9b6a1}.герой-состояние.уровень-1{color:#dc9d68;border-color:#a46c4d}.герой-состояние.уровень-0{color:#dc7465;border-color:#a2504a;background:#322228}
-.герой-состояние.уровень-0:after{content:'!';position:absolute;right:3px;top:1px;font:13px var(--mono)}
-.герой-тревога{font:11px/1.5 var(--mono);color:#d5a16f;margin:0 0 11px}
-.герой-тревога strong{color:var(--text)}
-.герой-снаряжение{width:100%;margin:0 0 13px;font-size:9px!important;text-align:left!important;padding:9px!important}
-.герой-раздел{border-top:1px solid var(--line);padding:11px 0}
-.герой-раздел h3{font:9px var(--px);color:var(--sin);margin:0 0 7px}
-.герой-строка{display:flex;justify-content:space-between;gap:8px;font-size:13px;margin:5px 0}
-.герой-строка span:last-child{text-align:right;color:#aeb9c8}
-.герой-значок{width:33px;height:33px;border:1px solid #56606b;display:grid;place-items:center;color:var(--svecha)}
-.герой-значок svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-@media(prefers-reduced-motion:reduce){#шторка{transition:none}}
-.карта{width:min(720px,100%);display:flex;flex-direction:column;gap:14px}
-.карта-подложка{height:180px;border:4px solid var(--text);background:linear-gradient(180deg,#151a2a,#0f1018) center/cover no-repeat}
-.карта-подпись{font-size:16px}
-.карта-описание{color:var(--mute);margin:0}
-.карта-районы{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
-
-.ов{position:fixed;inset:0;background:rgba(6,8,14,.92);z-index:20;display:flex;align-items:center;justify-content:center}
-.овбокс{width:min(520px,90%);background:var(--panel);border:4px solid var(--text);padding:24px;text-align:center}
-.овбокс h2{margin-top:0}
-
-/* ── место в городе («Синий час»): вёрстка старой игры, кнопки со старым видом ── */
-#экран.в-месте{padding:0;display:flex}
-#место{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
-#место .b,.ovbox .b{font-family:var(--body);font-size:16px;line-height:1.6;text-align:left;padding:11px 14px;
-   transition:transform .05s linear,box-shadow .05s linear}
-#место .b:hover,.ovbox .b:hover{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
-#место .b:active,.ovbox .b:active{transform:translate(3px,3px);box-shadow:0 0 0 #000}
-#место .b:disabled,.ovbox .b:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:3px 3px 0 #000}
-#место .b.on{background:var(--svecha);color:#171308}
-.cost{font:11px var(--mono);color:var(--sin);white-space:nowrap}
-.cost.gr{color:var(--svecha)}
-.row{display:flex;justify-content:space-between;align-items:center;gap:14px;width:100%}
-#полоса{display:flex;align-items:center;gap:20px;padding:9px 18px;background:var(--panel);
-     border-bottom:2px solid #000;box-shadow:0 3px 0 #000;position:relative;z-index:5;flex-wrap:wrap}
-.meter{display:flex;align-items:center;gap:7px}
-.meter .lbl{font:10px var(--mono);color:var(--mute);letter-spacing:.06em}
-.pips{display:flex;gap:2px}
-.pip{width:11px;height:12px;background:#151a28;border:2px solid #000}
-.pip.on{background:#2b3a63}.pip.now{background:var(--svecha)}
-#scene{flex:1;position:relative;min-height:34vh;overflow:hidden}
-#bg{position:absolute;inset:0;background:linear-gradient(180deg,#151a2a,#0f1018)}
-#tint{position:absolute;inset:0;pointer-events:none;transition:background 1.2s ease}
-#scan{position:absolute;inset:0;pointer-events:none;
-  background:repeating-linear-gradient(0deg,rgba(0,0,0,0) 0 3px,rgba(0,0,0,.10) 4px)}
-#bgtag{position:absolute;top:12px;left:16px;font:11px var(--mono);color:rgba(214,223,240,.34);z-index:2}
-#portrait{position:absolute;right:48px;bottom:0;width:300px;height:400px;z-index:2;
-  border:4px solid var(--text);box-shadow:0 0 0 4px var(--noch),0 0 0 8px var(--sin),6px 6px 0 8px #000;
-  background:linear-gradient(180deg,#34303a,#191821);display:none;align-items:flex-end;justify-content:center;
-  font:11px var(--mono);color:rgba(214,223,240,.45);text-align:center;padding:0 8px 14px;line-height:1.7;overflow:hidden;word-break:break-all}
-#portrait.sprite{border:0;box-shadow:none;background:none;width:auto;height:92%;right:26px;bottom:0;padding:0;
-  filter:drop-shadow(0 6px 26px rgba(0,0,0,.75));
-  -webkit-mask-image:linear-gradient(to top,transparent 0,#000 9%);mask-image:linear-gradient(to top,transparent 0,#000 9%)}
-#portrait.sprite img{display:block;width:auto;height:100%;object-fit:contain;object-position:bottom}
-#temy{position:absolute;left:16px;top:44px;width:220px;z-index:2;display:flex;flex-direction:column;gap:6px}
-#temy .h{font:8px var(--px);color:var(--sin);letter-spacing:.06em;margin-bottom:2px}
-#temy .t.враньё{opacity:.5;text-decoration:line-through}
-#temy button.t{text-align:left;cursor:pointer;color:#cfd8ea}
-#temy button.t:hover{border-color:var(--sin)}
-#temy .t{font:12px var(--mono);color:#cfd8ea;background:rgba(27,32,48,.85);border:2px solid #000;
-  box-shadow:2px 2px 0 #000;padding:6px 9px}
-#plate{position:relative;z-index:4;margin:0 16px 14px;background:var(--panel);border:4px solid var(--text);
-  box-shadow:0 0 0 4px var(--noch),0 0 0 8px var(--sin),6px 6px 0 8px #000;padding:14px 18px 16px;
-  max-height:52vh;overflow-y:auto}
-#who{display:flex;align-items:baseline;gap:12px;margin-bottom:9px;flex-wrap:wrap}
-#who b{font:11px var(--px);color:var(--svecha);font-weight:400}
-#who span{font:11px var(--mono);color:var(--mute)}
-#say{margin:0 0 14px;font-size:17px;line-height:1.55;color:#e7dfd2;white-space:pre-wrap}
-#say .my{color:var(--sin);font-style:italic}
-#tone{display:flex;gap:8px;align-items:center;margin-bottom:11px;flex-wrap:wrap}
-#tone .lbl{font:10px var(--mono);color:var(--mute);letter-spacing:.06em}
-#tone .b{padding:6px 12px;font-size:13px;box-shadow:2px 2px 0 #000}
-#acts{display:flex;flex-direction:column;gap:7px}
-.ов.мест{padding:20px;overflow-y:auto}
-.ovbox{width:min(760px,100%);background:var(--panel);border:4px solid var(--text);
-  box-shadow:0 0 0 4px var(--noch),0 0 0 8px var(--svecha),6px 6px 0 8px #000;padding:22px 24px;text-align:left}
-.ovbox h1{font:13px var(--px);color:var(--svecha);font-weight:400;margin:0 0 14px;line-height:1.7}
-.ovbox h2{font:10px var(--px);color:var(--sin);font-weight:400;margin:20px 0 10px}
-.ovbox p{margin:0 0 12px}
-#mapgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:8px 0 4px}
-.mroom{background:var(--raise);border:2px solid #000;box-shadow:3px 3px 0 #000;padding:13px 10px;text-align:center;
-  font-size:13px;min-height:74px;display:flex;flex-direction:column;justify-content:center;gap:5px}
-.mroom.here{background:var(--svecha);color:#171308}
-.mroom.dark{background:#141824;color:#4c5568}
-.mroom small{font:10px var(--mono);opacity:.8}
-.fin{font-size:16px;line-height:1.7}
-.fin .ln{padding:8px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:14px}
-.fin .ln span:last-child{color:var(--svecha);font-family:var(--mono);font-size:13px;text-align:right}
-@media (max-width:820px){
-  #полоса{gap:9px;padding:7px 9px;flex-wrap:nowrap;overflow:hidden}
-  #полоса .meter .lbl{display:none}
-  #полоса .pip{width:6px;height:9px;border-width:1px}
-  #полоса .b{padding:7px 9px!important;font-size:11px!important}
-  #полоса #карта{font-size:8px!important;padding:8px 8px!important}
-  #tone .b{padding:6px 10px;font-size:12px}
-  #portrait{right:10px;width:31vw;max-width:150px;height:auto;aspect-ratio:3/4;font-size:9px;border-width:2px;
-    box-shadow:0 0 0 2px var(--noch),0 0 0 4px var(--sin),3px 3px 0 4px #000}
-  #portrait.sprite{width:auto;height:88%;right:0;border-width:0;box-shadow:none;
-    filter:drop-shadow(0 4px 16px rgba(0,0,0,.75))}
-  #temy{width:150px;top:36px;left:10px}
-  #temy .t{font-size:11px;padding:5px 7px}
-  #plate{margin:0 8px 8px;padding:12px 13px 13px;border-width:2px;max-height:56vh;
-    box-shadow:0 0 0 2px var(--noch),0 0 0 4px var(--sin),3px 3px 0 4px #000}
-  #say{font-size:16px}
-  .ovbox{padding:16px 14px;border-width:2px;box-shadow:0 0 0 2px var(--noch),0 0 0 4px var(--svecha),3px 3px 0 4px #000}
-  #mapgrid{grid-template-columns:repeat(2,1fr)}
-}
-
-/* ── этап 5: карта города, экран района, нижняя панель, экраны поверх ── */
-#панель{flex:none;height:52px;display:flex;gap:8px;padding:6px 10px;background:var(--panel);border-top:2px solid #000;z-index:30}
-#панель .b{flex:1;padding:8px 6px;font-size:10px;text-align:center}
-#панель .b.on{background:var(--svecha);color:#171308}
-#панель .b:disabled{opacity:.4;cursor:default}
-/* окна поверх города оставляют панель видимой */
-.ов:not(.меню){bottom:52px}
-.город{width:min(960px,100%);display:flex;flex-direction:column;gap:12px}
-.город-полотно{position:relative;width:100%;line-height:0;border:4px solid var(--text);background:#0f1018;overflow:hidden}
-.город-картинка{display:block;width:100%;height:auto;image-rendering:pixelated}
-.зона{position:absolute;border-radius:50%;background:transparent;border:2px dashed transparent;padding:0;cursor:pointer;z-index:2}
-.зона:hover{border-color:rgba(239,230,216,.55);background:rgba(239,230,216,.08)}
-.табличка-место{position:absolute;transform:translate(-50%,-50%);z-index:3;pointer-events:none;text-align:center;line-height:1.3}
-.табличка{display:inline-block;background:rgba(11,13,20,.86);color:var(--text);border:2px solid #000;box-shadow:2px 2px 0 #000;padding:5px 8px;font-size:9px}
-.табличка.тут{background:var(--svecha);color:#171308}
-.табличка small{display:block;font:9px var(--mono);margin-top:2px}
-.значки{display:flex;flex-direction:column;gap:2px;margin-top:4px}
-.значок{font:9px var(--mono);background:#22314f;color:#dfe8ff;padding:1px 5px}
-.значок.закрыто{opacity:.45}
-.туман{position:absolute;inset:0;z-index:4;pointer-events:none;
-  background:radial-gradient(60% 50% at 30% 40%,rgba(190,200,220,.35),transparent 70%),radial-gradient(60% 50% at 75% 65%,rgba(190,200,220,.30),transparent 70%),rgba(20,26,44,.45)}
-.город-кнопки{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
-.район-кнопка{text-align:left}
-.район-кнопка .табличка{background:none;border:0;box-shadow:none;padding:0;color:inherit;font-size:11px}
-.город-карточка{background:var(--panel);border:4px solid var(--text);padding:14px 16px;display:flex;flex-direction:column;gap:8px}
-.район-шапка{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-.пан-бокс{width:min(720px,100%);max-height:100%;overflow:auto;text-align:left}
-.пан-шапка{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
-.пан-шапка h2{margin:0}
-.пан-блок{margin:0 0 14px}
-.пан-блок h3{font-size:10px;color:var(--sin);margin:0 0 8px;font-weight:400}
-.пан-имя{margin:0 0 12px}
-.строка-тела{display:flex;gap:12px;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
-.строка-тела .полоска{flex:0 0 150px;font-size:10px}
-.строка-тела .описание{flex:1;min-width:180px;font-size:14px;color:#c6cddb}
-.строка-тела.тело-0 .полоска{color:var(--krov)}
-.строка-тела.тело-1 .полоска{color:#d2a45c}
-.слот-вещи{display:flex;align-items:flex-start;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}
-.слот-вещи.пусто{color:var(--mute)}
-.слот-вещи .b{margin-left:auto;padding:6px 12px;font-size:10px}
-.вещь-действия{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
-.вещь-действия .b{margin-left:0}
-.тема-журнала{padding:6px 0;border-bottom:1px solid var(--line)}
-.тема-журнала.враньё{opacity:.55}
-.тема-журнала p{margin:4px 0 0;font-size:14px;color:#c6cddb}
-.ушла{color:var(--krov);margin-left:6px}
-.день-журнала{margin-bottom:10px}
-@media (max-width:820px){
-  .табличка{font-size:7px;padding:3px 4px}
-  .табличка small,.значок{font-size:7px}
-  .строка-тела .полоска{flex-basis:100%}
-  #панель .b{font-size:9px}
-}
-
-/* Масштаб следует за доступной шириной окна: ноутбуки остаются компактными,
-   а широкие мониторы получают читаемые надписи и крупные рабочие области. */
-body{font-size:var(--text-body)}
-#экран{padding:clamp(12px,1.4vw,32px)}
-#hud{font-size:var(--text-control);gap:clamp(10px,1.2vw,24px);padding:clamp(10px,.9vw,20px) clamp(12px,1.4vw,28px)}
-#hud-кнопки .b,.слот-кнопки .b,.меню-низ .b{font-size:var(--text-small);padding:9px 12px}
-.плашка,.группа-имя,.журнал,.меню-мелко,.листалка-счёт{font-size:var(--text-small)}
-.b{font-size:var(--text-control)}
-.листалка .b{font-size:var(--text-small)}
-.вступление,.карта-описание,.тема-журнала p{font-size:var(--text-body)}
-.карта{width:min(1240px,100%);margin-block:auto;gap:clamp(12px,1vw,20px)}
-.карта-подложка{height:clamp(210px,32vh,420px)}
-.карта-подпись{font-size:var(--text-title)}
-.карта-районы{grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:clamp(10px,.9vw,18px)}
-.город{width:min(1900px,100%,133vh);margin-block:auto;gap:clamp(12px,1vw,20px)}
-.табличка,.табличка small,.значок,.район-кнопка .табличка{font-size:var(--text-small)}
-.значки{gap:4px;margin-top:6px}
-.значок{padding:3px 6px}
-.город-кнопки{grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:clamp(10px,.9vw,18px)}
-.город-карточка{padding:clamp(16px,1.2vw,24px);gap:12px}
-.пан-бокс{width:min(1120px,100%)}
-.пан-блок h3,.строка-тела .полоска,.слот-вещи .b{font-size:var(--text-small)}
-.строка-тела .описание,.тема-журнала p{font-size:var(--text-body)}
-#шторка{width:72px}
-#шторка-таб{font-size:var(--text-small)}
-#шторка.открыта{width:min(360px,78vw)}
-#шторка-тело{width:min(357px,calc(78vw - 3px))}
-.герой-начало,.герой-состояние .состояние-имя,.герой-тревога,.герой-раздел h3{font-size:var(--text-small)}
-.герой-снаряжение{font-size:var(--text-small)!important}
-#панель{height:var(--panel-height);gap:clamp(6px,.5vw,12px);padding:6px clamp(8px,.8vw,16px)}
-#панель .b{font-size:var(--text-control);padding:9px 8px}
-.ов:not(.меню){bottom:var(--panel-height)}
-.овбокс{width:min(760px,92%)}
-.овбокс.меню-бокс{width:min(840px,92%)}
-#полоса .meter .lbl,#bgtag,#portrait,#who span,#tone .lbl,.cost,.mroom small{font-size:var(--text-small)}
-#temy .h,#who b,.ovbox h2{font-size:var(--text-small)}
-#temy{width:min(300px,26vw)}
-#temy .t{font-size:var(--text-small)}
-#say{font-size:var(--text-body)}
-#tone .b{font-size:var(--text-small)}
-.ovbox{width:min(900px,100%)}
-.ovbox h1{font-size:var(--text-title)}
-.ovbox .b{font-size:var(--text-control)}
-.смена-экран{width:min(1040px,100%);min-height:100%;margin:auto;display:flex;align-items:center;justify-content:center}
-.смена-карточка{width:min(860px,100%);background:var(--panel);border:4px solid var(--text);padding:clamp(20px,2vw,36px);display:flex;flex-direction:column;gap:clamp(14px,1.2vw,22px)}
-.смена-карточка h1{font-size:var(--text-title);line-height:1.6;margin:0;color:var(--svecha)}
-.смена-текст{font-size:var(--text-body);line-height:1.7;white-space:pre-wrap;margin:0}
-.смена-итог{font-size:var(--text-small);color:var(--sin);margin:0;padding-left:1.4em}
-.смена-кнопки{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:clamp(10px,.9vw,18px)}
-.смена-кнопки .b{min-height:64px}
-.смена-кнопки .mono{font-size:var(--text-small);color:var(--mute)}
-@media (max-height:780px) and (min-width:821px){
-  .карта-подложка{height:clamp(170px,28vh,300px)}
-  .город{width:min(1280px,100%,133vh)}
-  #экран{padding-block:12px}
-}
-
-/* Диалог-граф: лента реплик, врезки голосов, строки кубиков, варианты с чипами проверок (П05) */
-#say.лента{max-height:34vh;overflow-y:auto;display:flex;flex-direction:column;gap:7px;padding-right:4px;white-space:normal}
-#say .з{font-size:16px;line-height:1.5}
-#say .з.нар{color:#b9b2a4}
-#say .з.нпс{color:#e7dfd2}
-#say .з.гер{color:var(--sin);font-style:italic}
-#say .з.вид{color:#8e97a8;font-size:14px;border-left:2px solid #4b5568;padding-left:8px}
-#say .з.гол{color:#d8d2c4;font-size:15px;border-left:3px solid var(--г,#888);padding-left:9px}
-#say .з.гол b{font:10px var(--px);font-weight:400;color:var(--г,#888);margin-right:4px}
-#say .з.бр{font:12px var(--mono);color:var(--г,#9aa3b5);padding:4px 8px;background:#1a1f2b;border:1px solid #2c3446}
-#say .з.бр.ок{border-color:#4f7a52}#say .з.бр.не{border-color:#8a4b4b}
-.b.вар .ном{color:var(--mute);margin-right:6px;font-family:var(--mono)}
-.b.вар.закреплён{opacity:.8}
-.b.вар.красная{border-color:#9b4b4b}
-.чип{font:11px var(--mono);padding:2px 7px;margin-left:8px;border:1px solid #5c6b86;color:#b9c6e4;white-space:nowrap;cursor:help}
-.чип.кр{border-color:#b26060;color:#f0b4b4}
-.b.вар .почему{display:block;font-size:12px;color:#8a93a6;margin-top:3px}
-.b.вар .разбор{display:block;font:12px var(--mono);color:#aeb8cf;margin-top:6px;white-space:normal}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;500&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./Движок/интерфейс.css">
 </head>
 <body>
 <div class="плашка">Ранняя сборка · Порт</div>
-<div id="hud">
-  <span id="hud-день" class="px"></span>
-  <span id="hud-отрезок" class="px"></span>
-  <span id="hud-кошель" class="mono"></span>
-  <span id="hud-кнопки"><button class="b" id="hud-помощь">Как играть</button><button class="b" id="hud-меню">Меню</button></span>
-</div>
+<header id="hud">
+  <div class="hud-бренд">Порт Теней<small>Ранняя осень · 1026</small></div>
+  <div class="hud-время"><span id="hud-день"></span><div id="hud-отрезок"></div></div>
+  <div class="hud-контекст"><span id="hud-где"></span><small id="hud-погода"></small></div>
+  <span id="hud-кошель"></span>
+  <span id="hud-кнопки"><button class="b" id="hud-помощь">Как играть</button><button class="b" id="hud-меню">Меню <small>Esc</small></button></span>
+</header>
 <div id="тело-макета">
-  <button id="шторка-таб" class="b px">Герой ›</button>
-  <aside id="шторка"><div id="шторка-тело"></div></aside>
   <div id="экран"></div>
 </div>
 <nav id="панель"></nav>
 
 <script type="module">
-import { новоеСостояние, сохранить, загрузить, ошибкаЗагрузки } from './Движок/состояние.js';
+import { новоеСостояние, сохранить, загрузить, ошибкаЗагрузки, сброситьАвтосейв } from './Движок/состояние.js';
 import { рендерHUD, рендерКарту, рендерСмены, рендерКонецДня, рендерСтарт } from './Движок/экраны.js';
 import { рендерМесто } from './Движок/экраны-места.js';
-import { рендерПанель, рендерШторку } from './Движок/экраны-панель.js';
-import { рендерМеню, рендерПомощь, рендерВступление, подтверждено18, рендерВзрослым } from './Движок/меню.js';
+import { рендерПанель, ПАН } from './Движок/экраны-панель.js';
+import { рендерМеню, рендерГлавноеМеню, рендерПомощь, рендерВступление, подтверждено18, рендерВзрослым } from './Движок/меню.js';
+
+import { применитьНастройки } from './Движок/настройки-интерфейса.js';
+import { ИНТ } from './Движок/экраны.js';
+применитьНастройки();
 
 document.getElementById('hud-помощь').onclick = () => рендерПомощь();
-// Открыть/закрыть вручную нужно только на узком экране — на широком шторка держится открытой
-// через CSS-медиазапрос независимо от этого класса (см. index.html, #шторка).
-document.getElementById('шторка-таб').onclick = () => document.getElementById('шторка').classList.toggle('открыта');
+function загрузитьСлот(n) {
+  const З = загрузить(n); if (!З) return;
+  S = З; ПАН.вкладка = 'город'; ИНТ.район = true; ИНТ.карточка = null;
+  document.getElementById('hud').hidden = false;
+  document.getElementById('панель').style.display = '';
+  сохранить(S, 'авто'); перерисовать();
+}
+function новаяИгра() {
+  сброситьАвтосейв();
+  S = null; ПАН.вкладка = 'город'; ИНТ.район = true; ИНТ.карточка = null;
+  document.getElementById('панель').style.display = '';
+  перерисовать();
+}
 document.getElementById('hud-меню').onclick = () => рендерМеню(!!S, {
-  сохранитьВ: n => сохранить(S, n),
-  загрузить: n => { const З = загрузить(n); if (!З) return; S = З; сохранить(S, 'авто'); перерисовать(); },
-  заново: () => { localStorage.removeItem('порт-теней-авто'); S = null; перерисовать(); },
-  помощь: () => рендерПомощь(),
+  сохранитьВ: n => сохранить(S,n), загрузить: загрузитьСлот, заново: новаяИгра,
 });
-
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || document.querySelector('.ов') || document.getElementById('hud').hidden) return;
+  e.preventDefault(); document.getElementById('hud-меню').click();
+});
 let S = загрузить('авто');
+function главноеМеню() {
+  рендерГлавноеМеню(!!S, { продолжить: перерисовать, новая: новаяИгра, заново: новаяИгра, загрузить: загрузитьСлот });
+}
 
 function перерисовать() {
   if (!S) {
     // на старте шапка скрыта, но меню нужно (загрузить слот), поэтому прячем только показатели
     document.getElementById('hud').hidden = false;
-    ['hud-день', 'hud-отрезок', 'hud-кошель'].forEach(id => document.getElementById(id).textContent = '');
+    ['hud-день', 'hud-отрезок', 'hud-кошель', 'hud-где', 'hud-погода'].forEach(id => document.getElementById(id).textContent = '');
     document.getElementById('панель').innerHTML = ''; // до начала игры панели нет
     document.querySelectorAll('.ов.пан').forEach(o => o.remove());
-    document.getElementById('шторка-таб').hidden = true;
-    document.getElementById('шторка').classList.remove('открыта');
-    рендерШторку(null);
     рендерСтарт(началоId => {
       S = новоеСостояние(началоId);
       сохранить(S, 'авто');
@@ -380,8 +79,6 @@ function перерисовать() {
   }
   рендерHUD(S);
   рендерПанель(S, продолжить);
-  рендерШторку(S);
-  document.getElementById('шторка-таб').hidden = false;
   document.querySelectorAll('.ов.мест').forEach(o => o.remove());
   document.getElementById('экран').classList.toggle('в-месте', !!S.сцена && !S.мир.конецДня);
   if (S.мир.конецДня) {
@@ -406,7 +103,7 @@ function продолжить(состояние, сохранитьПослеС
   перерисовать();
 }
 
-if (подтверждено18()) перерисовать(); else рендерВзрослым(перерисовать);
+if (подтверждено18()) главноеМеню(); else рендерВзрослым(главноеМеню);
 </script>
 </body>
 </html>

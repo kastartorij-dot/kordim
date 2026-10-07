@@ -34,13 +34,21 @@ try {
   // На Windows каталог может оставаться видимым сразу после rename.
   // Удаляем только уже сохранённую копию выпуска, исходники не затрагиваются.
   await rm(output, { recursive: true, force: true });
-  await rename(temporary, output);
+  try {
+    await rename(temporary, output);
+  } catch (error) {
+    // Windows может запрещать перенос подготовленного каталога (EPERM/EBUSY).
+    // Старый выпуск уже в backup; копирование завершается до его удаления.
+    if (!['EPERM', 'EBUSY'].includes(error.code)) throw error;
+    await cp(temporary, output, { recursive: true, errorOnExist: true, force: false });
+  }
   if (oldMoved) await rm(backup, { recursive: true });
   console.log(`Собрано: ${output}`);
 } catch (error) {
   if (oldMoved) {
-    const existing = await readdir(parent);
-    if (!existing.includes('Порт')) await rename(backup, output);
+    // Если копирование прервалось, возвращаем весь прежний выпуск.
+    await rm(output, { recursive: true, force: true });
+    await rename(backup, output);
   }
   throw error;
 } finally {

@@ -99,6 +99,19 @@ export function сохранить(S, слотN) {
   ошибка = null;
 }
 
+// Новая игра убирает только автосейв; повреждённый исходник сначала сохраняется.
+export function сброситьАвтосейв() {
+  const ключ = `${КЛЮЧ}-авто`;
+  const прежнее = localStorage.getItem(ключ);
+  if (прежнее && (!разобрать(прежнее).можно || ошибка)) {
+    let резерв = `${ключ}-резерв-${Date.now()}`;
+    for (let i = 1; localStorage.getItem(резерв); i++) резерв = `${ключ}-резерв-${Date.now()}-${i}`;
+    localStorage.setItem(резерв, прежнее);
+  }
+  localStorage.removeItem(ключ);
+  ошибка = null;
+}
+
 function разобрать(сырое) {
   try {
     const S = JSON.parse(сырое);

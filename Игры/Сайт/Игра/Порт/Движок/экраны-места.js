@@ -1,6 +1,8 @@
 // Экран места (сейчас — «Синий час»): вёрстка старой игры — фон, тинт по часам, полоска часов, портрет,
 // реплика, «КАК СКАЗАТЬ», «ЧТО ТЫ ЗНАЕШЬ», план дома, откат. Единственный файл места, что трогает DOM.
 // Что показывать и что нажимать — решает Движок/разговор.js (видСцены, действияСцены).
+import { район } from '../Данные/районы.js';
+import { показатьОкно, закрытьОкно } from './окна.js';
 import { видСцены, видПлана, действияСцены, выбратьПодход, показатьТему, назад, вернутьсяВГород, догрузитьСцену, описаниеМеста, данныеМеста } from './разговор.js';
 
 const $ = id => document.getElementById(id);
@@ -19,9 +21,9 @@ function естьФайл(путь, ок, нет) {
   i.src = путь;
 }
 // Перебирает пути по порядку и отдаёт первый существующий: переезд картинок по папкам ничего не ломает.
-function перваяКартинка(пути, ок) {
+function перваяКартинка(пути, ок, нет = () => {}) {
   const шаг = i => {
-    if (i >= пути.length) return;
+    if (i >= пути.length) return нет();
     естьФайл(пути[i].путь, () => ок(пути[i]), () => шаг(i + 1));
   };
   шаг(0);
@@ -59,7 +61,7 @@ export function рендерМесто(S, onШаг) {
       </div>
       <div id="scene">
         <div id="bg"></div><div id="tint"></div><div id="scan"></div><div id="bgtag"></div>
-        <div id="temy"></div><div id="portrait"></div>
+        <details id="известное"><summary>Что ты знаешь</summary><div id="temy"></div></details><div id="portrait"></div>
       </div>
       <div id="plate">
         <div id="who"></div><p id="say"></p><div id="tone"></div><div id="acts"></div>
@@ -77,11 +79,17 @@ export function рендерМесто(S, onШаг) {
     // 40% по высоте: низ кадра всё равно перекрыт плашкой, а главное обычно выше середины
     $('bg').style.background = 'url(' + найден.путь + ') center 40%/cover no-repeat, ' + в.фон.градиент;
     $('bgtag').textContent = '';
+  }, () => {
+    const р = район(S.мир.район);
+    if (!р?.подложка || !S.сцена || S.сцена.комната !== эта || !$('bg')) return;
+    $('bg').style.background = 'url(' + new URL('../Ресурсы/Районы/' + р.подложка, import.meta.url).href + ') center/cover no-repeat, ' + в.фон.градиент;
+    $('bgtag').textContent = р.имя + ' · панорама района';
   });
   $('tint').style.background = в.тинт;
 
   // Панель тем: у слуха — «(слух)», у опровергнутого — «(враньё)» и приглушённо; нажал — текст темы в поле реплики.
-  $('temy').style.display = в.диалог ? 'none' : '';
+  $('известное').hidden = !!в.диалог || !в.темы.length;
+  $('известное').querySelector('summary').textContent = сл.знаешь + ' · ' + в.темы.length;
   $('temy').innerHTML = в.темы.length ? `<div class="h">${сл.знаешь}</div>` : '';
   for (const т of в.темы) {
     const d = document.createElement(т.можно ? 'button' : 'div');
@@ -95,7 +103,7 @@ export function рендерМесто(S, onШаг) {
   const п = $('portrait');
   if (в.портрет) {
     п.style.display = 'flex';
-    п.innerHTML = сл.портрет + '<br>' + экр(в.портрет.файл);
+    п.innerHTML = '<span class="портрет-буквы" aria-label="' + экр(в.портрет.имя) + '">' + экр(в.портрет.имя.split(/\s+/).slice(0, 2).map(x => x[0]).join('').toUpperCase()) + '</span>';
     п.className = '';
     п.style.padding = '0 8px 14px';
     const этот = S.сцена.собеседник;
@@ -162,7 +170,7 @@ export function рендерМесто(S, onШаг) {
     const ном = выборДиалога && !а.закреплён ? `<span class="ном">${++номер}.</span>` : '';
     b.innerHTML = '<span class="row"><span>' + ном + экр(а.текст) + '</span>' + чип +
       (а.подпись ? '<span class="cost' + (а.подпись.includes('гр') ? ' gr' : '') + '">' + экр(а.подпись) + '</span>' : '') + '</span>';
-    if (!а.можно && а.почему && вариант) b.insertAdjacentHTML('beforeend', `<span class="почему">${экр(а.почему)}</span>`);
+    if (!а.можно && а.почему) b.insertAdjacentHTML('beforeend', `<span class="почему">${экр(а.почему)}</span>`);
     if (а.можно) b.onclick = ев => {
       if (ев.target.closest?.('[data-ч]') && ev_разбор(ев)) return; // нажатие на чип — только разбор, без выбора варианта
       а.выполнить(S); onШаг(S);
@@ -183,6 +191,7 @@ export function рендерМесто(S, onШаг) {
 // Цифровые клавиши выбирают видимые варианты; браузерные поля ввода их не перехватывают.
 let клавишиВариантов = new Map();
 document.addEventListener('keydown', ев => {
+  if (document.querySelector('.ов')) return; // окно поверх сцены блокирует цифровой выбор реплики
   if (ев.altKey || ев.ctrlKey || ев.metaKey || /INPUT|TEXTAREA|SELECT/.test(ев.target?.tagName ?? '') || ев.target?.isContentEditable) return;
   const кнопка = клавишиВариантов.get(ев.key);
   if (кнопка?.isConnected && !кнопка.disabled) { ев.preventDefault(); кнопка.click(); }
@@ -226,6 +235,7 @@ function показатьИтог(S, итог, onШаг) {
     '<button class="b" id="выйти">' + сл.выйти + '</button></div></div>';
   document.body.appendChild(ov);
   ov.querySelector('#выйти').onclick = () => { ov.remove(); $('экран').classList.remove('в-месте'); вернутьсяВГород(S); onШаг(S); };
+  показатьОкно(ov); // обязательный итог не закрывается Escape
   const u = ov.querySelector('#откат');
   if (u) u.onclick = () => { if (назад(S)) onШаг(S); };
 }
@@ -240,5 +250,7 @@ function показатьПлан(S) {
     '<p style="color:#7c8699;font-size:13px;margin-top:14px">' + экр(п.ключ) + '</p>' +
     '<button class="b" id="закрыть" style="margin-top:8px">' + п.закрыть + '</button></div>';
   document.body.appendChild(ov);
-  ov.querySelector('#закрыть').onclick = () => ov.remove();
+  const закрыть = () => закрытьОкно(ov);
+  ov.querySelector('#закрыть').onclick = закрыть;
+  показатьОкно(ov, закрыть);
 }
