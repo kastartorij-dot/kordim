@@ -600,3 +600,37 @@ html[data-движение="меньше"] *, html[data-движение="мен
 .меню-сцена > * { flex-shrink: 0; }
 .меню-сцена .меню-список { width: min(360px,100%); max-width: 360px; }
 @media (max-width: 600px) { .меню-бокс > .меню-сцена { padding: 28px 20px; } .меню-сцена .меню-список { width: 100%; max-width: none; } }
+
+/* Иллюстрированный план дома. */
+.план-дома .план-бокс { width: min(1080px,100%); padding: 0; background: #152126; overflow: auto; }
+.план-шапка { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:22px 28px 18px; background:linear-gradient(90deg,#18262df5,#18262dba),url("../Ресурсы/Синий_Час/Фоны/krylco.jpg") center 45%/cover; border-bottom:1px solid var(--line); position:sticky; top:0; z-index:2; }
+.план-шапка h1 { margin:0; font:400 34px/1.2 var(--px); color:var(--text); }
+.план-шапка .надзаголовок { margin-bottom:6px; }
+.план-вступление { margin:18px 28px; color:var(--mute); font-size:var(--text-small); max-width:85ch; }
+.план-этажи { padding:0 28px 22px; display:grid; gap:20px; }
+.план-этаж h2 { font:500 15px/1.4 var(--body); color:var(--svecha); margin:0 0 10px; display:flex; align-items:center; gap:14px; }
+.план-этаж h2::after { content:""; flex:1; height:1px; background:var(--line); }
+.план-комнаты { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+.план-комната { border:1px solid #40525a; border-radius:4px; background:#1c2b31; overflow:hidden; min-width:0; }
+.план-комната.текущая { border-color:var(--svecha); box-shadow:0 0 0 1px var(--svecha); }
+.план-изображение { height:128px; position:relative; overflow:hidden; background:radial-gradient(ellipse at 30% 20%,#43545d,#18242d); }
+.план-изображение img { width:100%; height:100%; object-fit:cover; display:block; }
+.план-изображение::after { content:""; position:absolute; inset:0; background:linear-gradient(transparent 45%,#101c25aa); pointer-events:none; }
+.план-статус { position:absolute; z-index:1; bottom:10px; left:12px; font:500 11px/1.5 var(--body); color:#f0e7d7; padding:3px 8px; border-radius:3px; background:#15242de8; }
+.текущая .план-статус { background:var(--svecha); color:#162024; }
+.неизвестная .план-изображение img { filter:blur(5px) brightness(.55) saturate(.45); transform:scale(1.08); }
+.план-подпись { padding:11px 12px; display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:50px; }
+.план-подпись h3 { margin:0; font:500 var(--text-control)/1.35 var(--body); color:var(--text); }
+.неизвестная .план-подпись h3 { color:#b5c0c3; font-weight:300; }
+.план-цена { white-space:nowrap; color:var(--svecha); font:500 var(--text-small)/1.4 var(--body); }
+.план-примечания { border-top:1px solid var(--line); padding:14px 28px 20px; background:#122027; }
+.план-примечания p { margin:0 0 6px; font-size:var(--text-small); }
+.план-примечания small { color:var(--mute); font-size:12px; }
+@media(max-width:650px) { .план-комнаты { grid-template-columns:repeat(2,minmax(0,1fr)); }.план-шапка { padding:18px 16px; }.план-шапка h1 { font-size:28px; }.план-вступление { margin:16px; }.план-этажи { padding:0 16px 18px; gap:18px; }.план-примечания { padding:14px 16px; }.план-изображение { height:110px; } }
+@media(max-width:390px) { .план-комнаты { grid-template-columns:1fr; }.план-изображение { height:140px; } }
+/* Метки центрируются относительно координаты и не теряют transform при нажатии. */
+.b.карта-метка, .b.карта-метка:hover, .b.карта-метка:active, .b.карта-метка:focus-visible { transform:translate(-50%,-50%); }
+
+#экран:has(.город) { overflow-anchor: none; }
+.план-бокс .план-вступление { margin:18px 28px; }
+@media(max-width:650px) { .план-бокс .план-вступление { margin:16px; } }

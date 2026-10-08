@@ -108,12 +108,22 @@ function рендерГород(S, onПереход) {
   const собрать = естьКартинка => {
     if (S.сцена || S.мир.смена || S.мир.конецДня || ИНТ.район) return;
     const зоны = РАЙОНЫ.map(р => '<button class="b карта-метка' + (р.id === выбран.id ? ' выбрана' : '') + '" data-р="' + р.id + '" style="--x:' + р.наКарте.x + '%;left:var(--x);top:' + р.наКарте.y + '%" aria-pressed="' + (р.id === выбран.id) + '">' + метка(р) + '</button>').join('');
-    поле.innerHTML = '<div class="город"><section class="город-вид"><div class="надзаголовок">Порт Теней</div><h1>Город у воды</h1>'
-      + (естьКартинка ? '<div class="город-полотно"><img class="город-картинка" src="' + БАЗА_КАРТЫ + КАРТА + '" alt="Карта пяти районов Порта Теней">' + зоны + '</div>' : '<div class="город-кнопки">' + РАЙОНЫ.map(р => '<button class="b" data-р="' + р.id + '">' + метка(р) + '</button>').join('') + '</div>')
+    const html = '<div class="город"><section class="город-вид"><div class="надзаголовок">Порт Теней</div><h1>Город у воды</h1>'
+      + (естьКартинка ? '<div class="город-полотно"><img class="город-картинка" width="1672" height="941" src="' + БАЗА_КАРТЫ + КАРТА + '" alt="Карта пяти районов Порта Теней">' + зоны + '</div>' : '<div class="город-кнопки">' + РАЙОНЫ.map(р => '<button class="b" data-р="' + р.id + '">' + метка(р) + '</button>').join('') + '</div>')
       + '</section><aside class="город-карточка"><div class="надзаголовок">Выбранный район</div><h2>' + экр(выбран.имя) + '</h2><p class="карта-описание">' + экр(выбран.описание) + '</p><p class="действие-цена">' + (тут ? 'Ты здесь · без затрат времени' : экр(ход?.подпись ?? '') + ' · 0 гр.') + '</p>'
       + '<button class="b sin" id="идти"' + (!тут && !ход?.можно ? ' disabled' : '') + '>' + (тут ? 'Открыть район' : 'Перейти в район') + '</button><div class="места-карты"><h3>Места</h3>'
       + места.map(({м, открыто}) => '<div><b>' + экр(м.имя) + '</b><small>' + (открыто ? 'Открыто сейчас' : экр(можноВойти(S, м.id).почему ?? 'Закрыто')) + '</small></div>').join('')
       + '</div><p class="подсказка">Выбор района на карте не расходует время.</p></aside></div>';
+    if (поле.querySelector('.город')) {
+      // Выбор меняет описание справа, а рисунок и метки остаются на месте.
+      const шаблон = document.createElement('template'); шаблон.innerHTML = html;
+      поле.querySelector('.город-карточка').replaceWith(шаблон.content.querySelector('.город-карточка'));
+      поле.querySelectorAll('[data-р]').forEach(el => {
+        const выбранная = el.dataset.р === выбран.id;
+        el.classList.toggle('выбрана', выбранная);
+        el.setAttribute('aria-pressed', String(выбранная));
+      });
+    } else поле.innerHTML = html;
     поле.querySelectorAll('[data-р]').forEach(el => {
       el.onclick = () => {
         ИНТ.карточка = el.dataset.р;

@@ -241,16 +241,24 @@ function показатьИтог(S, итог, onШаг) {
 }
 
 function показатьПлан(S) {
-  const п = видПлана(S);
-  const ov = document.createElement('div');
-  ov.className = 'ов мест';
-  ov.innerHTML = '<div class="ovbox"><h1>' + п.заг + '</h1>' +
-    '<p style="color:#9aa3b5;font-size:14px">' + экр(п.вступление) + '</p>' +
-    '<div id="mapgrid">' + п.клетки.map(к => '<div class="' + к.класс + '">' + экр(к.имя) + '<small>' + экр(к.подпись) + '</small></div>').join('') + '</div>' +
-    '<p style="color:#7c8699;font-size:13px;margin-top:14px">' + экр(п.ключ) + '</p>' +
-    '<button class="b" id="закрыть" style="margin-top:8px">' + п.закрыть + '</button></div>';
+  const п = видПлана(S), д = данныеМеста(S);
+  const ov = document.createElement("div");
+  ov.className = "ов мест план-дома";
+  const карточка = к => `<article class="план-комната ${к.тут ? "текущая" : к.открыт ? "знакомая" : "неизвестная"}" data-комната="${к.id}">
+    <div class="план-изображение"><img alt="" loading="lazy"><span class="план-статус">${к.тут ? "Ты здесь" : к.открыт ? "Посещено" : "Не посещено"}</span></div>
+    <div class="план-подпись"><h3>${экр(к.открыт ? к.имя : "Неизвестное помещение")}</h3>${к.цена ? `<span class="план-цена">${к.цена} гр.</span>` : ""}</div>
+  </article>`;
+  ov.innerHTML = `<div class="ovbox план-бокс"><header class="план-шапка"><div><div class="надзаголовок">Синий час · ориентиры</div><h1>План дома</h1></div><button class="b" data-закрыть aria-label="Закрыть план дома">Закрыть ×</button></header>
+    <p class="план-вступление">${экр(п.вступление)}</p><div class="план-этажи">${п.этажи.map(э => `<section class="план-этаж"><h2>${экр(э.имя)}</h2><div class="план-комнаты">${э.комнаты.map(id => карточка(п.клетки.find(к => к.id === id))).join("")}</div></section>`).join("")}</div>
+    <footer class="план-примечания"><p>${экр(п.ключ)}</p><small>Неоткрытые помещения показаны без названий и подробностей. План не перемещает героя.</small></footer></div>`;
   document.body.appendChild(ov);
+  for (const к of п.клетки) {
+    const img = ov.querySelector(`[data-комната="${к.id}"] img`);
+    const пути = [];
+    д.КАРТИНКИ.папкиФонов.forEach(папка => [".jpg", ".webp", ".png"].forEach(р => пути.push({ путь: БАЗА + папка + к.id + р })));
+    перваяКартинка(пути, найден => { if (img.isConnected) img.src = найден.путь; }, () => { img.hidden = true; });
+  }
   const закрыть = () => закрытьОкно(ov);
-  ov.querySelector('#закрыть').onclick = закрыть;
+  ov.querySelector("[data-закрыть]").onclick = закрыть;
   показатьОкно(ov, закрыть);
 }
