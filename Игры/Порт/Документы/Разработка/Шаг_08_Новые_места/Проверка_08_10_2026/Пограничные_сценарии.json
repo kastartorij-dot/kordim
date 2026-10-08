@@ -1,0 +1,50 @@
+[
+  {
+    "case": "bypass_planks",
+    "day": 5,
+    "coins": 0,
+    "room": "внутри-локи",
+    "quiet": null,
+    "passAvailable": true
+  },
+  {
+    "case": "bypass_planks",
+    "day": 23,
+    "coins": 0,
+    "room": "внутри-локи",
+    "quiet": null,
+    "passAvailable": true
+  },
+  {
+    "case": "one_conversation_two_topics",
+    "first": {
+      "shadow": 0,
+      "protected": false,
+      "leaks": {}
+    },
+    "afterSecond": {
+      "shadow": 1,
+      "scene": "маяк",
+      "leaks": {
+        "gore": "ножи"
+      }
+    },
+    "log": [
+      "Слово Локи: разговор остался между вами, никто не слышал",
+      "Ты говорил на маяке о том, о чём там не говорят. Ифо отчитывается Ножам: к утру они знают."
+    ]
+  },
+  {
+    "case": "full_inventory_reward",
+    "bag": 8,
+    "received": false,
+    "pending": [
+      {
+        "номер": 1,
+        "тип": "находка",
+        "происхождение": "лачуга-локи"
+      }
+    ],
+    "award": true
+  }
+]
