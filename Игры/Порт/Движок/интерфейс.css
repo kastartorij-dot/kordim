@@ -592,3 +592,11 @@ html[data-движение="меньше"] *, html[data-движение="мен
 
 #bgtag {top:auto; bottom:12px; left:12px;}
 #bgtag:empty {display:none;}
+
+/* Главное меню и пауза занимают всё окно; служебные окна остаются карточками. */
+.ов.меню:has(.меню-сцена) { padding: 0; background: var(--noch); }
+.овбокс.меню-бокс:has(.меню-сцена) { width: 100%; height: 100%; max-height: 100%; border: 0; border-radius: 0; }
+.меню-бокс > .меню-сцена { min-height: 100%; border-radius: 0; padding: clamp(28px,6vw,96px); display: flex; flex-direction: column; justify-content: center; align-items: flex-start; }
+.меню-сцена > * { flex-shrink: 0; }
+.меню-сцена .меню-список { width: min(360px,100%); max-width: 360px; }
+@media (max-width: 600px) { .меню-бокс > .меню-сцена { padding: 28px 20px; } .меню-сцена .меню-список { width: 100%; max-width: none; } }
