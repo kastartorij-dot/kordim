@@ -32,7 +32,7 @@ const данные = new Set();
   else if (Array.isArray(v)) v.filter(x => !x?.шаг7).forEach(x => обойти(x)); // новые действия П08 проверяются в шаг7-интеграция.mjs
   // Нора и Дана добавлены позднее: их реплики не относятся к исходному файлу этапа 4.
   else if (v && typeof v === 'object') for (const [к, x] of Object.entries(v)) if (!['ЭКРАН', 'КАРТИНКИ', 'nora', 'dana'].includes(к)) обойти(x, к);
-})([АПТЕКА, ТАВЕРНА, БАНЯ, Object.fromEntries(Object.entries(РЕЕСТР).filter(([, т]) => т.текст))]);
+})([АПТЕКА, ТАВЕРНА, БАНЯ, Object.fromEntries(Object.entries(РЕЕСТР).filter(([, т]) => т.текст && !т.шаг8))]); // темы рынка (шаг 8) — не из Порт-тексты-4.md
 
 // ── разбор файла
 const цитаты = []; // { текст, контекст }
