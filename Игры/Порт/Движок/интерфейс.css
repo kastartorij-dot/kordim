@@ -634,3 +634,9 @@ html[data-движение="меньше"] *, html[data-движение="мен
 #экран:has(.город) { overflow-anchor: none; }
 .план-бокс .план-вступление { margin:18px 28px; }
 @media(max-width:650px) { .план-бокс .план-вступление { margin:16px; } }
+
+/* Девять районов остаются отдельными доступными кнопками при любом масштабе. */
+.город-список { margin-top:14px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px; }
+.город-список .b { white-space:normal;min-height:44px; }
+.город-список small { display:block; }
+@media(max-width:700px){.город-полотно .карта-метка{display:none}.город-список{grid-template-columns:repeat(2,minmax(0,1fr))}}

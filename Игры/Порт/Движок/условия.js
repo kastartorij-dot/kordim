@@ -12,6 +12,7 @@ const список = v => (Array.isArray(v) ? v : [v]);
 
 export function условие(S, у) {
   if (!у) return true;
+  if (typeof у === 'function') return !!у(S);
   const м = S.мир, г = S.герой;
   if (у.день && !вДиапазоне(м.день, у.день)) return false;
   if (у.рынок !== undefined && рыночныйДень(м.день) !== у.рынок) return false;
