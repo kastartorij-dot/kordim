@@ -1,5 +1,6 @@
 /* Общие утилиты: DOM, ссылки, карта, путешествие, пикселизация, разговор. */
 import { PLACES, placeById } from '../Данные/places.js';
+import { sourcesOf } from './canon-links.js';
 import { ROUTES } from '../Данные/routes.js';
 import { personById } from '../Данные/people.js';
 
@@ -176,4 +177,11 @@ export function countUp(nodes, from, to, ms = 500){
     nodes.forEach(n => n.textContent = v);
     if (k < 1) requestAnimationFrame(f);
   })(t0);
+}
+
+/* Источники карточки: переход к раскрытому блоку, без объявления черновиков каноном. */
+export function canonSources(kind, id){
+  const refs = sourcesOf(kind, id);
+  if (!refs.length) return '';
+  return '<details class="canon-sources"><summary>Связанные записи канона · ' + refs.length + '</summary><ul>' + refs.map(r => '<li><a href="' + r.href + '">' + esc(r.title) + '</a>' + (r.status?.startsWith('заморожен') ? ' <span class="badge draft">заморожен</span>' : '') + '</li>').join('') + '</ul></details>';
 }

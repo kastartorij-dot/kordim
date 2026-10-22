@@ -28,5 +28,5 @@ function card(p){
   const pl = p.place ? placeById(p.place) : null;
   const av = '<img class="av" src="' + IMG + (p.img || 'Лица/' + p.id + '.jpg') + '" alt="" data-initial="' + esc(p.name[0]) + '" onerror="kordimNoImg(this)">';
   return '<a class="pcard" href="#/person/' + p.id + '">' + av + '<div><b>' + esc(p.name) + (p.alias ? ' <span style="color:var(--mute)">' + esc(p.alias) + '</span>' : '') + '</b><small>' + esc(p.role) + (pl ? ' · ' + esc(pl.name) : '') + '</small>' +
-    (p.profile ? '<span class="badge ok">хронология</span>' : '') + '</div></a>';
+    (p.frozen ? '<span class="badge draft">заморожен</span>' : '') + (p.profile ? '<span class="badge ok">хронология</span>' : '') + '</div></a>';
 }

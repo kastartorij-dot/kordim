@@ -1,5 +1,5 @@
 /* Страница персонажа. Полный профиль — раскладка «Панели», иначе короткая карточка. */
-import { $, $$, esc, IMG, mapHTML, drawRoutes, drawPins, markPlace, markRoute, daysFor, closedFor, travel, pixelate, mountChat, countUp, personChip, placeChip, MODE_LABEL } from '../ui.js';
+import { $, $$, esc, IMG, mapHTML, drawRoutes, drawPins, markPlace, markRoute, daysFor, closedFor, travel, pixelate, mountChat, countUp, personChip, placeChip, MODE_LABEL, canonSources } from '../ui.js';
 import { personById } from '../../Данные/people.js';
 import { placeById } from '../../Данные/places.js';
 import { ROUTES, routeById } from '../../Данные/routes.js';
@@ -10,6 +10,10 @@ export function render(root, [id]){
   return p.profile ? full(root, p) : short(root, p);
 }
 
+function personNotice(p){
+  return p.frozen ? '<p class="pending"><span class="badge draft">заморожен</span> Персонаж выведен из сюжета. Описание сохранено для справки; использовать его можно после решения автора.</p>' : '';
+}
+
 function short(root, p){
   const pl = p.place ? placeById(p.place) : null;
   root.innerHTML = `<div class="short" data-title="${esc(p.name)}">
@@ -17,10 +21,12 @@ function short(root, p){
     <section class="body">
       <div class="eyebrow"><a href="#/people">люди</a></div>
       <h1 class="bigname">${esc(p.name)}<span>${esc((p.alias || p.role).toUpperCase())}</span></h1>
+      ${personNotice(p)}
       <p style="margin-top:22px">${esc(p.lead)}</p>
       ${(p.bio || []).map(t => '<p>' + esc(t) + '</p>').join('')}
       ${p.facts.length ? '<div>' + p.facts.map(f => '<span class="chip">' + esc(f) + '</span>').join('') + '</div>' : ''}
       ${pl ? '<div style="margin-top:10px">' + placeChip(pl.id) + '</div>' : ''}
+      ${canonSources('people', p.id)}
       <div class="pending">Хронология, вещи и разговоры для этого персонажа ещё не собраны.</div>
     </section>
     <section class="card c-map"><div class="mhead"><b style="font-weight:500">Где искать</b><a href="#/map">на общую карту</a></div>
@@ -43,8 +49,10 @@ function full(root, p){
     <section class="c-name">
       <div class="eyebrow"><a href="#/people">люди</a></div>
       <h1 class="bigname">${esc(p.name)}${P.born ? '<b class="age" id="age"></b>' : ''}<span>${esc(P.subtitle)}</span></h1>
+      ${personNotice(p)}
       <div class="now"><div class="yearbig yearN"></div><div class="where"><small>ГДЕ</small><span id="where"></span></div></div>
       <div style="margin-top:12px">${(P.links || []).map(personChip).join('')}</div>
+      ${canonSources('people', p.id)}
       ${P.secret ? '<details class="secret"><summary>только для автора</summary><div class="secret-pop">' + esc(P.secret) + '</div></details>' : ''}
     </section>
     <section class="card c-photo">
@@ -139,7 +147,7 @@ function full(root, p){
     const t = (P.talks || {})[year], box = $('#talk', root);
     $('#talkWhere', root).innerHTML = t ? (t.draft ? '<span class="badge draft">набросок</span> ' : '') + esc(t.where) : '';
     if (!t){ box.innerHTML = '<p class="locked">В этом году разговора нет. Годы с разговором: ' + Object.keys(P.talks || {}).join(', ') + '.</p>'; return; }
-    box.innerHTML = '<div id="chat"></div>';
+    box.innerHTML = (t.draft ? '<p class="pending">Набросок разговора, автором не подтверждён.</p>' : '') + '<div id="chat"></div>';
     stopChat = mountChat($('#chat', root), t.tree, {gains:P.gains || {}, onGain:g => { const box = $('#debts', root); if (box) slot(g, box, 'new').focus({preventScroll:true}); }});
   }
   stops.push(() => { stopTrip && stopTrip(); stopChat && stopChat(); });

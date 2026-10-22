@@ -1,5 +1,5 @@
 /* Мир: статьи с шапкой, крупными цифрами, карточками разделов и интерактивными вставками. */
-import { $, $$, esc, IMG, SPEED, MODE_LABEL, plural } from '../ui.js';
+import { $, $$, esc, IMG, SPEED, MODE_LABEL, plural, canonSources } from '../ui.js';
 import { ARTICLES } from '../../Данные/articles.js';
 import { GOODS } from '../../Данные/goods.js';
 import { icon } from '../icons.js';
@@ -16,6 +16,7 @@ export function render(root, [id]){
       <article class="warticle">
         <header class="whero" style="${heroBg(a.id)}"><span class="big">${icon(a.icon, 84)}</span><h2>${esc(a.title)}</h2></header>
         <p class="wlead">${esc(a.lead)}</p>
+        ${canonSources('articles', a.id)}
         ${a.facts ? '<div class="facts">' + a.facts.map(([v, l], i) => '<div class="fact" style="animation-delay:' + i * 80 + 'ms"><b>' + esc(v) + '</b><span>' + esc(l) + '</span></div>').join('') + '</div>' : ''}
         <div id="widgets"></div>
         <div class="wsecs">${a.sections.map(([h, ps], i) => '<section class="card wsec"><h3><i>' + String(i + 1).padStart(2, '0') + '</i>' + esc(h) + '</h3>' + ps.map(p => '<p>' + esc(p) + '</p>').join('') + '</section>').join('')}</div>

@@ -1,4 +1,4 @@
-import { $, esc, IMG, mapHTML, drawRoutes, drawPins, markPlace, markRoute, personChip } from '../ui.js';
+import { $, esc, IMG, mapHTML, drawRoutes, drawPins, markPlace, markRoute, personChip, canonSources } from '../ui.js';
 import { placeById } from '../../Данные/places.js';
 import { ROUTES } from '../../Данные/routes.js';
 import { PEOPLE } from '../../Данные/people.js';
@@ -23,6 +23,7 @@ export function render(root, [id]){
         ${p.parts && p.parts.length ? '<h2>Что там есть</h2><div class="parts">' + p.parts.map(([h, t]) => '<div class="card part"><b>' + esc(h) + '</b><p>' + esc(t) + '</p></div>').join('') + '</div>' : ''}
         ${here.length ? '<h2>Кто здесь</h2><div>' + here.map(x => personChip(x.id)).join('') + '</div>' : ''}
         ${facs.length ? '<h2>Кто держит</h2><div>' + facs.map(f => '<a class="chip" href="#/faction/' + f.id + '">' + esc(f.name) + '</a>').join('') + '</div>' : ''}
+        ${canonSources('places', p.id)}
         <div class="pending">Подробная карта места ещё не нарисована.</div>
       </div>
     </div>

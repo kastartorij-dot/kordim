@@ -12,7 +12,8 @@ const GROUPS = [
 ];
 
 /* ключ блока для ссылки из поиска: у приложений в шапках нет id — берём заголовок */
-export const canonKey = (group, item) => group + '-' + String(item.id || item.title).toLowerCase().replace(/\s+/g, '-');
+import { canonKey } from '../canon-links.js';
+export { canonKey };
 
 const STATUS = {
   'канон': { label: 'канон', c: 'var(--sage)' },

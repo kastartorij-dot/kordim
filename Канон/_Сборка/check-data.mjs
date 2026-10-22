@@ -19,6 +19,9 @@ const { FACTIONS, RELATIONS } = await load('factions.js');
 const { EVENTS, LINES } = await load('events.js');
 const { ROUTES } = await load('routes.js');
 const { CHARGED } = await load('questions.js');
+const { ARTICLES } = await load('articles.js');
+const { CANON } = await load('canon.js');
+const { SOURCES } = await load('sources.js');
 
 const peopleIds = new Set(PEOPLE.map(p => p.id));
 const placeIds = new Set(PLACES.map(p => p.id));
@@ -71,6 +74,28 @@ const chargedCanon = (chargedMd.match(/^\d+\.\s/gm) || []).length;
 if (chargedCanon !== CHARGED.length) {
   console.log(`⚠ questions.js: «Заряжено» ${CHARGED.length} пунктов, в Канон/Приложения/что-заряжено.md — ${chargedCanon}`);
   problems++;
+}
+
+// Любая карточка ведёт к существующим блокам; опечатка в привязке не скрывается в интерфейсе.
+const sourceTargets = {people:PEOPLE, places:PLACES, factions:FACTIONS, articles:ARTICLES};
+for (const [kind, entries] of Object.entries(SOURCES)) {
+  if (!sourceTargets[kind]) { bad('sources.js', 'раздел справочника', kind); continue; }
+  const ids = new Set(sourceTargets[kind].map(x => x.id));
+  for (const [id, refs] of Object.entries(entries)) {
+    if (!ids.has(id)) bad('sources.js: ' + kind, 'карточка', id);
+    const seen = new Set();
+    for (const [group, key] of refs) {
+      if (!(CANON[group] || []).some(x => String(x.id ?? x.title) === String(key))) bad('sources.js: ' + kind + '/' + id, 'блок канона', group + '/' + key);
+      const ref = group + '/' + key;
+      if (seen.has(ref)) { console.log('⚠ sources.js: повтор источника ' + kind + '/' + id + ': ' + ref); problems++; }
+      seen.add(ref);
+    }
+  }
+}
+for (const [kind, entries] of Object.entries(sourceTargets)) {
+  for (const item of entries) {
+    if (!SOURCES[kind]?.[item.id]?.length) { console.log('⚠ sources.js: нет источников для ' + kind + '/' + item.id); problems++; }
+  }
 }
 
 console.log(problems ? `\nНайдено ${problems} проблем.` : '\nOK: все перекрёстные ссылки в данных вики целы.');

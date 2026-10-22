@@ -2,7 +2,7 @@
    Базовый костяк один на все фракции, но каждая несёт archetype — official/crime/wild —
    и получает лёгкий грим по CSS (см. app.css, .arche-*). Одна фракция может нести
    special:'herb' — тогда рисуется отдельная штучная страница (сейчас Свинцовые клинки). */
-import { $, $$, esc, IMG, mapHTML, drawRoutes, drawPins, markPlace, placeChip, plural } from '../ui.js';
+import { $, $$, esc, IMG, mapHTML, drawRoutes, drawPins, markPlace, placeChip, plural, canonSources } from '../ui.js';
 import { factionById, relationsOf, REL_LABEL } from '../../Данные/factions.js';
 import { personById } from '../../Данные/people.js';
 import { placeById } from '../../Данные/places.js';
@@ -49,6 +49,7 @@ function renderDoc(root, f, { people, rels, evs, seat }){
     <div class="fgrid">
       <div>
         <div class="prose">${f.text.map(t => '<p>' + esc(t) + '</p>').join('')}</div>
+        ${canonSources('factions', f.id)}
         ${f.hooks && f.hooks.length ? '<section class="card fhooks"><h3>КРЮЧКИ</h3><ul>' + f.hooks.map(h => '<li>' + esc(h) + '</li>').join('') + '</ul></section>' : ''}
         <section class="card fevs"><h3>В ХРОНИКЕ <small>${evs.length}</small></h3>
           ${evs.length ? evs.map(([e, i]) => '<a class="fev" href="#/chronicle/' + i + '"><span>' + esc(e.y) + '</span><div><b>' + esc(e.h) + '.</b> ' + esc(e.t) + '</div></a>').join('') : '<p class="locked" style="padding:0 16px 14px">Событий с людьми этой фракции пока нет.</p>'}
@@ -88,6 +89,7 @@ function renderHerb(root, f, { people, rels, evs, seat }){
     <div class="fherb-stats">${f.guarantee ? '<div><b>' + esc(f.guarantee) + '</b>ручается</div>' : ''}${f.size ? '<div><b>' + esc(f.size.split(',')[0]) + '</b>сила</div>' : ''}<div><b>${rels.length}</b>${plural(rels.length, ['связь', 'связи', 'связей'])}</div></div>
     ${rels.length ? `<div class="fherb-orbit"><div class="core">${esc(f.name)}</div>${orbit}</div>` : ''}
     <div class="fherb-prose">${f.text.map(t => '<p>' + esc(t) + '</p>').join('')}</div>
+    ${canonSources('factions', f.id)}
     ${f.hooks && f.hooks.length ? '<div class="fherb-hooks">' + f.hooks.map(h => '<div>' + esc(h) + '</div>').join('') + '</div>' : ''}
     ${people.length ? '<div class="fherb-folk">' + people.map(p => '<a href="#/person/' + p.id + '"><img class="av" src="' + IMG + (p.img || 'Лица/' + p.id + '.jpg') + '" alt="" data-initial="' + esc(p.name[0]) + '" onerror="kordimNoImg(this)">' + esc(p.name) + '</a>').join('') + '</div>' : ''}
     <section class="card c-map"><div class="mhead"><b style="font-weight:500">${seat ? 'Где сидят' : 'Без одного места'}</b><a href="#/map">общая карта</a></div>

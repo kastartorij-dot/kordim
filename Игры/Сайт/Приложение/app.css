@@ -703,3 +703,11 @@ a.fac::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;backg
   .game .gwrap {padding:8px;}
   .game .gwrap iframe {border-width:1px; box-shadow:none;}
 }
+
+/* Сверка карточки с каноном: свёрнуто по умолчанию, ссылки доступны с клавиатуры. */
+.canon-sources{margin:16px 0;padding:12px 16px;border:1px solid var(--line);border-radius:4px;font:400 13px/1.5 var(--body);overflow-wrap:anywhere}
+.canon-sources summary{cursor:pointer;color:var(--ochre)}
+.canon-sources ul{margin:10px 0 0;padding-left:18px}
+.canon-sources li+li{margin-top:6px}
+.canon-sources a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+.canon-sources a:focus-visible,.canon-sources summary:focus-visible{outline:2px solid var(--ochre);outline-offset:3px}

@@ -87,7 +87,7 @@ route();
 
 /* ─── поиск Ctrl+K ─── */
 const INDEX = [
-  ...PEOPLE.map(p => ({t:p.name + (p.alias ? ' ' + p.alias : ''), k:'человек', h:'#/person/' + p.id})),
+  ...PEOPLE.map(p => ({t:p.name + (p.alias ? ' ' + p.alias : ''), k:p.frozen ? 'человек · заморожен' : 'человек', h:'#/person/' + p.id})),
   ...PLACES.map(p => ({t:p.name, k:'место', h:'#/place/' + p.id})),
   ...FACTIONS.map(f => ({t:f.name, k:'фракция', h:'#/faction/' + f.id})),
   ...ARTICLES.map(a => ({t:a.title, k:'мир', h:'#/world/' + a.id})),
