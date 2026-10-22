@@ -74,13 +74,24 @@ export function markPlace(map, id){
 
 export const SPEED = {horse:37, foot:22, cart:15};
 export const MODE_LABEL = {horse:'верхом', foot:'пешком', cart:'обозом'};
+/* Для летнего, осеннего и зимнего режимов карты; весенняя распутица здесь не моделируется. */
+export const groundFactor = season => season === 'summer' ? 1 : 2;
+export function dayRangeFor(r, season, mode){
+  const estimate = r.miles / SPEED[mode], base = r.days?.[mode] || [estimate, estimate];
+  const factor = r.ground ? groundFactor(season) : 1;
+  return base.map(d => d * factor);
+}
 export function daysFor(r, season, mode){
-  let d = r.miles / SPEED[mode];
-  if (r.ground && season !== 'summer') d *= season === 'winter' ? 2.2 : 1.6;
-  return d;
+  const [lo, hi] = dayRangeFor(r, season, mode);
+  return (lo + hi) / 2;
+}
+export function daysLabel(r, season, mode){
+  const [lo, hi] = dayRangeFor(r, season, mode);
+  return '≈ ' + fmt(lo) + (lo === hi ? '' : '–' + fmt(hi));
 }
 export function closedFor(r, season, mode){
-  return season === 'winter' && ((r.winterClosed || []).includes(mode) || r.k === 'water' || (r.k === 'rough' && mode === 'cart'));
+  /* k — оформление линии, не способ движения; остановка барж не закрывает сухопутный путь. */
+  return season === 'winter' && (r.winterClosed || []).includes(mode);
 }
 export const fmt = d => d.toFixed(1).replace('.0', '').replace('.', ',');
 /* склонение по числу: plural(2, ['связь','связи','связей']) → 'связи' */

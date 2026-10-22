@@ -1,5 +1,5 @@
 /* Страница персонажа. Полный профиль — раскладка «Панели», иначе короткая карточка. */
-import { $, $$, esc, IMG, mapHTML, drawRoutes, drawPins, markPlace, markRoute, daysFor, closedFor, travel, pixelate, mountChat, countUp, personChip, placeChip, MODE_LABEL, canonSources } from '../ui.js';
+import { $, $$, esc, IMG, mapHTML, drawRoutes, drawPins, markPlace, markRoute, daysFor, daysLabel, closedFor, travel, pixelate, mountChat, countUp, personChip, placeChip, MODE_LABEL, canonSources } from '../ui.js';
 import { personById } from '../../Данные/people.js';
 import { placeById } from '../../Данные/places.js';
 import { ROUTES, routeById } from '../../Данные/routes.js';
@@ -115,7 +115,7 @@ function full(root, p){
       foot.innerHTML = '<div class="row"><select id="rsel" aria-label="Тракт">' + ROUTES.map((x, i) => '<option value="' + i + '"' + (i === trip.route ? ' selected' : '') + '>' + esc(x.n + ' · ' + x.e) + '</option>').join('') + '</select>' +
         '<select id="msel" aria-label="Как">' + Object.entries(MODE_LABEL).map(([k, l]) => '<option value="' + k + '"' + (k === trip.mode ? ' selected' : '') + '>' + l + '</option>').join('') + '</select>' +
         '<button class="go" id="go"' + (c ? ' disabled' : '') + '>В путь</button></div>' +
-        '<div class="nums"><span id="dn">0</span> / ' + Math.round(d) + '<small>дней осенью</small></div><div class="evline" id="ev">' + esc(r.note) + '</div>';
+        '<div class="nums"><span id="dn">0</span> / ' + daysLabel(r, 'autumn', trip.mode) + '<small>дней осенью</small></div><div class="evline" id="ev">' + esc(r.note) + ' Срок с сезонной поправкой; при отсутствии срока в каноне — оценка по длине.</div>';
       $('#rsel', root).onchange = e => { trip.route = +e.target.value; paintMap(); };
       $('#msel', root).onchange = e => { trip.mode = e.target.value; paintMap(); };
       $('#go', root).onclick = () => { stopTrip && stopTrip(); stopTrip = travel(r, {token:$('#token', root), days:d,

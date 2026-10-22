@@ -1,5 +1,5 @@
 /* Общая карта: сезоны, ночь, способ пути, «в путь», панорама и масштаб. */
-import { $, $$, esc, mapHTML, drawRoutes, drawPins, markRoute, daysFor, closedFor, travel, fmt, MODE_LABEL } from '../ui.js';
+import { $, $$, esc, mapHTML, drawRoutes, drawPins, markRoute, daysFor, daysLabel, closedFor, travel, MODE_LABEL, canonSources } from '../ui.js';
 import { ROUTES } from '../../Данные/routes.js';
 import { placeById } from '../../Данные/places.js';
 
@@ -61,10 +61,10 @@ export function render(root){
     const r = ROUTES[S.route], c = closedFor(r, S.season, S.mode), d = daysFor(r, S.season, S.mode);
     const a = placeById(r.from), b = placeById(r.to);
     $('#card', root).innerHTML = '<h2>' + esc(r.n) + '</h2><div class="ends"><a href="#/place/' + a.id + '">' + esc(a.name) + '</a> — <a href="#/place/' + b.id + '">' + esc(b.name) + '</a> · ~' + r.miles + ' миль · ' + MODE_LABEL[S.mode] + '</div>' +
-      '<div class="bignums"><div>' + (c ? '—' : fmt(d)) + '<small>' + (c ? 'закрыто' : 'дней') + '</small></div><div>' + (c ? '—' : Math.round(d) * 5) + '<small>грошей в пути</small></div><div id="dn">0<small>день</small></div></div>' +
+      '<div class="bignums"><div>' + (c ? '—' : daysLabel(r, S.season, S.mode)) + '<small>' + (c ? 'закрыто' : 'дней') + '</small></div><div>' + (c ? '—' : Math.ceil(d) * 5) + '<small>при 5 грошах в день</small></div><div id="dn">0<small>день</small></div></div>' +
       '<button class="go" id="go"' + (c ? ' disabled' : '') + '>▶ В путь</button>' +
-      '<div class="evline' + (c ? ' bad' : '') + '" style="margin-top:10px">' + esc(c ? r.winter : r.note) + '</div>' +
-      '<div class="evline" style="margin-top:6px">Держит: ' + esc(r.holder) + '</div><div class="feed" id="feed"></div>';
+      '<div class="evline' + (c ? ' bad' : '') + '" style="margin-top:10px">' + esc(c ? r.winter : r.note + (S.season === 'winter' && r.k === 'water' ? ' ' + r.winter : '')) + '</div>' +
+      '<div class="evline" style="margin-top:6px">Держит: ' + esc(r.holder) + '</div><div class="evline">Срок дан с сезонной поправкой; где нет отдельного срока в каноне — оценён по длине. Оговорки маршрутов — в связанных записях.</div>' + canonSources('articles', 'roads') + '<div class="feed" id="feed"></div>';
     $('#go', root).onclick = () => { const feed = $('#feed', root); feed.innerHTML = '';
       stop = travel(r, {token:$('#token', root), days:d, speed:S.mode === 'cart' ? 120 : 80,
         onDay:k => { const n = $('#dn', root); if (n) n.firstChild.textContent = k; },

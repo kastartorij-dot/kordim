@@ -61,6 +61,15 @@ EVENTS.forEach((e, i) => {
 ROUTES.forEach(r => {
   if (!placeIds.has(r.from)) bad(`routes.js: ${r.id}`, 'место (from)', r.from);
   if (!placeIds.has(r.to)) bad(`routes.js: ${r.id}`, 'место (to)', r.to);
+  const modes = ['horse', 'foot', 'cart'];
+  for (const mode of r.winterClosed || []) {
+    if (!modes.includes(mode)) { console.log(`⚠ routes.js: ${r.id}: неизвестный способ в winterClosed: ${mode}`); problems++; }
+  }
+  for (const [mode, range] of Object.entries(r.days || {})) {
+    if (!modes.includes(mode) || !Array.isArray(range) || range.length !== 2 || !range.every(d => Number.isFinite(d) && d > 0) || range[0] > range[1]) {
+      console.log(`⚠ routes.js: ${r.id}: неверный диапазон дней для ${mode}`); problems++;
+    }
+  }
 });
 
 CHARGED.forEach(([title, , ppl], i) => {

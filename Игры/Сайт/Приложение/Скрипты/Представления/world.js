@@ -1,5 +1,5 @@
 /* Мир: статьи с шапкой, крупными цифрами, карточками разделов и интерактивными вставками. */
-import { $, $$, esc, IMG, SPEED, MODE_LABEL, plural, canonSources } from '../ui.js';
+import { $, $$, esc, IMG, SPEED, groundFactor, MODE_LABEL, plural, canonSources } from '../ui.js';
 import { ARTICLES } from '../../Данные/articles.js';
 import { GOODS } from '../../Данные/goods.js';
 import { icon } from '../icons.js';
@@ -89,14 +89,14 @@ function coins(box){
 /* сколько идти */
 function travelCalc(box){
   box.className = 'card widget';
-  box.innerHTML = '<h3>СКОЛЬКО ИДТИ</h3><div class="row"><input type="range" id="mi" min="10" max="300" value="111" aria-label="Мили"><b id="mil"></b></div>' +
+  box.innerHTML = '<h3>СКОЛЬКО ИДТИ</h3><p class="pending">Приблизительно для проходимой дороги. Зимние запреты отдельных трактов проверяйте на карте; сроки конкретных маршрутов — в записи 15.</p><div class="row"><input type="range" id="mi" min="10" max="300" value="111" aria-label="Мили"><b id="mil"></b></div>' +
     '<div class="row" style="margin-top:10px">' + seg('m', Object.entries(MODE_LABEL), 'horse') + seg('s', [['summer', 'лето'], ['autumn', 'осень'], ['winter', 'зима']], 'autumn') + '</div><div class="wout" id="out"></div>';
   let mode = 'horse', season = 'autumn'; const mi = $('#mi', box), out = $('#out', box);
   const paint = () => {
-    const miles = +mi.value, f = season === 'summer' ? 1 : season === 'winter' ? 2.2 : 1.6;
+    const miles = +mi.value, f = groundFactor(season);
     const road = miles / SPEED[mode], ground = road * f;
     $('#mil', box).textContent = miles + ' миль' + (miles === 111 ? ' — Столица → Врата' : miles === 148 ? ' — лесной тракт' : '');
-    out.innerHTML = [[n1(road), 'дней по мощёной дороге'], [n1(ground), 'дней по грунту в этот сезон'], [Math.ceil(ground) * 5 + ' гр.', 'ночлег и корм, если в общей комнате']]
+    out.innerHTML = [['≈ ' + n1(road), 'дней по хорошей дороге'], ['≈ ' + n1(ground), 'дней по грунту в этот сезон'], [Math.ceil(ground) * 5 + ' гр.', 'пример бюджета по 5 грошей в день']]
       .map(([b, s]) => '<div><b>' + b + '</b><small>' + s + '</small></div>').join('');
   };
   mi.oninput = paint; bindSeg(box, 'm', v => { mode = v; paint(); }); bindSeg(box, 's', v => { season = v; paint(); }); paint();
