@@ -77,10 +77,11 @@ if (chargedCanon !== CHARGED.length) {
 }
 
 // Любая карточка ведёт к существующим блокам; опечатка в привязке не скрывается в интерфейсе.
-const sourceTargets = {people:PEOPLE, places:PLACES, factions:FACTIONS, articles:ARTICLES};
+const sourceTargets = {people:PEOPLE, places:PLACES, factions:FACTIONS, articles:ARTICLES, events:EVENTS};
+const sourceId = (kind, item) => kind === 'events' ? item.slug : item.id;
 for (const [kind, entries] of Object.entries(SOURCES)) {
   if (!sourceTargets[kind]) { bad('sources.js', 'раздел справочника', kind); continue; }
-  const ids = new Set(sourceTargets[kind].map(x => x.id));
+  const ids = new Set(sourceTargets[kind].map(x => sourceId(kind, x)));
   for (const [id, refs] of Object.entries(entries)) {
     if (!ids.has(id)) bad('sources.js: ' + kind, 'карточка', id);
     const seen = new Set();
@@ -94,7 +95,7 @@ for (const [kind, entries] of Object.entries(SOURCES)) {
 }
 for (const [kind, entries] of Object.entries(sourceTargets)) {
   for (const item of entries) {
-    if (!SOURCES[kind]?.[item.id]?.length) { console.log('⚠ sources.js: нет источников для ' + kind + '/' + item.id); problems++; }
+    if (!SOURCES[kind]?.[sourceId(kind, item)]?.length) { console.log('⚠ sources.js: нет источников для ' + kind + '/' + sourceId(kind, item)); problems++; }
   }
 }
 

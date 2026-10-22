@@ -30,8 +30,10 @@ const ROWS = [
   { t: 'Места без вида', of: PLACES.length, files: PLACES.map(pl => [pl.img, placeChip(pl.id)]) },
   { t: 'Места без пина на карте', of: PLACES.length,
     items: () => PLACES.filter(pl => pl.x == null || pl.y == null).map(pl => placeChip(pl.id)) },
-  { t: 'Ключевые события без сцены', hint: 'проза не написана', of: keyEvents.length,
+  { t: 'Ключевые события без сцены', hint: 'файла прозы пока нет', of: keyEvents.length,
     items: () => keyEvents.filter(e => !scened.has(e.slug)).map(evChip) },
+  { t: 'События с черновой прозой', hint: 'текст есть, авторская приёмка не завершена', of: keyEvents.length,
+    items: () => keyEvents.filter(e => SCENES.some(s => s.event === e.slug && s.status !== 'готово')).map(evChip) },
   { t: 'Ключевые события без иллюстрации', of: keyEvents.length,
     files: keyEvents.map(e => ['События/' + e.slug + '.jpg', evChip(e)]) },
   { t: 'Статьи «Мир» без обложки', of: ARTICLES.length,
@@ -56,7 +58,7 @@ function rowHTML(r, items) {
 export function render(root){
   root.innerHTML = `<div class="page" data-title="Вопросы">
     <div class="eyebrow">работа над миром</div><h1 class="h1">Вопросы</h1>
-    <p class="lead">Заряженное — крючки, которые уже лежат в сюжете. Открытое — то, что автор ещё не решил. Ниже — где мир пока молчит.</p>
+    <p class="lead">Заряженное — крючки, которые уже лежат в сюжете. Открытое — то, что автор ещё не решил. Ниже — где мир пока молчит. Это обзор материалов: не каждому человеку нужен полный профиль, а каждому событию — сцена или иллюстрация.</p>
     <div class="qgrid">
       <section class="card"><h3>ЗАРЯЖЕНО <small>${CHARGED.length}</small></h3>${CHARGED.map(([t, d, ppl]) => '<div class="q"><b>' + esc(t) + '</b><p>' + esc(d) + '</p><div style="margin-top:6px">' + ppl.map(personChip).join('') + '</div></div>').join('')}</section>
       <section class="card"><h3>ОТКРЫТО <small>${OPEN.length}</small></h3>${OPEN.map(([t, d]) => '<div class="q"><b>' + esc(t) + '</b><p>' + esc(d) + '</p></div>').join('')}</section>

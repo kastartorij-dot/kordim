@@ -87,10 +87,10 @@ route();
 
 /* ─── поиск Ctrl+K ─── */
 const INDEX = [
-  ...PEOPLE.map(p => ({t:p.name + (p.alias ? ' ' + p.alias : ''), k:p.frozen ? 'человек · заморожен' : 'человек', h:'#/person/' + p.id})),
-  ...PLACES.map(p => ({t:p.name, k:'место', h:'#/place/' + p.id})),
-  ...FACTIONS.map(f => ({t:f.name, k:'фракция', h:'#/faction/' + f.id})),
-  ...ARTICLES.map(a => ({t:a.title, k:'мир', h:'#/world/' + a.id})),
+  ...PEOPLE.map(p => ({t:p.name + (p.alias ? ' ' + p.alias : ''), s:[p.name,p.alias,p.role,p.lead,...(p.bio || []),...(p.facts || []),...(p.profile?.desc || []).flatMap(x => [x.h,...x.p])].join(' '), k:p.frozen ? 'человек · заморожен' : 'человек', h:'#/person/' + p.id})),
+  ...PLACES.map(p => ({t:p.name, s:[p.name,p.kind,p.lead,p.senses,...(p.text || []),...(p.parts || []).flat()].join(' '), k:'место', h:'#/place/' + p.id})),
+  ...FACTIONS.map(f => ({t:f.name, s:[f.name,f.kind,...(f.text || []),...(f.hooks || [])].join(' '), k:'фракция', h:'#/faction/' + f.id})),
+  ...ARTICLES.map(a => ({t:a.title, s:[a.title,a.lead,...a.sections.flatMap(([h, ps]) => [h,...ps])].join(' '), k:'мир', h:'#/world/' + a.id})),
   ...EVENTS.map((e, i) => ({t:e.y + ' — ' + e.h, s:e.y + ' ' + e.h + ' ' + e.t, k:'хроника', h:'#/chronicle/' + i})),
   ...SCENES.map(sc => ({t:sc.title, s:sc.title + ' ' + (LINES[sc.arc] || ''), k:'арка', h:'#/scenes/' + sc.arc})),
   /* весь канон, не только лорбук: герои, правила ведения и приложения искались мимо */

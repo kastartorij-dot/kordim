@@ -67,7 +67,7 @@ function full(root, p){
     <section class="card c-stats"><h3>СОСТОЯНИЕ <small>к этому году</small></h3><div class="in" id="stats"></div></section>
     <section class="card c-map" id="cmap">
       <div class="mhead">
-        <div class="seg" role="group" aria-label="Режим карты"><button data-mm="path" aria-pressed="true">Путь героя</button><button data-mm="trip" aria-pressed="false">Как добраться</button></div>
+        <div class="seg" role="group" aria-label="Режим карты"><button data-mm="path" aria-pressed="true">Место в этот год</button><button data-mm="trip" aria-pressed="false">Как добраться</button></div>
         <a href="#/map">на общую карту</a>
       </div>
       <div class="map" id="map">${mapHTML('<div class="token" id="token" hidden>🐴</div>')}</div>
@@ -107,7 +107,7 @@ function full(root, p){
       const ri = s.route ? ROUTES.indexOf(routeById(s.route)) : -1;
       markRoute(svg, ri);
       const pl = placeById(s.place);
-      foot.innerHTML = '<b>' + esc(s.where) + '</b>' + (ri >= 0 ? '<div class="evline">Путь года: ' + esc(ROUTES[ri].n) + ', ' + esc(ROUTES[ri].e) + '.</div>' : '<div class="evline">' + (pl ? placeChip(pl.id) : '') + '</div>');
+      foot.innerHTML = '<b>' + esc(s.where) + '</b>' + (ri >= 0 ? '<div class="evline">Указанный маршрут: ' + esc(ROUTES[ri].n) + ', ' + esc(ROUTES[ri].e) + '.</div>' : '<div class="evline">' + (pl ? placeChip(pl.id) : '') + '</div>');
     } else {
       map.classList.remove('quiet');
       markRoute(svg, trip.route, 'autumn', trip.mode);

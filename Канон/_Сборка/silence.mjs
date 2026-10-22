@@ -14,7 +14,8 @@ const IMG = path.join(ROOT, 'Игры', 'Сайт', 'Изображения');
 const load = rel => import(pathToFileURL(path.join(DATA, rel)).href);
 const img = rel => rel && fs.existsSync(path.join(IMG, rel));
 
-const { PEOPLE } = await load('people.js');
+const { PEOPLE: ALL_PEOPLE } = await load('people.js');
+const PEOPLE = ALL_PEOPLE.filter(p => !p.frozen);
 const { PLACES } = await load('places.js');
 const { FACTIONS } = await load('factions.js');
 const { EVENTS } = await load('events.js');
@@ -53,10 +54,13 @@ const scened = new Set(SCENES.map(s => s.event));
 section('Ключевые события без написанной сцены',
   key.filter(e => !scened.has(e.slug)).map(e => e.h), key.length);
 
+section('Ключевые события, у которых пока только черновая проза',
+  key.filter(e => SCENES.some(s => s.event === e.slug && s.status !== 'готово')).map(e => e.h), key.length);
+
 section('Статьи «Мир» без обложки (Изображения/Мир/<id>.jpg)',
   ARTICLES.filter(a => !img('Мир/' + a.id + '.jpg')).map(a => a.title), ARTICLES.length);
 
 section('Фракции без главы в реестре людей',
   FACTIONS.filter(f => !(f.head || []).length).map(f => f.name), FACTIONS.length);
 
-console.log('\n(Хада заморожен 15.09 — его пропуски ожидаемы.)');
+console.log('\nЗамороженные персонажи исключены из подсчёта. Списки показывают объём материалов, а не обязательство дописать каждому профиль, сцену или картинку.');
