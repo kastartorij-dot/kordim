@@ -79,7 +79,7 @@ export function daysFor(r, season, mode){
   return d;
 }
 export function closedFor(r, season, mode){
-  return season === 'winter' && (r.k === 'water' || (r.k === 'rough' && mode === 'cart'));
+  return season === 'winter' && ((r.winterClosed || []).includes(mode) || r.k === 'water' || (r.k === 'rough' && mode === 'cart'));
 }
 export const fmt = d => d.toFixed(1).replace('.0', '').replace('.', ',');
 /* склонение по числу: plural(2, ['связь','связи','связей']) → 'связи' */

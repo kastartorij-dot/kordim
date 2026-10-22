@@ -64,6 +64,15 @@ export const SCENES = ${JSON.stringify(scenes, null, 2)};
 export const sceneById = id => SCENES.find(s => s.id === id);
 export const scenesOf = arc => SCENES.filter(s => s.arc === arc).sort((a, b) => a.s - b.s);
 `;
-fs.writeFileSync(OUT, out);
-console.log(`OK: ${scenes.length} сцен(ы) → Игры/Сайт/Приложение/Данные/scenes.js`);
+if (process.argv.includes('--check')) {
+  const normalize = s => s.replace(/\r\n/g, '\n');
+  if (!fs.existsSync(OUT) || normalize(fs.readFileSync(OUT, 'utf8')) !== normalize(out)) {
+    console.error('Проза справочника устарела. Запустите node Канон/_Сборка/export-scenes.mjs');
+    process.exit(1);
+  }
+  console.log('OK: проза справочника совпадает с исходниками.');
+} else {
+  fs.writeFileSync(OUT, out);
+  console.log(`OK: ${scenes.length} сцен(ы) → Игры/Сайт/Приложение/Данные/scenes.js`);
+}
 for (const s of scenes) console.log(`  ${s.id} · арка «${s.arc}» · ${s.words} слов · ${s.status}`);

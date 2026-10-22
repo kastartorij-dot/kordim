@@ -25,6 +25,12 @@ jobs:
       - name: В блоках нет снятых формулировок
         run: node Канон/_Сборка/validate.mjs
 
+      - name: Канон справочника совпадает с блоками
+        run: node Канон/_Сборка/export-wiki.mjs --check
+
+      - name: Проза справочника совпадает с исходниками
+        run: node Канон/_Сборка/export-scenes.mjs --check
+
       - name: В данных вики нет битых ссылок
         run: node Канон/_Сборка/check-data.mjs
 

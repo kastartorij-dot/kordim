@@ -86,9 +86,20 @@ for (const part of manifest.части) {
   for (const rel of part.блоки) target.push(toItem(rel));
 }
 
-fs.mkdirSync(path.dirname(OUT), { recursive: true });
 const header = '// Автосборка из Канон/Герои, Канон/Правила, Канон/Записи, Канон/Приложения.\n'
   + '// Не редактировать руками — правьте блоки и запускайте node Канон/_Сборка/export-wiki.mjs.\n';
-fs.writeFileSync(OUT, header + `export const CANON = ${JSON.stringify(out, null, 2)};\n`, 'utf8');
-console.log(`Записано: ${OUT}`);
+const generated = header + `export const CANON = ${JSON.stringify(out, null, 2)};\n`;
+if (process.argv.includes('--check')) {
+  // Дата сборки не меняет фактов; переносы Windows и Linux могут различаться.
+  const normalize = s => s.replace(/\r\n/g, '\n').replace(/("собрано": ")[^"]+(")/, '$1DATE$2');
+  if (!fs.existsSync(OUT) || normalize(fs.readFileSync(OUT, 'utf8')) !== normalize(generated)) {
+    console.error('Канон справочника устарел. Запустите node Канон/_Сборка/export-wiki.mjs');
+    process.exit(1);
+  }
+  console.log('OK: канон справочника совпадает с блоками.');
+} else {
+  fs.mkdirSync(path.dirname(OUT), { recursive: true });
+  fs.writeFileSync(OUT, generated, 'utf8');
+  console.log(`Записано: ${OUT}`);
+}
 console.log(`Герои ${out.герои.length}, правила ${out.правила.length}, записи ${out.записи.length}, приложения ${out.приложения.length}`);

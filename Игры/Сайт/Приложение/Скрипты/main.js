@@ -95,7 +95,7 @@ const INDEX = [
   ...SCENES.map(sc => ({t:sc.title, s:sc.title + ' ' + (LINES[sc.arc] || ''), k:'арка', h:'#/scenes/' + sc.arc})),
   /* весь канон, не только лорбук: герои, правила ведения и приложения искались мимо */
   ...['герои', 'правила', 'записи', 'приложения'].flatMap(g => CANON[g].map(r =>
-    ({t:r.title, s:r.title + ' ' + (r.ключи || []).join(' '), k:'канон', h:'#/canon/' + encodeURIComponent(canon.canonKey(g, r))})))
+    ({t:r.title, s:r.title + ' ' + (r.ключи || []).join(' ') + ' ' + r.текст, k:'канон', h:'#/canon/' + encodeURIComponent(canon.canonKey(g, r))})))
 ];
 const pal = $('#pal'), inp = $('#palIn'), res = $('#palRes');
 let hits = [], at = 0;
