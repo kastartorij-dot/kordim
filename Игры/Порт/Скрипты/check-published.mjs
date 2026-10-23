@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { недостающиеСцены } from './сцены-близости.mjs';
 
 const source = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const repository = resolve(source, '..', '..');
@@ -45,6 +46,12 @@ for (const entry of ['chronicles.css', 'chronicles.js', 'ai-models.js', 'ai.js',
       if (await digest(join(storiesDir, file)) !== await digest(join(storiesOutputDir, file))) different.push('Генератор_Историй/' + file);
     } catch { missing.push('Истории/' + file); }
   }
+}
+
+const безФайла = await недостающиеСцены(source);
+if (безФайла.length) {
+  console.error('Нет файлов сцен близости в Сцены/Близость:', безФайла.map(з => `${з.сцена}.md (${з.место}/${з.комната})`).join(', '));
+  process.exitCode = 1;
 }
 
 if (missing.length || extra.length || different.length) {
