@@ -58,7 +58,7 @@ button:focus-visible, summary:focus-visible, select:focus-visible { outline: 2px
 p, h1, h2, h3, span, button { overflow-wrap: break-word; }
 h1 { font: 600 var(--т-титул)/1.05 var(--шрифт-титул); margin: 0; letter-spacing: .005em; }
 h2 { font: 500 26px/1.25 var(--шрифт-титул); margin: 0 0 12px; }
-h3 { font: 500 var(--т-мелко)/1.4 var(--шрифт-метка); letter-spacing: .12em; text-transform: lowercase; color: var(--свеча); margin: 0 0 10px; }
+h3 { font: 500 15px/1.4 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; color: var(--свеча); margin: 0 0 10px; }
 small { color: var(--тихо); }
 ::selection { background: var(--свеча); color: var(--чернила); }
 * { scrollbar-width: thin; scrollbar-color: var(--линия-ярко) transparent; }
@@ -66,7 +66,7 @@ small { color: var(--тихо); }
 .зн { width: 1em; height: 1em; flex: none; display: inline-block; vertical-align: -.12em; }
 .px, .mono { font-family: inherit; }
 .надзаголовок {
-  font: 500 var(--т-мелко)/1.3 var(--шрифт-метка); letter-spacing: .16em; text-transform: lowercase;
+  font: 500 15px/1.3 var(--шрифт-метка); letter-spacing: .12em; text-transform: lowercase;
   color: var(--свеча); margin-bottom: 8px;
 }
 .подсказка { color: var(--тихо); font-size: var(--т-мелко); line-height: 1.55; }
@@ -106,6 +106,7 @@ small { color: var(--тихо); }
 @keyframes дождь { from { background-position: 0 0; } to { background-position: -60px 260px; } }
 .з-виньетка {
   background:
+    radial-gradient(60% 45% at 0% 88%, rgba(4, 7, 9, .6), transparent 70%),
     radial-gradient(120% 90% at 35% 40%, transparent 45%, rgba(4, 7, 9, .7) 100%),
     linear-gradient(180deg, rgba(5, 8, 10, .55), transparent 18%, transparent 62%, rgba(5, 8, 10, .82));
 }
@@ -147,14 +148,28 @@ small { color: var(--тихо); }
 .b:active:not(:disabled) { transform: translateY(1px); }
 .b:disabled { color: var(--тихо); cursor: default; background: transparent; border-color: rgba(226, 198, 146, .08); }
 .b small { display: block; font-size: var(--т-мелко); }
-.b.sin, .b.on, .b.здесь {
-  border-color: #f2cf92; color: var(--чернила);
-  background: linear-gradient(180deg, #f0c77f, #cf9446); box-shadow: inset 0 1px 0 rgba(255, 245, 220, .55), 0 0 22px var(--свеча-тень);
+/* Главная кнопка — не золотой слиток, а гравированная табличка: двойная тонкая рамка
+   свечой, капитель, ромбы по краям; при наведении изнутри разгорается тёплый свет. */
+.b.sin, .b.здесь {
+  justify-content: center; gap: 14px; padding: 12px 24px; min-height: 48px;
+  color: var(--свеча); border: 1px solid rgba(231, 178, 99, .72);
+  background: radial-gradient(120% 140% at 50% 120%, rgba(231, 178, 99, .16), rgba(231, 178, 99, .03) 70%), rgba(8, 12, 14, .6);
+  box-shadow: inset 0 0 0 3px rgba(8, 12, 14, .92), inset 0 0 0 4px rgba(231, 178, 99, .3);
+  font: 600 16px/1.1 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase;
+  transition: background .25s, color .25s, border-color .25s, text-shadow .25s, box-shadow .25s;
 }
-.b.sin:hover:not(:disabled), .b.on:hover:not(:disabled) { background: linear-gradient(180deg, #f6d394, #d99d4f); border-color: #f8deae; }
-.b.sin small, .b.on small { color: rgba(26, 19, 9, .7); }
-.b.sin:disabled { background: transparent; color: var(--тихо); box-shadow: none; border-color: var(--линия); }
-.b.ссылка { min-height: 36px; padding: 6px 12px; font: 500 var(--т-мелко)/1.2 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; color: var(--бумага-2); }
+.b.sin::before, .b.sin::after { content: ''; width: 5px; height: 5px; flex: none; background: currentColor; transform: rotate(45deg); opacity: .75; }
+.b.sin:hover:not(:disabled) {
+  color: #ffe4b3; border-color: var(--свеча); text-shadow: 0 0 12px rgba(231, 178, 99, .55);
+  background: radial-gradient(120% 140% at 50% 120%, rgba(231, 178, 99, .32), rgba(231, 178, 99, .06) 70%), rgba(8, 12, 14, .6);
+  box-shadow: inset 0 0 0 3px rgba(8, 12, 14, .92), inset 0 0 0 4px rgba(231, 178, 99, .55), 0 0 24px rgba(231, 178, 99, .18);
+}
+.b.sin small { color: var(--бумага-2); font-family: var(--шрифт-текст); letter-spacing: 0; text-transform: none; }
+.b.sin:disabled { background: transparent; color: var(--тихо); box-shadow: none; border-color: var(--линия); text-shadow: none; }
+/* Выбранное в группе (тон разговора, вещь в хранилище) — тонкая рамка свечой, без заливки. */
+.b.on { color: var(--свеча); border-color: var(--свеча); background: rgba(231, 178, 99, .1); box-shadow: inset 0 0 0 1px rgba(231, 178, 99, .25); }
+.b.on small { color: var(--бумага-2); }
+.b.ссылка { min-height: 36px; padding: 6px 12px; font: 500 15px/1.2 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; color: var(--бумага-2); }
 
 /* Строка выбора — как пункт в журнале: без коробки, с меткой слева при наведении. */
 .строка, .действие-карточка, #acts .b, .начало, .меню-список .b, .смена-кнопки .b {
@@ -176,17 +191,17 @@ small { color: var(--тихо); }
   font: 400 var(--т-кнопка)/1.3 var(--шрифт-текст);
 }
 .hud-бренд { font: 600 27px/1 var(--шрифт-титул); margin-right: auto; white-space: nowrap; text-shadow: 0 2px 12px #000; }
-.hud-бренд small { display: block; margin-top: 5px; font: 500 12px/1 var(--шрифт-метка); letter-spacing: .18em; text-transform: lowercase; color: var(--свеча); }
+.hud-бренд small { display: block; margin-top: 5px; font: 500 13px/1 var(--шрифт-метка); letter-spacing: .18em; text-transform: lowercase; color: var(--свеча); }
 .hud-время { display: flex; align-items: center; gap: 14px; }
 #hud-день { font: 600 22px/1 var(--шрифт-титул); white-space: nowrap; }
 #hud-отрезок { display: flex; gap: 3px; }
 .отрезок {
   display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 52px; padding: 5px 6px 4px;
-  color: rgba(239, 227, 201, .32); font: 500 12px/1 var(--шрифт-метка); letter-spacing: .08em; text-transform: lowercase;
+  color: rgba(239, 227, 201, .62); font: 500 14px/1 var(--шрифт-метка); letter-spacing: .06em; text-transform: lowercase;
   border-bottom: 2px solid rgba(226, 198, 146, .12); transition: color .5s, border-color .5s;
 }
 .отрезок .зн { font-size: 18px; }
-.отрезок.прошёл { color: rgba(239, 227, 201, .5); }
+.отрезок.прошёл { color: rgba(239, 227, 201, .52); }
 .отрезок.сейчас { color: var(--свеча); border-bottom-color: var(--свеча); text-shadow: 0 0 14px var(--свеча-тень); }
 .отрезок.сейчас .зн { filter: drop-shadow(0 0 6px rgba(231, 178, 99, .6)); }
 #hud-тело { display: flex; gap: 6px; }
@@ -201,6 +216,7 @@ small { color: var(--тихо); }
 .мерило.сдвиг { animation: толчок .6s ease; }
 @keyframes толчок { 30% { transform: translateY(-4px) scale(1.12); } }
 .hud-контекст { display: flex; flex-direction: column; max-width: 200px; font-size: var(--т-мелко); line-height: 1.3; }
+#hud-погода { font-size: 14px; color: var(--бумага-2); }
 #hud-где { color: var(--бумага); }
 #hud-погода { display: flex; align-items: center; gap: 5px; }
 #hud-кошель {
@@ -217,8 +233,8 @@ small { color: var(--тихо); }
 .дельта.плюс { color: var(--трава); } .дельта.минус { color: var(--ржа); }
 @keyframes всплыть { from { opacity: 0; transform: translateY(-6px); } 15% { opacity: 1; transform: translateY(4px); } to { opacity: 0; transform: translateY(18px); } }
 #hud-кнопки { display: flex; gap: 6px; }
-#hud-кнопки .b { min-height: 38px; padding: 6px 12px; font: 500 var(--т-мелко)/1 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; background: rgba(6, 10, 12, .4); }
-#hud-кнопки small { margin-left: 6px; display: inline; opacity: .7; }
+#hud-кнопки .b { min-height: 38px; padding: 6px 12px; font: 500 15px/1 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; background: rgba(6, 10, 12, .4); }
+#hud-кнопки small { margin-left: 6px; display: inline; color: var(--бумага-2); }
 
 /* ── вести: короткие строки о том, что изменилось ── */
 #вести { position: fixed; z-index: 70; top: calc(var(--hud-height) + 6px); left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; width: min(560px, 92vw); }
@@ -243,13 +259,13 @@ small { color: var(--тихо); }
 #панель .b {
   flex: 0 1 128px; flex-direction: column; justify-content: center; gap: 3px; min-height: 0; padding: 4px 6px;
   border: 0; border-top: 2px solid transparent; border-radius: 0; background: transparent; box-shadow: none;
-  font: 500 13px/1 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; color: var(--бумага-2);
+  font: 500 15px/1 var(--шрифт-метка); letter-spacing: .08em; text-transform: lowercase; color: var(--бумага-2);
 }
 #панель .b .зн { font-size: 22px; transition: transform .2s; }
 #панель .b:hover:not(:disabled) { color: var(--бумага); background: linear-gradient(0deg, rgba(231, 178, 99, .1), transparent); }
 #панель .b:hover:not(:disabled) .зн { transform: translateY(-2px); }
 #панель .b.on { color: var(--свеча); border-top-color: var(--свеча); background: linear-gradient(0deg, rgba(231, 178, 99, .16), transparent); text-shadow: 0 0 12px var(--свеча-тень); }
-#панель .b:disabled { color: rgba(239, 227, 201, .22); }
+#панель .b:disabled { color: rgba(239, 227, 201, .4); }
 
 /* ── вход: появление строк ─────────────────────────────────────────── */
 @keyframes проявиться { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
@@ -322,14 +338,14 @@ ul.журнал li::marker { color: var(--свеча); }
 .карта-метка, .b.карта-метка {
   position: absolute; transform: translate(-50%, -50%); min-height: 0; padding: 6px 12px 7px; white-space: nowrap;
   background: rgba(10, 14, 16, .86); border: 1px solid rgba(226, 198, 146, .4); border-radius: 0; color: var(--бумага);
-  font: 500 14px/1.1 var(--шрифт-метка); letter-spacing: .06em; flex-direction: column; align-items: center; gap: 2px;
+  font: 500 15px/1.1 var(--шрифт-метка); letter-spacing: .04em; flex-direction: column; align-items: center; gap: 2px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, .55); transition: background .15s, color .15s, box-shadow .2s;
 }
 .b.карта-метка, .b.карта-метка:hover, .b.карта-метка:active, .b.карта-метка:focus-visible { transform: translate(-50%, -50%); }
 .карта-метка:hover:not(:disabled) { background: rgba(26, 30, 30, .95); border-color: var(--свеча); }
-.карта-метка small { font: italic 400 12px/1 var(--шрифт-текст); color: var(--свеча); letter-spacing: 0; }
-.карта-метка.выбрана { background: linear-gradient(180deg, #f0c77f, #cf9446); color: var(--чернила); border-color: #f8deae; box-shadow: 0 0 0 3px rgba(231, 178, 99, .25), 0 0 26px rgba(231, 178, 99, .5); }
-.карта-метка.выбрана small { color: rgba(26, 19, 9, .75); }
+.карта-метка small { font: italic 400 14px/1 var(--шрифт-текст); color: var(--свеча); letter-spacing: 0; }
+.карта-метка.выбрана { background: rgba(10, 14, 16, .94); color: var(--свеча); border-color: var(--свеча); box-shadow: inset 0 0 0 2px rgba(10, 14, 16, .95), inset 0 0 0 3px rgba(231, 178, 99, .45), 0 0 22px rgba(231, 178, 99, .45); text-shadow: 0 0 10px rgba(231, 178, 99, .5); }
+.карта-метка.выбрана small { color: var(--бумага-2); }
 .город-список { margin-top: 16px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 18px; }
 .город-список .b { border: 0; border-bottom: 1px solid rgba(226, 198, 146, .1); border-radius: 0; background: none; padding: 8px 4px; font-size: var(--т-мелко); display: block; }
 .город-список .b:hover { color: var(--свеча); background: none; }
@@ -338,7 +354,7 @@ ul.журнал li::marker { color: var(--свеча); }
 .город-карточка h2 { font-size: 36px; margin: 0 0 6px; }
 .карта-описание { color: var(--бумага-2); margin: 0 0 14px; font-style: italic; line-height: 1.5; }
 .город-карточка > .действие-цена { margin: 0 0 14px; color: var(--бумага-2); }
-#идти { width: 100%; justify-content: center; font: 600 17px/1 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; min-height: 50px; }
+#идти { width: 100%; min-height: 50px; }
 .места-карты { margin-top: 24px; }
 .места-карты h3 { margin: 0 0 6px; }
 .места-карты > div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 9px 0; border-bottom: 1px solid rgba(226, 198, 146, .09); font-size: var(--т-кнопка); }
@@ -356,23 +372,24 @@ ul.журнал li::marker { color: var(--свеча); }
 #bg, #tint, #scan { display: none; }
 #bgtag { display: none; }
 #полоса {
-  grid-column: 2; grid-row: 1; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
-  padding: 10px 14px; background: rgba(8, 12, 14, .7); border: 1px solid var(--линия);
+  grid-column: 2; grid-row: 1; display: flex; align-items: center; gap: 8px 14px; flex-wrap: nowrap; min-width: 0;
+  padding: 8px 12px; background: rgba(8, 12, 14, .7); border: 1px solid var(--линия);
   -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
 }
 .meter { display: flex; align-items: center; gap: 9px; }
-.meter .lbl { font: 500 13px/1 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; color: var(--тихо); }
+.meter .lbl { font: 500 15px/1 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; color: var(--тихо); }
 .pips { display: flex; gap: 3px; }
 .pip { width: 11px; height: 11px; transform: rotate(45deg) scale(.75); border: 1px solid rgba(226, 198, 146, .4); background: transparent; }
 .pip.on { background: rgba(226, 198, 146, .35); border-color: transparent; }
 .pip.now { background: var(--свеча); border-color: var(--свеча); box-shadow: 0 0 8px var(--свеча); }
 #дом { font: italic 400 15px/1 var(--шрифт-текст) !important; color: var(--море) !important; }
 #долг { font: 400 14px/1 var(--шрифт-текст) !important; }
-#назад, #карта { min-height: 34px !important; padding: 4px 12px !important; font: 500 13px/1 var(--шрифт-метка) !important; letter-spacing: .1em; text-transform: lowercase; }
+#назад, #карта { min-height: 34px !important; padding: 4px 12px !important; font: 500 15px/1 var(--шрифт-метка) !important; letter-spacing: .1em; text-transform: lowercase; }
 #назад { margin-left: auto; }
+#полоса .meter { min-width: 0; } #полоса .pips { gap: 1px; } #полоса .pip { width: 10px; height: 10px; }
 
 #известное { position: absolute; top: 0; left: 0; z-index: 4; width: min(300px, 80%); padding: 0 14px; background: rgba(8, 12, 14, .82); border: 1px solid var(--линия); max-height: calc(100% - 10px); overflow-y: auto; }
-#известное summary { position: sticky; top: 0; z-index: 1; background: rgba(8, 12, 14, .95); padding: 11px 0; font: 500 13px/1 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; color: var(--свеча); }
+#известное summary { position: sticky; top: 0; z-index: 1; background: rgba(8, 12, 14, .95); padding: 11px 0; font: 500 15px/1 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; color: var(--свеча); }
 #temy { display: flex; flex-direction: column; gap: 4px; padding-bottom: 12px; }
 #temy .h { display: none; }
 #temy .t { text-align: left; padding: 7px 10px; font-size: var(--т-мелко); line-height: 1.4; color: var(--бумага-2); background: rgba(255, 236, 200, .03); border: 1px solid rgba(226, 198, 146, .1); }
@@ -390,7 +407,7 @@ ul.журнал li::marker { color: var(--свеча); }
 }
 @keyframes портрет { from { opacity: 0; translate: 0 14px; } to { opacity: 1; translate: 0 0; } }
 /* Портрета нет — силуэт с именем, не инициалы в кружке. */
-#portrait:has(.портрет-буквы) { left: auto; right: 6%; bottom: 0; transform: none; width: min(260px, 40%); aspect-ratio: 5 / 6; animation: портрет .7s ease both; }
+#portrait:has(.портрет-буквы) { left: auto; right: 4%; bottom: 0; transform: none; width: min(220px, 34%); max-height: 62%; aspect-ratio: 5 / 6; opacity: .82; animation: портрет .7s ease both; }
 .портрет-буквы { position: relative; display: block; width: 100%; height: 100%; font-size: 0; color: transparent; }
 .портрет-буквы::before {
   content: ''; position: absolute; inset: 0;
@@ -403,34 +420,34 @@ ul.журнал li::marker { color: var(--свеча); }
 #who { flex: none; display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--линия); }
 #who b { font: 700 22px/1.1 var(--шрифт-метка); letter-spacing: .06em; text-transform: lowercase; color: var(--свеча); }
 #who span { font: italic 400 var(--т-мелко)/1.3 var(--шрифт-текст); color: var(--тихо); }
-#say { flex: 1 1 0; min-height: 4em; overflow-y: auto; margin: 0 0 14px; padding-right: 8px; white-space: pre-wrap; font-size: var(--т-текст); line-height: 1.6; color: var(--бумага); }
+#say { flex: 1 1 0; min-height: 38%; overflow-y: auto; margin: 0 0 14px; padding-right: 8px; white-space: pre-wrap; font-size: var(--т-текст); line-height: 1.6; color: var(--бумага); }
 #say .my { color: var(--море); font-style: italic; }
 #say.лента { white-space: normal; display: flex; flex-direction: column; gap: 9px; }
 #say .з { line-height: 1.6; }
 #say .з:last-child { animation: проявиться .45s ease both; }
-#say .з.нар { color: var(--бумага-2); font-style: italic; }
-#say .з.нпс { color: var(--бумага); }
+#say .з.нар { color: var(--бумага-2); }
+#say .з.нпс { color: #f7ecd6; font-weight: 500; }
 #say .з.гер { color: var(--море); padding-left: 14px; border-left: 1px solid rgba(147, 199, 194, .35); }
 #say .з.гер.выбор { color: var(--тихо); font: 500 var(--т-мелко)/1.4 var(--шрифт-метка); letter-spacing: .06em; border-left: 0; padding-left: 0; }
 #say .з.гер.выбор::before { content: '› '; color: var(--свеча); }
 #say .з.вид { color: var(--тихо); font-size: var(--т-мелко); border-left: 1px solid var(--линия); padding-left: 12px; }
 #say .з.гол { color: #ddd3bf; font-size: var(--т-мелко); border-left: 2px solid var(--г, #888); padding: 2px 0 2px 12px; background: linear-gradient(90deg, rgba(255, 255, 255, .03), transparent); }
-#say .з.гол b { font: 700 12px/1 var(--шрифт-метка); letter-spacing: .14em; color: var(--г, #888); margin-right: 6px; }
-#say .з.бр { align-self: flex-start; font: 500 13px/1.3 var(--шрифт-метка); letter-spacing: .06em; color: var(--г, #b6ad99); padding: 4px 10px; border: 1px solid; background: rgba(0, 0, 0, .3); }
+#say .з.гол b { font: 700 14px/1 var(--шрифт-метка); letter-spacing: .14em; color: var(--г, #888); margin-right: 6px; }
+#say .з.бр { align-self: flex-start; font: 500 15px/1.3 var(--шрифт-метка); letter-spacing: .06em; color: var(--г, #b6ad99); padding: 4px 10px; border: 1px solid; background: rgba(0, 0, 0, .3); }
 #say .з.бр.ок { border-color: rgba(170, 201, 139, .6); } #say .з.бр.не { border-color: rgba(224, 127, 98, .6); }
 #tone { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 12px; }
-#tone .lbl { font: 500 13px/1 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; color: var(--тихо); margin-right: 4px; }
+#tone .lbl { font: 500 15px/1 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; color: var(--тихо); margin-right: 4px; }
 #tone .b { min-height: 34px; padding: 4px 12px; font-size: var(--т-мелко); }
-#acts { flex: 0 1 auto; max-height: 55%; min-height: 80px; overflow-y: auto; display: flex; flex-direction: column; border-top: 1px solid var(--линия); padding-right: 4px; }
+#acts { flex: 0 1 auto; max-height: 46%; min-height: 80px; overflow-y: auto; display: flex; flex-direction: column; border-top: 1px solid var(--линия); padding-right: 4px; }
 #acts .b { flex-direction: column; align-items: stretch; flex-shrink: 0; font-size: var(--т-кнопка); }
 #acts .row { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; width: 100%; }
-.b.вар .ном { color: var(--свеча); font: 600 15px/1 var(--шрифт-титул); margin-right: 8px; }
+.b.вар .ном { color: var(--свеча); font: 700 15px/1 var(--шрифт-текст); margin-right: 8px; }
 .b.вар.закреплён { color: var(--бумага-2); font-style: italic; }
 .b.вар.красная { color: #f0c0b0; }
 .b.вар.красная .ном { color: var(--ржа); }
-.cost { font: 500 13px/1.2 var(--шрифт-метка); letter-spacing: .06em; color: var(--тихо); white-space: nowrap; }
+.cost { font: 500 15px/1.2 var(--шрифт-метка); letter-spacing: .04em; color: var(--тихо); white-space: nowrap; }
 .cost.gr { color: var(--свеча); }
-.чип { font: 500 12px/1.4 var(--шрифт-метка); letter-spacing: .06em; padding: 2px 8px; border: 1px solid rgba(147, 199, 194, .45); color: var(--море); cursor: help; white-space: nowrap; }
+.чип { font: 500 14px/1.4 var(--шрифт-метка); letter-spacing: .06em; padding: 2px 8px; border: 1px solid rgba(147, 199, 194, .45); color: var(--море); cursor: help; white-space: nowrap; }
 .чип.кр { border-color: rgba(224, 127, 98, .6); color: #f0b4a2; }
 .b.вар .почему, .b.вар .разбор, #acts .почему { display: block; font-size: var(--т-мелко); color: var(--тихо); font-style: italic; margin-top: 3px; }
 
@@ -449,7 +466,7 @@ ul.журнал li::marker { color: var(--свеча); }
 .смена-карточка h1 { font-size: 52px; color: var(--свеча); }
 .смена-текст { margin: 0; white-space: pre-wrap; font-size: var(--т-текст); line-height: 1.65; }
 .смена-итог { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
-.смена-итог li { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border: 1px solid var(--линия); font: 500 var(--т-мелко)/1.2 var(--шрифт-метка); letter-spacing: .05em; color: var(--бумага-2); animation: проявиться .4s ease both; }
+.смена-итог li { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border: 1px solid var(--линия); font: 500 15px/1.2 var(--шрифт-метка); letter-spacing: .04em; color: var(--бумага-2); animation: проявиться .4s ease both; }
 .смена-итог li.плюс { color: var(--трава); border-color: rgba(170, 201, 139, .4); }
 .смена-итог li.минус { color: var(--ржа); border-color: rgba(224, 127, 98, .4); }
 .смена-итог li:nth-child(2) { animation-delay: .12s; } .смена-итог li:nth-child(3) { animation-delay: .24s; } .смена-итог li:nth-child(n+4) { animation-delay: .36s; }
@@ -503,7 +520,8 @@ select { background: var(--смола); color: var(--бумага); border: 1px 
 .меню-сцена > p { max-width: 44ch; margin: 18px 0 34px; font-size: 21px; font-style: italic; color: var(--бумага-2); animation-delay: .35s; }
 .меню-список { display: flex; flex-direction: column; width: min(380px, 100%); animation-delay: .45s; }
 .меню-список .b { font: 400 22px/1.2 var(--шрифт-титул); font-weight: 600; padding: 12px 12px 12px 16px; color: var(--бумага); }
-.меню-список .b.sin { background: transparent; color: var(--свеча); box-shadow: none; border-left-color: var(--свеча); }
+.меню-список .b.sin { background: transparent; color: var(--свеча); box-shadow: none; border: 0; border-left: 2px solid var(--свеча); border-bottom: 1px solid rgba(226, 198, 146, .09); justify-content: flex-start; font: 600 22px/1.2 var(--шрифт-титул); letter-spacing: 0; text-transform: none; padding: 12px 12px 12px 16px; }
+.меню-список .b.sin::before, .меню-список .b.sin::after { display: none; }
 .меню-список .b:disabled { display: none; }
 .меню-служебное { margin-top: 26px; color: var(--тихо); font-size: var(--т-мелко); }
 .меню-служебное .b { margin-top: 8px; font-size: var(--т-мелко); }
@@ -522,7 +540,7 @@ select { background: var(--смола); color: var(--бумага); border: 1px 
 .начало:hover { transform: translateY(-4px); border-color: var(--свеча) !important; box-shadow: 0 20px 50px rgba(0, 0, 0, .55), 0 0 30px var(--свеча-тень); padding-left: 24px !important; }
 .начало > .зн { font-size: 34px; color: var(--свеча); margin-bottom: 6px; }
 .начало-имя { font: 600 30px/1.05 var(--шрифт-титул); }
-.начало-ремесло { display: flex; gap: 14px; font: 500 var(--т-мелко)/1 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; color: var(--свеча); }
+.начало-ремесло { display: flex; gap: 14px; font: 500 15px/1 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; color: var(--свеча); }
 .начало-описание { font-size: var(--т-кнопка); color: var(--бумага-2); font-style: italic; line-height: 1.5; }
 
 /* ── панели «Герой · Вещи · Журнал»: книга, выезжающая справа ── */
@@ -602,7 +620,7 @@ select { background: var(--смола); color: var(--бумага); border: 1px 
 .план-изображение { height: 128px; position: relative; overflow: hidden; background: radial-gradient(ellipse at 30% 20%, #3a4a50, #141d22); }
 .план-изображение img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .план-изображение::after { content: ''; position: absolute; inset: 0; background: linear-gradient(transparent 45%, rgba(8, 12, 14, .75)); pointer-events: none; }
-.план-статус { position: absolute; z-index: 1; bottom: 10px; left: 12px; font: 500 12px/1.4 var(--шрифт-метка); letter-spacing: .08em; text-transform: lowercase; color: var(--бумага); padding: 2px 8px; background: rgba(8, 12, 14, .85); }
+.план-статус { position: absolute; z-index: 1; bottom: 10px; left: 12px; font: 500 14px/1.4 var(--шрифт-метка); letter-spacing: .08em; text-transform: lowercase; color: var(--бумага); padding: 2px 8px; background: rgba(8, 12, 14, .85); }
 .текущая .план-статус { background: var(--свеча); color: var(--чернила); }
 .неизвестная .план-изображение img { filter: blur(5px) brightness(.5) saturate(.4); transform: scale(1.08); }
 .план-подпись { padding: 11px 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 50px; }
@@ -626,7 +644,7 @@ select { background: var(--смола); color: var(--бумага); border: 1px 
 .ночь-итог .мерило { flex-direction: row; gap: 7px; font-size: var(--т-кнопка); }
 .ночь-итог .кошель { display: flex; align-items: center; gap: 7px; font: 600 24px/1 var(--шрифт-титул); color: #f4dfae; }
 .ночь-итог .кошель .зн { color: var(--свеча); }
-.ночь-дня #дальше { margin: 0 auto; min-width: 240px; justify-content: center; font: 600 17px/1 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; min-height: 52px; }
+.ночь-дня #дальше { margin: 0 auto; min-width: 260px; min-height: 52px; }
 .ночь-дня .финал { text-align: left; margin-top: 18px; }
 
 /* ── широкие и короткие экраны ─────────────────────────────────────── */
@@ -648,7 +666,7 @@ select { background: var(--смола); color: var(--бумага); border: 1px 
   #hud-помощь { display: none; }
   .hud-время { order: 4; width: 100%; justify-content: space-between; gap: 8px; }
   #hud-день { font-size: 18px; }
-  .отрезок { min-width: 0; padding: 4px 4px 3px; font-size: 11px; }
+  .отрезок { min-width: 0; padding: 4px 4px 3px; font-size: 13px; }
   .отрезок .зн { font-size: 15px; }
   #hud-тело { order: 5; width: 100%; justify-content: space-between; }
   .мерило { flex-direction: row; gap: 6px; padding: 2px 0; }
@@ -677,7 +695,7 @@ select { background: var(--смола); color: var(--бумага); border: 1px 
   .вещь-подробно { border-left: 0; border-top: 1px solid var(--линия); padding: 20px 0 0; }
   .строка-тела .полоска { flex-basis: 100%; }
   .план-комнаты { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  #панель .b { font-size: 11px; }
+  #панель .b { font-size: 13px; }
   .ов.меню:has(.вступление) { justify-content: center; padding: 14px; }
   .начало { min-height: 0; }
 }
@@ -695,3 +713,6 @@ html[data-движение="меньше"] .з-кадр { opacity: 1; }
 .пан-бокс { overflow-x: hidden; }
 .строка-тела .полоска { flex-basis: 270px; }
 .весы { width: 96px; }
+#hud-кнопки .b { white-space: nowrap; }
+/* Подписи у краёв карты не вылезают за рамку. */
+.город-полотно .карта-метка { left: clamp(94px, var(--x), calc(100% - 94px)) !important; }
