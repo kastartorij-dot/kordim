@@ -9,7 +9,7 @@ const names = {...LINES, world:'Мир'};
 const color = l => LINE_COLOR[l] || LINE_COLOR.world;
 const linesOf = e => e.lines.length ? e.lines : ['world'];
 const dateInfo = e => e.dateNote ? '<p class="pending">' + esc(e.dateNote) + '</p>' : '';
-const sceneFor = e => SCENES.find(s => s.event === e.slug);
+const sceneFor = e => SCENES.find(s => (s.events || [s.event]).includes(e.slug));
 const sceneLink = e => { const s = sceneFor(e); return s ? '<a class="btn more" href="#/scenes/' + s.arc + '">📖 читать сцену' + (s.status === 'готово' ? '' : ' · черновик') + '</a>' : ''; };
 
 export function render(root, [param]){

@@ -50,12 +50,12 @@ section('Места без пина на карте',
 const key = EVENTS.filter(e => e.key);
 section('Ключевые события без своей иллюстрации (Изображения/События/<slug>.jpg)',
   key.filter(e => !img('События/' + e.slug + '.jpg')).map(e => e.h), key.length);
-const scened = new Set(SCENES.map(s => s.event));
+const scened = new Set(SCENES.flatMap(s => s.events || [s.event]));
 section('Ключевые события без написанной сцены',
   key.filter(e => !scened.has(e.slug)).map(e => e.h), key.length);
 
 section('Ключевые события, у которых пока только черновая проза',
-  key.filter(e => SCENES.some(s => s.event === e.slug && s.status !== 'готово')).map(e => e.h), key.length);
+  key.filter(e => SCENES.some(s => (s.events || [s.event]).includes(e.slug) && s.status !== 'готово')).map(e => e.h), key.length);
 
 section('Статьи «Мир» без обложки (Изображения/Мир/<id>.jpg)',
   ARTICLES.filter(a => !img('Мир/' + a.id + '.jpg')).map(a => a.title), ARTICLES.length);

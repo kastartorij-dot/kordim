@@ -52,7 +52,7 @@ function arcView(root, arc) {
   const name = arcTitle(arc, list);
   const line = list[0].line;
   const words = list.reduce((s, x) => s + x.words, 0);
-  const covered = new Set(SCENES.map(s => s.event));
+  const covered = new Set(SCENES.flatMap(s => s.events || [s.event]));
   const missing = line ? EVENTS.filter(e => (e.lines || []).includes(line) && !covered.has(e.slug)) : [];
 
   root.innerHTML = `<div class="page scene-page" data-title="${esc(name)}" style="--c:${LINE_COLOR[line] || 'var(--ochre)'}">
@@ -60,19 +60,19 @@ function arcView(root, arc) {
     <h1 class="h1">${esc(name)}</h1>
     <p class="lead">${list.length} ${plural(list.length, ['сцена', 'сцены', 'сцен'])} · ${words.toLocaleString('ru-RU')} слов подряд</p>
     <article class="prose scene-flow">
-      ${list.map(chapter).join('')}
+      ${list.map(s => chapter(s, list.length > 1)).join('')}
     </article>
     ${missing.length ? `<section class="card" style="margin-top:28px"><h3>В ХРОНИКЕ, НО ЕЩЁ НЕ НАПИСАНО <small>${missing.length}</small></h3>
       <ul class="list">${missing.map(e => '<li><b>' + esc(e.y) + '.</b> ' + esc(e.h) + '</li>').join('')}</ul></section>` : ''}
   </div>`;
 }
 
-function chapter(s) {
+function chapter(s, showTitle = true) {
   /* первая строка текста часто повторяет заголовок файла (# Название) — он уже показан
      в шапке главы строкой выше, второй раз голым текстом с решёткой не нужен */
   const body = s.text.replace(/^#\s+.*(?:\n+|$)/, '');
   return `<header class="scene-chap">
-    <h2>${esc(s.title)}</h2>
+    ${showTitle ? '<h2>' + esc(s.title) + '</h2>' : ''}
     <div class="scene-meta">
       ${s.status !== 'готово' ? '<span class="badge draft">' + esc(s.status) + '</span>' : ''}
       ${s.place ? placeChip(s.place) : ''}

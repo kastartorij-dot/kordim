@@ -12,7 +12,7 @@ import { SCENES } from '../../Данные/scenes.js';
 const link = (href, text) => '<a class="chip" href="' + href + '">' + esc(text) + '</a>';
 const people = PEOPLE.filter(p => !p.frozen);
 const inEvents = new Set(EVENTS.flatMap(e => e.people || []));
-const scened = new Set(SCENES.map(s => s.event));
+const scened = new Set(SCENES.flatMap(s => s.events || [s.event]));
 const keyEvents = EVENTS.map((e, i) => ({ ...e, i })).filter(e => e.key);
 const evChip = e => link('#/chronicle/' + e.i, e.h);
 
@@ -33,7 +33,7 @@ const ROWS = [
   { t: 'Ключевые события без сцены', hint: 'файла прозы пока нет', of: keyEvents.length,
     items: () => keyEvents.filter(e => !scened.has(e.slug)).map(evChip) },
   { t: 'События с черновой прозой', hint: 'текст есть, авторская приёмка не завершена', of: keyEvents.length,
-    items: () => keyEvents.filter(e => SCENES.some(s => s.event === e.slug && s.status !== 'готово')).map(evChip) },
+    items: () => keyEvents.filter(e => SCENES.some(s => (s.events || [s.event]).includes(e.slug) && s.status !== 'готово')).map(evChip) },
   { t: 'Ключевые события без иллюстрации', of: keyEvents.length,
     files: keyEvents.map(e => ['События/' + e.slug + '.jpg', evChip(e)]) },
   { t: 'Статьи «Мир» без обложки', of: ARTICLES.length,

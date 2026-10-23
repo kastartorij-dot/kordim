@@ -1,6 +1,7 @@
 // Собирает Проза/*.md в Игры/Сайт/Приложение/Данные/scenes.js для раздела «Арки».
 // Шапка сцены — title/event/status, plus необязательный arc. Люди, место и сюжетная линия
 // (line) НЕ дублируются — берутся из связанного события в events.js по полю event (slug).
+// covers — необязательный список дополнительных slug через запятую: цельная история может охватывать несколько событий.
 // arc — ключ плитки-группировки на странице «Арки»: своя история, не сюжетная линия.
 // По умолчанию arc = slug события (одна история — одна плитка); если несколько файлов
 // сцен относятся к одной истории (главы одной арки), проставь им одинаковый `arc:` в
@@ -39,16 +40,20 @@ function readScene(file) {
   const ev = eventBySlug(front.event);
   if (!ev) throw new Error(`${file}: event «${front.event}» не найден в events.js (нет такого slug)`);
 
+  const events = [...new Set([front.event, ...(front.covers || '').split(',').map(x => x.trim()).filter(Boolean)])];
+  for (const slug of events) if (!eventBySlug(slug)) throw new Error(`${file}: covers содержит неизвестное событие «${slug}»`);
+  const people = [...new Set(events.flatMap(slug => eventBySlug(slug).people || []))];
   const words = body.split(/\s+/).filter(Boolean).length;
   return {
     id: file.replace(/\.md$/, ''),
     title: front.title,
     status: front.status || 'готово',
     event: front.event,
+    events,
     arc: front.arc || ev.slug,
     line: (ev.lines && ev.lines[0]) || null,
     s: ev.s,
-    people: ev.people || [],
+    people,
     place: ev.place || null,
     words,
     text: body,
