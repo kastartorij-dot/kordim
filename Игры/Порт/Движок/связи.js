@@ -162,7 +162,7 @@ export function условиеСвязи(S, кто0, у) {
   if (у.этапДо && номер(с.этап) >= номер(у.этапДо)) return false;
   if (у.вЭтапеДнейОт !== undefined && (с.этапДень === null || S.мир.день - с.этапДень < у.вЭтапеДнейОт)) return false;
   if (у.влечение !== undefined && с.влечение < у.влечение) return false;
-  if (у.решение !== undefined && (с.решение?.что ?? null) !== у.решение) return false;
+  if (у.решение !== undefined && ![].concat(у.решение).includes(с.решение?.что ?? null)) return false;
   if (у.статус && ![].concat(у.статус).includes(с.статус)) return false;
   if (у.поступок && !с.поступки.some(п => п.ид === у.поступок)) return false;
   if (у.обещание) {
