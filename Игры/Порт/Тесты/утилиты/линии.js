@@ -3,6 +3,27 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { войти, действияСцены, вернутьсяВГород } from '../../Движок/разговор.js';
 import { лечьСпать } from '../../Движок/время.js';
+import { сохранить, загрузить } from '../../Движок/состояние.js';
+
+// Режим приёмки: после каждого нажатия партия сохраняется и загружается, игра продолжается с загруженного состояния.
+let сЗагрузкой = false, загрузок = 0;
+const память = new Map();
+export function включитьСохранение() {
+  сЗагрузкой = true;
+  globalThis.localStorage = { getItem: k => память.get(k) ?? null, setItem: (k, v) => память.set(k, String(v)), removeItem: k => память.delete(k) };
+}
+export const сколькоЗагрузок = () => загрузок;
+function черезСохранение(S) {
+  if (!сЗагрузкой) return;
+  const до = JSON.stringify(S);
+  сохранить(S, 'авто');
+  const L = загрузить('авто');
+  assert.ok(L, 'партия загружается');
+  assert.equal(JSON.stringify(L), до, 'загрузка не меняет партию');
+  for (const k of Object.keys(S)) delete S[k];
+  Object.assign(S, L);
+  загрузок++;
+}
 
 export const ids = S => действияСцены(S).map(а => а.id);
 export const есть = (S, id) => ids(S).includes(id);
@@ -11,10 +32,12 @@ export function нажать(S, id) {
   assert.ok(а, `нет действия ${id} (${S.сцена?.место}/${S.сцена?.комната}): ${ids(S).join(', ')}`);
   assert.notEqual(а.можно, false, `${id}: ${а.почему}`);
   а.выполнить(S);
+  черезСохранение(S);
 }
 export function конецДня(S) {
   if (S.сцена) вернутьсяВГород(S);
   S.мир.отрезок = 'ночь'; лечьСпать(S, null); S.мир.конецДня = null; S.мир.отрезок = 'утро';
+  черезСохранение(S);
 }
 export const доДня = (S, д) => { while (S.мир.день < д) конецДня(S); };
 export function вХаб(S) {
@@ -51,5 +74,6 @@ export function нажатьТекст(S, текст) {
   const а = действияСцены(S).find(х => х.текст === текст);
   assert.ok(а, `нет кнопки «${текст}»: ${действияСцены(S).map(х => х.текст).join(' | ')}`);
   а.выполнить(S);
+  черезСохранение(S);
 }
 export const естьТекст = (S, текст) => действияСцены(S).some(х => х.текст === текст);
