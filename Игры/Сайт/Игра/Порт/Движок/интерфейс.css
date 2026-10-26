@@ -653,6 +653,8 @@ select { background: var(--смола); color: var(--бумага); border: 1px 
 .финал-надпись { font: 500 13px/1 var(--шрифт-метка); letter-spacing: .14em; text-transform: uppercase; color: var(--тихо); }
 .финал-текст { white-space: pre-wrap; font-size: calc(var(--т-текст) + 1px); line-height: 1.75; margin: 0 0 14px; animation: проявиться .8s ease both; }
 .финал-экран ul.журнал { margin: 0 0 14px; }
+.финал-записи { margin: 0 0 14px; padding-left: 18px; font-size: var(--т-мелко); line-height: 1.5; color: var(--бумага-2); }
+.финал-записи li { margin-bottom: 4px; }
 .финал-кнопки { display: flex; justify-content: center; gap: 12px; margin-top: 18px; }
 .финал-кнопки .b.sin { min-width: 220px; }
 
