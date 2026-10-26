@@ -645,7 +645,16 @@ select { background: var(--смола); color: var(--бумага); border: 1px 
 .ночь-итог .кошель { display: flex; align-items: center; gap: 7px; font: 600 24px/1 var(--шрифт-титул); color: #f4dfae; }
 .ночь-итог .кошель .зн { color: var(--свеча); }
 .ночь-дня #дальше { margin: 0 auto; min-width: 260px; min-height: 52px; }
-.ночь-дня .финал { text-align: left; margin-top: 18px; }
+
+/* ── финал сезона: страницы поверх картинки исхода, как вступление ── */
+.ов.финал-экран { bottom: var(--panel-height); background: linear-gradient(90deg, rgba(4, 7, 9, .25), rgba(4, 7, 9, .85) 55%); justify-content: flex-end; padding-right: clamp(20px, 6vw, 110px); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.ов.финал-экран .овбокс { width: min(640px, 100%); max-height: calc(100% - 40px); overflow: auto; }
+.финал-экран h2 { color: var(--свеча); margin: 4px 0 14px; }
+.финал-надпись { font: 500 13px/1 var(--шрифт-метка); letter-spacing: .14em; text-transform: uppercase; color: var(--тихо); }
+.финал-текст { white-space: pre-wrap; font-size: calc(var(--т-текст) + 1px); line-height: 1.75; margin: 0 0 14px; animation: проявиться .8s ease both; }
+.финал-экран ul.журнал { margin: 0 0 14px; }
+.финал-кнопки { display: flex; justify-content: center; gap: 12px; margin-top: 18px; }
+.финал-кнопки .b.sin { min-width: 220px; }
 
 /* ── широкие и короткие экраны ─────────────────────────────────────── */
 @media (max-width: 1180px) { .hud-контекст { display: none; } .отрезок { min-width: 44px; } }
