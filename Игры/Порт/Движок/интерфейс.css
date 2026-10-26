@@ -473,6 +473,30 @@ ul.журнал li::marker { color: var(--свеча); }
 .смена-кнопки { display: flex; flex-direction: column; border-top: 1px solid var(--линия); }
 .смена-кнопки .b { flex-direction: column; align-items: stretch; }
 .смена-кнопки .mono { font-size: var(--т-мелко); color: var(--тихо); }
+/* Мини-игра смены (шаг 12): «Вес», «Счёт». Выбор — рамкой и словом, не цветом. */
+.смена-карточка.задача { width: min(800px, 100%); gap: 10px; padding-block: clamp(20px, 2vw, 32px); max-height: calc(100vh - var(--hud-height) - var(--panel-height) - 24px); overflow: auto; }
+.смена-карточка.задача h1 { font-size: 40px; }
+.задача-игра { font: 500 15px/1.2 var(--шрифт-метка); letter-spacing: .14em; text-transform: lowercase; color: var(--море); }
+.задача-факты ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.задача-факты li { position: relative; padding-left: 16px; font-size: var(--т-кнопка); line-height: 1.5; }
+.задача-факты li::before { content: ''; position: absolute; left: 2px; top: .7em; width: 5px; height: 5px; background: var(--свеча); transform: rotate(45deg); opacity: .7; }
+.задача-дощечка li { padding-left: 0; } .задача-дощечка li::before { display: none; }
+.задача-строка { width: 100%; min-height: 44px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; text-align: left; padding: 8px 12px;
+  border: 1px dashed var(--линия); background: rgba(255, 236, 200, .03); color: var(--бумага); font: 400 var(--т-кнопка)/1.45 var(--шрифт-текст); cursor: pointer; }
+.задача-строка[aria-pressed="true"] { border-style: solid; border-color: var(--линия-ярко); }
+.задача-метка { font: 500 13px/1.2 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; color: var(--свеча); white-space: nowrap; }
+.задача-совет { margin: 0; padding: 8px 12px; border-left: 2px solid var(--море); color: var(--бумага-2); font-size: var(--т-кнопка); line-height: 1.5; }
+.задача-вопрос { margin: 4px 0 0; font: 500 21px/1.4 var(--шрифт-текст); color: var(--бумага); }
+.задача-варианты { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 900px) { .задача-варианты { grid-template-columns: 1fr; } .смена-карточка.задача { max-height: none; overflow: visible; } }
+.задача-вариант { width: 100%; justify-content: space-between; flex-wrap: wrap; }
+.задача-вариант.отпал span:first-child { text-decoration: line-through; }
+.задача-кнопки { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 6px; border-top: 1px solid var(--линия); }
+.задача-кнопки .b { flex: 1 1 160px; justify-content: center; }
+.задача-уточнение { margin: 0; font-size: var(--т-текст); }
+.задача-верный { margin: 0; font-size: var(--т-кнопка); display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+.задача-решение summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font: 500 15px/1.2 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; color: var(--бумага-2); }
+.задача-решение p { margin: 0; color: var(--бумага-2); font-size: var(--т-кнопка); line-height: 1.55; }
 
 /* ── окна ───────────────────────────────────────────────────────────── */
 .ов { position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(4, 7, 9, .66); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); animation: затемнение .3s ease both; }
