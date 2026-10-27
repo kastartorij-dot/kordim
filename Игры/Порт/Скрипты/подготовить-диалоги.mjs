@@ -1,7 +1,7 @@
 // Одноразовая подготовка редакторских Markdown к формату графа. Ошибки не пропускаются.
 import fs from 'node:fs';
 import vm from 'node:vm';
-const dir=new URL('../Документы/Разработка/Шаг_10_Жители_и_разговоры/Диалоги_НПС/',import.meta.url);
+const dir=new URL('../Документы/Материалы/Жители/Диалоги_НПС/',import.meta.url);
 const out={};const errors=[];
 const clean=s=>s.trim().replace(/\s*⟦пр⟧/g,'').replace(/^«|»$/g,'');
 const obj=s=>vm.runInNewContext('('+s+')',Object.create(null),{timeout:100});

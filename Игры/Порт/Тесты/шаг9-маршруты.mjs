@@ -14,7 +14,7 @@ const известные = new Set([...НАЧАЛА.map(a=>a.id), ...Object.keys
 for (const arg of process.argv.slice(2)) assert.ok(arg==='--report' || известные.has(arg), 'неизвестный фильтр/параметр: '+arg);
 const начала = фильтр.filter(a=>НАЧАЛА.some(н=>н.id===a));
 const цели = фильтр.filter(a=>Object.hasOwn(пути,a));
-const каталог='Документы/Разработка/Шаг_09_Главные_цели/Сквозные_маршруты_23_10_2026';
+const каталог='Тесты/Результаты/Сквозные_маршруты_23_10_2026';
 const отчёт=process.argv.includes('--report');
 if(отчёт)fs.mkdirSync(каталог,{recursive:true});
 let ошибок=0, выполнено=0;
