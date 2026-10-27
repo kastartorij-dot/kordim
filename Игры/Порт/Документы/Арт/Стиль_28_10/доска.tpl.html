@@ -1,0 +1,162 @@
+<title>Стиль Порта</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,600;1,400&family=Alegreya+SC:wght@500;700&display=swap">
+<style>
+/* Раскладка: одна колонка-«журнал» на ночном фоне, как в самой игре; варианты портретов — карточки с буквой, рекомендованный подсвечен свечой. */
+:root {
+  --ночь: #101318;
+  --панель: #181d25;
+  --линия: #2c3440;
+  --текст: #e7e1d4;
+  --тихий: #a39d90;
+  --свеча: #e0a650;
+  --хорошо: #8fb98a;
+  --плохо: #d28a74;
+  --шрифт: "Alegreya", Georgia, "Times New Roman", serif;
+  --заголовок: "Alegreya SC", "Alegreya", Georgia, serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--ночь);
+  color: var(--текст);
+  font-family: var(--шрифт);
+  font-size: 17px;
+  line-height: 1.5;
+}
+.лист {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-block: 40px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid;
+  gap: 48px;
+}
+h1, h2, h3 { font-family: var(--заголовок); font-weight: 700; letter-spacing: 0.02em; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 44px); color: var(--свеча); }
+h2 { font-size: 24px; }
+h3 { font-size: 20px; }
+p { margin: 0; max-width: 66ch; }
+.вступ { display: grid; gap: 12px; }
+.вступ p { color: var(--тихий); font-size: 19px; }
+section { display: grid; gap: 16px; }
+.метка { font-family: var(--заголовок); font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--тихий); }
+.сетка { display: grid; gap: 10px; }
+.сцены { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+.люди { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.люди.широко { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 640px) { .люди { grid-template-columns: repeat(2, minmax(0, 1fr)); } .люди.широко { grid-template-columns: 1fr; } }
+figure { margin: 0; display: grid; gap: 6px; min-width: 0; }
+figure img { width: 100%; height: auto; display: block; border-radius: 3px; background: var(--панель); }
+.люди:not(.широко) figure img { aspect-ratio: 2 / 3; object-fit: cover; object-position: top; }
+figcaption { font-size: 14px; color: var(--тихий); }
+.итог { color: var(--хорошо); }
+.варианты { display: grid; gap: 20px; }
+.вариант {
+  background: var(--панель);
+  border: 1px solid var(--линия);
+  border-radius: 6px;
+  padding: 20px;
+  display: grid;
+  gap: 14px;
+}
+.вариант.совет { border-color: var(--свеча); box-shadow: 0 0 0 1px var(--свеча), 0 0 28px -8px var(--свеча); }
+.шапка { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 14px; }
+.буква {
+  font-family: var(--заголовок); font-size: 26px; color: var(--ночь); background: var(--свеча);
+  width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; flex: none;
+}
+.вариант:not(.совет) .буква { background: var(--линия); color: var(--текст); }
+.значок { font-family: var(--заголовок); font-size: 13px; letter-spacing: 0.08em; color: var(--свеча); border: 1px solid var(--свеча); border-radius: 99px; padding: 2px 10px; }
+.цифры { display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 15px; font-variant-numeric: tabular-nums; }
+.цифры b { font-weight: 600; }
+.плюс { color: var(--хорошо); }
+.минус { color: var(--плохо); }
+.ответ { border-top: 1px solid var(--линия); padding-top: 24px; display: grid; gap: 8px; }
+.ответ p { font-size: 19px; }
+</style>
+
+<main class="лист">
+  <header class="вступ">
+    <span class="метка">Порт Теней · выбор стиля</span>
+    <h1>Стиль уже есть. Осталось выбрать, как рисовать людей</h1>
+    <p>Фоны и сцены почти все нарисованы одинаково, их трогать не нужно. Разнобой только в портретах: одни как фото, другие переведены в пиксель, третьи нарисованы. Ниже все четыре вида портретов, которые уже есть в готовых картинках, и сколько каждый потребует переделки.</p>
+  </header>
+
+  <section>
+    <span class="метка">Фоны и сцены</span>
+    <h2>Пиксельная живопись — оставляем как есть</h2>
+    <div class="сетка сцены">
+      <figure><img src="{{сцена_доки}}" alt="Доки"><figcaption>Доки, район</figcaption></figure>
+      <figure><img src="{{сцена_пристань}}" alt="Пристань"><figcaption>Пристань, место</figcaption></figure>
+      <figure><img src="{{сцена_лавка}}" alt="Лавка"><figcaption>Лавка с прилавком</figcaption></figure>
+      <figure><img src="{{сцена_кухня}}" alt="Кухня после смены"><figcaption>Кухня после смены, быт</figcaption></figure>
+      <figure><img src="{{сцена_весы}}" alt="Весы"><figcaption>Весы, работа</figcaption></figure>
+      <figure><img src="{{сцена_трущобы}}" alt="Трущобы ночью"><figcaption>Трущобы ночью, погода</figcaption></figure>
+    </div>
+    <p class="итог">Готово около 100 картинок в этом стиле: 36 уже в игре, ещё 63 ждут подключения (быт и город, работы, новые места, вступление). Переделывать нечего.</p>
+  </section>
+
+  <section>
+    <span class="метка">Портреты</span>
+    <h2>Четыре вида портретов из готовых картинок</h2>
+    <div class="варианты">
+
+      <article class="вариант">
+        <div class="шапка"><span class="буква">А</span><h3>Как фото</h3></div>
+        <div class="сетка люди">
+          <figure><img src="{{а_нора}}" alt="Нора Линн, фото"><figcaption>Нора Линн</figcaption></figure>
+          <figure><img src="{{а_хозяин}}" alt="Хозяин таверны, фото"><figcaption>Хозяин таверны</figcaption></figure>
+          <figure><img src="{{а_фрея}}" alt="Фрея, фото"><figcaption>Фрея</figcaption></figure>
+          <figure><img src="{{а_ким}}" alt="Ким, фото"><figcaption>Ким</figcaption></figure>
+        </div>
+        <div class="цифры"><span>Готово: <b>почти все портреты в игре</b> и 39 кандидатов</span><span>Переделка: <b>0</b></span></div>
+        <p><span class="минус">Минус:</span> рядом с нарисованными фонами выглядит как вклеенная фотография. Именно это сильнее всего выдаёт, что картинки собраны из разных источников.</p>
+      </article>
+
+      <article class="вариант совет">
+        <div class="шапка"><span class="буква">Б</span><h3>Фото, переведённое в пиксель</h3><span class="значок">рекомендую</span></div>
+        <div class="сетка люди">
+          <figure><img src="{{б_нора}}" alt="Нора Линн, пиксель"><figcaption>Нора Линн</figcaption></figure>
+          <figure><img src="{{б_хозяин}}" alt="Хозяин таверны, пиксель"><figcaption>Хозяин таверны</figcaption></figure>
+          <figure><img src="{{б_фрея}}" alt="Фрея, пиксель"><figcaption>Фрея</figcaption></figure>
+          <figure><img src="{{б_ким}}" alt="Ким, пиксель"><figcaption>Ким</figcaption></figure>
+        </div>
+        <div class="цифры"><span>Готово: <b>около 24 из 32</b> портретов в игре</span><span>Переделка: <b>около 8</b>, остальные по мере подключения</span></div>
+        <p><span class="плюс">Плюс:</span> лица остаются те, что ты уже выбрал, а по фактуре портрет ближе к фонам. Недостающие делаются тем же способом автоматически, без перерисовки.</p>
+      </article>
+
+      <article class="вариант">
+        <div class="шапка"><span class="буква">В</span><h3>Нарисованный портрет</h3></div>
+        <div class="сетка люди">
+          <figure><img src="{{в_мэсти}}" alt="Мэсти Вол, рисунок"><figcaption>Мэсти Вол</figcaption></figure>
+          <figure><img src="{{в_ния}}" alt="Ния, запасной портрет"><figcaption>Ния, запасной</figcaption></figure>
+          <figure><img src="{{в_старшая}}" alt="Старшая, рисунок"><figcaption>Старшая</figcaption></figure>
+        </div>
+        <div class="цифры"><span>Готово: <b>3</b></span><span>Переделка: <b>около 30</b>, лица немного изменятся</span></div>
+        <p>Выразительнее фото, но таких портретов почти нет. Всех остальных пришлось бы перерисовать заново.</p>
+      </article>
+
+      <article class="вариант">
+        <div class="шапка"><span class="буква">Г</span><h3>Человек внутри сцены, в стиле фонов</h3></div>
+        <div class="сетка люди широко">
+          <figure><img src="{{г_чтец}}" alt="Чтец у ворот"><figcaption>Чтец у ворот, работа</figcaption></figure>
+          <figure><img src="{{г_встреча}}" alt="Первая встреча с Мэсти"><figcaption>Первая встреча с Мэсти</figcaption></figure>
+          <figure><img src="{{г_бой}}" alt="Бой"><figcaption>Бой, работа</figcaption></figure>
+          <figure><img src="{{г_прибытие}}" alt="Прибытие Одвина"><figcaption>Прибытие, вступление</figcaption></figure>
+        </div>
+        <div class="цифры"><span>Готово: <b>около 5 сцен</b>, отдельных портретов нет</span><span>Переделка: <b>все 32</b>, лица изменятся</span></div>
+        <p>Самый цельный вид: люди и фоны нарисованы одной рукой. Но это самая большая работа, и утверждённые лица придётся выбирать заново.</p>
+      </article>
+
+    </div>
+  </section>
+
+  <footer class="ответ">
+    <span class="метка">Как ответить</span>
+    <p>Напиши в чате одну букву: А, Б, В или Г. Можно и сочетание, например «Б, а для главных сцен Г».</p>
+  </footer>
+</main>
