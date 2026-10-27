@@ -71,9 +71,9 @@ if (кейс === 'вес' || кейс === 'счёт') {
   if (нужное) учётИгры(S, кейс).решены = ИГРЫ[кейс].задания.map(з => з.id).filter(id => id !== нужное);
   начатьСмену(S, р);
 }
-// Шаг 12: ?кейс=мысли — одна созревшая, одна зреющая, место свободно, две ждут; &полно=1 — все три места заняты.
+// Шаг 12: ?кейс=мысли — одна созревшая, одна зреющая, место свободно, четыре ждут (цель, ремесло, решение); &полно=1 — все три места заняты.
 if (кейс === 'мысли') {
-  for (const id of ['syn_vesovshchika', 'ne_otkuda_a_kuda', 'dolg_rychag', 'pozhit_prezhde_chem_platit']) предложитьМысль(S, id);
+  for (const id of ['syn_vesovshchika', 'ne_otkuda_a_kuda', 'dolg_rychag', 'pozhit_prezhde_chem_platit', 'tyazhest_remeslo', 'net_eto_otvet']) предложитьМысль(S, id);
   обдумать(S, 'syn_vesovshchika'); обдумать(S, 'ne_otkuda_a_kuda');
   if (параметры.get('полно')) обдумать(S, 'dolg_rychag');
   Object.assign(мысли(S).места[0], { ночи: [1, 2], созрела: 2 }); мысли(S).места[1].ночи = [2];
