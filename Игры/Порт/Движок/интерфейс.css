@@ -603,6 +603,24 @@ select { background: var(--смола); color: var(--бумага); border: 1px 
 .тема-журнала .mono { font-size: var(--т-мелко); color: var(--свеча); font-style: italic; margin-left: 6px; }
 .тема-журнала p { margin: 5px 0 0; color: var(--бумага-2); font-size: var(--т-кнопка); }
 .тема-журнала.враньё { opacity: .55; }
+/* Кабинет мыслей (шаг 12): место — рамка; созревшая отмечена словом и сплошной рамкой, зреющая — пунктиром. */
+.мысли-места { display: grid; gap: 10px; }
+.мысль { padding: 12px 14px; border: 1px solid var(--линия); border-radius: 4px; background: var(--приподнято); }
+.мысль.зреет { border-style: dashed; }
+.мысль.созрела { border-color: var(--линия-ярко); }
+.мысль.пусто { padding: 8px 14px; background: none; border-style: dotted; }
+.мысль.ждёт { margin-top: 10px; }
+.мысль-шапка { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 12px; }
+.мысль-шапка b { font-weight: 500; }
+.мысль-шапка .mono { font-size: var(--т-мелко); color: var(--свеча); font-style: italic; }
+.мысль p { margin: 6px 0 0; font-size: var(--т-кнопка); color: var(--бумага-2); }
+.мысль p.мысль-текст { color: var(--бумага); font-style: italic; }
+.мысль p.mono { font-size: var(--т-мелко); }
+.мысль details { margin-top: 6px; font-size: var(--т-кнопка); }
+.мысль summary { cursor: pointer; color: var(--свеча); }
+.мысль > .b, .мысль-уточнение .b { margin: 10px 10px 0 0; }
+.мысль-уточнение p { color: var(--бумага); }
+.мысли-заг { margin: 16px 0 0; font: 500 15px/1.4 var(--шрифт-метка); letter-spacing: .08em; text-transform: lowercase; color: var(--тихо); }
 .ушла { color: var(--ржа) !important; }
 .день-журнала { margin-bottom: 14px; }
 .день-журнала > b { font: 600 22px/1.2 var(--шрифт-титул); }
