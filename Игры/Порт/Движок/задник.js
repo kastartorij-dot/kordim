@@ -9,6 +9,9 @@ function загрузить(url) {
   return загружено.get(url);
 }
 
+// Подгрузить заранее (без показа): тяжёлый рисунок района не опаздывает к подписи района.
+export function предзагрузить(urls) { for (const u of urls) загрузить(u); }
+
 let ключ = null;
 // опции: позиция (CSS background-position), размер (CSS background-size), время, погода, тинт, глубина ('мягко'|'темно')
 export function задник(url, о = {}) {
@@ -30,7 +33,9 @@ export function задник(url, о = {}) {
     if (о.размер) кадр.style.backgroundSize = о.размер;
     з.querySelector('.з-кадры').appendChild(кадр);
     requestAnimationFrame(() => requestAnimationFrame(() => кадр.classList.add('видно')));
-    setTimeout(() => { for (const к of [...з.querySelectorAll('.з-кадр')]) if (к !== кадр && к.classList.contains('видно')) к.remove(); }, 900);
+    // Убираем всё, кроме самого нового кадра: при двух сменах подряд (быстрее 0,9 с) таймер первой
+    // удалял кадр второй, а таймер второй — первый, и оставался чёрный экран (раунд 2, смена на рынке).
+    setTimeout(() => { const кадры = [...з.querySelectorAll('.з-кадр')], новейший = кадры.at(-1); for (const к of кадры) if (к !== новейший && к.classList.contains('видно')) к.remove(); }, 900);
   };
   if (!url) return показать();
   загрузить(url).then(показать);

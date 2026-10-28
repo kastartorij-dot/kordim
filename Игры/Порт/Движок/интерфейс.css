@@ -837,3 +837,12 @@ html[data-движение="меньше"] .з-кадр { opacity: 1; }
 .меню-сцена::after { background: linear-gradient(90deg, rgba(6, 10, 12, .97) 0, rgba(6, 10, 12, .9) 42%, rgba(6, 10, 12, .35) 78%), linear-gradient(0deg, rgba(6, 10, 12, .8), transparent 40%); }
 .меню-список .b { color: #f8ecd2; text-shadow: 0 1px 14px rgba(0, 0, 0, .95); }
 .меню-список > .b { animation-duration: .25s; }
+/* Раунд 2: итог дня помещается в 1366×768 без прокрутки — шире, плотнее, списки без своих полос. */
+.ов.ночь-дня .овбокс { width: min(740px, 100%); padding: 22px 34px 20px; }
+.ночь-дня .зн.луна { font-size: 30px; }
+.ночь-дня h2 { font-size: 40px !important; margin: 2px 0 2px; }
+.ночь-сон { margin: 0 0 10px; }
+.ночь-дня ul.журнал { max-height: none; overflow: visible; margin: 0 auto 8px; max-width: 60ch; }
+.ночь-дня ul.журнал { line-height: 1.5; }
+.ночь-итог { margin: 4px 0 12px; padding: 10px 0; }
+.ночь-дня #дальше { min-height: 46px; }

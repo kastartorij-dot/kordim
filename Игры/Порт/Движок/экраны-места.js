@@ -189,7 +189,14 @@ export function рендерМесто(S, onШаг) {
   const хвост = в.диалог ? [...$('say').children].slice(-3) : [];
   const plate = $('plate'), последняя = хвост.findLast(з => з.classList.contains('гер')) ?? хвост.at(-1) ?? null;
   plate.scrollTop = 0;
-  if (последняя) plate.scrollTop = Math.max(0, последняя.getBoundingClientRect().top - plate.getBoundingClientRect().top - 12);
+  if (последняя) {
+    // Верх окна — всегда начало записи: если до последней не докрутить (конец ленты), берём ближайшую запись выше,
+    // чтобы сверху не висела обрезанная строка.
+    const верх = plate.getBoundingClientRect().top, предел = plate.scrollHeight - plate.clientHeight;
+    const цель = Math.min(предел, последняя.getBoundingClientRect().top - верх - 12);
+    const начала = [...$('say').children].map(з => з.getBoundingClientRect().top - верх - 12).filter(т => т <= цель);
+    plate.scrollTop = Math.max(0, начала.length ? Math.max(...начала) : 0);
+  }
 
   $('назад').onclick = () => { if (назад(S)) onШаг(S); };
   if (в.план) $('карта').onclick = () => показатьПлан(S);
