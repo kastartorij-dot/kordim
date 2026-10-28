@@ -42,6 +42,7 @@ function убратьОверлеи() {
 
 export function рендерМесто(S, onШаг) {
   убратьОверлеи();
+  document.getElementById('вести')?.replaceChildren(); // всплывшие вести района не висят поверх сцены (раунд 2)
   const в = видСцены(S);
   const Э = описаниеМеста(S), сл = Э.подпись, д = данныеМеста(S);
   const поле = $('экран');
@@ -188,7 +189,7 @@ export function рендерМесто(S, onШаг) {
   const хвост = в.диалог ? [...$('say').children].slice(-3) : [];
   const plate = $('plate'), последняя = хвост.findLast(з => з.classList.contains('гер')) ?? хвост.at(-1) ?? null;
   plate.scrollTop = 0;
-  if (последняя) plate.scrollTop = Math.max(0, последняя.getBoundingClientRect().top - plate.getBoundingClientRect().top - $('who').offsetHeight - 10);
+  if (последняя) plate.scrollTop = Math.max(0, последняя.getBoundingClientRect().top - plate.getBoundingClientRect().top - 12);
 
   $('назад').onclick = () => { if (назад(S)) onШаг(S); };
   if (в.план) $('карта').onclick = () => показатьПлан(S);
