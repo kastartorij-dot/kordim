@@ -178,4 +178,22 @@ function безДублей(S, где) {
   assert.ok(проверено >= 6, 'проверено смен: ' + проверено);
 }
 
+// ── Раунд 2: две смены задника быстрее 0,9 с не оставляют чёрный экран ───────
+{
+  const кадры = [];
+  const узел = (класс = '') => ({ className: класс, style: {}, classList: { _: new Set(), add(к) { this._.add(к); }, contains(к) { return this._.has(к); } }, remove() { кадры.splice(кадры.indexOf(this), 1); } });
+  const контейнер = { appendChild(к) { кадры.push(к); } };
+  const з = { dataset: {}, querySelector: с => с === '.з-кадры' ? контейнер : узел(), querySelectorAll: () => [...кадры] };
+  const былDocument = globalThis.document;
+  globalThis.document = { ...(былDocument ?? {}), getElementById: id => id === 'задник' ? з : null, createElement: () => узел(), addEventListener() {} };
+  globalThis.requestAnimationFrame ??= f => setTimeout(f, 0);
+  globalThis.Image = class { set src(v) { setTimeout(() => this.onload?.(), 5); } };
+  const { задник } = await import('../Движок/задник.js');
+  const ждать = мс => new Promise(r => setTimeout(r, мс));
+  задник('доки.webp'); await ждать(40);
+  задник('торговый.png'); await ждать(1100);
+  assert.deepEqual(кадры.map(к => к.style.backgroundImage), ['url("торговый.png")'], 'остаётся последний кадр, а не пустота');
+  globalThis.document = былDocument;
+}
+
 console.log('круг 1 · интерфейс: ок');
