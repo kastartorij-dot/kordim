@@ -796,3 +796,35 @@ html[data-движение="меньше"] .з-кадр { opacity: 1; }
 #hud-кнопки .b { white-space: nowrap; }
 /* Подписи у краёв карты не вылезают за рамку. */
 .город-полотно .карта-метка { left: clamp(94px, var(--x), calc(100% - 94px)) !important; }
+
+/* Круг 1 · понятность первых дней (PR004-11, -12, -14, -21, -22, -23, PR001-07). */
+.цели-выбор { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; margin: 12px 0 6px; }
+.цель-карточка { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border: 1px solid var(--линия); background: var(--приподнято); }
+.цель-карточка > b { font-family: var(--шрифт-титул); font-size: 24px; font-weight: 600; color: var(--бумага); }
+.цель-карточка p { margin: 0; font-size: var(--т-кнопка); color: var(--бумага-2); }
+.цель-карточка .цель-шаг { font-size: var(--т-мелко); color: var(--бумага-2); }
+.цель-карточка .цель-шаг .mono { display: block; color: var(--свеча); font-style: italic; }
+.цель-карточка .b { margin-top: auto; align-self: flex-start; }
+.весть-цели { display: flex; gap: 12px; align-items: flex-start; text-align: left; margin-top: 14px; padding: 12px 16px; border-color: var(--свеча); background: rgba(231, 178, 99, .1); max-width: 520px; }
+.весть-цели .зн { color: var(--свеча); flex: none; margin-top: 3px; }
+.весть-цели b { display: block; font-weight: 500; font-size: var(--т-кнопка); color: var(--бумага); }
+.весть-цели small { display: block; font-size: var(--т-мелко); color: var(--бумага-2); margin-top: 2px; }
+.тема-журнала .тема-откуда { font-size: var(--т-мелко); color: var(--тихо); font-style: italic; }
+.настройка-ползунок .ползунок { display: flex; align-items: center; gap: 12px; flex: 1; max-width: 300px; }
+.настройка-ползунок input[type="range"] { flex: 1; min-width: 0; height: 32px; accent-color: var(--свеча); cursor: pointer; background: transparent; }
+.настройка-ползунок input[type="range"]:focus-visible { outline: 2px solid var(--свеча); outline-offset: 3px; }
+.настройка-ползунок output { min-width: 5.2em; text-align: right; font-variant-numeric: tabular-nums; color: var(--бумага); font-size: var(--т-кнопка); }
+.ходы-словами { font-size: 12px; color: var(--бумага-2); font-style: italic; letter-spacing: .02em; }
+.действие-разбор { display: block; margin-top: 4px; font-size: var(--т-мелко); color: var(--бумага-2); font-style: italic; }
+.смена-плата { display: flex; align-items: center; gap: 8px; margin: 6px 0 0; font-size: var(--т-кнопка); color: var(--свеча); }
+.смена-плата .зн { flex: none; }
+.cost.риск, #место .cost.риск { color: var(--ржа); }
+/* Разговор: одна прокрутка на панель — реплики и варианты листаются вместе, ничего не режется по строке (PR004-22). */
+#plate { overflow-y: auto; overscroll-behavior: contain; }
+#plate #say { flex: none; min-height: 0; overflow: visible; }
+#plate #acts { flex: none; max-height: none; min-height: 0; overflow: visible; }
+#plate #who { position: sticky; top: -20px; z-index: 2; margin-top: -20px; padding-top: 20px; background: var(--панель-плотно); }
+#место.с-игрой #plate #acts { max-height: none; }
+/* Вкладки журнала: наведение только светлеет текстом, черта — у выбранной, чтобы не было двух «выбранных» (PR004-14). */
+.журнал-вкладки .b:hover:not(:disabled):not(.on) { border-color: transparent; border-bottom-color: transparent; }
+#plate #who { box-shadow: 0 12px 0 var(--панель-плотно); }
