@@ -825,3 +825,6 @@ html[data-движение="меньше"] .з-кадр { opacity: 1; }
 #plate #acts { flex: none; max-height: none; min-height: 0; overflow: visible; }
 #plate #who { position: sticky; top: -20px; z-index: 2; margin-top: -20px; padding-top: 20px; background: var(--панель-плотно); }
 #место.с-игрой #plate #acts { max-height: none; }
+/* Вкладки журнала: наведение только светлеет текстом, черта — у выбранной, чтобы не было двух «выбранных» (PR004-14). */
+.журнал-вкладки .b:hover:not(:disabled):not(.on) { border-color: transparent; border-bottom-color: transparent; }
+#plate #who { box-shadow: 0 12px 0 var(--панель-плотно); }
