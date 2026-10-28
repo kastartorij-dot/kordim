@@ -809,3 +809,9 @@ html[data-движение="меньше"] .з-кадр { opacity: 1; }
 .весть-цели .зн { color: var(--свеча); flex: none; margin-top: 3px; }
 .весть-цели b { display: block; font-weight: 500; font-size: var(--т-кнопка); color: var(--бумага); }
 .весть-цели small { display: block; font-size: var(--т-мелко); color: var(--бумага-2); margin-top: 2px; }
+.тема-журнала .тема-откуда { font-size: var(--т-мелко); color: var(--тихо); font-style: italic; }
+.настройка-ползунок .ползунок { display: flex; align-items: center; gap: 12px; flex: 1; max-width: 300px; }
+.настройка-ползунок input[type="range"] { flex: 1; min-width: 0; height: 32px; accent-color: var(--свеча); cursor: pointer; background: transparent; }
+.настройка-ползунок input[type="range"]:focus-visible { outline: 2px solid var(--свеча); outline-offset: 3px; }
+.настройка-ползунок output { min-width: 5.2em; text-align: right; font-variant-numeric: tabular-nums; color: var(--бумага); font-size: var(--т-кнопка); }
+.ходы-словами { font-size: 12px; color: var(--бумага-2); font-style: italic; letter-spacing: .02em; }
