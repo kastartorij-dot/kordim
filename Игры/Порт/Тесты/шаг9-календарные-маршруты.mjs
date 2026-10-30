@@ -13,9 +13,10 @@ const сценарии={
   async 'поздний-отказ-сцена'(p) {
     p.until(22);p.goal('уехать');
     assert.match(следующийШагУехать(p.S),/Локи/);
-    p.click(действияЦелей(p.S).find(a=>a.id==='цель:снять'),{panel:true});
+    // Отказ — цель, прожившая ночь; снятие в день выбора — проба, в итоге её нет (круг 2).
+    p.until(23);p.click(действияЦелей(p.S).find(a=>a.id==='цель:снять'),{panel:true});
     p.goal('угол');assert.ok(сводкаЦели(p.S).шаг.length>20);
-    p.click(действияЦелей(p.S).find(a=>a.id==='цель:снять'),{panel:true});
+    p.until(24);p.click(действияЦелей(p.S).find(a=>a.id==='цель:снять'),{panel:true});
     p.until(30);p.travel('жилые-улицы');p.slot('ночь');
     p.visit('ночлежка');
     assert.equal(p.S.мир.день,30);assert.equal(p.S.мир.итогСезона,undefined);
