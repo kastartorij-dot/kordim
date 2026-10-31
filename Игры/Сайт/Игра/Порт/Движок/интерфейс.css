@@ -444,6 +444,9 @@ ul.журнал li::marker { color: var(--свеча); }
   #место.с-игрой #acts { grid-column: 2; grid-row: 2; max-height: none; min-height: 0; border-top: 0; border-left: 1px solid var(--линия); padding-left: 14px; }
   #место.с-игрой #say, #место.с-игрой #tone { display: none; }
 }
+/* Окно мини-игры поверх всего: портрет собеседника на время партии убран, плашка выше сцены (PR005-03). */
+#место.с-игрой #portrait { display: none !important; }
+#место.с-игрой #plate { position: relative; z-index: 5; }
 /* На телефоне — одна прокрутка плашки; пустая сцена на время игры уступает место. */
 @media (max-width: 900px) {
   #место.с-игрой #scene { display: none; }
