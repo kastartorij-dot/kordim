@@ -3,7 +3,8 @@ body.стенд { --panel-height: 0px; }
 .стенд #hud { gap: 14px; padding-bottom: 12px; }
 .стенд-назад { order: 1; flex: none; min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; border: 1px solid var(--линия); }
 .стенд .hud-бренд { order: 2; margin-right: auto; }
-.стенд-звук { order: 3; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 6px; font: 500 15px/1 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; color: var(--бумага-2); cursor: pointer; }
+.стенд-прототипы { order: 3; flex: none; min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; border: 1px solid var(--линия); }
+.стенд-звук { order: 4; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 6px; font: 500 15px/1 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; color: var(--бумага-2); cursor: pointer; }
 .стенд-звук input { width: 20px; height: 20px; accent-color: var(--свеча); margin: 0; }
 .стенд-звук:has(input:focus-visible) { outline: 2px solid var(--свеча); outline-offset: 2px; }
 
@@ -15,7 +16,8 @@ body.стенд { --panel-height: 0px; }
 .стенд .смена-карточка.задача { max-height: none; overflow: visible; }
 
 /* список игр: имя, где она в игре, одна строка описания */
-#стенд-список { display: flex; flex-direction: column; gap: 6px; }
+#стенд-список { display: flex; flex-direction: column; gap: 6px; flex: 0 1 auto; min-height: 170px; overflow-y: auto; }
+#стенд-упр { flex: none; }
 .стенд-игра { display: flex; flex-direction: column; align-items: stretch; gap: 2px; width: 100%; min-width: 0; padding: 9px 14px 10px; text-align: left; background: var(--панель); border: 1px solid var(--линия); border-left: 3px solid transparent; }
 .стенд-игра:hover { border-color: var(--линия-ярко); }
 .стенд-игра[aria-pressed="true"] { border-color: var(--линия-ярко); border-left-color: var(--свеча); background: rgba(231, 178, 99, .1); }

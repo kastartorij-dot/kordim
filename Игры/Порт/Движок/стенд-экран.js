@@ -26,8 +26,12 @@ function ошибкаСтарта(е) {
 // ── список игр ───────────────────────────────────────────────────────────
 function рисоватьСписок() {
   const список = $('стенд-список');
+  if (список.children.length) {
+    список.querySelectorAll('.стенд-игра').forEach(б => { const он = б.dataset.id === П.игра?.id; б.setAttribute('aria-pressed', String(он)); б.tabIndex = он ? 0 : -1; });
+    return;
+  }
   список.innerHTML = игры().map(и => `
-    <button class="стенд-игра" type="button" data-id="${экр(и.id)}" aria-pressed="${и === П.игра}">
+    <button class="стенд-игра" type="button" data-id="${экр(и.id)}" aria-pressed="${и === П.игра}" tabindex="${и === П.игра ? 0 : -1}" aria-label="${экр(и.имя)}" title="${экр(`${и.где} — ${и.описание}`)}">
       <span class="имя">${экр(и.имя)}</span>
       <span class="где">${экр(и.где)}</span>
       <span class="опис">${экр(и.описание)}</span>
@@ -36,7 +40,7 @@ function рисоватьСписок() {
     б.onclick = () => выбратьИгру(б.dataset.id);
   });
 }
-// Стрелки ↑ ↓ (и ← →) переходят по списку, Enter запускает — обычные кнопки это и так умеют, стрелки быстрее.
+// Список — одна остановка на Tab (выбранная игра): стрелки ↑ ↓ ← → переходят по списку, Enter или пробел запускают.
 $('стенд-список').addEventListener('keydown', e => {
   const шаг = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
   if (!шаг) return;
@@ -83,7 +87,7 @@ function выбратьИгру(id) {
   if (!ступени(и).includes(П.ступень)) П.ступень = ступени(и).includes('умеешь') ? 'умеешь' : ступени(и)[0] ?? 'умеешь';
   рисоватьСписок();
   старт();
-  $('стенд-список').querySelector('[aria-pressed="true"]')?.focus({ preventScroll: true });
+  $('стенд-список').querySelector('[aria-pressed="true"]')?.focus();
 }
 
 function старт() {
