@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Песочница мини-игр — Порт Теней</title>
+<!-- Прототип для автора: живые мини-игры (мышь, удержание, тайминг, клавиши). Только ПК.
+     В игру пока не встроено; каждая игра — модуль Движок/песочница/<игра>.js с запустить(). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,500;0,700;1,400&family=Alegreya+SC:wght@500;700&family=Cormorant:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./Движок/песочница/песочница.css">
+</head>
+<body>
+<div class="пс-страница">
+  <aside class="пс-бок">
+    <h1>Песочница</h1>
+    <p class="пс-под">живые мини-игры · прототип</p>
+    <nav class="пс-список" aria-label="Мини-игры"></nav>
+    <p class="пс-заметка">Каждая игра — 20–60 секунд, одно главное действие, исход на три уровня. Навык героя облегчает: шире зона, медленнее ход.</p>
+  </aside>
+  <main class="пс-главная">
+    <div class="пс-верх">
+      <span><span class="пс-метка">навык героя</span><span class="пс-сегменты" role="group" aria-label="Навык героя"></span></span>
+      <button class="пс-кн-тихо" aria-pressed="false">звук: тихо</button>
+      <span class="пс-клавиши">Enter — начать и «Ещё раз»</span>
+    </div>
+    <div class="пс-место">
+      <div id="игра"></div>
+      <div class="пс-итог" hidden></div>
+    </div>
+  </main>
+</div>
+<script type="module" src="./Движок/песочница/страница.js"></script>
+</body>
+</html>
