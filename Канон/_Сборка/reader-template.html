@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__TITLE__</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5efe3;
+  --paper: #fbf7ef;
+  --ink: #2a241d;
+  --muted: #8a7f70;
+  --faint: #c9bfae;
+  --rule: #e4dac8;
+  --accent: #8c3b2a;
+  --ui-bg: #fffaf2;
+  --ui-shadow: 0 6px 24px rgba(60, 40, 20, .16);
+  --m-dislike: rgba(214, 72, 52, .22);
+  --m-dislike-line: #c4412d;
+  --m-question: rgba(52, 116, 214, .2);
+  --m-question-line: #2f68c0;
+  --m-note: rgba(222, 170, 40, .3);
+  --m-note-line: #b9850f;
+  --size: 20px;
+}
+:root[data-theme="dark"] {
+  --bg: #161411;
+  --paper: #1d1a16;
+  --ink: #ddd4c6;
+  --muted: #8f8577;
+  --faint: #4a443b;
+  --rule: #2f2a24;
+  --accent: #d98b6c;
+  --ui-bg: #26221d;
+  --ui-shadow: 0 6px 24px rgba(0, 0, 0, .5);
+  --m-dislike: rgba(240, 100, 80, .26);
+  --m-dislike-line: #f07a63;
+  --m-question: rgba(100, 160, 250, .24);
+  --m-question-line: #7fb0ff;
+  --m-note: rgba(240, 190, 60, .24);
+  --m-note-line: #e8b94a;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 80px; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Literata", Georgia, "Times New Roman", serif;
+  font-size: var(--size);
+  line-height: 1.68;
+  -webkit-font-smoothing: antialiased;
+  transition: background .25s, color .25s;
+}
+button { font: inherit; color: inherit; }
+.ui { font-family: "PT Sans", "Segoe UI", Arial, sans-serif; }
+
+#progress { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: var(--accent); z-index: 30; }
+
+.top {
+  position: fixed; top: 10px; right: 12px; z-index: 20;
+  display: flex; gap: 6px;
+}
+.top button {
+  border: 1px solid var(--rule); background: var(--ui-bg); border-radius: 999px;
+  padding: 6px 12px; font-size: 14px; cursor: pointer; box-shadow: var(--ui-shadow);
+}
+.top button:hover { border-color: var(--muted); }
+#notesBtn b { color: var(--accent); }
+
+main {
+  max-width: 40em;
+  margin: 0 auto;
+  padding: 88px 16px 160px;
+}
+.sheet {
+  background: var(--paper);
+  border-radius: 6px;
+  padding: 64px clamp(20px, 7vw, 76px) 72px;
+  box-shadow: 0 1px 0 var(--rule), 0 20px 50px -30px rgba(60, 40, 20, .35);
+}
+header { text-align: center; margin-bottom: 48px; }
+.kicker { font-size: 13px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
+h1 { font-weight: 600; font-size: 2.1em; line-height: 1.15; margin: .35em 0 .3em; letter-spacing: -.01em; }
+.meta { font-size: 14px; color: var(--muted); }
+.meta .draft { color: var(--accent); }
+.hint {
+  margin: 28px auto 0; max-width: 30em; font-size: 14px; line-height: 1.5; color: var(--muted);
+  border-top: 1px solid var(--rule); padding-top: 16px;
+}
+.hint kbd { font-family: inherit; border: 1px solid var(--rule); border-radius: 4px; padding: 0 5px; font-size: 12px; }
+
+article { hyphens: auto; -webkit-hyphens: auto; }
+article p {
+  margin: 0; text-indent: 1.5em; position: relative;
+}
+article p.first { text-indent: 0; }
+article p.first::first-letter {
+  float: left; font-size: 3.4em; line-height: .9; padding: .06em .08em 0 0; font-weight: 600; color: var(--accent);
+}
+article p .ln {
+  position: absolute; left: -3.6em; top: .32em; width: 2.8em; text-align: right; text-indent: 0;
+  font-family: "PT Sans", Arial, sans-serif; font-size: 12px; color: var(--faint);
+  cursor: pointer; user-select: none; -webkit-user-select: none;
+  opacity: 0; transition: opacity .15s;
+}
+article p:hover .ln { opacity: 1; }
+article p .ln:hover { color: var(--accent); }
+article p.has-note .ln { opacity: 1; color: var(--muted); }
+article h2 { font-size: 1.15em; text-align: center; margin: 2em 0 1em; font-weight: 600; }
+.break {
+  text-align: center; color: var(--muted); margin: 1.6em 0; letter-spacing: .6em; font-size: .9em;
+  user-select: none; -webkit-user-select: none;
+}
+.end { text-align: center; color: var(--muted); margin-top: 3em; font-size: .9em; letter-spacing: .3em; }
+
+mark { color: inherit; border-radius: 2px; cursor: pointer; padding: .05em 0; }
+mark.t-dislike { background: var(--m-dislike); box-shadow: inset 0 -2px 0 var(--m-dislike-line); }
+mark.t-question { background: var(--m-question); box-shadow: inset 0 -2px 0 var(--m-question-line); }
+mark.t-note { background: var(--m-note); box-shadow: inset 0 -2px 0 var(--m-note-line); }
+mark.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* панель выделения */
+#selbar {
+  position: fixed; left: 50%; bottom: 18px; transform: translate(-50%, 140%);
+  background: var(--ui-bg); border: 1px solid var(--rule); border-radius: 14px; box-shadow: var(--ui-shadow);
+  padding: 8px; display: flex; gap: 6px; align-items: center; z-index: 25;
+  transition: transform .18s ease; max-width: calc(100vw - 24px);
+}
+#selbar.on { transform: translate(-50%, 0); }
+#selbar .q { font-size: 13px; color: var(--muted); max-width: 16em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 6px; }
+.tbtn {
+  border: 1px solid var(--rule); background: transparent; border-radius: 10px; padding: 7px 12px;
+  font-size: 14px; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;
+}
+.tbtn:hover { border-color: var(--muted); }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none; }
+.dot.t-dislike { background: var(--m-dislike-line); }
+.dot.t-question { background: var(--m-question-line); }
+.dot.t-note { background: var(--m-note-line); }
+.tbtn small { color: var(--muted); font-size: 11px; }
+
+/* редактор заметки */
+#editor {
+  position: fixed; inset: 0; background: rgba(20, 15, 10, .35); z-index: 40;
+  display: none; align-items: flex-end; justify-content: center; padding: 16px;
+}
+#editor.on { display: flex; }
+.ed {
+  background: var(--ui-bg); border-radius: 16px; box-shadow: var(--ui-shadow); width: min(560px, 100%);
+  padding: 18px 18px 14px; margin-bottom: 4vh;
+}
+.ed .quote {
+  font-family: "Literata", Georgia, serif; font-size: 16px; line-height: 1.5; max-height: 9em; overflow: auto;
+  border-left: 3px solid var(--faint); padding: 2px 0 2px 12px; margin-bottom: 12px; color: var(--ink);
+}
+.ed .where { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.types { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.types .tbtn[aria-pressed="true"] { border-color: var(--ink); background: var(--paper); font-weight: 700; }
+.ed textarea {
+  width: 100%; min-height: 96px; resize: vertical; border: 1px solid var(--rule); border-radius: 10px;
+  background: var(--paper); color: var(--ink); padding: 10px 12px; font: 15px/1.45 "PT Sans", Arial, sans-serif;
+}
+.ed textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
+.row { display: flex; gap: 8px; justify-content: flex-end; align-items: center; margin-top: 12px; }
+.row .grow { flex: 1; }
+.pbtn { border: 0; background: var(--accent); color: #fff; border-radius: 10px; padding: 8px 16px; cursor: pointer; font-size: 14px; font-weight: 700; }
+.lbtn { border: 0; background: transparent; color: var(--muted); padding: 8px 10px; cursor: pointer; font-size: 14px; }
+.lbtn:hover { color: var(--ink); }
+.lbtn.danger:hover { color: var(--m-dislike-line); }
+
+/* список заметок */
+#drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 100vw); z-index: 35;
+  background: var(--ui-bg); box-shadow: var(--ui-shadow); transform: translateX(105%); transition: transform .22s ease;
+  display: flex; flex-direction: column;
+}
+#drawer.on { transform: translateX(0); }
+.dh { padding: 16px 18px 12px; border-bottom: 1px solid var(--rule); }
+.dh h3 { margin: 0 0 10px; font-size: 18px; display: flex; justify-content: space-between; align-items: center; }
+.dh .acts { display: flex; gap: 6px; flex-wrap: wrap; }
+.dh .copied { font-size: 13px; color: var(--accent); min-height: 1.2em; margin-top: 6px; }
+#list { overflow: auto; padding: 8px 10px 40px; flex: 1; }
+.item { padding: 10px 10px 12px; border-radius: 10px; cursor: pointer; border: 1px solid transparent; }
+.item:hover { background: var(--paper); border-color: var(--rule); }
+.item .h { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.item .h b { color: var(--ink); font-size: 13px; }
+.item .qq { font-family: "Literata", Georgia, serif; font-size: 14px; line-height: 1.45; margin: 4px 0 2px; color: var(--ink); }
+.item .c { font-size: 14px; line-height: 1.4; }
+.item.lost .qq { text-decoration: line-through; opacity: .6; }
+.empty { color: var(--muted); font-size: 14px; padding: 20px 12px; line-height: 1.5; }
+.filters { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.filters .tbtn { padding: 4px 10px; font-size: 13px; }
+.filters .tbtn[aria-pressed="true"] { border-color: var(--ink); }
+
+.warn { position: fixed; left: 12px; bottom: 12px; font-size: 13px; color: var(--m-dislike-line); z-index: 20; max-width: 22em; }
+
+@media (max-width: 760px) {
+  :root { --size: 18px; }
+  main { padding: 64px 0 160px; }
+  .sheet { border-radius: 0; padding: 40px 18px 56px; box-shadow: none; }
+  article p .ln { display: none; }
+  .top { top: 8px; right: 8px; }
+  .top button { padding: 5px 10px; }
+  #selbar .q { display: none; }
+  #selbar small { display: none; }
+}
+@media print {
+  .top, #selbar, #drawer, #editor, #progress, .hint { display: none !important; }
+  body { background: #fff; }
+  .sheet { box-shadow: none; }
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div class="top ui">
+  <button id="smaller" title="Мельче">А−</button>
+  <button id="bigger" title="Крупнее">А+</button>
+  <button id="theme" title="Тема">☾</button>
+  <button id="notesBtn">Заметки <b id="count">0</b></button>
+</div>
+
+<main>
+  <div class="sheet">
+    <header>
+      <div class="kicker ui">Кордим · проза</div>
+      <h1 id="title"></h1>
+      <div class="meta ui" id="meta"></div>
+      <div class="hint ui">
+        Выдели слово или кусок текста — снизу появится панель: <b>не нравится</b>, <b>вопрос</b> или <b>заметка</b>
+        (или клавиши <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>). Номер строки слева от абзаца — заметка на весь абзац.
+        Щелчок по выделенному — изменить. Когда закончишь: «Заметки» → «Скопировать для Claude» и вставь в чат.
+      </div>
+    </header>
+    <article id="text"></article>
+    <div class="end">⁂</div>
+  </div>
+</main>
+
+<div id="selbar" class="ui">
+  <span class="q" id="selq"></span>
+  <button class="tbtn" data-type="dislike"><span class="dot t-dislike"></span>Не нравится <small>1</small></button>
+  <button class="tbtn" data-type="question"><span class="dot t-question"></span>Вопрос <small>2</small></button>
+  <button class="tbtn" data-type="note"><span class="dot t-note"></span>Заметка <small>3</small></button>
+</div>
+
+<div id="editor" class="ui">
+  <div class="ed" role="dialog" aria-modal="true">
+    <div class="where" id="edWhere"></div>
+    <div class="quote" id="edQuote"></div>
+    <div class="types" id="edTypes">
+      <button class="tbtn" data-type="dislike"><span class="dot t-dislike"></span>Не нравится</button>
+      <button class="tbtn" data-type="question"><span class="dot t-question"></span>Вопрос</button>
+      <button class="tbtn" data-type="note"><span class="dot t-note"></span>Заметка</button>
+    </div>
+    <textarea id="edText" placeholder="Что не так, что спросить, как лучше… (можно оставить пустым)"></textarea>
+    <div class="row">
+      <button class="lbtn danger" id="edDelete">Удалить</button>
+      <span class="grow"></span>
+      <button class="lbtn" id="edCancel">Отмена</button>
+      <button class="pbtn" id="edSave">Сохранить <small style="opacity:.7;font-weight:400">Ctrl+Enter</small></button>
+    </div>
+  </div>
+</div>
+
+<aside id="drawer" class="ui" aria-label="Заметки">
+  <div class="dh">
+    <h3>Заметки <button class="lbtn" id="closeDrawer" title="Закрыть">✕</button></h3>
+    <div class="acts">
+      <button class="pbtn" id="copyAll">Скопировать для Claude</button>
+      <button class="tbtn" id="download">Сохранить файлом</button>
+      <button class="lbtn danger" id="clearAll">Очистить</button>
+    </div>
+    <div class="filters" id="filters">
+      <button class="tbtn" data-f="all" aria-pressed="true">Все</button>
+      <button class="tbtn" data-f="dislike"><span class="dot t-dislike"></span>Не нравится</button>
+      <button class="tbtn" data-f="question"><span class="dot t-question"></span>Вопросы</button>
+      <button class="tbtn" data-f="note"><span class="dot t-note"></span>Заметки</button>
+    </div>
+    <div class="copied" id="copied"></div>
+  </div>
+  <div id="list"></div>
+</aside>
+<div class="warn ui" id="warn"></div>
+
+<script>
+var DOC = __DATA__;
+(function () {
+  var TYPES = { dislike: 'Не нравится', question: 'Вопрос', note: 'Заметка' };
+  var KEY = 'kordim-reader:' + DOC.id;
+  var root = document.documentElement;
+
+  // хранилище: в приватном окне или при запрете может не работать — тогда предупреждаем
+  var storageOk = true;
+  function load(k, def) {
+    try { var v = localStorage.getItem(KEY + ':' + k); return v == null ? def : JSON.parse(v); }
+    catch (e) { storageOk = false; return def; }
+  }
+  function save(k, v) {
+    try { localStorage.setItem(KEY + ':' + k, JSON.stringify(v)); }
+    catch (e) { storageOk = false; showWarn(); }
+  }
+  function showWarn() {
+    if (!storageOk) document.getElementById('warn').textContent =
+      'Браузер не даёт сохранять заметки — скопируй их перед закрытием вкладки.';
+  }
+
+  // текст: абзацы склеены через \n, у каждого — смещение начала в общей строке
+  var paras = DOC.blocks.filter(function (b) { return b.kind === 'p'; });
+  var full = '', starts = [];
+  paras.forEach(function (p, i) { if (i) full += '\n'; starts.push(full.length); full += p.text; });
+
+  function paraAt(off) {
+    var lo = 0, hi = starts.length - 1;
+    while (lo < hi) { var mid = (lo + hi + 1) >> 1; if (starts[mid] <= off) lo = mid; else hi = mid - 1; }
+    return lo;
+  }
+
+  var notes = load('notes', []);
+  var filter = 'all';
+
+  // текст мог поменяться после правки файла — ищем цитату заново, ближайшее вхождение к старому месту
+  function reanchor() {
+    notes.forEach(function (n) {
+      if (full.slice(n.start, n.end) === n.quote) { n.lost = false; return; }
+      var best = -1, from = 0, idx;
+      while ((idx = full.indexOf(n.quote, from)) !== -1) {
+        if (best < 0 || Math.abs(idx - n.start) < Math.abs(best - n.start)) best = idx;
+        from = idx + 1;
+      }
+      if (best >= 0) { n.start = best; n.end = best + n.quote.length; n.lost = false; }
+      else n.lost = true;
+    });
+  }
+
+  function lineOf(off) { return paras[paraAt(off)].line; }
+  function whereOf(n) {
+    var a = lineOf(n.start), b = lineOf(Math.max(n.start, n.end - 1));
+    return a === b ? 'стр. ' + a : 'стр. ' + a + '–' + b;
+  }
+
+  function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  // разметка
+  var article = document.getElementById('text');
+  var pEls = [];
+  function build() {
+    document.title = DOC.title;
+    document.getElementById('title').textContent = DOC.title;
+    var words = full.split(/\s+/).filter(Boolean).length;
+    var mins = Math.round(words / 180);
+    document.getElementById('meta').innerHTML =
+      (DOC.status ? '<span class="draft">' + esc(DOC.status) + '</span> · ' : '') +
+      words.toLocaleString('ru-RU') + ' слов · около ' + mins + ' мин чтения';
+    var pi = 0, afterBreak = true;
+    DOC.blocks.forEach(function (b) {
+      if (b.kind === 'break') { var d = document.createElement('div'); d.className = 'break'; d.textContent = '✦ ✦ ✦'; article.appendChild(d); afterBreak = true; return; }
+      if (b.kind === 'h') { var h = document.createElement('h2'); h.textContent = b.text; article.appendChild(h); afterBreak = true; return; }
+      var p = document.createElement('p');
+      p.dataset.i = pi++;
+      if (afterBreak && /^[^—–-]/.test(b.text)) p.className = 'first';
+      afterBreak = false;
+      article.appendChild(p);
+      pEls.push(p);
+    });
+  }
+
+  function paint() {
+    pEls.forEach(function (p, i) {
+      var s0 = starts[i], s1 = s0 + paras[i].text.length;
+      var cuts = [0, paras[i].text.length], live = [];
+      notes.forEach(function (n) {
+        if (n.lost || n.end <= s0 || n.start >= s1) return;
+        var a = Math.max(n.start, s0) - s0, b = Math.min(n.end, s1) - s0;
+        live.push({ n: n, a: a, b: b }); cuts.push(a, b);
+      });
+      cuts = cuts.filter(function (v, k, arr) { return arr.indexOf(v) === k; }).sort(function (x, y) { return x - y; });
+      var html = '<span class="ln" title="Заметка на весь абзац">' + paras[i].line + '</span>';
+      for (var k = 0; k < cuts.length - 1; k++) {
+        var a = cuts[k], b = cuts[k + 1], seg = esc(paras[i].text.slice(a, b));
+        var cover = live.filter(function (x) { return x.a <= a && x.b >= b; });
+        if (!cover.length) { html += seg; continue; }
+        var top = cover[cover.length - 1].n;
+        html += '<mark class="t-' + top.type + '" data-ids="' + cover.map(function (x) { return x.n.id; }).join(',') + '">' + seg + '</mark>';
+      }
+      p.innerHTML = html;
+      p.classList.toggle('has-note', live.length > 0);
+    });
+    document.getElementById('count').textContent = notes.length;
+    renderList();
+  }
+
+  // выделение → смещения в общей строке
+  var pending = null;
+  function pointOffset(node, off) {
+    var el = node.nodeType === 1 ? node : node.parentNode;
+    var p = el.closest && el.closest('article p');
+    if (!p) return null;
+    var r = document.createRange();
+    r.setStart(p, 0);
+    r.setEnd(node, off);
+    var text = r.toString();
+    var ln = p.querySelector('.ln');
+    if (ln && r.intersectsNode(ln)) text = text.slice(ln.textContent.length);
+    return starts[+p.dataset.i] + text.length;
+  }
+  function readSelection() {
+    var sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.rangeCount) return null;
+    var r = sel.getRangeAt(0);
+    if (!article.contains(r.commonAncestorContainer)) return null;
+    var a = pointOffset(r.startContainer, r.startOffset);
+    var b = pointOffset(r.endContainer, r.endOffset);
+    if (a == null || b == null) {
+      // край выделения на разделителе сцены — подтягиваем к ближайшему абзацу
+      var ps = pEls.filter(function (p) { return r.intersectsNode(p); });
+      if (!ps.length) return null;
+      if (a == null) a = starts[+ps[0].dataset.i];
+      if (b == null) { var last = +ps[ps.length - 1].dataset.i; b = starts[last] + paras[last].text.length; }
+    }
+    while (a < b && /\s/.test(full[a])) a++;
+    while (b > a && /\s/.test(full[b - 1])) b--;
+    // недовыделенное слово добираем целиком
+    var letter = /[0-9A-Za-zА-Яа-яЁё]/;
+    while (a > 0 && letter.test(full[a - 1]) && letter.test(full[a])) a--;
+    while (b < full.length && letter.test(full[b]) && letter.test(full[b - 1])) b++;
+    if (b <= a) return null;
+    return { start: a, end: b };
+  }
+
+  var selbar = document.getElementById('selbar');
+  var selTimer;
+  document.addEventListener('selectionchange', function () {
+    clearTimeout(selTimer);
+    selTimer = setTimeout(function () {
+      if (editorOpen) return;
+      pending = readSelection();
+      selbar.classList.toggle('on', !!pending);
+      if (pending) document.getElementById('selq').textContent = '«' + full.slice(pending.start, pending.end).replace(/\n/g, ' ') + '»';
+    }, 120);
+  });
+  selbar.addEventListener('mousedown', function (e) { e.preventDefault(); });
+  selbar.querySelectorAll('.tbtn').forEach(function (b) {
+    b.addEventListener('click', function () { if (pending) openEditor({ start: pending.start, end: pending.end, type: b.dataset.type }); });
+  });
+
+  // редактор
+  var editor = document.getElementById('editor'), edText = document.getElementById('edText');
+  var editorOpen = false, editing = null, edType = 'note';
+  function setType(t) {
+    edType = t;
+    document.querySelectorAll('#edTypes .tbtn').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.type === t); });
+  }
+  document.querySelectorAll('#edTypes .tbtn').forEach(function (b) { b.addEventListener('click', function () { setType(b.dataset.type); }); });
+  function openEditor(n) {
+    editing = n;
+    editorOpen = true;
+    setType(n.type);
+    var q = n.quote || full.slice(n.start, n.end);
+    document.getElementById('edQuote').textContent = q;
+    document.getElementById('edWhere').textContent = whereOf(n) + (n.id ? '' : ' · новая');
+    document.getElementById('edDelete').style.visibility = n.id ? 'visible' : 'hidden';
+    edText.value = n.comment || '';
+    selbar.classList.remove('on');
+    editor.classList.add('on');
+    setTimeout(function () { edText.focus(); }, 30);
+  }
+  function closeEditor() { editor.classList.remove('on'); editorOpen = false; editing = null; }
+  function commit() {
+    if (!editing) return;
+    if (editing.id) {
+      editing.type = edType; editing.comment = edText.value.trim();
+    } else {
+      notes.push({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        type: edType, start: editing.start, end: editing.end,
+        quote: full.slice(editing.start, editing.end), comment: edText.value.trim(), at: new Date().toISOString()
+      });
+      window.getSelection().removeAllRanges();
+    }
+    notes.sort(function (x, y) { return x.start - y.start; });
+    save('notes', notes);
+    closeEditor();
+    paint();
+  }
+  document.getElementById('edSave').addEventListener('click', commit);
+  document.getElementById('edCancel').addEventListener('click', closeEditor);
+  document.getElementById('edDelete').addEventListener('click', function () {
+    if (!editing || !editing.id) return;
+    notes = notes.filter(function (n) { return n !== editing; });
+    save('notes', notes); closeEditor(); paint();
+  });
+  editor.addEventListener('mousedown', function (e) { if (e.target === editor) closeEditor(); });
+  edText.addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); commit(); } });
+
+  // щелчок по выделенному месту или по номеру строки
+  article.addEventListener('click', function (e) {
+    var ln = e.target.closest('.ln');
+    if (ln) {
+      var i = +ln.parentNode.dataset.i;
+      openEditor({ start: starts[i], end: starts[i] + paras[i].text.length, type: 'note' });
+      return;
+    }
+    var m = e.target.closest('mark');
+    if (m && window.getSelection().isCollapsed) {
+      var ids = m.dataset.ids.split(',');
+      var n = notes.filter(function (x) { return x.id === ids[ids.length - 1]; })[0];
+      if (n) openEditor(n);
+    }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { if (editorOpen) closeEditor(); else drawer.classList.remove('on'); return; }
+    if (editorOpen || e.ctrlKey || e.metaKey || e.altKey) return;
+    var t = { '1': 'dislike', '2': 'question', '3': 'note' }[e.key];
+    if (t && pending) { e.preventDefault(); openEditor({ start: pending.start, end: pending.end, type: t }); }
+  });
+
+  // список заметок
+  var drawer = document.getElementById('drawer');
+  document.getElementById('notesBtn').addEventListener('click', function () { drawer.classList.toggle('on'); });
+  document.getElementById('closeDrawer').addEventListener('click', function () { drawer.classList.remove('on'); });
+  document.querySelectorAll('#filters .tbtn').forEach(function (b) {
+    b.addEventListener('click', function () {
+      filter = b.dataset.f;
+      document.querySelectorAll('#filters .tbtn').forEach(function (x) { x.setAttribute('aria-pressed', x === b); });
+      renderList();
+    });
+  });
+  function renderList() {
+    var list = document.getElementById('list');
+    var shown = notes.filter(function (n) { return filter === 'all' || n.type === filter; });
+    if (!notes.length) { list.innerHTML = '<div class="empty">Пока пусто. Выдели в тексте то, что царапает, и выбери, что это.</div>'; return; }
+    if (!shown.length) { list.innerHTML = '<div class="empty">В этом фильтре заметок нет.</div>'; return; }
+    list.innerHTML = '';
+    shown.forEach(function (n) {
+      var d = document.createElement('div');
+      d.className = 'item' + (n.lost ? ' lost' : '');
+      var q = n.quote.length > 220 ? n.quote.slice(0, 220) + '…' : n.quote;
+      d.innerHTML = '<div class="h"><span class="dot t-' + n.type + '"></span><b>' + TYPES[n.type] + '</b>' +
+        (n.lost ? 'место не найдено после правки' : whereOf(n)) + '</div>' +
+        '<div class="qq">«' + esc(q) + '»</div>' + (n.comment ? '<div class="c">' + esc(n.comment) + '</div>' : '');
+      d.addEventListener('click', function () { jump(n); });
+      d.addEventListener('dblclick', function () { openEditor(n); });
+      list.appendChild(d);
+    });
+  }
+  function jump(n) {
+    if (n.lost) { openEditor(n); return; }
+    var m = article.querySelector('mark[data-ids*="' + n.id + '"]');
+    if (!m) return;
+    if (window.innerWidth < 760) drawer.classList.remove('on');
+    m.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    var all = article.querySelectorAll('mark[data-ids*="' + n.id + '"]');
+    all.forEach(function (x) { x.classList.add('flash'); });
+    setTimeout(function () { all.forEach(function (x) { x.classList.remove('flash'); }); }, 1600);
+  }
+
+  // выгрузка
+  function exportText() {
+    var out = DOC.title + ' — заметки к вычитке (' + notes.length + ')\nФайл: ' + DOC.file + '\n';
+    ['dislike', 'question', 'note'].forEach(function (t) {
+      var part = notes.filter(function (n) { return n.type === t; });
+      if (!part.length) return;
+      out += '\n## ' + { dislike: 'Не нравится', question: 'Вопросы', note: 'Заметки' }[t] + '\n';
+      part.forEach(function (n, k) {
+        out += '\n' + (k + 1) + '. ' + (n.lost ? 'место не найдено' : whereOf(n)) + ': «' + n.quote.replace(/\n/g, ' / ') + '»\n';
+        if (n.comment) out += '   → ' + n.comment.replace(/\n/g, '\n     ') + '\n';
+      });
+    });
+    return out;
+  }
+  function flashMsg(s) { var c = document.getElementById('copied'); c.textContent = s; setTimeout(function () { c.textContent = ''; }, 2600); }
+  document.getElementById('copyAll').addEventListener('click', function () {
+    if (!notes.length) { flashMsg('Заметок пока нет.'); return; }
+    var text = exportText();
+    var fallback = function () {
+      var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); flashMsg('Скопировано — вставь в чат.'); } catch (e) { flashMsg('Не вышло скопировать — сохрани файлом.'); }
+      ta.remove();
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText)
+      navigator.clipboard.writeText(text).then(function () { flashMsg('Скопировано — вставь в чат.'); }, fallback);
+    else fallback();
+  });
+  document.getElementById('download').addEventListener('click', function () {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([exportText()], { type: 'text/markdown;charset=utf-8' }));
+    a.download = DOC.title.replace(/\s+/g, '_') + '_заметки.md';
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+  document.getElementById('clearAll').addEventListener('click', function () {
+    if (!notes.length || !confirm('Удалить все заметки (' + notes.length + ')? Сначала лучше скопировать.')) return;
+    notes = []; save('notes', notes); paint();
+  });
+
+  // чтение: размер, тема, прогресс, место
+  var size = load('size', window.innerWidth < 760 ? 18 : 20);
+  function applySize() { root.style.setProperty('--size', size + 'px'); }
+  document.getElementById('smaller').addEventListener('click', function () { size = Math.max(15, size - 1); applySize(); save('size', size); });
+  document.getElementById('bigger').addEventListener('click', function () { size = Math.min(28, size + 1); applySize(); save('size', size); });
+  var theme = load('theme', window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  function applyTheme() { root.dataset.theme = theme; document.getElementById('theme').textContent = theme === 'dark' ? '☀' : '☾'; }
+  document.getElementById('theme').addEventListener('click', function () { theme = theme === 'dark' ? 'light' : 'dark'; applyTheme(); save('theme', theme); });
+
+  var bar = document.getElementById('progress'), saveTimer;
+  window.addEventListener('scroll', function () {
+    var h = document.documentElement.scrollHeight - innerHeight;
+    bar.style.width = (h > 0 ? scrollY / h * 100 : 0) + '%';
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () { save('pos', scrollY / Math.max(1, document.documentElement.scrollHeight)); }, 300);
+  }, { passive: true });
+
+  applySize(); applyTheme();
+  build(); reanchor(); paint(); showWarn();
+  var pos = load('pos', 0);
+  if (pos) requestAnimationFrame(function () { scrollTo(0, pos * document.documentElement.scrollHeight); });
+})();
+</script>
+</body>
+</html>
