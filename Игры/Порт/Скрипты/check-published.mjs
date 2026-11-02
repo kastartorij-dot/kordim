@@ -8,7 +8,7 @@ import { недостающиеСцены } from './сцены-близости.
 const source = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const repository = resolve(source, '..', '..');
 const published = join(repository, 'Игры', 'Сайт', 'Игра', 'Порт');
-const entries = ['index.html', 'стенд-игр.html', 'Данные', 'Движок', 'Сцены', 'Ресурсы'];
+const entries = ['index.html', 'стенд-игр.html', 'песочница-игр.html', 'Данные', 'Движок', 'Сцены', 'Ресурсы'];
 
 async function filesUnder(path, prefix = '') {
   if ((await stat(path)).isFile()) return [prefix];

@@ -1,0 +1,77 @@
+/* Песочница мини-игр: страница-прототип для ПК (1366×768 и шире). Цвета и шрифты — из интерфейс.css. */
+:root {
+  --ночь: #0a1013; --смола: #10181b; --панель: rgba(13, 19, 22, .88); --линия: rgba(226, 198, 146, .17);
+  --линия-ярко: rgba(226, 198, 146, .45); --бумага: #efe3c9; --бумага-2: #cbbd9e; --тихо: #8f978f;
+  --свеча: #e7b263; --море: #93c7c2; --ржа: #e07f62; --трава: #aac98b; --чернила: #1a1309;
+  --шрифт-текст: 'Alegreya', Georgia, serif; --шрифт-метка: 'Alegreya SC', Georgia, serif;
+  --шрифт-титул: 'Cormorant', 'Alegreya', Georgia, serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: radial-gradient(ellipse at 60% 0%, #17211f 0%, var(--ночь) 60%) fixed, var(--ночь);
+  color: var(--бумага); font: 400 17px/1.5 var(--шрифт-текст); -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--свеча); outline-offset: 2px; }
+
+.пс-страница { display: grid; grid-template-columns: 250px 1fr; gap: 18px; padding: 14px 18px; min-height: 100%; }
+.пс-бок h1 { font: 600 30px/1.05 var(--шрифт-титул); margin: 2px 0 2px; }
+.пс-бок .пс-под { color: var(--тихо); font-size: 14px; margin: 0 0 14px; }
+.пс-список { display: flex; flex-direction: column; gap: 6px; }
+.пс-пункт {
+  text-align: left; padding: 8px 12px; border: 1px solid var(--линия); background: rgba(255, 236, 200, .03);
+  border-radius: 2px; display: grid; gap: 1px;
+}
+.пс-пункт b { font: 700 17px/1.2 var(--шрифт-метка); letter-spacing: .04em; color: var(--бумага); }
+.пс-пункт small { color: var(--тихо); font-size: 13.5px; line-height: 1.3; }
+.пс-пункт:hover { border-color: var(--линия-ярко); background: rgba(231, 178, 99, .07); }
+.пс-пункт[aria-current="true"] { border-color: var(--свеча); background: rgba(231, 178, 99, .12); }
+.пс-пункт[aria-current="true"] b { color: var(--свеча); }
+.пс-пункт[data-нет] { opacity: .45; }
+.пс-бок .пс-заметка { color: var(--тихо); font-size: 13px; margin-top: 14px; line-height: 1.45; }
+
+.пс-главная { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.пс-верх { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+.пс-верх .пс-метка { font: 500 14px/1 var(--шрифт-метка); letter-spacing: .1em; color: var(--свеча); text-transform: lowercase; margin-right: 6px; }
+.пс-сегменты { display: inline-flex; border: 1px solid var(--линия); border-radius: 2px; }
+.пс-сегменты button { border: 0; background: none; padding: 5px 12px; font-size: 15px; color: var(--бумага-2); }
+.пс-сегменты button + button { border-left: 1px solid var(--линия); }
+.пс-сегменты button[aria-pressed="true"] { background: rgba(231, 178, 99, .16); color: var(--свеча); }
+.пс-кн-тихо { border: 1px solid var(--линия); background: none; padding: 5px 12px; font-size: 15px; border-radius: 2px; color: var(--бумага-2); }
+.пс-кн-тихо[aria-pressed="true"] { color: var(--ржа); border-color: rgba(224, 127, 98, .5); }
+.пс-верх .пс-клавиши { color: var(--тихо); font-size: 13px; margin-left: auto; }
+
+.пс-место { position: relative; width: min(100%, calc((100vh - 120px) * 16 / 9)); }
+.пс-игра { display: flex; flex-direction: column; gap: 6px; }
+.пс-подсказка {
+  font: 500 17px/1.3 var(--шрифт-текст); color: var(--бумага); padding: 6px 12px; min-height: 34px;
+  border-left: 2px solid var(--свеча); background: rgba(231, 178, 99, .06);
+}
+.пс-рамка { position: relative; width: 100%; aspect-ratio: 16 / 9; border: 1px solid var(--линия-ярко); background: var(--ночь); }
+.пс-холст { display: block; width: 100%; height: 100%; outline: none; cursor: crosshair; touch-action: none; user-select: none; }
+.пс-слой { position: absolute; inset: 0; pointer-events: none; display: grid; place-items: center; }
+.пс-старт, .пс-итог-панель {
+  pointer-events: auto; background: rgba(10, 16, 19, .9); border: 1px solid var(--линия-ярко);
+  padding: 22px 30px 20px; max-width: 560px; text-align: center; box-shadow: 0 20px 60px rgba(0, 0, 0, .6);
+}
+.пс-старт h2 { font: 600 34px/1.1 var(--шрифт-титул); margin: 0 0 8px; color: var(--свеча); }
+.пс-старт p { margin: 0 0 16px; color: var(--бумага-2); }
+.пс-кнопки { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.пс-кн {
+  min-height: 42px; padding: 8px 18px; border: 1px solid var(--линия-ярко); border-radius: 2px;
+  background: rgba(231, 178, 99, .08); font-size: 17px;
+}
+.пс-кн:hover { background: rgba(231, 178, 99, .18); border-color: var(--свеча); }
+.пс-кн small { display: block; color: var(--тихо); font-size: 13px; }
+
+.пс-итог { position: absolute; left: 0; right: 0; bottom: 0; top: 40px; display: grid; place-items: center; background: rgba(5, 8, 10, .45); }
+.пс-итог[hidden] { display: none; }
+.пс-итог-панель { animation: пс-всплыть .35s ease-out; min-width: 420px; }
+.пс-итог-слово { font: 700 64px/1 var(--шрифт-титул); letter-spacing: .02em; margin: 2px 0 10px; }
+.пс-итог-слово[data-у="отлично"] { color: var(--свеча); text-shadow: 0 0 24px rgba(231, 178, 99, .45); }
+.пс-итог-слово[data-у="нормально"] { color: var(--море); }
+.пс-итог-слово[data-у="плохо"] { color: var(--ржа); }
+.пс-итог-смысл { color: var(--бумага); margin: 0 0 6px; font-size: 18px; }
+.пс-итог-очки { color: var(--тихо); font-size: 14px; margin: 0 0 16px; }
+@keyframes пс-всплыть { from { transform: scale(.85); opacity: 0; } to { transform: none; opacity: 1; } }
