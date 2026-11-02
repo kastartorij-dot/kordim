@@ -1,73 +1,72 @@
 /* Стенд мини-игр: только раскладка страницы (список, параметры, исход). Экраны самих игр — стили игры (интерфейс.css). */
 body.стенд { --panel-height: 0px; }
 .стенд #hud { gap: 14px; padding-bottom: 12px; }
-.стенд .hud-бренд { margin-right: auto; }
-.стенд-назад { flex: none; min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; border: 1px solid var(--линия); }
-.стенд-звук { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 6px; font: 500 15px/1 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; color: var(--бумага-2); cursor: pointer; }
+.стенд-назад { order: 1; flex: none; min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; border: 1px solid var(--линия); }
+.стенд .hud-бренд { order: 2; margin-right: auto; }
+.стенд-звук { order: 3; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 6px; font: 500 15px/1 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; color: var(--бумага-2); cursor: pointer; }
 .стенд-звук input { width: 20px; height: 20px; accent-color: var(--свеча); margin: 0; }
 .стенд-звук:has(input:focus-visible) { outline: 2px solid var(--свеча); outline-offset: 2px; }
 
 .стенд #тело-макета { margin-top: 0; }
-#стенд-бок { flex: none; width: clamp(260px, 24vw, 330px); display: flex; flex-direction: column; gap: 14px; overflow: auto; padding: 4px 10px 16px clamp(14px, 2vw, 30px); }
+#стенд-бок { flex: none; width: clamp(260px, 24vw, 330px); display: flex; flex-direction: column; gap: 12px; overflow: auto; padding: 4px 10px 16px clamp(14px, 2vw, 30px); }
 #стенд-центр { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
 #стенд-центр #экран { flex: 1; min-height: 0; }
 /* Карточка задачи в игре сама ограничена высотой экрана с нижней панелью; в стенде панели нет, прокручивает сам экран. */
 .стенд .смена-карточка.задача { max-height: none; overflow: visible; }
 
-/* список игр */
-#стенд-список { display: flex; flex-direction: column; gap: 8px; }
-.стенд-игра { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; width: 100%; padding: 11px 14px 12px; text-align: left; background: var(--панель); border: 1px solid var(--линия); border-left: 3px solid transparent; }
+/* список игр: имя, где она в игре, одна строка описания */
+#стенд-список { display: flex; flex-direction: column; gap: 6px; }
+.стенд-игра { display: flex; flex-direction: column; align-items: stretch; gap: 2px; width: 100%; min-width: 0; padding: 9px 14px 10px; text-align: left; background: var(--панель); border: 1px solid var(--линия); border-left: 3px solid transparent; }
 .стенд-игра:hover { border-color: var(--линия-ярко); }
 .стенд-игра[aria-pressed="true"] { border-color: var(--линия-ярко); border-left-color: var(--свеча); background: rgba(231, 178, 99, .1); }
 .стенд-игра .имя { font: 600 25px/1.1 var(--шрифт-титул); color: var(--бумага); }
 .стенд-игра[aria-pressed="true"] .имя { color: var(--свеча); }
-.стенд-игра .где { font: 500 13px/1.3 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; color: var(--море); }
+.стенд-игра .где, .стенд-игра .опис { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.стенд-игра .где { font: 500 13px/1.3 var(--шрифт-метка); letter-spacing: .08em; text-transform: lowercase; color: var(--море); }
 .стенд-игра .опис { font-size: var(--т-мелко); line-height: 1.4; color: var(--бумага-2); }
 
 /* параметры партии */
-#стенд-упр { display: flex; flex-direction: column; gap: 12px; padding: 14px; background: var(--панель); border: 1px solid var(--линия); }
-.стенд-инфо { display: none; margin: 0; font-size: var(--т-мелко); line-height: 1.45; color: var(--бумага-2); }
+#стенд-упр { display: flex; flex-direction: column; gap: 10px; padding: 12px; background: var(--панель); border: 1px solid var(--линия); }
+.стенд-инфо { display: none; margin: 0; font-size: var(--т-мелко); line-height: 1.4; color: var(--бумага-2); }
 .стенд-инфо b { color: var(--бумага); font-weight: 700; }
-.стенд-поле { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.стенд-поле > label, .стенд-поле > span { flex: 1 0 100%; font: 500 14px/1.2 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; color: var(--свеча); }
-.стенд-поле select { flex: 1 1 100%; min-height: 44px; min-width: 0; padding: 8px 10px; color: var(--бумага); background: var(--панель-плотно); border: 1px solid var(--линия-ярко); font: 400 var(--т-кнопка)/1.3 var(--шрифт-текст); }
-.стенд-поле .b { flex: 1 1 auto; min-height: 44px; justify-content: center; }
-.стенд-ступени { flex: 1 0 100%; display: flex; gap: 6px; }
-.стенд-ступени .b { flex: 1 1 0; padding-inline: 8px; }
+.стенд-кнопки { display: flex; gap: 8px; }
+.стенд-кнопки .b { flex: 1 1 0; min-width: 0; min-height: 44px; justify-content: center; padding-inline: 8px; text-align: center; }
+.стенд-кнопки .b::before, .стенд-кнопки .b::after { display: none; }
+#стенд-заново { font-weight: 700; }
+.стенд-поле { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.стенд-поле > label, .стенд-поле > span { font: 500 14px/1.2 var(--шрифт-метка); letter-spacing: .1em; text-transform: lowercase; color: var(--свеча); }
+.стенд-поле select { width: 100%; min-width: 0; min-height: 44px; padding: 8px 10px; color: var(--бумага); background: var(--панель-плотно); border: 1px solid var(--линия-ярко); font: 400 var(--т-кнопка)/1.3 var(--шрифт-текст); text-overflow: ellipsis; }
+.стенд-ступени { display: flex; gap: 6px; }
+.стенд-ступени .b { flex: 1 1 0; min-width: 0; min-height: 44px; justify-content: center; padding-inline: 4px; }
 .стенд-ступени .b[aria-pressed="true"] { color: var(--свеча); border-color: var(--свеча); background: rgba(231, 178, 99, .12); box-shadow: inset 0 0 0 1px rgba(231, 178, 99, .25); }
-#стенд-упр .подсказка { margin: 0; }
-#стенд-заново { justify-content: center; min-height: 48px; }
 
 /* исход */
 #стенд-исход { flex: none; max-height: 40dvh; overflow: auto; margin: 0 clamp(14px, 2vw, 30px) 14px; padding: 14px 18px 16px; background: var(--панель); border: 1px solid var(--линия-ярко); border-top: 2px solid var(--свеча); animation: проявиться .4s ease both; }
-.исход-шапка { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.исход-шапка { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
 .исход-шапка h2 { margin: 0; color: var(--свеча); font-size: 24px; }
 .исход-шапка .b { min-height: 44px; }
-.исход-кратко { margin: 6px 0 10px; font-size: var(--т-кнопка); color: var(--бумага); }
 .исход-список { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 8px; }
 .исход-список li { padding: 5px 12px; border: 1px solid var(--линия); font: 500 15px/1.3 var(--шрифт-текст); color: var(--бумага-2); }
 .исход-список li.плюс { color: var(--трава); border-color: rgba(170, 201, 139, .4); }
 .исход-список li.минус { color: var(--ржа); border-color: rgba(224, 127, 98, .4); }
 .исход-список.служебное li { border-style: dashed; color: var(--тихо); font-size: var(--т-мелко); }
 
-/* телефон: список — лентой над игрой, параметры — компактно */
+/* телефон: список лентой, параметры компактно, а всё вместе — одной прокруткой (игра, под ней исход) */
 @media (max-width: 900px) {
-  .стенд #hud { flex-wrap: nowrap; padding: 8px 12px 10px; gap: 10px; }
-  .стенд .hud-бренд { font-size: 20px; min-width: 0; white-space: normal; line-height: 1.05; }
-  .стенд .hud-бренд small { display: block; margin-top: 3px; font-size: 11px; letter-spacing: .08em; }
+  .стенд #hud { flex-wrap: nowrap; padding: 8px 12px 8px; gap: 10px; }
+  .стенд .hud-бренд { font-size: 20px; min-width: 0; line-height: 1.05; }
+  .стенд .hud-бренд small { display: block; margin-top: 3px; font-size: 10px; letter-spacing: .06em; line-height: 1.25; }
   .стенд-назад { padding: 6px 10px; }
-  .стенд #тело-макета { flex-direction: column; }
-  #стенд-бок { width: auto; flex: none; overflow: visible; gap: 8px; padding: 0 12px 6px; }
+  .стенд-звук { padding: 0; font-size: 13px; gap: 5px; }
+  .стенд #тело-макета { flex-direction: column; overflow-y: auto; overflow-x: hidden; }
+  #стенд-бок { width: auto; flex: none; overflow: visible; gap: 8px; padding: 0 12px 8px; }
   #стенд-список { flex-direction: row; gap: 6px; overflow-x: auto; padding-bottom: 4px; scroll-snap-type: x proximity; }
   .стенд-игра { flex: none; width: auto; min-height: 44px; padding: 6px 14px; border-left-width: 1px; scroll-snap-align: start; }
   .стенд-игра .имя { font-size: 21px; }
   .стенд-игра .где, .стенд-игра .опис { display: none; }
-  #стенд-упр { padding: 8px 10px; gap: 8px; flex-direction: row; flex-wrap: wrap; align-items: stretch; }
-  .стенд-инфо { display: block; flex: 1 0 100%; }
-  #стенд-заново { flex: 1 1 100%; min-height: 44px; }
-  .стенд-поле { flex: 1 1 100%; }
-  .стенд-поле > label, .стенд-поле > span { flex-basis: auto; }
-  .стенд-поле select { flex: 1 1 60%; }
-  #стенд-упр .подсказка { display: none; }
-  #стенд-исход { max-height: 44dvh; margin: 0 12px 10px; padding: 12px 14px 14px; }
+  #стенд-упр { padding: 8px 10px; gap: 8px; }
+  .стенд-инфо { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  #стенд-центр { flex: none; min-height: auto; }
+  #стенд-центр #экран { flex: none; overflow: visible; min-height: 60dvh; }
+  #стенд-исход { max-height: none; overflow: visible; margin: 0 12px 16px; padding: 12px 14px 14px; }
 }
