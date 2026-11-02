@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Стенд мини-игр · Порт Теней</title>
+<!-- Стенд для автора: запускает любую мини-игру сама по себе, с готового состояния, и показывает, что получил герой.
+     Не часть игры. Сохранения и настройки игрока не трогает (Движок/стенд-игр.js, изолироватьХранилище). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,500;0,700;1,400&family=Alegreya+SC:wght@500;700&family=Cormorant:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./Движок/интерфейс.css">
+<link rel="stylesheet" href="./Движок/стенд-игр.css">
+</head>
+<body class="стенд">
+<div id="задник" aria-hidden="true"><div class="з-кадры"></div><div class="з-время"></div><div class="з-тинт"></div><div class="з-туман"></div><div class="з-дождь"></div><div class="з-виньетка"></div></div>
+<div id="зерно" aria-hidden="true"></div>
+<header id="hud">
+  <a class="b ссылка стенд-назад" href="./index.html">← в игру</a>
+  <div class="hud-бренд">Стенд мини-игр<small>Стенд для автора, не часть игры</small></div>
+  <a class="b ссылка стенд-прототипы" href="./песочница-игр.html">Живые прототипы → песочница-игр.html</a>
+  <label class="стенд-звук"><input type="checkbox" id="стенд-звук" aria-label="Звук на стенде"> Звук</label>
+</header>
+<div id="тело-макета">
+  <aside id="стенд-бок">
+    <nav id="стенд-список" aria-label="Мини-игры"></nav>
+    <section id="стенд-упр" aria-label="Параметры партии" hidden></section>
+  </aside>
+  <main id="стенд-центр">
+    <div id="экран"></div>
+    <section id="стенд-исход" aria-live="polite" aria-label="Исход партии" hidden></section>
+  </main>
+</div>
+<div id="вести" aria-live="polite"></div>
+<script type="module" src="./Движок/стенд-экран.js"></script>
+</body>
+</html>

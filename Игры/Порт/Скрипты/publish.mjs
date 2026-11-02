@@ -10,7 +10,7 @@ const output = resolve(repository, 'Игры', 'Сайт', 'Игра', 'Порт
 const parent = dirname(output);
 const temporary = join(parent, `.port-build-${process.pid}`);
 const backup = join(parent, `.port-backup-${process.pid}`);
-const entries = ['index.html', 'Данные', 'Движок', 'Сцены', 'Ресурсы'];
+const entries = ['index.html', 'стенд-игр.html', 'Данные', 'Движок', 'Сцены', 'Ресурсы'];
 
 if (output !== join(repository, 'Игры', 'Сайт', 'Игра', 'Порт') || source === repository) {
   throw new Error('Неверный путь сборки Порта');
