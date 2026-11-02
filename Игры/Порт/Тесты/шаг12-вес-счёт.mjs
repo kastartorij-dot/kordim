@@ -247,5 +247,5 @@ function утроВДоках(S, день) {
   assert.deepEqual(учётИгры(S, 'вес').решены, []);
 }
 
-assert.deepEqual(Object.keys(ИГРЫ), ['вес', 'счёт']);
+assert.deepEqual(Object.keys(ИГРЫ), ['вес', 'счёт', 'игла']);
 console.log('шаг 12, «Вес» и «Счёт»: проверки пройдены');
