@@ -40,6 +40,8 @@ button:focus-visible { outline: 2px solid var(--свеча); outline-offset: 2px
 .пс-сегменты button[aria-pressed="true"] { background: rgba(231, 178, 99, .16); color: var(--свеча); }
 .пс-кн-тихо { border: 1px solid var(--линия); background: none; padding: 5px 12px; font-size: 15px; border-radius: 2px; color: var(--бумага-2); }
 .пс-кн-тихо[aria-pressed="true"] { color: var(--ржа); border-color: rgba(224, 127, 98, .5); }
+.пс-варианты[hidden] { display: none; }
+.пс-варианты select { border: 1px solid var(--линия); background: #10181b; padding: 5px 8px; font: 15px var(--шрифт-текст); border-radius: 2px; color: var(--бумага); }
 .пс-верх .пс-клавиши { color: var(--тихо); font-size: 13px; margin-left: auto; }
 
 .пс-место { position: relative; width: min(100%, calc((100vh - 120px) * 16 / 9)); }
