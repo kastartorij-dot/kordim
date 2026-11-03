@@ -2,7 +2,8 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f5efe3">
 <title>__TITLE__</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -117,7 +118,7 @@ article h2 { font-size: 1.15em; text-align: center; margin: 2em 0 1em; font-weig
 }
 .end { text-align: center; color: var(--muted); margin-top: 3em; font-size: .9em; letter-spacing: .3em; }
 
-mark { color: inherit; border-radius: 2px; cursor: pointer; padding: .05em 0; }
+mark { color: inherit; border-radius: 2px; cursor: pointer; padding: .05em 0; -webkit-tap-highlight-color: transparent; }
 mark.t-dislike { background: var(--m-dislike); box-shadow: inset 0 -2px 0 var(--m-dislike-line); }
 mark.t-question { background: var(--m-question); box-shadow: inset 0 -2px 0 var(--m-question-line); }
 mark.t-note { background: var(--m-note); box-shadow: inset 0 -2px 0 var(--m-note-line); }
@@ -142,6 +143,9 @@ mark.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
 .dot.t-question { background: var(--m-question-line); }
 .dot.t-note { background: var(--m-note-line); }
 .tbtn small { color: var(--muted); font-size: 11px; }
+#selbar .para { font-weight: 700; }
+#selbar .para[aria-pressed="true"] { border-color: var(--ink); background: var(--paper); }
+.sep { width: 1px; align-self: stretch; background: var(--rule); margin: 2px 2px; }
 
 /* редактор заметки */
 #editor {
@@ -190,6 +194,8 @@ mark.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
 .item .h b { color: var(--ink); font-size: 13px; }
 .item .qq { font-family: "Literata", Georgia, serif; font-size: 14px; line-height: 1.45; margin: 4px 0 2px; color: var(--ink); }
 .item .c { font-size: 14px; line-height: 1.4; }
+.item .h .ed-it { margin-left: auto; padding: 2px 8px; font-size: 13px; }
+.only-touch { display: none; }
 .item.lost .qq { text-decoration: line-through; opacity: .6; }
 .empty { color: var(--muted); font-size: 14px; padding: 20px 12px; line-height: 1.5; }
 .filters { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
@@ -207,6 +213,28 @@ mark.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
   .top button { padding: 5px 10px; }
   #selbar .q { display: none; }
   #selbar small { display: none; }
+  .ed { margin-bottom: 0; }
+}
+/* палец: панель выделения сверху (снизу её закрывают меню браузера), окно заметки сверху (снизу клавиатура) */
+@media (pointer: coarse) {
+  .only-touch { display: inline; }
+  .only-mouse { display: none; }
+  .top button { min-height: 38px; min-width: 38px; }
+  #selbar {
+    top: calc(8px + env(safe-area-inset-top)); bottom: auto; transform: translate(-50%, -160%);
+    padding: 6px; gap: 4px; flex-wrap: nowrap;
+  }
+  #selbar.on { transform: translate(-50%, 0); }
+  #selbar .q, #selbar small { display: none; }
+  .tbtn { padding: 9px 11px; }
+  body.selecting .top { visibility: hidden; }
+  #editor { align-items: flex-start; padding-top: calc(12px + env(safe-area-inset-top)); }
+  .ed textarea { font-size: 16px; min-height: 84px; }
+  .ed .quote { max-height: 6.5em; }
+  #edSave small { display: none; }
+  .dh { padding-top: calc(16px + env(safe-area-inset-top)); }
+  #list { padding-bottom: calc(40px + env(safe-area-inset-bottom)); }
+  .item:hover { background: transparent; border-color: transparent; }
 }
 @media print {
   .top, #selbar, #drawer, #editor, #progress, .hint { display: none !important; }
@@ -231,9 +259,12 @@ mark.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
       <h1 id="title"></h1>
       <div class="meta ui" id="meta"></div>
       <div class="hint ui">
-        Выдели слово или кусок текста — снизу появится панель: <b>не нравится</b>, <b>вопрос</b> или <b>заметка</b>
+        <span class="only-mouse">Выдели слово или кусок текста — снизу появится панель: <b>не нравится</b>, <b>вопрос</b> или <b>заметка</b>
         (или клавиши <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>). Номер строки слева от абзаца — заметка на весь абзац.
-        Щелчок по выделенному — изменить. Когда закончишь: «Заметки» → «Скопировать для Claude» и вставь в чат.
+        Щелчок по выделенному — изменить.</span>
+        <span class="only-touch">Зажми слово пальцем и потяни ручки выделения — сверху появится панель: <b>не нравится</b>, <b>вопрос</b>
+        или <b>заметка</b>. Кнопка <b>¶</b> растягивает выделение на весь абзац. Тап по цветному — изменить.</span>
+        Когда закончишь: «Заметки» → «Скопировать для Claude» и вставь в чат.
       </div>
     </header>
     <article id="text"></article>
@@ -243,6 +274,8 @@ mark.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 <div id="selbar" class="ui">
   <span class="q" id="selq"></span>
+  <button class="tbtn para" id="selPara" title="Весь абзац" aria-pressed="false">¶</button>
+  <span class="sep"></span>
   <button class="tbtn" data-type="dislike"><span class="dot t-dislike"></span>Не нравится <small>1</small></button>
   <button class="tbtn" data-type="question"><span class="dot t-question"></span>Вопрос <small>2</small></button>
   <button class="tbtn" data-type="note"><span class="dot t-note"></span>Заметка <small>3</small></button>
@@ -438,13 +471,38 @@ var DOC = __DATA__;
     clearTimeout(selTimer);
     selTimer = setTimeout(function () {
       if (editorOpen) return;
-      pending = readSelection();
-      selbar.classList.toggle('on', !!pending);
-      if (pending) document.getElementById('selq').textContent = '«' + full.slice(pending.start, pending.end).replace(/\n/g, ' ') + '»';
+      var got = readSelection();
+      if (!got && pending && Date.now() - selbarTouch < 800) return;
+      pending = got;
+      wholePara = false;
+      showSel();
     }, 120);
   });
+  var wholePara = false;
+  function showSel() {
+    selbar.classList.toggle('on', !!pending);
+    document.body.classList.toggle('selecting', !!pending);
+    document.getElementById('selPara').setAttribute('aria-pressed', wholePara);
+    if (pending) document.getElementById('selq').textContent = '«' + full.slice(pending.start, pending.end).replace(/\n/g, ' ') + '»';
+  }
+  // растянуть выделенное до границ абзацев (на телефоне номеров строк не видно — это вместо них)
+  document.getElementById('selPara').addEventListener('click', function () {
+    if (!pending) return;
+    if (!wholePara) {
+      pending.raw = { start: pending.start, end: pending.end };
+      var a = paraAt(pending.start), b = paraAt(pending.end - 1);
+      pending.start = starts[a]; pending.end = starts[b] + paras[b].text.length;
+      wholePara = true;
+    } else if (pending.raw) {
+      pending.start = pending.raw.start; pending.end = pending.raw.end; wholePara = false;
+    }
+    showSel();
+  });
   selbar.addEventListener('mousedown', function (e) { e.preventDefault(); });
-  selbar.querySelectorAll('.tbtn').forEach(function (b) {
+  // на телефоне тап по панели может снять выделение — заметку всё равно ставим на то, что было выделено
+  var selbarTouch = 0;
+  selbar.addEventListener('pointerdown', function () { selbarTouch = Date.now(); });
+  selbar.querySelectorAll('.tbtn[data-type]').forEach(function (b) {
     b.addEventListener('click', function () { if (pending) openEditor({ start: pending.start, end: pending.end, type: b.dataset.type }); });
   });
 
@@ -466,6 +524,7 @@ var DOC = __DATA__;
     document.getElementById('edDelete').style.visibility = n.id ? 'visible' : 'hidden';
     edText.value = n.comment || '';
     selbar.classList.remove('on');
+    document.body.classList.remove('selecting');
     editor.classList.add('on');
     setTimeout(function () { edText.focus(); }, 30);
   }
@@ -542,9 +601,9 @@ var DOC = __DATA__;
       d.className = 'item' + (n.lost ? ' lost' : '');
       var q = n.quote.length > 220 ? n.quote.slice(0, 220) + '…' : n.quote;
       d.innerHTML = '<div class="h"><span class="dot t-' + n.type + '"></span><b>' + TYPES[n.type] + '</b>' +
-        (n.lost ? 'место не найдено после правки' : whereOf(n)) + '</div>' +
+        (n.lost ? 'место не найдено после правки' : whereOf(n)) + '<button class="lbtn ed-it" title="Изменить">✎</button></div>' +
         '<div class="qq">«' + esc(q) + '»</div>' + (n.comment ? '<div class="c">' + esc(n.comment) + '</div>' : '');
-      d.addEventListener('click', function () { jump(n); });
+      d.addEventListener('click', function (e) { if (e.target.closest('.ed-it')) openEditor(n); else jump(n); });
       d.addEventListener('dblclick', function () { openEditor(n); });
       list.appendChild(d);
     });
@@ -604,7 +663,10 @@ var DOC = __DATA__;
   document.getElementById('smaller').addEventListener('click', function () { size = Math.max(15, size - 1); applySize(); save('size', size); });
   document.getElementById('bigger').addEventListener('click', function () { size = Math.min(28, size + 1); applySize(); save('size', size); });
   var theme = load('theme', window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-  function applyTheme() { root.dataset.theme = theme; document.getElementById('theme').textContent = theme === 'dark' ? '☀' : '☾'; }
+  function applyTheme() {
+    root.dataset.theme = theme; document.getElementById('theme').textContent = theme === 'dark' ? '☀' : '☾';
+    document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#161411' : '#f5efe3';
+  }
   document.getElementById('theme').addEventListener('click', function () { theme = theme === 'dark' ? 'light' : 'dark'; applyTheme(); save('theme', theme); });
 
   var bar = document.getElementById('progress'), saveTimer;
