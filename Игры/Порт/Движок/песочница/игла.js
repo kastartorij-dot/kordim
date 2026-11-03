@@ -106,7 +106,7 @@ export async function запустить(контейнер, { навык = 0, �
   const предел = (230 + 70 * н) * [1.1, 1, 0.9][с]; // px/с, быстрее — больно
   const предупр = (0.7 + 0.3 * н) * [1.1, 1, 0.8][с]; // сколько видно, что клиент сейчас дёрнется
   const доСледующего = () => случайно(5, 9) / ТЕРПЕНИЕ[с];
-  const ВРЕМЯ = Math.round(30 + длина / 20);
+  const ВРЕМЯ = Math.round(25 + длина / 45);
 
   let штрих = 0;
   let i = 0;
@@ -216,8 +216,8 @@ export async function запустить(контейнер, { навык = 0, �
     });
     // краска: свежая кожа вокруг краснеет, сама краска — сине-чёрная
     for (const [a, b] of краска.flat()) {
-      ctx.strokeStyle = 'rgba(190,70,60,.22)';
-      ctx.lineWidth = 10;
+      ctx.strokeStyle = 'rgba(190,70,60,.13)';
+      ctx.lineWidth = 9;
       ctx.beginPath();
       ctx.moveTo(a.x, a.y);
       ctx.lineTo(b.x, b.y);
