@@ -100,6 +100,39 @@ export function шум({ длит = 0.06, громк = 0.4, через = 0, ча
   s.stop(t + длит + 0.05);
 }
 
+// Голос: мягкий тон с вибрато и медленной атакой — Нора, зал, подпевка. Для музыки на фоне.
+export function голос(f, { длит = 0.5, через = 0, громк = 0.3, яркость = 1600, тип = 'triangle', вибрато = 0.006 } = {}) {
+  const a = ак();
+  if (!a) return;
+  const t = a.currentTime + Math.max(0, через);
+  const o = a.createOscillator();
+  o.type = тип;
+  o.frequency.setValueAtTime(f, t);
+  const лфо = a.createOscillator();
+  лфо.frequency.value = 5.2;
+  const глубина = a.createGain();
+  глубина.gain.setValueAtTime(0, t);
+  глубина.gain.linearRampToValueAtTime(f * вибрато, t + Math.min(0.25, длит * 0.6));
+  лфо.connect(глубина);
+  глубина.connect(o.frequency);
+  const ф = a.createBiquadFilter();
+  ф.type = 'lowpass';
+  ф.frequency.value = яркость;
+  o.connect(ф);
+  const g = a.createGain();
+  const атака = Math.min(0.06, длит * 0.3);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(Math.max(0.0002, громк), t + атака);
+  g.gain.setValueAtTime(Math.max(0.0002, громк), t + длит * 0.7);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + длит);
+  ф.connect(g);
+  g.connect(мастер);
+  o.start(t);
+  лфо.start(t);
+  o.stop(t + длит + 0.05);
+  лфо.stop(t + длит + 0.05);
+}
+
 export const звуки = {
   удар: (через = 0, громк = 0.9) => тон(110, { к: 45, длит: 0.22, тип: 'sine', громк, через }),
   хлоп: (через = 0) => шум({ длит: 0.035, громк: 0.18, через, частота: 6500 }),
@@ -158,6 +191,51 @@ export function фон(ctx, img, тёмно = 0.55, сдвиг = 0) {
   }
   ctx.fillStyle = `rgba(10,16,19,${тёмно})`;
   ctx.fillRect(0, 0, ШИР, ВЫС);
+}
+
+// Портрет без мыла: картинку обрезаем под рамку (верх лица важнее) и заранее ужимаем ступенями
+// до настоящего числа пикселей экрана, потом кладём один к одному.
+const ужатые = new WeakMap();
+export function портрет(ctx, img, x, y, w, h, { верх = 0.08 } = {}) {
+  if (!img) return;
+  const м = ctx.getTransform();
+  const к = Math.hypot(м.a, м.b) || 1;
+  const пw = Math.max(1, Math.round(w * к));
+  const пh = Math.max(1, Math.round(h * к));
+  let набор = ужатые.get(img);
+  if (!набор) ужатые.set(img, (набор = new Map()));
+  const ключ = пw + 'x' + пh;
+  let готово = набор.get(ключ);
+  if (!готово) {
+    // вырез с теми же пропорциями, что рамка
+    let sw = img.width;
+    let sh = sw * h / w;
+    if (sh > img.height) { sh = img.height; sw = sh * w / h; }
+    const sx = (img.width - sw) / 2;
+    const sy = Math.min(img.height - sh, img.height * верх);
+    let src = img;
+    let [cx, cy, cw, ch] = [sx, sy, sw, sh];
+    while (cw / 2 >= пw) {
+      const c = document.createElement('canvas');
+      c.width = Math.round(cw / 2);
+      c.height = Math.round(ch / 2);
+      const g = c.getContext('2d');
+      g.imageSmoothingQuality = 'high';
+      g.drawImage(src, cx, cy, cw, ch, 0, 0, c.width, c.height);
+      [src, cx, cy, cw, ch] = [c, 0, 0, c.width, c.height];
+    }
+    готово = document.createElement('canvas');
+    готово.width = пw;
+    готово.height = пh;
+    const g = готово.getContext('2d');
+    g.imageSmoothingQuality = 'high';
+    g.drawImage(src, cx, cy, cw, ch, 0, 0, пw, пh);
+    набор.set(ключ, готово);
+  }
+  const было = ctx.imageSmoothingEnabled;
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(готово, x, y, w, h);
+  ctx.imageSmoothingEnabled = было;
 }
 
 export function надпись(ctx, s, x, y, { р = 20, цвет = ЦВЕТ.бумага, выр = 'center', шрифт = ШРИФТ.текст, вес = 400, тень = true, база = 'middle' } = {}) {
@@ -219,10 +297,34 @@ export function создатьПоле(контейнер, { подсказка 
   корень.append(строка, рамка);
   контейнер.append(корень);
 
-  const dpr = Math.min(2, window.devicePixelRatio || 1);
-  холст.width = ШИР * dpr;
-  холст.height = ВЫС * dpr;
+  // Холст рисуется в настоящем разрешении экрана: логика — 960×540, а пикселей столько,
+  // сколько рамка занимает на мониторе (× devicePixelRatio). Иначе браузер растягивает картинку — мыло.
   const ctx = холст.getContext('2d');
+  let масштаб = 1;
+  let статичный = null;
+  function подогнать() {
+    const ш = холст.getBoundingClientRect().width || ШИР;
+    const w = Math.max(ШИР / 2, Math.round(ш * (window.devicePixelRatio || 1)));
+    const h = Math.round(w * ВЫС / ШИР);
+    if (холст.width === w && холст.height === h) return false;
+    холст.width = w;
+    холст.height = h;
+    масштаб = w / ШИР;
+    return true;
+  }
+  подогнать();
+  const наблюдатель = typeof ResizeObserver === 'function' ? new ResizeObserver(() => {
+    if (!холст.isConnected) return наблюдатель.disconnect();
+    if (подогнать() && !живо) перерисовать();
+  }) : null;
+  наблюдатель?.observe(холст);
+  document.fonts?.ready?.then(() => { if (!живо) перерисовать(); });
+  function перерисовать() {
+    if (!холст.isConnected) return;
+    ctx.setTransform(масштаб, 0, 0, масштаб, 0, 0);
+    if (игра) игра.нарисовать?.(ctx, поле.t);
+    else статичный?.(ctx, 0);
+  }
 
   const мышь = { x: ШИР / 2, y: ВЫС / 2, нажата: false, внутри: false };
   const клавиши = new Set();
@@ -261,9 +363,11 @@ export function создатьПоле(контейнер, { подсказка 
     },
     // Один кадр без хода игры — показать сцену под заставкой.
     кадр(рис) {
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      статичный = рис;
+      ctx.setTransform(масштаб, 0, 0, масштаб, 0, 0);
       рис(ctx, 0);
     },
+    get масштаб() { return масштаб; },
     старт({ заголовок, строка: текст = '', кнопки = [{ текст: 'Начать', значение: true }] }) {
       return new Promise((готово, нет) => {
         отказ = нет;
@@ -385,7 +489,7 @@ export function создатьПоле(контейнер, { подсказка 
   }
 
   function отрисовать(dt) {
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.setTransform(масштаб, 0, 0, масштаб, 0, 0);
     const д = эф.дрожь;
     эф.дрожь = Math.max(0, д - dt * 45);
     ctx.save();
@@ -444,6 +548,7 @@ export function создатьПоле(контейнер, { подсказка 
 
   сигнал?.addEventListener('abort', () => {
     остановить();
+    наблюдатель?.disconnect();
     отказ?.(new DOMException('Игра прервана', 'AbortError'));
   }, { once: true });
 
