@@ -1,0 +1,6 @@
+- [No autostash in shared folder](no-autostash-shared-folder.md) — parallel session edits same checkout; fetch+push, never pull --autostash
+- [ПОРТ agent system decisions](port-agent-system-decisions.md) — author's answers for the polishing team, installed studioigor skills
+- [ПОРТ agent team](port-agent-team.md) — since 28.10 Шеф runs agent sessions; rules in Документы/Команда, tasks on ДОСКА
+- [Шеф: когда можно открывать чаты](port-chef-session-start-rule.md) — только в ходе от слов автора, не по событию
+- [ПОРТ: локальный просмотр в worktree](port-local-preview-gotchas.md) — repo-py порт 8795 зашит; старые модули из кэша http.server
+- [ПОРТ: как планировать круги](port-round-planning-feedback.md) — варианты по сторонам игры, крупный шаг плана + немного починки, экономия моделей
