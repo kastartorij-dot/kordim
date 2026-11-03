@@ -42,6 +42,17 @@
         "8795"
       ],
       "port": 8795
+    },
+    {
+      "name": "Порт-механик-песня",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8811"
+      ],
+      "port": 8811,
+      "autoPort": false
     }
   ]
 }
