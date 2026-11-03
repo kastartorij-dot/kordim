@@ -858,7 +858,8 @@ html[data-движение="меньше"] .з-кадр { opacity: 1; }
 /* Живая мини-игра поверх места или смены (Движок/живая-игра.js, с 03.11). Поле рисует модуль Движок/песочница/<игра>.js;
    его классы .пс-* — подмножество Движок/песочница/песочница.css без правил страницы (body, :root). Только ПК. */
 .ов.живая { z-index: 40; padding: 14px; }
-.овбокс.живая-бокс { position: relative; width: min(100%, calc((100vh - 120px) * 16 / 9), 1400px); max-height: 100%; padding: 12px 16px 16px; overflow: hidden; }
+/* Окно встаёт над нижней панелью (.ов кончается у неё): ширина — от высоты, чтобы поле 16:9 с шапкой и подсказкой влезло целиком. */
+.овбокс.живая-бокс { position: relative; width: min(100%, calc((100vh - var(--panel-height) - 170px) * 16 / 9), 1400px); max-height: 100%; padding: 12px 16px 16px; overflow: auto; }
 .живая-шапка { display: flex; align-items: center; gap: 14px; margin: 0 0 8px; }
 .живая-шапка h2 { font: 600 28px/1.1 var(--шрифт-титул); color: var(--свеча); margin: 0; flex: 1; text-align: left; }
 .живая-шапка .b small { color: var(--тихо); font-size: 13px; margin-left: 6px; }
