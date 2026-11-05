@@ -11,7 +11,8 @@
 // Разбор вычитки — вторая вкладка той же читалки: файл в Канон/ с шапкой
 //   ---
 //   читалка: Ошерская_история.md
-//   ---
+//   было: <коммит>      — необязательно: с какой версией рассказа сравнивать,
+//   ---                    правки подсвечиваются в читалке (кнопка «Правки»)
 // Шапка — в разборе, а не в прозе, чтобы не сдвигать номера строк рассказа.
 // На разборе можно ставить такие же пометки; хранятся отдельно, выгружаются вместе
 // с пометками к рассказу, номера строк — по файлу разбора. Если разборов к одному
@@ -19,6 +20,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import { execFileSync } from 'child_process';
 import { fileURLToPath } from 'url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -83,6 +85,7 @@ function readDoc(file) {
   const blocks = [];
   let i0 = 0;
   if (lines[0] === '---') { i0 = lines.indexOf('---', 1) + 1; }
+  // шапка разбора служебная, в читалку не идёт
   for (let i = i0; i < lines.length; i++) {
     const raw = lines[i];
     const t = raw.trim();
@@ -119,6 +122,130 @@ for (const f of fs.readdirSync(KANON).filter(f => f.endsWith('.md')).sort()) {
   }
 }
 
+// Схемы к рассказу: Проза/Схемы/<id>_*.html — отдельные страницы, кнопка в шапке читалки
+const SCHEMES = path.join(PROZA, 'Схемы');
+function schemesFor(id) {
+  if (!fs.existsSync(SCHEMES)) return [];
+  return fs.readdirSync(SCHEMES).filter(f => f.startsWith(id + '_') && f.endsWith('.html')).sort().map(f => {
+    const html = fs.readFileSync(path.join(SCHEMES, f), 'utf8');
+    const t = (html.match(/<title>([^<]*)<\/title>/) || [])[1] || f;
+    for (const dir of [OUT, SITE]) {
+      fs.mkdirSync(path.join(dir, 'Схемы'), { recursive: true });
+      fs.copyFileSync(path.join(SCHEMES, f), path.join(dir, 'Схемы', f));
+    }
+    return { href: 'Схемы/' + f, title: t.replace(/\s+—\s+схема$/, '') };
+  });
+}
+
+// Правки: прошлая версия рассказа из git → какие куски нового текста вставлены/изменены и что убрано.
+function gitShow(rev, rel) {
+  try { return execFileSync('git', ['show', `${rev}:${rel}`], { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }); }
+  catch (e) { console.warn(`! не удалось взять ${rel} из ${rev} — правки не подсвечены`); return null; }
+}
+function parasOf(text) {
+  const lines = text.replace(/^﻿/, '').replace(/\r\n/g, '\n').split('\n');
+  let i = 0;
+  if (lines[0] === '---') i = lines.indexOf('---', 1) + 1;
+  const out = [];
+  for (; i < lines.length; i++) {
+    const t = lines[i].trim();
+    if (!t || /^-{3,}$|^\*{3,}$/.test(t) || /^#{1,6}\s/.test(t)) continue;
+    out.push(t);
+  }
+  return out;
+}
+function lcs(a, b, eq) {
+  const n = a.length, m = b.length, T = Array.from({ length: n + 1 }, () => new Int32Array(m + 1));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--)
+    T[i][j] = eq(a[i], b[j]) ? T[i + 1][j + 1] + 1 : Math.max(T[i + 1][j], T[i][j + 1]);
+  const pairs = [];
+  let i = 0, j = 0;
+  while (i < n && j < m) {
+    if (eq(a[i], b[j])) { pairs.push([i, j]); i++; j++; }
+    else if (T[i + 1][j] >= T[i][j + 1]) i++; else j++;
+  }
+  return pairs;
+}
+const tokens = s => s.match(/\s+|[\p{L}\p{N}]+|[^\s\p{L}\p{N}]/gu) || [];
+// разница внутри абзаца: вставленные отрезки нового текста и убранные куски старого (с позицией в новом)
+function wordDiff(oldT, newT) {
+  const a = tokens(oldT), b = tokens(newT);
+  const pairs = lcs(a, b, (x, y) => x === y);
+  const ins = [], del = [];
+  let ai = 0, bi = 0, pos = 0, same = 0;
+  const offs = []; { let o = 0; for (const t of b) { offs.push(o); o += t.length; } offs.push(o); }
+  const flush = (a0, a1, b0, b1) => {
+    const removed = a.slice(a0, a1).join('');
+    const added = b.slice(b0, b1).join('');
+    if (added.trim()) {
+      // края-пробелы не красим
+      let s0 = offs[b0], s1 = offs[b1];
+      while (s0 < s1 && /\s/.test(newT[s0])) s0++;
+      while (s1 > s0 && /\s/.test(newT[s1 - 1])) s1--;
+      ins.push([s0, s1]);
+    }
+    if (removed.trim()) del.push([offs[b0], removed.trim()]);
+  };
+  for (const [x, y] of pairs) {
+    if (x > ai || y > bi) flush(ai, x, bi, y);
+    same += b[y].trim() ? 1 : 0;
+    ai = x + 1; bi = y + 1;
+  }
+  if (ai < a.length || bi < b.length) flush(ai, a.length, bi, b.length);
+  const words = b.filter(t => t.trim()).length || 1;
+  // соседние вставки через пробел — одним куском, соседние удаления в одной точке — одной пометкой
+  const insM = [];
+  for (const r of ins) {
+    const last = insM[insM.length - 1];
+    if (last && /^[\s,]*$/.test(newT.slice(last[1], r[0]))) last[1] = r[1]; else insM.push(r.slice());
+  }
+  const delM = [];
+  for (const d of del) {
+    const last = delM[delM.length - 1];
+    const between = last ? newT.slice(last[0], d[0]) : '';
+    // удаления, разделённые только тем, что теперь вставлено, — тоже вместе
+    if (last && insM.some(r => r[0] <= last[0] && r[1] >= d[0] - 1 && between.length < 40)) last[1] += ' ' + d[1];
+    else if (last && last[0] === d[0]) last[1] += ' ' + d[1];
+    else delM.push(d.slice());
+  }
+  return { ins: insM, del: delM, ratio: same / words };
+}
+function diffProse(oldText, blocks) {
+  const oldP = parasOf(oldText);
+  const newB = blocks.filter(b => b.kind === 'p');
+  const pairs = lcs(oldP, newB.map(b => b.text), (x, y) => x === y);
+  let changed = 0;
+  const mark = (b, d) => { if (d.ins.length) b.ins = d.ins; if (d.del.length) b.del = d.del; if (d.ins.length || d.del.length) { b.chg = 1; changed++; } };
+  const gaps = [];
+  let pi = 0, pj = 0;
+  for (const [i, j] of [...pairs, [oldP.length, newB.length]]) { gaps.push([pi, i, pj, j]); pi = i + 1; pj = j + 1; }
+  for (const [o0, o1, n0, n1] of gaps) {
+    const olds = oldP.slice(o0, o1), news = newB.slice(n0, n1);
+    if (!news.length) {
+      // абзацы убраны целиком — показываем у следующего абзаца
+      if (olds.length) { const host = newB[n1] || newB[newB.length - 1]; (host.del = host.del || []).unshift([0, olds.join(' / ')]); if (!host.chg) { host.chg = 1; changed++; } }
+      continue;
+    }
+    // каждому новому абзацу — самый похожий старый из этого промежутка (по порядку)
+    let k = 0;
+    const left = [];
+    news.forEach((b, idx) => {
+      let best = -1, bestR = 0, bestD = null;
+      for (let q = k; q < olds.length; q++) {
+        const d = wordDiff(olds[q], b.text);
+        if (d.ratio > bestR) { bestR = d.ratio; best = q; bestD = d; }
+      }
+      if (best >= 0 && bestR >= .35) {
+        for (let q = k; q < best; q++) left.push([idx, olds[q]]);
+        mark(b, bestD); k = best + 1;
+      } else { b.ins = [[0, b.text.length]]; b.chg = 1; b.fresh = 1; changed++; }
+    });
+    for (let q = k; q < olds.length; q++) left.push([news.length - 1, olds[q]]);
+    for (const [idx, t] of left) { const b = news[idx]; (b.del = b.del || []).push([b.text.length, t]); if (!b.chg) { b.chg = 1; changed++; } }
+  }
+  return changed;
+}
+
 const files = process.argv.slice(2).length
   ? process.argv.slice(2).map(f => path.basename(f))
   : fs.readdirSync(PROZA).filter(f => f.endsWith('.md'));
@@ -130,9 +257,16 @@ for (const file of files) {
   const { front, blocks } = readProse(file);
   const title = front.title || file.replace(/\.md$/, '');
   const docs = [{ id: file.replace(/\.md$/, ''), tab: 'Рассказ', file: `Проза/${file}`, title, status: front.status || '', blocks }];
+  docs[0].schemes = schemesFor(docs[0].id);
   if (reviews[file]) {
     const rel = reviews[file];
     const review = readDoc(path.join(ROOT, rel));
+    const head = fs.readFileSync(path.join(ROOT, rel), 'utf8').replace(/^﻿/, '').split('\n');
+    const was = head[0] === '---' ? (head.slice(1, head.indexOf('---', 1)).find(l => /^было:/.test(l)) || '').replace(/^было:\s*/, '').trim() : '';
+    if (was) {
+      const old = gitShow(was, `Проза/${file}`);
+      if (old != null) { docs[0].diffFrom = was; docs[0].changed = diffProse(old, blocks); }
+    }
     docs.push({ id: docs[0].id + '~разбор', tab: 'Разбор', style: 'doc', file: rel,
       // «Ошерская история — разбор вычитки (35 заметок)» → «Разбор вычитки (35 заметок)»: история и так в подзаголовке
       title: (review.title || 'Разбор').replace(title + ' — ', '').replace(/^./, c => c.toUpperCase()),
@@ -145,7 +279,9 @@ for (const file of files) {
   const name = file.replace(/\.md$/, '.html');
   fs.writeFileSync(path.join(OUT, name), html);
   fs.writeFileSync(path.join(SITE, name), html);
-  console.log(`✓ ${name} — ${docs.map(d => `${d.tab}: ${d.blocks.filter(b => b.kind === 'p').length} абзацев`).join(', ')}`);
+  console.log(`✓ ${name} — ${docs.map(d => `${d.tab}: ${d.blocks.filter(b => b.kind === 'p').length} абзацев`).join(', ')}` +
+    (docs[0].diffFrom ? `, правок против ${docs[0].diffFrom}: ${docs[0].changed} абзацев` : '') +
+    (docs[0].schemes.length ? `, схем: ${docs[0].schemes.length}` : ''));
 }
 
 // оглавление для телефона — по всей прозе, не только по пересобранной
