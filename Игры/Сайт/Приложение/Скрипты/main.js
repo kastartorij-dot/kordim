@@ -18,6 +18,7 @@ import * as chronicle from './Представления/chronicle.js';
 import * as scenes from './Представления/scenes.js';
 import * as world from './Представления/world.js';
 import * as questions from './Представления/questions.js';
+import * as plan from './Представления/plan.js';
 import * as canon from './Представления/canon.js';
 import * as game from './Представления/game.js';
 import { CANON } from '../Данные/canon.js';
@@ -38,6 +39,7 @@ const NAV = [
   ['world', 'Мир', world],
   ['canon', 'Канон', canon],
   ['questions', 'Вопросы', questions],
+  ['plan', 'План', plan],
   ['game', 'Игра', game]
 ];
 const DETAIL = { person:[person, 'people'], place:[place, 'places'], faction:[faction, 'factions'] };

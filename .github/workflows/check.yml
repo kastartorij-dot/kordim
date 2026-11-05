@@ -31,6 +31,9 @@ jobs:
       - name: Проза справочника совпадает с исходниками
         run: node Канон/_Сборка/export-scenes.mjs --check
 
+      - name: План на сайте совпадает с Канон/ПЛАН_развития.md
+        run: node Канон/_Сборка/export-plan.mjs --check
+
       - name: В данных вики нет битых ссылок
         run: node Канон/_Сборка/check-data.mjs
 

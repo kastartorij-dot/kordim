@@ -5,9 +5,11 @@ import { FACTIONS } from '../../Данные/factions.js';
 import { EVENTS } from '../../Данные/events.js';
 import { ARTICLES } from '../../Данные/articles.js';
 import { CHARGED, OPEN } from '../../Данные/questions.js';
+import { progress } from './plan.js';
 
 export function render(root){
   const profiles = PEOPLE.filter(p => p.profile).length;
+  const plan = progress();
   root.innerHTML = `<div class="page" data-title="Главная">
     <div class="home-hero">
       <div>
@@ -26,6 +28,7 @@ export function render(root){
       <a class="tile" href="#/chronicle"><span class="n">${EVENTS.length}</span><b>Хроника</b><span>От первой волны Чумы до настоящего</span></a>
       <a class="tile" href="#/world"><span class="n">${ARTICLES.length}</span><b>Мир</b><span>Деньги, контора, алхимия, закон, быт</span></a>
       <a class="tile" href="#/questions"><span class="n">${CHARGED.length + OPEN.length}</span><b>Вопросы</b><span>Заряженное и нерешённое</span></a>
+      <a class="tile tile-plan" href="#/plan"><span class="n">${plan.total}%</span><b>План</b><span>${plan.groups.map(g => g.title + ' ' + g.p + '%').join(' · ')}</span><span class="tile-meter"><i style="width:${plan.total}%"></i></span></a>
       <a class="tile" href="#/game"><span class="n">▶</span><b>Игра</b><span>Текстовая RPG по миру</span></a>
     </div>
     <div class="row2">
