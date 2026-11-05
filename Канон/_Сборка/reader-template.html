@@ -71,6 +71,7 @@ button { font: inherit; color: inherit; }
 }
 .top button:hover { border-color: var(--muted); }
 #notesBtn b { color: var(--accent); }
+#swap { font-weight: 700; }
 
 main {
   max-width: 40em;
@@ -117,6 +118,29 @@ article h2 { font-size: 1.15em; text-align: center; margin: 2em 0 1em; font-weig
   user-select: none; -webkit-user-select: none;
 }
 .end { text-align: center; color: var(--muted); margin-top: 3em; font-size: .9em; letter-spacing: .3em; }
+
+/* вкладки: рассказ / разбор */
+.tabs { display: none; justify-content: center; gap: 4px; margin: 22px auto 0; padding: 4px; width: max-content; max-width: 100%;
+  border: 1px solid var(--rule); border-radius: 999px; background: var(--bg); }
+.tabs.on { display: flex; }
+.tabs button { border: 0; background: transparent; border-radius: 999px; padding: 6px 16px; font-size: 14px; cursor: pointer; color: var(--muted); }
+.tabs button[aria-selected="true"] { background: var(--paper); color: var(--ink); font-weight: 700; box-shadow: 0 1px 3px rgba(60, 40, 20, .18); }
+.tabs button b { color: var(--accent); font-weight: 700; margin-left: 4px; }
+
+/* разбор: документ, а не проза */
+article.doc { hyphens: manual; -webkit-hyphens: manual; font-size: .9em; line-height: 1.6; }
+article.doc p { text-indent: 0; margin: 0 0 .7em; }
+article.doc p.tag-h2 { font-weight: 600; font-size: 1.3em; line-height: 1.3; margin: 1.8em 0 .6em; }
+article.doc p.tag-h3 { font-weight: 600; font-size: 1.08em; margin: 1.4em 0 .5em; }
+article.doc p.tag-quote { border-left: 3px solid var(--faint); padding-left: .9em; margin: 0 0 .25em; color: var(--ink); font-style: italic; }
+article.doc p.tag-quote + p:not(.tag-quote) { margin-top: .7em; }
+article.doc p.tag-li { padding-left: 1.3em; margin: 0 0 .35em; }
+article.doc p.tag-li::before { content: "•"; position: absolute; left: .3em; color: var(--muted); }
+article.doc p.tag-li[data-m]::before { content: attr(data-m); left: 0; font-size: .9em; }
+article.doc p.tag-li.d1 { margin-left: 1.3em; }
+article.doc p.tag-li.d2 { margin-left: 2.6em; }
+article.doc .break { margin: 1.2em 0; }
+article.doc code { font-family: "PT Sans", Arial, sans-serif; font-size: .88em; background: var(--bg); border-radius: 4px; padding: 0 .25em; }
 
 mark { color: inherit; border-radius: 2px; cursor: pointer; padding: .05em 0; -webkit-tap-highlight-color: transparent; }
 mark.t-dislike { background: var(--m-dislike); box-shadow: inset 0 -2px 0 var(--m-dislike-line); }
@@ -184,6 +208,7 @@ mark.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
 }
 #drawer.on { transform: translateX(0); }
 .dh { padding: 16px 18px 12px; border-bottom: 1px solid var(--rule); }
+.dh .tabnote { font-size: 12px; color: var(--muted); margin: -4px 0 10px; }
 .dh h3 { margin: 0 0 10px; font-size: 18px; display: flex; justify-content: space-between; align-items: center; }
 .dh .acts { display: flex; gap: 6px; flex-wrap: wrap; }
 .dh .copied { font-size: 13px; color: var(--accent); min-height: 1.2em; margin-top: 6px; }
@@ -211,6 +236,7 @@ mark.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
   article p .ln { display: none; }
   .top { top: 8px; right: 8px; }
   .top button { padding: 5px 10px; }
+  article.doc { font-size: .95em; }
   #selbar .q { display: none; }
   #selbar small { display: none; }
   .ed { margin-bottom: 0; }
@@ -246,6 +272,7 @@ mark.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
 <body>
 <div id="progress"></div>
 <div class="top ui">
+  <button id="swap" title="Другая вкладка" hidden></button>
   <button id="smaller" title="Мельче">А−</button>
   <button id="bigger" title="Крупнее">А+</button>
   <button id="theme" title="Тема">☾</button>
@@ -255,9 +282,10 @@ mark.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
 <main>
   <div class="sheet">
     <header>
-      <div class="kicker ui">Кордим · проза</div>
+      <div class="kicker ui" id="kicker">Кордим · проза</div>
       <h1 id="title"></h1>
       <div class="meta ui" id="meta"></div>
+      <div class="tabs ui" id="tabs" role="tablist"></div>
       <div class="hint ui">
         <span class="only-mouse">Выдели слово или кусок текста — снизу появится панель: <b>не нравится</b>, <b>вопрос</b> или <b>заметка</b>
         (или клавиши <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>). Номер строки слева от абзаца — заметка на весь абзац.
@@ -302,7 +330,8 @@ mark.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 <aside id="drawer" class="ui" aria-label="Заметки">
   <div class="dh">
-    <h3>Заметки <button class="lbtn" id="closeDrawer" title="Закрыть">✕</button></h3>
+    <h3><span id="drawerTitle">Заметки</span> <button class="lbtn" id="closeDrawer" title="Закрыть">✕</button></h3>
+    <div class="tabnote" id="tabnote"></div>
     <div class="acts">
       <button class="pbtn" id="copyAll">Скопировать для Claude</button>
       <button class="tbtn" id="download">Сохранить файлом</button>
@@ -321,31 +350,43 @@ mark.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
 <div class="warn ui" id="warn"></div>
 
 <script>
-var DOC = __DATA__;
+var DOCS = __DATA__;
+if (!Array.isArray(DOCS)) DOCS = [DOCS];
 (function () {
   var TYPES = { dislike: 'Не нравится', question: 'Вопрос', note: 'Заметка' };
-  var KEY = 'kordim-reader:' + DOC.id;
+  // настройки (размер, тема) — общие на всю читалку, под ключом основного текста;
+  // пометки и место чтения — у каждой вкладки свои (у основной — прежние ключи, старые пометки целы)
+  var KEY = 'kordim-reader:' + DOCS[0].id;
+  var DOC = DOCS[0], cur = 0;
+  function dkey(d, k) { return 'kordim-reader:' + d.id + ':' + k; }
   var root = document.documentElement;
 
   // хранилище: в приватном окне или при запрете может не работать — тогда предупреждаем
   var storageOk = true;
-  function load(k, def) {
-    try { var v = localStorage.getItem(KEY + ':' + k); return v == null ? def : JSON.parse(v); }
+  function loadRaw(key, def) {
+    try { var v = localStorage.getItem(key); return v == null ? def : JSON.parse(v); }
     catch (e) { storageOk = false; return def; }
   }
-  function save(k, v) {
-    try { localStorage.setItem(KEY + ':' + k, JSON.stringify(v)); }
+  function saveRaw(key, v) {
+    try { localStorage.setItem(key, JSON.stringify(v)); }
     catch (e) { storageOk = false; showWarn(); }
   }
+  function load(k, def) { return loadRaw(KEY + ':' + k, def); }
+  function save(k, v) { saveRaw(KEY + ':' + k, v); }
+  function saveNotes() { saveRaw(dkey(DOC, 'notes'), notes); }
   function showWarn() {
     if (!storageOk) document.getElementById('warn').textContent =
       'Браузер не даёт сохранять заметки — скопируй их перед закрытием вкладки.';
   }
 
   // текст: абзацы склеены через \n, у каждого — смещение начала в общей строке
-  var paras = DOC.blocks.filter(function (b) { return b.kind === 'p'; });
-  var full = '', starts = [];
-  paras.forEach(function (p, i) { if (i) full += '\n'; starts.push(full.length); full += p.text; });
+  var paras, full, starts;
+  function prep(d) {
+    var ps = d.blocks.filter(function (b) { return b.kind === 'p'; });
+    var f = '', st = [];
+    ps.forEach(function (p, i) { if (i) f += '\n'; st.push(f.length); f += p.text; });
+    return { paras: ps, full: f, starts: st };
+  }
 
   function paraAt(off) {
     var lo = 0, hi = starts.length - 1;
@@ -353,11 +394,11 @@ var DOC = __DATA__;
     return lo;
   }
 
-  var notes = load('notes', []);
+  var notes = [];
   var filter = 'all';
 
   // текст мог поменяться после правки файла — ищем цитату заново, ближайшее вхождение к старому месту
-  function reanchor() {
+  function reanchor(notes, full) {
     notes.forEach(function (n) {
       if (full.slice(n.start, n.end) === n.quote) { n.lost = false; return; }
       var best = -1, from = 0, idx;
@@ -370,11 +411,16 @@ var DOC = __DATA__;
     });
   }
 
-  function lineOf(off) { return paras[paraAt(off)].line; }
-  function whereOf(n) {
-    var a = lineOf(n.start), b = lineOf(Math.max(n.start, n.end - 1));
+  function lineIn(t, off) {
+    var lo = 0, hi = t.starts.length - 1;
+    while (lo < hi) { var mid = (lo + hi + 1) >> 1; if (t.starts[mid] <= off) lo = mid; else hi = mid - 1; }
+    return t.paras[lo].line;
+  }
+  function whereIn(t, n) {
+    var a = lineIn(t, n.start), b = lineIn(t, Math.max(n.start, n.end - 1));
     return a === b ? 'стр. ' + a : 'стр. ' + a + '–' + b;
   }
+  function whereOf(n) { return whereIn({ paras: paras, starts: starts }, n); }
 
   function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
@@ -382,20 +428,29 @@ var DOC = __DATA__;
   var article = document.getElementById('text');
   var pEls = [];
   function build() {
-    document.title = DOC.title;
+    var isDoc = DOC.style === 'doc';
+    document.title = DOCS[0].title + (cur ? ' — ' + DOC.tab.toLowerCase() : '');
     document.getElementById('title').textContent = DOC.title;
+    document.getElementById('kicker').textContent = isDoc ? 'Кордим · ' + DOCS[0].title : 'Кордим · проза';
     var words = full.split(/\s+/).filter(Boolean).length;
     var mins = Math.round(words / 180);
     document.getElementById('meta').innerHTML =
       (DOC.status ? '<span class="draft">' + esc(DOC.status) + '</span> · ' : '') +
+      (isDoc ? esc(DOC.file) + ' · ' : '') +
       words.toLocaleString('ru-RU') + ' слов · около ' + mins + ' мин чтения';
+    article.innerHTML = '';
+    article.className = isDoc ? 'doc' : '';
+    pEls = [];
     var pi = 0, afterBreak = true;
     DOC.blocks.forEach(function (b) {
       if (b.kind === 'break') { var d = document.createElement('div'); d.className = 'break'; d.textContent = '✦ ✦ ✦'; article.appendChild(d); afterBreak = true; return; }
       if (b.kind === 'h') { var h = document.createElement('h2'); h.textContent = b.text; article.appendChild(h); afterBreak = true; return; }
       var p = document.createElement('p');
       p.dataset.i = pi++;
-      if (afterBreak && /^[^—–-]/.test(b.text)) p.className = 'first';
+      if (isDoc) {
+        p.className = 'tag-' + (b.tag || 'p') + (b.depth ? ' d' + Math.min(b.depth, 2) : '');
+        if (b.marker) p.dataset.m = b.marker;
+      } else if (afterBreak && /^[^—–-]/.test(b.text)) p.className = 'first';
       afterBreak = false;
       article.appendChild(p);
       pEls.push(p);
@@ -405,7 +460,8 @@ var DOC = __DATA__;
   function paint() {
     pEls.forEach(function (p, i) {
       var s0 = starts[i], s1 = s0 + paras[i].text.length;
-      var cuts = [0, paras[i].text.length], live = [];
+      var cuts = [0, paras[i].text.length], live = [], fmt = paras[i].fmt || [];
+      fmt.forEach(function (f) { cuts.push(f[0], f[1]); });
       notes.forEach(function (n) {
         if (n.lost || n.end <= s0 || n.start >= s1) return;
         var a = Math.max(n.start, s0) - s0, b = Math.min(n.end, s1) - s0;
@@ -415,6 +471,7 @@ var DOC = __DATA__;
       var html = '<span class="ln" title="Заметка на весь абзац">' + paras[i].line + '</span>';
       for (var k = 0; k < cuts.length - 1; k++) {
         var a = cuts[k], b = cuts[k + 1], seg = esc(paras[i].text.slice(a, b));
+        fmt.forEach(function (f) { if (f[0] <= a && f[1] >= b) seg = '<' + f[2] + '>' + seg + '</' + f[2] + '>'; });
         var cover = live.filter(function (x) { return x.a <= a && x.b >= b; });
         if (!cover.length) { html += seg; continue; }
         var top = cover[cover.length - 1].n;
@@ -424,6 +481,7 @@ var DOC = __DATA__;
       p.classList.toggle('has-note', live.length > 0);
     });
     document.getElementById('count').textContent = notes.length;
+    renderTabs();
     renderList();
   }
 
@@ -542,7 +600,7 @@ var DOC = __DATA__;
       window.getSelection().removeAllRanges();
     }
     notes.sort(function (x, y) { return x.start - y.start; });
-    save('notes', notes);
+    saveNotes();
     closeEditor();
     paint();
   }
@@ -551,7 +609,7 @@ var DOC = __DATA__;
   document.getElementById('edDelete').addEventListener('click', function () {
     if (!editing || !editing.id) return;
     notes = notes.filter(function (n) { return n !== editing; });
-    save('notes', notes); closeEditor(); paint();
+    saveNotes(); closeEditor(); paint();
   });
   editor.addEventListener('mousedown', function (e) { if (e.target === editor) closeEditor(); });
   edText.addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); commit(); } });
@@ -620,22 +678,35 @@ var DOC = __DATA__;
   }
 
   // выгрузка
-  function exportText() {
-    var out = DOC.title + ' — заметки к вычитке (' + notes.length + ')\nФайл: ' + DOC.file + '\n';
-    ['dislike', 'question', 'note'].forEach(function (t) {
-      var part = notes.filter(function (n) { return n.type === t; });
+  // все вкладки в одну выгрузку: у каждой свой файл и свои номера строк
+  function docNotes(d) { return d === DOC ? notes : loadRaw(dkey(d, 'notes'), []); }
+  function totalNotes() { return DOCS.reduce(function (s, d) { return s + docNotes(d).length; }, 0); }
+  function exportDoc(d, multi) {
+    var ns = docNotes(d);
+    var t = d === DOC ? { paras: paras, starts: starts } : prep(d);
+    if (d !== DOC) reanchor(ns, t.full);
+    var head = multi ? '# ' + d.tab + '\n' : '';
+    var out = head + (d.style === 'doc' ? DOCS[0].title + ' — ' + d.tab.toLowerCase() : d.title) +
+      ' — заметки к вычитке (' + ns.length + ')\nФайл: ' + d.file + '\n';
+    ['dislike', 'question', 'note'].forEach(function (tp) {
+      var part = ns.filter(function (n) { return n.type === tp; });
       if (!part.length) return;
-      out += '\n## ' + { dislike: 'Не нравится', question: 'Вопросы', note: 'Заметки' }[t] + '\n';
+      out += '\n## ' + { dislike: 'Не нравится', question: 'Вопросы', note: 'Заметки' }[tp] + '\n';
       part.forEach(function (n, k) {
-        out += '\n' + (k + 1) + '. ' + (n.lost ? 'место не найдено' : whereOf(n)) + ': «' + n.quote.replace(/\n/g, ' / ') + '»\n';
+        out += '\n' + (k + 1) + '. ' + (n.lost ? 'место не найдено' : whereIn(t, n)) + ': «' + n.quote.replace(/\n/g, ' / ') + '»\n';
         if (n.comment) out += '   → ' + n.comment.replace(/\n/g, '\n     ') + '\n';
       });
     });
     return out;
   }
+  function exportText() {
+    var withNotes = DOCS.filter(function (d) { return docNotes(d).length; });
+    var multi = DOCS.length > 1;
+    return withNotes.map(function (d) { return exportDoc(d, multi); }).join('\n');
+  }
   function flashMsg(s) { var c = document.getElementById('copied'); c.textContent = s; setTimeout(function () { c.textContent = ''; }, 2600); }
   document.getElementById('copyAll').addEventListener('click', function () {
-    if (!notes.length) { flashMsg('Заметок пока нет.'); return; }
+    if (!totalNotes()) { flashMsg('Заметок пока нет.'); return; }
     var text = exportText();
     var fallback = function () {
       var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
@@ -649,12 +720,13 @@ var DOC = __DATA__;
   document.getElementById('download').addEventListener('click', function () {
     var a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([exportText()], { type: 'text/markdown;charset=utf-8' }));
-    a.download = DOC.title.replace(/\s+/g, '_') + '_заметки.md';
+    a.download = DOCS[0].title.replace(/\s+/g, '_') + '_заметки.md';
     document.body.appendChild(a); a.click(); a.remove();
   });
   document.getElementById('clearAll').addEventListener('click', function () {
-    if (!notes.length || !confirm('Удалить все заметки (' + notes.length + ')? Сначала лучше скопировать.')) return;
-    notes = []; save('notes', notes); paint();
+    var where = DOCS.length > 1 ? ' на вкладке «' + DOC.tab + '»' : '';
+    if (!notes.length || !confirm('Удалить все заметки' + where + ' (' + notes.length + ')? Сначала лучше скопировать.')) return;
+    notes = []; saveNotes(); paint();
   });
 
   // чтение: размер, тема, прогресс, место
@@ -674,13 +746,56 @@ var DOC = __DATA__;
     var h = document.documentElement.scrollHeight - innerHeight;
     bar.style.width = (h > 0 ? scrollY / h * 100 : 0) + '%';
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(function () { save('pos', scrollY / Math.max(1, document.documentElement.scrollHeight)); }, 300);
+    saveTimer = setTimeout(function () { saveRaw(posKey(), scrollY / Math.max(1, document.documentElement.scrollHeight)); }, 300);
   }, { passive: true });
 
+  // вкладки
+  function posKey() { return cur ? dkey(DOC, 'pos') : KEY + ':pos'; }
+  var tabsEl = document.getElementById('tabs');
+  function renderTabs() {
+    if (DOCS.length < 2) return;
+    tabsEl.classList.add('on');
+    tabsEl.innerHTML = '';
+    DOCS.forEach(function (d, i) {
+      var b = document.createElement('button');
+      b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', i === cur);
+      var c = docNotes(d).length;
+      b.innerHTML = esc(d.tab) + (c ? '<b>' + c + '</b>' : '');
+      b.addEventListener('click', function () { if (i !== cur) { setDoc(i, true); } });
+      tabsEl.appendChild(b);
+    });
+    var other = DOCS[cur ? 0 : 1], swap = document.getElementById('swap');
+    swap.hidden = false;
+    swap.textContent = '⇄ ' + other.tab;
+    document.getElementById('drawerTitle').textContent = 'Заметки · ' + DOC.tab.toLowerCase();
+    var others = totalNotes() - notes.length;
+    document.getElementById('tabnote').textContent = others
+      ? 'Здесь — пометки этой вкладки. «Скопировать» берёт обе вкладки сразу (на другой ещё ' + others + ').'
+      : 'Здесь — пометки этой вкладки. «Скопировать» берёт обе вкладки сразу.';
+  }
+  function setDoc(i, user) {
+    if (user) saveRaw(posKey(), scrollY / Math.max(1, document.documentElement.scrollHeight));
+    cur = i; DOC = DOCS[i];
+    var t = prep(DOC); paras = t.paras; full = t.full; starts = t.starts;
+    notes = loadRaw(dkey(DOC, 'notes'), []);
+    pending = null; selbar.classList.remove('on'); document.body.classList.remove('selecting');
+    build(); reanchor(notes, full); paint(); showWarn();
+    if (DOCS.length > 1) {
+      save('tab', i);
+      try { history.replaceState(null, '', i ? '#' + encodeURIComponent(DOC.tab.toLowerCase()) : location.pathname + location.search); } catch (e) {}
+    }
+    var pos = loadRaw(posKey(), 0);
+    requestAnimationFrame(function () { scrollTo(0, pos ? pos * document.documentElement.scrollHeight : 0); });
+  }
+
+  document.getElementById('swap').addEventListener('click', function () { setDoc(cur ? 0 : 1, true); });
+
   applySize(); applyTheme();
-  build(); reanchor(); paint(); showWarn();
-  var pos = load('pos', 0);
-  if (pos) requestAnimationFrame(function () { scrollTo(0, pos * document.documentElement.scrollHeight); });
+  var start = 0, hash = decodeURIComponent(location.hash.slice(1)).toLowerCase();
+  if (hash) DOCS.forEach(function (d, i) { if (d.tab.toLowerCase() === hash) start = i; });
+  else start = Math.min(load('tab', 0) || 0, DOCS.length - 1);
+  setDoc(start, false);
 })();
 </script>
 </body>

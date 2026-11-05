@@ -7,6 +7,15 @@
 //
 // node Канон/_Сборка/reader.mjs                      — вся проза
 // node Канон/_Сборка/reader.mjs Ошерская_история.md  — один файл
+//
+// Разбор вычитки — вторая вкладка той же читалки: файл в Канон/ с шапкой
+//   ---
+//   читалка: Ошерская_история.md
+//   ---
+// Шапка — в разборе, а не в прозе, чтобы не сдвигать номера строк рассказа.
+// На разборе можно ставить такие же пометки; хранятся отдельно, выгружаются вместе
+// с пометками к рассказу, номера строк — по файлу разбора. Если разборов к одному
+// рассказу несколько, вкладкой становится самый свежий по имени файла.
 
 import fs from 'fs';
 import path from 'path';
@@ -47,6 +56,69 @@ function readProse(file) {
   return { front, blocks };
 }
 
+// Markdown разбора: заголовки, абзацы, цитаты (>), пункты списков (-, 1.), --- как разрыв.
+// Жирный, курсив и `код` снимаются из текста и сохраняются отрезками fmt — так пометки
+// считают смещения по чистому тексту, а вид остаётся.
+function inline(src) {
+  let text = '';
+  const fmt = [], open = {};
+  const re = /\*\*|`|\*/g;
+  let last = 0, m;
+  while ((m = re.exec(src))) {
+    const tok = m[0];
+    const kind = tok === '**' ? 'b' : tok === '`' ? 'code' : 'i';
+    // одиночная * посреди слова или в коде — просто символ
+    if (open.code != null && kind !== 'code') continue;
+    text += src.slice(last, m.index);
+    last = m.index + tok.length;
+    if (open[kind] != null) { if (text.length > open[kind]) fmt.push([open[kind], text.length, kind]); delete open[kind]; }
+    else open[kind] = text.length;
+  }
+  text += src.slice(last);
+  return { text, fmt };
+}
+function readDoc(file) {
+  const lines = fs.readFileSync(file, 'utf8').replace(/^﻿/, '').replace(/\r\n/g, '\n').split('\n');
+  let title = '';
+  const blocks = [];
+  let i0 = 0;
+  if (lines[0] === '---') { i0 = lines.indexOf('---', 1) + 1; }
+  for (let i = i0; i < lines.length; i++) {
+    const raw = lines[i];
+    const t = raw.trim();
+    if (!t || t === '>') continue;
+    if (/^-{3,}$|^\*{3,}$/.test(t)) { blocks.push({ kind: 'break' }); continue; }
+    let tag = 'p', depth = 0, marker = '', body = t;
+    let m;
+    if ((m = t.match(/^(#{1,6})\s+(.*)$/))) {
+      if (m[1].length === 1 && !title) { title = m[2]; continue; }
+      tag = 'h' + Math.min(m[1].length, 3); body = m[2];
+    } else if ((m = t.match(/^>\s?(.*)$/))) { tag = 'quote'; body = m[1]; }
+    else if ((m = raw.match(/^(\s*)([-*]|\d+\.)\s+(.*)$/))) {
+      tag = 'li'; depth = Math.floor(m[1].replace(/\t/g, '  ').length / 2); marker = /\d/.test(m[2]) ? m[2] : ''; body = m[3];
+    }
+    const { text, fmt } = inline(body);
+    const b = { kind: 'p', line: i + 1, text, tag };
+    if (fmt.length) b.fmt = fmt;
+    if (depth) b.depth = depth;
+    if (marker) b.marker = marker;
+    blocks.push(b);
+  }
+  return { title, blocks };
+}
+
+// разборы: Канон/*.md с `читалка: <файл прозы>` в шапке
+const KANON = path.join(ROOT, 'Канон');
+const reviews = {};
+for (const f of fs.readdirSync(KANON).filter(f => f.endsWith('.md')).sort()) {
+  const head = fs.readFileSync(path.join(KANON, f), 'utf8').replace(/^﻿/, '').replace(/\r\n/g, '\n').split('\n');
+  if (head[0] !== '---') continue;
+  for (let i = 1; i < head.length && head[i] !== '---'; i++) {
+    const m = head[i].match(/^читалка:\s*(.+)$/);
+    if (m) reviews[path.basename(m[1].trim())] = `Канон/${f}`;
+  }
+}
+
 const files = process.argv.slice(2).length
   ? process.argv.slice(2).map(f => path.basename(f))
   : fs.readdirSync(PROZA).filter(f => f.endsWith('.md'));
@@ -57,15 +129,23 @@ fs.mkdirSync(SITE, { recursive: true });
 for (const file of files) {
   const { front, blocks } = readProse(file);
   const title = front.title || file.replace(/\.md$/, '');
-  const data = { id: file.replace(/\.md$/, ''), file: `Проза/${file}`, title, status: front.status || '', blocks };
-  const json = JSON.stringify(data).replace(/</g, '\\u003c');
+  const docs = [{ id: file.replace(/\.md$/, ''), tab: 'Рассказ', file: `Проза/${file}`, title, status: front.status || '', blocks }];
+  if (reviews[file]) {
+    const rel = reviews[file];
+    const review = readDoc(path.join(ROOT, rel));
+    docs.push({ id: docs[0].id + '~разбор', tab: 'Разбор', style: 'doc', file: rel,
+      // «Ошерская история — разбор вычитки (35 заметок)» → «Разбор вычитки (35 заметок)»: история и так в подзаголовке
+      title: (review.title || 'Разбор').replace(title + ' — ', '').replace(/^./, c => c.toUpperCase()),
+      status: '', blocks: review.blocks });
+  }
+  const json = JSON.stringify(docs).replace(/</g, '\\u003c');
   const html = TEMPLATE
     .replace('__TITLE__', esc(title))
     .replace('__DATA__', () => json);
   const name = file.replace(/\.md$/, '.html');
   fs.writeFileSync(path.join(OUT, name), html);
   fs.writeFileSync(path.join(SITE, name), html);
-  console.log(`✓ ${name} — ${blocks.filter(b => b.kind === 'p').length} абзацев`);
+  console.log(`✓ ${name} — ${docs.map(d => `${d.tab}: ${d.blocks.filter(b => b.kind === 'p').length} абзацев`).join(', ')}`);
 }
 
 // оглавление для телефона — по всей прозе, не только по пересобранной
