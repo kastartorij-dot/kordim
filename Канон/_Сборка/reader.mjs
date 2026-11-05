@@ -173,11 +173,13 @@ h1 { font: 600 2em/1.15 "Literata", Georgia, serif; margin: .3em 0 .8em; }
 a { display: block; background: var(--paper); border: 1px solid var(--rule); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; color: inherit; text-decoration: none; }
 a b { display: block; font: 600 19px/1.3 "Literata", Georgia, serif; margin-bottom: 3px; }
 a span { color: var(--muted); font-size: 14px; }
+a.home { display: inline-block; padding: 6px 12px; border-radius: 999px; font-size: 14px; margin-bottom: 20px; }
 p { color: var(--muted); font-size: 14px; margin-top: 24px; }
 </style>
 </head>
 <body>
 <main>
+  <a class="home" href="../Приложение/">⌂ Кордим — на главную</a>
   <div class="kicker">Кордим · проза</div>
   <h1>Читалка</h1>
 ${rows}

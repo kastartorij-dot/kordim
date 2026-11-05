@@ -42,7 +42,9 @@ const NAV = [
 ];
 const DETAIL = { person:[person, 'people'], place:[place, 'places'], faction:[faction, 'factions'] };
 
-$('#nav').innerHTML = NAV.map(([k, label]) => '<a href="#/' + k + '" data-k="' + k + '">' + label + '</a>').join('');
+$('#nav').innerHTML = NAV.map(([k, label]) => '<a href="#/' + k + '" data-k="' + k + '">' + label + '</a>').join('') +
+  /* читалка прозы с пометками — отдельные страницы, не раздел приложения */
+  '<a href="../Читалка/" data-k="reader">Читалка</a>';
 
 const view = $('#view');
 let cleanup = null;

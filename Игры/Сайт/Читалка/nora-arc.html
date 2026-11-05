@@ -71,6 +71,12 @@ button { font: inherit; color: inherit; }
 }
 .top button:hover { border-color: var(--muted); }
 #notesBtn b { color: var(--accent); }
+.home {
+  position: fixed; top: 10px; left: 12px; z-index: 20; color: inherit; text-decoration: none;
+  border: 1px solid var(--rule); background: var(--ui-bg); border-radius: 999px;
+  padding: 6px 12px; font-size: 14px; box-shadow: var(--ui-shadow);
+}
+.home:hover { border-color: var(--muted); }
 #swap { font-weight: 700; }
 
 main {
@@ -236,6 +242,8 @@ mark.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
   article p .ln { display: none; }
   .top { top: 8px; right: 8px; }
   .top button { padding: 5px 10px; }
+  .home { top: 8px; left: 8px; padding: 5px 10px; }
+  .home span { display: none; }
   article.doc { font-size: .95em; }
   #selbar .q { display: none; }
   #selbar small { display: none; }
@@ -246,6 +254,8 @@ mark.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
   .only-touch { display: inline; }
   .only-mouse { display: none; }
   .top button { min-height: 38px; min-width: 38px; }
+  .home { min-height: 38px; min-width: 38px; display: inline-flex; align-items: center; justify-content: center; padding: 5px 10px; }
+  body.selecting .home { visibility: hidden; }
   #selbar {
     top: calc(8px + env(safe-area-inset-top)); bottom: auto; transform: translate(-50%, -160%);
     padding: 6px; gap: 4px; flex-wrap: nowrap;
@@ -263,7 +273,7 @@ mark.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
   .item:hover { background: transparent; border-color: transparent; }
 }
 @media print {
-  .top, #selbar, #drawer, #editor, #progress, .hint { display: none !important; }
+  .top, .home, #selbar, #drawer, #editor, #progress, .hint { display: none !important; }
   body { background: #fff; }
   .sheet { box-shadow: none; }
 }
@@ -271,6 +281,7 @@ mark.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
 </head>
 <body>
 <div id="progress"></div>
+<a class="home ui" href="../Приложение/" title="На главную сайта">⌂ <span>Кордим</span></a>
 <div class="top ui">
   <button id="swap" title="Другая вкладка" hidden></button>
   <button id="smaller" title="Мельче">А−</button>
