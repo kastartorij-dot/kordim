@@ -146,6 +146,15 @@ article.doc p.tag-li[data-m]::before { content: attr(data-m); left: 0; font-size
 article.doc p.tag-li.d1 { margin-left: 1.3em; }
 article.doc p.tag-li.d2 { margin-left: 2.6em; }
 article.doc .break { margin: 1.2em 0; }
+/* ссылки разбора на строки рассказа */
+article.doc .ref { color: var(--accent); text-decoration: underline dotted; text-underline-offset: 3px; cursor: pointer; }
+article.doc .ref:hover { text-decoration-style: solid; }
+article.doc p.jumphead { cursor: pointer; }
+article.doc p.jumphead:hover .ref { text-decoration-style: solid; }
+article p.target { background: var(--m-note); border-radius: 3px; box-shadow: 0 0 0 .35em var(--m-note); }
+article p.target.first::first-letter { color: var(--accent); }
+@keyframes pulse { from { box-shadow: 0 0 0 .35em var(--m-note), 0 0 0 .9em var(--m-note); } to { box-shadow: 0 0 0 .35em var(--m-note), 0 0 0 .35em transparent; } }
+article p.target.pulse { animation: pulse 1.2s ease-out 2; }
 article.doc code { font-family: "PT Sans", Arial, sans-serif; font-size: .88em; background: var(--bg); border-radius: 4px; padding: 0 .25em; }
 
 mark { color: inherit; border-radius: 2px; cursor: pointer; padding: .05em 0; -webkit-tap-highlight-color: transparent; }
@@ -396,6 +405,16 @@ if (!Array.isArray(DOCS)) DOCS = [DOCS];
     var ps = d.blocks.filter(function (b) { return b.kind === 'p'; });
     var f = '', st = [];
     ps.forEach(function (p, i) { if (i) f += '\n'; st.push(f.length); f += p.text; });
+    // в разборе «стр. N» и «стр. N–M» — ссылки на строки рассказа
+    if (d.style === 'doc' && DOCS[0] !== d) ps.forEach(function (p) {
+      if (p.refs) return;
+      p.refs = [];
+      var re = /стр\.\s*(\d+)(?:\s*[–-]\s*(\d+))?/g, m;
+      while ((m = re.exec(p.text))) p.refs.push([m.index, m.index + m[0].length, +m[1], +(m[2] || m[1])]);
+      // заголовок заметки (Н1. / В12. / З2–З3. … целиком жирный) — тап по нему ведёт к первой ссылке
+      var fm = p.fmt || [];
+      p.jump = p.refs.length && /^[НВЗП]\d/.test(p.text) && fm.some(function (f) { return f[2] === 'b' && f[0] === 0; }) ? p.refs[0] : null;
+    });
     return { paras: ps, full: f, starts: st };
   }
 
@@ -473,6 +492,8 @@ if (!Array.isArray(DOCS)) DOCS = [DOCS];
       var s0 = starts[i], s1 = s0 + paras[i].text.length;
       var cuts = [0, paras[i].text.length], live = [], fmt = paras[i].fmt || [];
       fmt.forEach(function (f) { cuts.push(f[0], f[1]); });
+      var refs = paras[i].refs || [];
+      refs.forEach(function (r) { cuts.push(r[0], r[1]); });
       notes.forEach(function (n) {
         if (n.lost || n.end <= s0 || n.start >= s1) return;
         var a = Math.max(n.start, s0) - s0, b = Math.min(n.end, s1) - s0;
@@ -483,6 +504,7 @@ if (!Array.isArray(DOCS)) DOCS = [DOCS];
       for (var k = 0; k < cuts.length - 1; k++) {
         var a = cuts[k], b = cuts[k + 1], seg = esc(paras[i].text.slice(a, b));
         fmt.forEach(function (f) { if (f[0] <= a && f[1] >= b) seg = '<' + f[2] + '>' + seg + '</' + f[2] + '>'; });
+        refs.forEach(function (r) { if (r[0] <= a && r[1] >= b) seg = '<span class="ref" data-a="' + r[2] + '" data-b="' + r[3] + '" title="Открыть в рассказе">' + seg + '</span>'; });
         var cover = live.filter(function (x) { return x.a <= a && x.b >= b; });
         if (!cover.length) { html += seg; continue; }
         var top = cover[cover.length - 1].n;
@@ -490,6 +512,7 @@ if (!Array.isArray(DOCS)) DOCS = [DOCS];
       }
       p.innerHTML = html;
       p.classList.toggle('has-note', live.length > 0);
+      if (paras[i].jump) { p.classList.add('jumphead'); p.dataset.a = paras[i].jump[2]; p.dataset.b = paras[i].jump[3]; }
     });
     document.getElementById('count').textContent = notes.length;
     renderTabs();
@@ -633,8 +656,13 @@ if (!Array.isArray(DOCS)) DOCS = [DOCS];
       openEditor({ start: starts[i], end: starts[i] + paras[i].text.length, type: 'note' });
       return;
     }
+    var collapsed = window.getSelection().isCollapsed;
+    var ref = e.target.closest('.ref');
+    if (ref && collapsed) { jumpTo(+ref.dataset.a, +ref.dataset.b); return; }
     var m = e.target.closest('mark');
-    if (m && window.getSelection().isCollapsed) {
+    var jh = e.target.closest('p.jumphead');
+    if (jh && collapsed && !m) { jumpTo(+jh.dataset.a, +jh.dataset.b); return; }
+    if (m && collapsed) {
       var ids = m.dataset.ids.split(',');
       var n = notes.filter(function (x) { return x.id === ids[ids.length - 1]; })[0];
       if (n) openEditor(n);
@@ -762,6 +790,7 @@ if (!Array.isArray(DOCS)) DOCS = [DOCS];
 
   // вкладки
   function posKey() { return cur ? dkey(DOC, 'pos') : KEY + ':pos'; }
+  var here = {}; // точное место на вкладке, пока страница открыта (между переключениями)
   var tabsEl = document.getElementById('tabs');
   function renderTabs() {
     if (DOCS.length < 2) return;
@@ -785,8 +814,27 @@ if (!Array.isArray(DOCS)) DOCS = [DOCS];
       ? 'Здесь — пометки этой вкладки. «Скопировать» берёт обе вкладки сразу (на другой ещё ' + others + ').'
       : 'Здесь — пометки этой вкладки. «Скопировать» берёт обе вкладки сразу.';
   }
-  function setDoc(i, user) {
-    if (user) saveRaw(posKey(), scrollY / Math.max(1, document.documentElement.scrollHeight));
+  // из разбора — к строкам рассказа: открыть вкладку и подсветить абзацы.
+  // Место в разборе запоминается, «⇄ Разбор» вернёт туда же.
+  function jumpTo(a, b) { setDoc(0, true, { a: a, b: b || a }); }
+  function showTarget(t) {
+    var hit = [];
+    pEls.forEach(function (p, i) { var l = paras[i].line; if (l >= t.a && l <= t.b) hit.push(p); });
+    if (!hit.length) {
+      // строка указала не на абзац (пустая, разрыв) — берём ближайший следующий
+      var k = 0; while (k < paras.length - 1 && paras[k].line < t.a) k++;
+      hit = [pEls[k]];
+    }
+    hit.forEach(function (p) { p.classList.add('target', 'pulse'); });
+    requestAnimationFrame(function () {
+      var r = hit[0].getBoundingClientRect();
+      var y = scrollY + r.top - Math.max(90, (innerHeight - Math.min(r.height * hit.length, innerHeight * .6)) / 2);
+      scrollTo(0, Math.max(0, y));
+    });
+  }
+  function setDoc(i, user, target) {
+    if (user) { saveRaw(posKey(), scrollY / Math.max(1, document.documentElement.scrollHeight)); here[cur] = scrollY; }
+    clearTimeout(saveTimer);
     cur = i; DOC = DOCS[i];
     var t = prep(DOC); paras = t.paras; full = t.full; starts = t.starts;
     notes = loadRaw(dkey(DOC, 'notes'), []);
@@ -796,8 +844,9 @@ if (!Array.isArray(DOCS)) DOCS = [DOCS];
       save('tab', i);
       try { history.replaceState(null, '', i ? '#' + encodeURIComponent(DOC.tab.toLowerCase()) : location.pathname + location.search); } catch (e) {}
     }
-    var pos = loadRaw(posKey(), 0);
-    requestAnimationFrame(function () { scrollTo(0, pos ? pos * document.documentElement.scrollHeight : 0); });
+    if (target) { showTarget(target); return; }
+    var pos = loadRaw(posKey(), 0), exact = here[i];
+    requestAnimationFrame(function () { scrollTo(0, exact != null ? exact : pos ? pos * document.documentElement.scrollHeight : 0); });
   }
 
   document.getElementById('swap').addEventListener('click', function () { setDoc(cur ? 0 : 1, true); });
