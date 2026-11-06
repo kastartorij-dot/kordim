@@ -246,6 +246,12 @@ mark.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
 #drawer.on { transform: translateX(0); }
 .dh { padding: 16px 18px 12px; border-bottom: 1px solid var(--rule); }
 .dh .tabnote { font-size: 12px; color: var(--muted); margin: -4px 0 10px; }
+.dh .old { display: none; font-size: 13px; line-height: 1.4; background: var(--paper); border: 1px solid var(--rule); border-radius: 10px; padding: 8px 10px; margin: 0 0 10px; }
+.dh .old.on { display: block; }
+.dh .old button { margin-top: 6px; }
+.grp { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin: 14px 10px 4px; }
+.grp:first-child { margin-top: 4px; }
+.item.old-round { opacity: .55; }
 .dh h3 { margin: 0 0 10px; font-size: 18px; display: flex; justify-content: space-between; align-items: center; }
 .dh .acts { display: flex; gap: 6px; flex-wrap: wrap; }
 .dh .copied { font-size: 13px; color: var(--accent); min-height: 1.2em; margin-top: 6px; }
@@ -337,7 +343,7 @@ mark.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
         Щелчок по выделенному — изменить.</span>
         <span class="only-touch">Зажми слово пальцем и потяни ручки выделения — сверху появится панель: <b>не нравится</b>, <b>вопрос</b>
         или <b>заметка</b>. Кнопка <b>¶</b> растягивает выделение на весь абзац. Тап по цветному — изменить.</span>
-        Когда закончишь: «Заметки» → «Скопировать для Claude» и вставь в чат.
+        Когда закончишь: «Заметки» → «Скопировать для Claude» и вставь в чат. Копировать один раз: туда попадают и рассказ, и разбор.
       </div>
     </header>
     <article id="text"></article>
@@ -377,6 +383,7 @@ mark.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
   <div class="dh">
     <h3><span id="drawerTitle">Заметки</span> <button class="lbtn" id="closeDrawer" title="Закрыть">✕</button></h3>
     <div class="tabnote" id="tabnote"></div>
+    <div class="old" id="oldBox"><span id="oldText"></span><br><button class="lbtn danger" id="oldClear">Убрать пометки прошлого круга</button></div>
     <div class="acts">
       <button class="pbtn" id="copyAll">Скопировать для Claude</button>
       <button class="tbtn" id="download">Сохранить файлом</button>
@@ -553,7 +560,7 @@ if (!Array.isArray(DOCS)) DOCS = [DOCS];
       p.classList.toggle('has-note', live.length > 0);
       if (paras[i].jump) { p.classList.add('jumphead'); p.dataset.a = paras[i].jump[2]; p.dataset.b = paras[i].jump[3]; }
     });
-    document.getElementById('count').textContent = notes.length;
+    document.getElementById('count').textContent = totalNotes();
     renderTabs();
     renderList();
   }
@@ -668,7 +675,7 @@ if (!Array.isArray(DOCS)) DOCS = [DOCS];
       notes.push({
         id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
         type: edType, start: editing.start, end: editing.end,
-        quote: full.slice(editing.start, editing.end), comment: edText.value.trim(), at: new Date().toISOString()
+        quote: full.slice(editing.start, editing.end), comment: edText.value.trim(), at: new Date().toISOString(), v: DOCS[0].ver
       });
       window.getSelection().removeAllRanges();
     }
@@ -728,23 +735,55 @@ if (!Array.isArray(DOCS)) DOCS = [DOCS];
       renderList();
     });
   });
+  // список: пометки всех вкладок разом, по группам; у чужой вкладки место считается по её тексту
+  function isOld(n) { return !!DOCS[0].ver && n.v !== DOCS[0].ver; }
+  function allNotes() {
+    var out = [];
+    DOCS.forEach(function (d, i) {
+      var ns = docNotes(d), t = d === DOC ? { paras: paras, starts: starts } : prep(d);
+      if (d !== DOC) reanchor(ns, t.full);
+      ns.forEach(function (n) { out.push({ n: n, i: i, d: d, t: t }); });
+    });
+    return out;
+  }
   function renderList() {
     var list = document.getElementById('list');
-    var shown = notes.filter(function (n) { return filter === 'all' || n.type === filter; });
-    if (!notes.length) { list.innerHTML = '<div class="empty">Пока пусто. Выдели в тексте то, что царапает, и выбери, что это.</div>'; return; }
+    var all = allNotes();
+    var shown = all.filter(function (x) { return filter === 'all' || x.n.type === filter; });
+    var old = all.filter(function (x) { return isOld(x.n); }).length;
+    document.getElementById('oldBox').classList.toggle('on', old > 0);
+    document.getElementById('oldText').textContent = old
+      ? 'Пометок с прошлого круга: ' + old + ' (бледные). Если ты их уже отправил и правки внесены — убери, чтобы не ушли второй раз.' : '';
+    if (!all.length) { list.innerHTML = '<div class="empty">Пока пусто. Выдели в тексте то, что царапает, и выбери, что это.</div>'; return; }
     if (!shown.length) { list.innerHTML = '<div class="empty">В этом фильтре заметок нет.</div>'; return; }
     list.innerHTML = '';
-    shown.forEach(function (n) {
+    var lastTab = -1;
+    shown.forEach(function (x) {
+      var n = x.n;
+      if (DOCS.length > 1 && x.i !== lastTab) {
+        lastTab = x.i;
+        var g = document.createElement('div');
+        g.className = 'grp';
+        g.textContent = x.d.tab + ' · ' + docNotes(x.d).length;
+        list.appendChild(g);
+      }
       var d = document.createElement('div');
-      d.className = 'item' + (n.lost ? ' lost' : '');
+      d.className = 'item' + (n.lost ? ' lost' : '') + (isOld(n) ? ' old-round' : '');
       var q = n.quote.length > 220 ? n.quote.slice(0, 220) + '…' : n.quote;
       d.innerHTML = '<div class="h"><span class="dot t-' + n.type + '"></span><b>' + TYPES[n.type] + '</b>' +
-        (n.lost ? 'место не найдено после правки' : whereOf(n)) + '<button class="lbtn ed-it" title="Изменить">✎</button></div>' +
+        (n.lost ? 'место не найдено после правки' : whereIn(x.t, n)) + '<button class="lbtn ed-it" title="Изменить">✎</button></div>' +
         '<div class="qq">«' + esc(q) + '»</div>' + (n.comment ? '<div class="c">' + esc(n.comment) + '</div>' : '');
-      d.addEventListener('click', function (e) { if (e.target.closest('.ed-it')) openEditor(n); else jump(n); });
-      d.addEventListener('dblclick', function () { openEditor(n); });
+      d.addEventListener('click', function (e) { goNote(x.i, n.id, !!e.target.closest('.ed-it')); });
+      d.addEventListener('dblclick', function () { goNote(x.i, n.id, true); });
       list.appendChild(d);
     });
+  }
+  // пометка с другой вкладки: сначала открыть ту вкладку, потом искать
+  function goNote(i, id, edit) {
+    if (i !== cur) setDoc(i, true);
+    var n = notes.filter(function (x) { return x.id === id; })[0];
+    if (!n) return;
+    if (edit) openEditor(n); else jump(n);
   }
   function jump(n) {
     if (n.lost) { openEditor(n); return; }
@@ -804,9 +843,20 @@ if (!Array.isArray(DOCS)) DOCS = [DOCS];
     document.body.appendChild(a); a.click(); a.remove();
   });
   document.getElementById('clearAll').addEventListener('click', function () {
-    var where = DOCS.length > 1 ? ' на вкладке «' + DOC.tab + '»' : '';
-    if (!notes.length || !confirm('Удалить все заметки' + where + ' (' + notes.length + ')? Сначала лучше скопировать.')) return;
-    notes = []; saveNotes(); paint();
+    var total = totalNotes();
+    var what = DOCS.length > 1 ? ' — и к рассказу, и к разбору' : '';
+    if (!total || !confirm('Удалить все заметки' + what + ' (' + total + ')? Сначала лучше скопировать.')) return;
+    DOCS.forEach(function (d) { saveRaw(dkey(d, 'notes'), []); });
+    notes = []; paint();
+  });
+
+  document.getElementById('oldClear').addEventListener('click', function () {
+    DOCS.forEach(function (d) {
+      var ns = docNotes(d).filter(function (n) { return !isOld(n); });
+      if (d === DOC) notes = ns;
+      saveRaw(dkey(d, 'notes'), ns);
+    });
+    paint();
   });
 
   // чтение: размер, тема, прогресс, место
@@ -891,11 +941,8 @@ if (!Array.isArray(DOCS)) DOCS = [DOCS];
     var other = DOCS[cur ? 0 : 1], swap = document.getElementById('swap');
     swap.hidden = false;
     swap.textContent = '⇄ ' + other.tab;
-    document.getElementById('drawerTitle').textContent = 'Заметки · ' + DOC.tab.toLowerCase();
-    var others = totalNotes() - notes.length;
-    document.getElementById('tabnote').textContent = others
-      ? 'Здесь — пометки этой вкладки. «Скопировать» берёт обе вкладки сразу (на другой ещё ' + others + ').'
-      : 'Здесь — пометки этой вкладки. «Скопировать» берёт обе вкладки сразу.';
+    document.getElementById('tabnote').textContent =
+      'Здесь пометки и к рассказу, и к разбору. «Скопировать для Claude» берёт всё сразу — копировать один раз, с любой вкладки.';
   }
   // из разбора — к строкам рассказа: открыть вкладку и подсветить абзацы.
   // Место в разборе запоминается, «⇄ Разбор» вернёт туда же.

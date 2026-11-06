@@ -15,12 +15,13 @@
 //   ---                    правки подсвечиваются в читалке (кнопка «Правки»)
 // Шапка — в разборе, а не в прозе, чтобы не сдвигать номера строк рассказа.
 // На разборе можно ставить такие же пометки; хранятся отдельно, выгружаются вместе
-// с пометками к рассказу, номера строк — по файлу разбора. Если разборов к одному
+// с пометками к рассказу (список и выгрузка общие), номера строк — по файлу разбора. Если разборов к одному
 // рассказу несколько, вкладкой становится самый свежий по имени файла.
 
 import fs from 'fs';
 import path from 'path';
 import { execFileSync } from 'child_process';
+import { createHash } from 'crypto';
 import { fileURLToPath } from 'url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -272,6 +273,9 @@ for (const file of files) {
       title: (review.title || 'Разбор').replace(title + ' — ', '').replace(/^./, c => c.toUpperCase()),
       status: '', blocks: review.blocks });
   }
+  // версия круга вычитки: меняется с текстом рассказа или разбора. Пометки, поставленные
+  // на прошлой версии, читалка показывает бледными и предлагает убрать, чтобы не ушли дважды
+  docs[0].ver = createHash('sha1').update(JSON.stringify(docs.map(d => d.blocks))).digest('hex').slice(0, 10);
   const json = JSON.stringify(docs).replace(/</g, '\\u003c');
   const html = TEMPLATE
     .replace('__TITLE__', esc(title))
