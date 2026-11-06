@@ -63,7 +63,7 @@ function full(root, p){
     </section>
     <section class="card c-story"><h3>ЧТО ПРОИСХОДИТ</h3><div class="in"><p class="story" id="story"></p></div></section>
     ${P.desc && P.desc.length ? `<section class="card c-desc" id="cdesc"><h3>ОПИСАНИЕ</h3><div class="in">${P.desc.map(s => '<h4>' + esc(s.h) + '</h4>' + s.p.map(t => '<p>' + esc(t) + '</p>').join('')).join('')}</div></section>` : ''}
-    <section class="card c-time"><h3>ГОД</h3><div class="tl" id="tl"><div class="ax"></div><div class="fill" id="fill"></div></div></section>
+    <section class="card c-time"><h3>ГОД</h3><div class="tl-scroll" id="tlScroll"><div class="tl" id="tl"><div class="ax"></div><div class="fill" id="fill"></div></div></div></section>
     <section class="card c-stats"><h3>СОСТОЯНИЕ <small>к этому году</small></h3><div class="in" id="stats"></div></section>
     <section class="card c-map" id="cmap">
       <div class="mhead">
@@ -83,6 +83,7 @@ function full(root, p){
 
   /* шкала лет */
   const tl = $('#tl', root);
+  tl.style.setProperty('--n', MARKS.length); /* на телефоне шкала шире экрана и листается */
   YEARS.forEach(y => { const b = document.createElement('button'); b.className = 'tick'; b.dataset.y = y; b.style.left = pct(y) + '%';
     b.innerHTML = '<span class="yr">' + esc(P.years[y].label || y) + '</span><span class="dot"></span><span class="lab">' + esc(P.years[y].mark) + '</span>'; b.onclick = () => show(y); tl.appendChild(b); });
   (P.eras || []).filter(([y]) => y > MIN && y < MAX).forEach(([y, l]) => { const d = document.createElement('div'); d.className = 'tick era'; d.style.left = pct(y) + '%';
@@ -155,6 +156,8 @@ function full(root, p){
   function show(y){
     year = y; const s = P.years[y];
     $$('.tick[data-y]', root).forEach(t => t.setAttribute('aria-current', +t.dataset.y === y));
+    const wrap = $('#tlScroll', root), cur = $('.tick[aria-current="true"]', root);
+    if (wrap && cur && wrap.scrollWidth > wrap.clientWidth + 24) wrap.scrollTo({left:cur.offsetLeft - wrap.clientWidth / 2, behavior:prev == null ? 'auto' : 'smooth'});
     $('#fill', root).style.width = pct(y) + '%';
     countUp($$('.yearN', root), Math.floor(prev || y), Math.floor(y));
     $('#where', root).textContent = s.where;

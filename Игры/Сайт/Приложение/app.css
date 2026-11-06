@@ -127,6 +127,12 @@ a.chip:hover{border-color:var(--dusk);text-decoration:none}
 .c-time{padding:10px 16px 8px}
 .c-time h3{margin:0 0 2px;font:700 10px var(--disp);letter-spacing:.12em;color:var(--mute)}
 .tl{position:relative;height:46px}
+.tl-scroll{overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:var(--line) transparent;margin:0 -16px;padding:0 16px 4px}
+/* по 84 px на отметку (на телефоне 96): иначе «1025», «весна 1026» и «осень 1026» налезают друг на друга;
+   не помещается — шкала листается, текущий год подкручивается к середине */
+.tl{min-width:calc(var(--n,8) * 84px)}
+@media (max-width:700px){.tl{min-width:calc(var(--n,8) * 96px)}}
+@media (hover:none){.tl-scroll{scrollbar-width:none}.tl-scroll::-webkit-scrollbar{display:none}}
 .tl .ax{position:absolute;left:0;right:0;top:20px;height:2px;background:var(--line)}
 .tl .fill{position:absolute;left:0;top:20px;height:2px;background:var(--ochre);transition:width .7s var(--ease)}
 .tick{all:unset;position:absolute;top:0;transform:translateX(-50%);text-align:center;cursor:pointer;white-space:nowrap}
@@ -582,6 +588,7 @@ a.fac::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;backg
 .secret-pop{position:absolute;left:0;top:calc(100% + 6px);z-index:30;width:min(520px,80vw);padding:12px 14px;border-radius:12px;background:#2a2320;border:1px solid rgba(212,106,74,.45);box-shadow:0 18px 50px rgba(0,0,0,.6);font-size:14px;line-height:1.5;color:#e6ddd2;animation:swap .3s var(--ease)}
 /* портрет и карта фиксированного размера: смена года или длинный текст их не растягивает */
 .frame .c-photo{align-self:start;height:540px}
+@media (max-width:700px){.frame .c-photo{height:auto;min-height:0;aspect-ratio:3/4;max-height:80vh}}
 .frame .c-map{align-self:start}
 .frame .c-map .map{flex:none;aspect-ratio:1280/698;min-height:0}
 .slot{position:relative;overflow:hidden}
