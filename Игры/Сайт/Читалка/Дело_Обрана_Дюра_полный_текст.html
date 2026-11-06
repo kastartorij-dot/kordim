@@ -440,7 +440,7 @@ if (!Array.isArray(DOCS)) DOCS = [DOCS];
       while ((m = re.exec(p.text))) p.refs.push([m.index, m.index + m[0].length, +m[1], +(m[2] || m[1])]);
       // заголовок заметки (Н1. / В12. / З2–З3. … целиком жирный) — тап по нему ведёт к первой ссылке
       var fm = p.fmt || [];
-      p.jump = p.refs.length && /^[НВЗП]\d/.test(p.text) && fm.some(function (f) { return f[2] === 'b' && f[0] === 0; }) ? p.refs[0] : null;
+      p.jump = p.refs.length && /^[А-ЯЁ]{1,2}\d/.test(p.text) && fm.some(function (f) { return f[2] === 'b' && f[0] === 0; }) ? p.refs[0] : null;
     });
     return { paras: ps, full: f, starts: st };
   }
