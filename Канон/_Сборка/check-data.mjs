@@ -108,5 +108,27 @@ for (const [kind, entries] of Object.entries(sourceTargets)) {
   }
 }
 
+// У каждой картинки, на которую ссылаются данные, есть файл в Игры/Сайт/Изображения (пути вида «Лица/x.jpg»).
+// Портрет без поля img ищется как Лица/<id>.jpg и молча пропадает — это не ошибка, а пустое место.
+const IMAGES = path.join(ROOT, 'Игры', 'Сайт', 'Изображения');
+const IMG_RE = /^[^\s/][^\s]*\.(jpe?g|png|webp|gif|svg)$/i;
+const SKIP = new Set(['canon.js', 'scenes.js', 'plan.js']);
+const dataFiles = dir => fs.readdirSync(dir, {withFileTypes:true}).flatMap(d =>
+  d.isDirectory() ? dataFiles(path.join(dir, d.name)) : d.name.endsWith('.js') && !SKIP.has(d.name) ? [path.join(dir, d.name)] : []);
+const walkImages = (value, seen, out) => {
+  if (typeof value === 'string') { if (IMG_RE.test(value)) out.add(value); return; }
+  if (!value || typeof value !== 'object' || seen.has(value)) return;
+  seen.add(value);
+  Object.values(value).forEach(v => walkImages(v, seen, out));
+};
+const imageUse = new Map(); // путь картинки → файлы данных, где она встречается
+for (const file of dataFiles(DATA)) {
+  const found = new Set();
+  walkImages(await import(pathToFileURL(file).href), new Set(), found);
+  for (const rel of found) imageUse.set(rel, [...(imageUse.get(rel) || []), path.relative(DATA, file)]);
+}
+for (const [rel, files] of imageUse) if (!fs.existsSync(path.join(IMAGES, rel))) bad(files.join(', '), 'файл картинки', rel);
+console.log(`Картинок в данных: ${imageUse.size}.`);
+
 console.log(problems ? `\nНайдено ${problems} проблем.` : '\nOK: все перекрёстные ссылки в данных вики целы.');
 process.exit(problems ? 1 : 0);

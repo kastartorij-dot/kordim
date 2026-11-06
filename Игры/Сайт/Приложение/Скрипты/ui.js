@@ -26,7 +26,7 @@ export function proseHTML(text){
 export function personChip(id){
   const p = personById(id); if (!p) return '';
   /* портрет ищется и по имени файла Лица/<id>.jpg: положил файл — он появился */
-  const av = '<img src="' + IMG + (p.img || 'Лица/' + p.id + '.jpg') + '" alt="" onerror="this.remove()">';
+  const av = '<img src="' + IMG + (p.img || 'Лица/' + p.id + '.jpg') + '" alt="" loading="lazy" decoding="async" onerror="this.remove()">';
   return '<a class="chip" href="#/person/' + id + '">' + av + esc(p.name) + '</a>';
 }
 export function placeChip(id){

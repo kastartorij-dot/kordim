@@ -57,7 +57,7 @@ function renderDoc(root, f, { people, rels, evs, seat }){
       </div>
       <aside class="fside">
         <section class="card"><h3>ЛЮДИ <small>${people.length}</small></h3><div class="fpeople">
-          ${people.length ? people.map(p => '<a class="pcard" href="#/person/' + p.id + '">' + '<img class="av" src="' + IMG + (p.img || 'Лица/' + p.id + '.jpg') + '" alt="" data-initial="' + esc(p.name[0]) + '" onerror="kordimNoImg(this)">' + '<div><b>' + esc(p.name) + '</b><small>' + esc(p.role) + '</small></div></a>').join('') : '<p class="locked">Люди этой фракции ещё не заведены.</p>'}
+          ${people.length ? people.map(p => '<a class="pcard" href="#/person/' + p.id + '">' + '<img class="av" src="' + IMG + (p.img || 'Лица/' + p.id + '.jpg') + '" alt="" loading="lazy" decoding="async" data-initial="' + esc(p.name[0]) + '" onerror="kordimNoImg(this)">' + '<div><b>' + esc(p.name) + '</b><small>' + esc(p.role) + '</small></div></a>').join('') : '<p class="locked">Люди этой фракции ещё не заведены.</p>'}
         </div></section>
         <section class="card"><h3>СВЯЗИ <small>${rels.length}</small></h3>
           ${rels.length ? rels.map(r => { const o = factionById(r.other); return '<a class="rel" href="#/faction/' + o.id + '" style="--oc:' + o.color + '"><span class="t ' + r.type + '">' + REL_LABEL[r.type] + '</span><div><b>' + icon(o.icon, 15) + ' ' + esc(o.name) + '</b><small>' + esc(r.text) + '</small></div></a>'; }).join('') : '<p class="locked" style="padding:0 16px 14px">Связей пока не записано.</p>'}
@@ -91,7 +91,7 @@ function renderHerb(root, f, { people, rels, evs, seat }){
     <div class="fherb-prose">${f.text.map(t => '<p>' + esc(t) + '</p>').join('')}</div>
     ${canonSources('factions', f.id)}
     ${f.hooks && f.hooks.length ? '<div class="fherb-hooks">' + f.hooks.map(h => '<div>' + esc(h) + '</div>').join('') + '</div>' : ''}
-    ${people.length ? '<div class="fherb-folk">' + people.map(p => '<a href="#/person/' + p.id + '"><img class="av" src="' + IMG + (p.img || 'Лица/' + p.id + '.jpg') + '" alt="" data-initial="' + esc(p.name[0]) + '" onerror="kordimNoImg(this)">' + esc(p.name) + '</a>').join('') + '</div>' : ''}
+    ${people.length ? '<div class="fherb-folk">' + people.map(p => '<a href="#/person/' + p.id + '"><img class="av" src="' + IMG + (p.img || 'Лица/' + p.id + '.jpg') + '" alt="" loading="lazy" decoding="async" data-initial="' + esc(p.name[0]) + '" onerror="kordimNoImg(this)">' + esc(p.name) + '</a>').join('') + '</div>' : ''}
     <section class="card c-map"><div class="mhead"><b style="font-weight:500">${seat ? 'Где сидят' : 'Без одного места'}</b><a href="#/map">общая карта</a></div>
       <div class="map" id="map" style="margin:0 12px 12px;border-radius:12px;flex:none">${mapHTML()}</div></section>
     ${evs.length ? '<div class="fherb-evs">' + evs.map(([e, i]) => '<a class="fev" href="#/chronicle/' + i + '"><span>' + esc(e.y) + '</span><div><b>' + esc(e.h) + '.</b> ' + esc(e.t) + '</div></a>').join('') + '</div>' : ''}
