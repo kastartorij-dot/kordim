@@ -68,7 +68,7 @@ export const SCENES = [
   {
     "id": "Ошерская_история",
     "title": "Ошерская история",
-    "status": "черновик",
+    "status": "готово",
     "event": "now",
     "events": [
       "now",
