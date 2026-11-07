@@ -549,14 +549,14 @@ export const PLAN = {
        "date": null
       },
       {
-       "st": "open",
-       "p": 0,
+       "st": "done",
+       "p": 1,
        "frac": null,
        "text": "Развести яд Ленна (запись 52) и паралитик алхимии (запись 08)",
        "refs": "О §2",
-       "effort": 1,
+       "effort": 0,
        "author": false,
-       "date": null
+       "date": "07.11"
       },
       {
        "st": "open",
