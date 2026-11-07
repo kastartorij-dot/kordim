@@ -5,6 +5,8 @@ import { $, $$, esc, IMG, personChip, placeChip, canonSources } from '../ui.js';
 import { EVENTS, LINES, LINE_COLOR, ERAS } from '../../Данные/events.js';
 import { SCENES } from '../../Данные/scenes.js';
 const TOUCH = typeof matchMedia === 'function' && matchMedia('(hover: none)').matches;
+/* узкий экран: «Полная лента» столбиком, а не горизонтальным полотном */
+const NARROW = () => typeof matchMedia === 'function' && matchMedia('(max-width: 700px)').matches;
 
 const names = {...LINES, world:'Мир'};
 const color = l => LINE_COLOR[l] || LINE_COLOR.world;
@@ -36,7 +38,7 @@ export function render(root, [param]){
     const body = $('#body', root), ctrl = $('#ctrl', root);
     body.innerHTML = ''; ctrl.innerHTML = '';
     const wrap = document.createElement('div'); body.appendChild(wrap);
-    stop = m === 'full' ? full(wrap, ctrl, at) : keyView(wrap, i => set('full', i));
+    stop = m === 'full' ? (NARROW() ? fullList : full)(wrap, ctrl, at) : keyView(wrap, i => set('full', i));
   }
   $$('[data-mode]', root).forEach(b => b.onclick = () => { if (b.dataset.mode !== mode) set(b.dataset.mode); });
   set(mode, param);
@@ -201,4 +203,68 @@ function full(wrap, ctrl, param){
   const start = param != null && EVENTS[+param] ? +param : nowIdx;
   requestAnimationFrame(() => { select(start, false); paintWin(); });
   return () => { stopPlay(); removeEventListener('keydown', keys); removeEventListener('resize', paintWin); };
+}
+
+/* ─── «Полная лента» на телефоне: столбик сверху вниз, фильтр по линиям, эпохи заголовками ─── */
+function fullList(wrap, ctrl, param){
+  const lanes = [...Object.keys(LINES), 'world'];
+  const nowIdx = Math.max(0, EVENTS.findIndex(e => e.now));
+  let line = null;
+  ctrl.innerHTML = '<button class="btn" id="now">Сейчас</button>';
+  const eraAt = i => ERAS.find(([a]) => EVENTS[i].s >= a && (i === 0 || EVENTS[i - 1].s < a));
+  wrap.innerHTML = `
+    <div class="vl-lines" role="group" aria-label="Линии">
+      <button class="vl-chip on" data-vl="">Все</button>${lanes.map(l => '<button class="vl-chip" data-vl="' + l + '" style="--c:' + color(l) + '">' + esc(names[l]) + '</button>').join('')}
+    </div>
+    <ol class="vl">${EVENTS.map((e, i) => {
+      const era = eraAt(i);
+      return (era ? '<li class="vl-era">' + esc(era[2]) + '</li>' : '') +
+        (i === nowIdx ? '<li class="vl-nowmark">сейчас</li>' : '') +
+        '<li class="vl-ev' + (e.hot ? ' hot' : '') + (e.key ? ' key' : '') + '" id="vl' + i + '" data-ev="' + i + '" style="--c:' + color(linesOf(e)[0]) + '">' +
+        '<div class="vl-y">' + esc(e.y) + '</div><div class="vl-body"><h3>' + esc(e.h) + '</h3><p>' + esc(e.t) + '</p>' + dateInfo(e) +
+        '<div>' + linesOf(e).map(l => '<span class="ltag" style="--c:' + color(l) + '">' + esc(names[l]) + '</span>').join('') + '</div>' +
+        ((e.people || []).length || e.place ? '<div class="vl-chips">' + (e.people || []).map(personChip).join('') + (e.place ? placeChip(e.place) : '') + '</div>' : '') +
+        canonSources('events', e.slug) + sceneLink(e) + '</div></li>';
+    }).join('')}</ol>
+    <p class="hc-hint">листай вниз · линия сверху оставляет только её события</p>`;
+
+  const go = (i, smooth = true) => {
+    const el = $('#vl' + i, wrap); if (!el) return;
+    $$('.vl-ev', wrap).forEach(v => v.classList.toggle('sel', v === el));
+    el.scrollIntoView({block:'start', behavior:smooth ? 'smooth' : 'auto'});
+    history.replaceState(null, '', '#/chronicle/' + i);
+  };
+  wrap.addEventListener('click', e => {
+    const c = e.target.closest('[data-vl]');
+    if (c){
+      line = c.dataset.vl || null;
+      $$('[data-vl]', wrap).forEach(b => b.classList.toggle('on', (b.dataset.vl || null) === line));
+      $$('.vl-ev', wrap).forEach(v => v.hidden = !!line && !linesOf(EVENTS[+v.dataset.ev]).includes(line));
+      tidy();
+      return;
+    }
+    const ev = e.target.closest('.vl-ev');
+    if (ev && !e.target.closest('a,button')) {
+      $$('.vl-ev', wrap).forEach(v => v.classList.toggle('sel', v === ev));
+      history.replaceState(null, '', '#/chronicle/' + ev.dataset.ev);
+    }
+  });
+  /* заголовок эпохи виден, если до следующей эпохи есть видимое событие; «сейчас» — если видно событие под ней */
+  function tidy(){
+    $$('.vl-era,.vl-nowmark', wrap).forEach(h => {
+      const era = h.classList.contains('vl-era');
+      let any = false;
+      for (let k = h.nextElementSibling; k; k = k.nextElementSibling){
+        if (era && k.classList.contains('vl-era')) break;
+        if (k.classList.contains('vl-ev')){ if (!k.hidden){ any = true; break; } if (!era) break; }
+      }
+      h.hidden = !any;
+    });
+  }
+  $('#now', ctrl).onclick = () => {
+    if (line && !linesOf(EVENTS[nowIdx]).includes(line)) $('[data-vl=""]', wrap).click();
+    go(nowIdx);
+  };
+  if (param != null && EVENTS[+param]) requestAnimationFrame(() => go(+param, false));
+  return () => {};
 }
