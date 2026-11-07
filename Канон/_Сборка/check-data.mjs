@@ -112,7 +112,7 @@ for (const [kind, entries] of Object.entries(sourceTargets)) {
 // Портрет без поля img ищется как Лица/<id>.jpg и молча пропадает — это не ошибка, а пустое место.
 const IMAGES = path.join(ROOT, 'Игры', 'Сайт', 'Изображения');
 const IMG_RE = /^[^\s/][^\s]*\.(jpe?g|png|webp|gif|svg)$/i;
-const SKIP = new Set(['canon.js', 'scenes.js', 'plan.js']);
+const SKIP = new Set(['canon.js', 'scenes.js', 'plan.js', 'journal.js']);
 const dataFiles = dir => fs.readdirSync(dir, {withFileTypes:true}).flatMap(d =>
   d.isDirectory() ? dataFiles(path.join(dir, d.name)) : d.name.endsWith('.js') && !SKIP.has(d.name) ? [path.join(dir, d.name)] : []);
 const walkImages = (value, seen, out) => {

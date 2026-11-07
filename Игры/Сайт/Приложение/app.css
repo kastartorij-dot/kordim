@@ -76,6 +76,29 @@ a.chip:hover{border-color:var(--dusk);text-decoration:none}
 .tile span{color:var(--mute);font-size:14px}
 .tile .n{float:right;font:700 13px var(--mono);color:var(--ochre)}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:26px}
+/* главная «куда дальше»: что нового · ждёт автора · где мир молчит */
+.home-next{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:18px;align-items:start}
+.hn{display:flex;flex-direction:column}
+.hn-list{list-style:none;margin:0;padding:8px 16px 4px}
+.hn-list li{padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.45}
+.hn-list li:last-child{border:0}
+.hn-new .hn-list b{display:block;font-weight:600;color:var(--text)}
+.hn-new .hn-list p{margin:3px 0 0;color:var(--mute);font-size:13px}
+.hn-date{display:block;font:11px var(--mono);color:var(--ochre);margin-bottom:2px}
+.hn-more{padding:0 16px 12px}
+.hn-more summary{cursor:pointer;font:12px var(--mono);color:var(--mute);padding:6px 0}
+.hn-more .hn-list{padding:0}
+.hn-count{margin:8px 16px 0;color:var(--mute);font-size:13px}
+.hn-count b{font:900 26px/1 var(--disp);color:var(--ember);margin-right:4px}
+.hn-todo li{padding-left:16px;position:relative}
+.hn-todo li::before{content:"";position:absolute;left:0;top:15px;width:7px;height:7px;border-radius:50%;border:1.5px solid var(--mute)}
+.hn-todo li.part::before{border-color:var(--ochre);background:linear-gradient(90deg,var(--ochre) 50%,transparent 50%)}
+.hn-quiet .hn-list li{display:grid;grid-template-columns:62px 1fr;gap:10px;align-items:baseline}
+.hn-n{font:900 22px/1 var(--disp);color:var(--ochre)}
+.hn-n i{display:block;font:11px var(--mono);font-style:normal;color:var(--mute);margin-top:3px}
+.hn-link{margin:auto 16px 14px;padding-top:6px;font:12px var(--mono);color:var(--ochre)}
+@media (max-width:1100px){.home-next{grid-template-columns:1fr 1fr}.hn-new{grid-column:1/-1}}
+@media (max-width:700px){.home-next{grid-template-columns:1fr}}
 .list{list-style:none;margin:0;padding:10px 16px 16px}
 .list li{padding:8px 0;border-bottom:1px solid var(--line)}
 .list li:last-child{border:0}

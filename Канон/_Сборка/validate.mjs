@@ -64,7 +64,7 @@ if (fs.existsSync(PROZA)) {
 // проверенных выше блоков и прозы (в canon.js к тому же лежит журнал правок с историей отмен).
 // Мини-игру не проверяем намеренно — у неё свой лорбук и своя сессия.
 const DATA = path.join(ROOT, 'Игры', 'Сайт', 'Приложение', 'Данные');
-const GENERATED = new Set(['canon.js', 'scenes.js', 'plan.js']);  // plan.js — из Канон/ПЛАН_развития.md, там снятое названо по имени намеренно
+const GENERATED = new Set(['canon.js', 'scenes.js', 'plan.js', 'journal.js']);  // plan.js — из Канон/ПЛАН_развития.md, там снятое названо по имени намеренно
 function walk(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap(d =>
     d.isDirectory() ? walk(path.join(dir, d.name)) : d.name.endsWith('.js') ? [path.join(dir, d.name)] : []);

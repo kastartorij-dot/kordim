@@ -11,6 +11,8 @@ import { fileURLToPath } from 'url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const KANON = path.join(ROOT, 'Канон');
 const OUT = path.join(ROOT, 'Игры', 'Сайт', 'Приложение', 'Данные', 'canon.js');
+// Лента правок для главной: датированные записи журнала из 00_шапка.md, новые сверху.
+const OUT_JOURNAL = path.join(ROOT, 'Игры', 'Сайт', 'Приложение', 'Данные', 'journal.js');
 
 function readBlock(rel) {
   // \r\n -> \n сразу: файл мог быть пересохранён редактором целиком в CRLF (в т.ч. автором
@@ -86,13 +88,34 @@ for (const part of manifest.части) {
   for (const rel of part.блоки) target.push(toItem(rel));
 }
 
+/* журнал: абзацы вида «**Заголовок, ДД.ММ.ГГГГ** текст» в разделе «Что изменено против исходника» */
+function readJournal() {
+  const src = fs.readFileSync(path.join(KANON, manifest.шапка), 'utf8').replace(/\r\n/g, '\n');
+  const at = src.indexOf('## Что изменено против исходника');
+  if (at < 0) return [];
+  const entries = [];
+  src.slice(at).split(/\n\s*\n/).forEach((p, order) => {
+    const m = p.trim().match(/^\*\*(.+?)\*\*:?\s*([\s\S]*)$/);
+    if (!m) return;
+    const d = m[1].match(/(\d{1,2})\.(\d{2})\.(\d{4})/);
+    if (!d) return;
+    const title = m[1].replace(/,?\s*\d{1,2}\.\d{2}\.\d{4}\s*:?$/, '').replace(/:$/, '').trim();
+    entries.push({ date: `${d[3]}-${d[2]}-${d[1].padStart(2, '0')}`, title, text: m[2].replace(/\s+/g, ' ').trim(), order });
+  });
+  return entries.sort((a, b) => b.date.localeCompare(a.date) || b.order - a.order).map(({ order, ...e }) => e);
+}
+const journal = readJournal();
+const generatedJournal = '// Автосборка из журнала правок Канон/00_шапка.md (export-wiki.mjs). Не редактировать руками.\n'
+  + `export const JOURNAL = ${JSON.stringify(journal, null, 1)};\n`;
+
 const header = '// Автосборка из Канон/Герои, Канон/Правила, Канон/Записи, Канон/Приложения.\n'
   + '// Не редактировать руками — правьте блоки и запускайте node Канон/_Сборка/export-wiki.mjs.\n';
 const generated = header + `export const CANON = ${JSON.stringify(out, null, 2)};\n`;
 if (process.argv.includes('--check')) {
   // Дата сборки не меняет фактов; переносы Windows и Linux могут различаться.
   const normalize = s => s.replace(/\r\n/g, '\n').replace(/("собрано": ")[^"]+(")/, '$1DATE$2');
-  if (!fs.existsSync(OUT) || normalize(fs.readFileSync(OUT, 'utf8')) !== normalize(generated)) {
+  const stale = (file, text) => !fs.existsSync(file) || normalize(fs.readFileSync(file, 'utf8')) !== normalize(text);
+  if (stale(OUT, generated) || stale(OUT_JOURNAL, generatedJournal)) {
     console.error('Канон справочника устарел. Запустите node Канон/_Сборка/export-wiki.mjs');
     process.exit(1);
   }
@@ -100,6 +123,7 @@ if (process.argv.includes('--check')) {
 } else {
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   fs.writeFileSync(OUT, generated, 'utf8');
+  fs.writeFileSync(OUT_JOURNAL, generatedJournal, 'utf8');
   console.log(`Записано: ${OUT}`);
 }
-console.log(`Герои ${out.герои.length}, правила ${out.правила.length}, записи ${out.записи.length}, приложения ${out.приложения.length}`);
+console.log(`Герои ${out.герои.length}, правила ${out.правила.length}, записи ${out.записи.length}, приложения ${out.приложения.length}, журнал ${journal.length}`);

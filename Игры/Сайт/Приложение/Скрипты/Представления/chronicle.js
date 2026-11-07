@@ -4,6 +4,7 @@
 import { $, $$, esc, IMG, personChip, placeChip, canonSources } from '../ui.js';
 import { EVENTS, LINES, LINE_COLOR, ERAS } from '../../Данные/events.js';
 import { SCENES } from '../../Данные/scenes.js';
+const TOUCH = typeof matchMedia === 'function' && matchMedia('(hover: none)').matches;
 
 const names = {...LINES, world:'Мир'};
 const color = l => LINE_COLOR[l] || LINE_COLOR.world;
@@ -53,7 +54,7 @@ function keyView(wrap, openFull){
         '<span class="ks-dot"></span><span class="ks-yr">' + esc(e.y) + '</span><span class="ks-h">' + esc(e.h) + '</span></button>').join('')}
       <div class="ks-card" id="card" hidden></div>
     </div></div>
-    <p class="hc-hint">наведи или нажми на событие — всплывёт карточка · ← → листать · в «Полной ленте» все ${EVENTS.length} событий по линиям</p>`;
+    <p class="hc-hint">${TOUCH ? 'нажми на событие — откроется карточка, нажми ещё раз — закроется' : 'наведи или нажми на событие — всплывёт карточка · ← → листать'} · в «Полной ленте» все ${EVENTS.length} событий по линиям</p>`;
   history.replaceState(null, '', '#/chronicle');
 
   const card = $('#card', wrap);
@@ -73,12 +74,15 @@ function keyView(wrap, openFull){
   function hide(){ if (pinned != null) return show(pinned); card.hidden = true; shown = null; $$('.ks-ev', wrap).forEach(b => b.classList.remove('on')); }
   $$('.ks-ev', wrap).forEach(b => {
     const k = +b.dataset.k;
-    b.addEventListener('mouseenter', () => show(k));
-    b.addEventListener('focus', () => show(k));
-    b.addEventListener('mouseleave', () => { if (!card.matches(':hover')) hide(); });
-    b.addEventListener('click', () => { pinned = pinned === k ? null : k; show(k); });
+    /* на тач-экране наведения нет: нажатие открывает карточку, повторное — закрывает */
+    if (!TOUCH){
+      b.addEventListener('mouseenter', () => show(k));
+      b.addEventListener('focus', () => show(k));
+      b.addEventListener('mouseleave', () => { if (!card.matches(':hover')) hide(); });
+    }
+    b.addEventListener('click', () => { pinned = pinned === k ? null : k; if (pinned == null && TOUCH) hide(); else show(k); });
   });
-  card.addEventListener('mouseleave', () => hide());
+  if (!TOUCH) card.addEventListener('mouseleave', () => hide());
   card.addEventListener('click', e => { const f = e.target.closest('[data-full]'); if (f) openFull(+f.dataset.full); });
   const keys = e => {
     if (e.target.closest('input,select,textarea')) return;
