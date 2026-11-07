@@ -114,72 +114,20 @@ a.chip:hover{border-color:var(--dusk);text-decoration:none}
 .pcard .badge{margin-top:4px;display:inline-block}
 
 /* ─── персонаж: «Панели» ─── */
-.frame{display:grid;gap:var(--gap);padding:var(--gap) 24px 30px;grid-template-columns:300px 1fr 1fr;grid-template-rows:auto auto auto 1fr;
-  grid-template-areas:"photo name  desc" "photo story desc" "stats time  map" "items talk  map"}
-.frame .c-time{grid-area:time}.frame .c-name{grid-area:name}.frame .c-story{grid-area:story}.frame .c-stats{grid-area:stats}
-.frame .c-photo{grid-area:photo}.frame .c-map{grid-area:map}.frame .c-talk{grid-area:talk}.frame .c-items{grid-area:items}
-.frame .c-desc{grid-area:desc}.frame .c-stats{align-self:start}.frame .c-time{align-self:start}
-.c-name{padding:4px 2px}
-.bigname{font:900 clamp(36px,4vw,64px)/.9 var(--disp);letter-spacing:-.03em;margin:0;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
-.bigname span{display:block;font:500 12px var(--disp);letter-spacing:.2em;color:var(--ochre);margin-top:10px;flex-basis:100%}
-.bigname .age{font:700 16px var(--mono);color:var(--mute);letter-spacing:0}
 .now{display:flex;gap:16px;align-items:center;margin-top:16px}
-.yearbig{font:900 48px/1 var(--disp);color:var(--ochre);font-variant-numeric:tabular-nums}
 .where{font-weight:500}.where small{display:block;font:11px var(--mono);color:var(--mute)}
-.c-story .in{padding:10px 16px 16px}
-.story{font-size:18px;line-height:1.55;margin:0}
 .swap{animation:swap .55s var(--ease)}
 @keyframes swap{from{opacity:0;transform:translateY(10px);filter:blur(3px)}}
-.c-stats .in{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px 14px 14px}
-.st{font:10px var(--mono);color:var(--mute);overflow:hidden;text-overflow:ellipsis}
-.st .tr{height:46px;background:var(--raise);border-radius:9px;position:relative;overflow:hidden;margin-bottom:5px}
-.st .v{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(0deg,var(--sage),rgba(155,179,131,.35));transition:height .8s var(--ease)}
-.st.warm .v{background:linear-gradient(0deg,var(--ochre),rgba(217,164,65,.3))}
-.st.hot .v{background:linear-gradient(0deg,var(--ember),rgba(212,106,74,.3))}
-.st b{position:absolute;left:8px;top:5px;font:700 15px var(--disp);color:var(--text)}
-.st .d{position:absolute;right:6px;top:7px;font:10px var(--mono)}
 .up{color:var(--sage)}.down{color:var(--ember)}
-.c-photo{position:relative;overflow:hidden;min-height:380px}
-.c-photo>img,.c-photo>canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 22%;transition:filter .8s var(--ease)}
-.c-photo canvas{image-rendering:pixelated}
-.c-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(26,23,22,.9));pointer-events:none}
-.c-photo .stamp{position:absolute;left:14px;bottom:12px;z-index:1;font:700 11px var(--disp);letter-spacing:.14em;color:var(--ochre)}
 .pxbtn{position:absolute;right:10px;top:10px;z-index:2;all:unset;cursor:pointer;background:rgba(26,23,22,.75);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:8px;padding:4px 9px;font:11px var(--mono)}
 .pxbtn[aria-pressed="true"]{color:var(--ochre);border-color:var(--ochre)}
 /* компактно и рядом с тем, что она меняет: диалог, вещи/долги — не витрина на всю ширину */
-.c-time{padding:10px 16px 8px}
-.c-time h3{margin:0 0 2px;font:700 10px var(--disp);letter-spacing:.12em;color:var(--mute)}
-.tl{position:relative;height:46px}
-.tl-scroll{overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:var(--line) transparent;margin:0 -16px;padding:0 16px 4px}
 /* по 84 px на отметку (на телефоне 96): иначе «1025», «весна 1026» и «осень 1026» налезают друг на друга;
    не помещается — шкала листается, текущий год подкручивается к середине */
-.tl{min-width:calc(var(--n,8) * 84px)}
-@media (max-width:700px){.tl{min-width:calc(var(--n,8) * 96px)}}
-@media (hover:none){.tl-scroll{scrollbar-width:none}.tl-scroll::-webkit-scrollbar{display:none}}
-.tl .ax{position:absolute;left:0;right:0;top:20px;height:2px;background:var(--line)}
-.tl .fill{position:absolute;left:0;top:20px;height:2px;background:var(--ochre);transition:width .7s var(--ease)}
-.tick{all:unset;position:absolute;top:0;transform:translateX(-50%);text-align:center;cursor:pointer;white-space:nowrap}
-.tick .yr{font:700 10px var(--disp);color:var(--mute)}
-.tick .dot{display:block;width:8px;height:8px;margin:6px auto 0;border-radius:50%;background:var(--ground);border:2px solid var(--line);transition:.3s}
-.tick .lab{display:none}
-.tick[aria-current="true"] .yr{color:var(--ochre);font-size:12px}
-.tick[aria-current="true"] .dot{background:var(--ochre);border-color:var(--ochre);box-shadow:0 0 0 5px rgba(217,164,65,.18)}
-.tick.era{cursor:default}.tick.era .dot{width:5px;height:5px;margin-top:7px}
-.tick:hover .lab,.tick[aria-current="true"] .lab{display:block;position:absolute;top:32px;left:50%;transform:translateX(-50%);font:10px var(--mono);color:var(--mute);background:var(--panel);padding:1px 6px;border-radius:5px;z-index:2}
 
 /* ─── описание: полный текст, сворачивается, если длинный.
    Высота карточки зафиксирована (не зависит от того, свёрнут текст или развёрнут),
    иначе разворачивание у Грейс раздувает всю сетку «Панелей» — внутри своя прокрутка. */
-.c-desc{display:flex;flex-direction:column;max-height:620px}
-.c-desc h3{margin:0;padding:12px 16px 0;font:700 11px var(--disp);letter-spacing:.14em;color:var(--mute);flex:none}
-.c-desc .in{padding:8px 16px 14px;flex:1 1 auto;min-height:0;overflow-y:auto}
-.c-desc p{margin:0 0 12px;font-size:15px;line-height:1.55;color:#d6cec4}
-.c-desc p:last-child{margin-bottom:0}
-.c-desc h4{margin:14px 0 6px;font:700 12px var(--disp);letter-spacing:.06em;color:var(--ochre)}
-.c-desc h4:first-child{margin-top:0}
-.c-desc.clamp .in{max-height:280px;overflow:hidden;position:relative;-webkit-mask-image:linear-gradient(180deg,#000 78%,transparent);mask-image:linear-gradient(180deg,#000 78%,transparent)}
-.desc-more{all:unset;cursor:pointer;margin:0 16px 12px;font:12px var(--mono);color:var(--ochre);flex:none}
-.desc-more:hover{text-decoration:underline}
 .c-map{display:flex;flex-direction:column}
 .mhead{display:flex;gap:8px;align-items:center;padding:10px 12px 8px;flex-wrap:wrap}
 .mhead a{margin-left:auto;font-size:12px}
@@ -191,7 +139,6 @@ select{background:var(--raise);border:1px solid var(--line);border-radius:8px;pa
 .go[disabled]{opacity:.4;cursor:not-allowed}
 .nums{font:700 20px var(--disp);margin-top:6px}.nums small{font:11px var(--mono);color:var(--mute);margin-left:4px}
 .evline{margin-top:4px;color:var(--mute)}.evline.bad{color:#eeac98}
-.c-talk .in{padding:8px 16px 14px}
 .chat-log{display:grid;gap:7px;overflow:auto;align-content:start;max-height:260px}
 .msg{font-size:15px;animation:swap .35s var(--ease)}
 .msg.them b{font:700 10px var(--disp);letter-spacing:.1em;color:var(--ochre);margin-right:8px}
@@ -201,23 +148,12 @@ select{background:var(--raise);border:1px solid var(--line);border-radius:8px;pa
 .chat-opts button{all:unset;cursor:pointer;padding:6px 12px;border-radius:99px;background:var(--raise);font-size:14px}
 .chat-opts button:hover,.chat-opts button:focus-visible{background:var(--dusk);color:#141414}
 .locked{color:var(--mute);font-size:14px;margin:4px 0}
-.c-items .in{padding:10px 16px 14px}
 .sub{font:10px var(--mono);color:var(--mute);margin:8px 0 6px;text-transform:uppercase;letter-spacing:.08em}
-.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(42px,1fr));gap:6px}
-.slot{all:unset;aspect-ratio:1;display:grid;place-items:center;font-size:19px;background:var(--raise);border:1px solid var(--line);border-radius:10px;cursor:pointer;transition:transform .2s var(--ease),border-color .2s}
-.slot:hover,.slot:focus-visible,.slot.on{border-color:var(--ochre);transform:translateY(-2px)}
-.slot.debt{border-color:rgba(212,106,74,.5);background:linear-gradient(180deg,rgba(212,106,74,.14),var(--raise))}
-.slot.new{animation:drop .6s var(--ease)}
 @keyframes drop{from{transform:scale(.3) translateY(-16px);opacity:0}}
-.slot.ghost{opacity:.28;cursor:default}
 .tip{margin-top:10px;font-size:13px;color:#d6cec4;min-height:38px}
 .tip b{color:var(--text);font-weight:500}
 
 /* короткая карточка персонажа, пока профиль не собран */
-.short{display:grid;grid-template-columns:320px 1fr 1fr;gap:var(--gap);padding:var(--gap) 24px 30px}
-.short .c-photo{min-height:420px}
-.short .body{padding:4px 2px}
-.short .body p{font-size:17px;max-width:640px}
 .pending{margin-top:18px;padding:14px 16px;border:1px dashed var(--line);border-radius:14px;color:var(--mute);font-size:14px}
 
 /* ─── карта (общая и малая) ─── */
@@ -392,8 +328,7 @@ body[data-season="autumn"] .rain{opacity:.55}
 }
 
 @media (max-width:1100px){
-  .frame,.short,.place,.home-hero,.row2,.qgrid,.world-grid{grid-template-columns:1fr}
-  .frame{grid-template-rows:none;grid-template-areas:"photo" "name" "desc" "story" "stats" "time" "map" "talk" "items"}
+  .place,.home-hero,.row2,.qgrid,.world-grid{grid-template-columns:1fr}
   .toc{position:static;grid-auto-flow:column;overflow:auto}
   .chron{margin-left:70px}.ev .yr{left:-96px;width:60px;font-size:11px}
   .atlas-card{left:14px;width:auto;max-height:44vh;overflow:auto}
@@ -605,23 +540,12 @@ a.fac::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;backg
   .hc-det{grid-template-columns:1fr}
   .hc-head,.hc-mini,.hc-wrap,.hc-det,.hc-hint{margin-left:14px;margin-right:14px}
   .hc-lanes{width:120px}
-  .c-desc{max-height:52vh}
-  .c-desc.clamp .in{max-height:220px}
 }
 @media (max-width:860px){
   .fherb-orbit{transform:scale(.78)}
 }
 /* ─── персонаж: галерея, тайна, картинки предметов ─── */
 /* галерея портретов: маленькие превью внизу карточки, выбранное — в охряной рамке */
-.gal-wrap{position:absolute;left:10px;right:10px;bottom:38px;z-index:2;display:flex;align-items:center;gap:4px}
-.gal{flex:1;min-width:0;display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding:4px 10px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12px,#000 calc(100% - 12px),transparent);mask-image:linear-gradient(90deg,transparent,#000 12px,#000 calc(100% - 12px),transparent)}
-.gal::-webkit-scrollbar{display:none}
-.gal-arrow{all:unset;cursor:pointer;flex:none;width:26px;height:44px;display:grid;place-items:center;border-radius:8px;background:rgba(26,23,22,.8);backdrop-filter:blur(6px);border:1px solid var(--line);color:var(--text);font-size:22px;line-height:1;transition:border-color .2s,color .2s}
-.gal-arrow:hover{border-color:var(--ochre);color:var(--ochre)}
-.gal button{all:unset;cursor:pointer;width:44px;height:56px;border-radius:9px;overflow:hidden;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.14),0 4px 12px rgba(0,0,0,.55);opacity:.65;transition:opacity .2s,transform .2s,box-shadow .2s}
-.gal button:hover{opacity:.95;transform:translateY(-2px)}
-.gal button.on{opacity:1;box-shadow:0 0 0 2px var(--ochre),0 4px 12px rgba(0,0,0,.55)}
-.gal img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 20%}
 /* тайна раскрывается поверх страницы и не раздвигает сетку */
 .secret{position:relative;display:inline-block;margin-top:12px}
 .secret summary{cursor:pointer;list-style:none;font:11px var(--mono);color:var(--ember);border:1px dashed rgba(212,106,74,.45);border-radius:10px;padding:5px 10px}
@@ -630,13 +554,98 @@ a.fac::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;backg
 .secret[open] summary::before{content:"▾ "}
 .secret-pop{position:absolute;left:0;top:calc(100% + 6px);z-index:30;width:min(520px,80vw);padding:12px 14px;border-radius:12px;background:#2a2320;border:1px solid rgba(212,106,74,.45);box-shadow:0 18px 50px rgba(0,0,0,.6);font-size:14px;line-height:1.5;color:#e6ddd2;animation:swap .3s var(--ease)}
 /* портрет и карта фиксированного размера: смена года или длинный текст их не растягивает */
-.frame .c-photo{align-self:start;height:540px}
-@media (max-width:700px){.frame .c-photo{height:auto;min-height:0;aspect-ratio:3/4;max-height:80vh}}
-.frame .c-map{align-self:start}
-.frame .c-map .map{flex:none;aspect-ratio:1280/698;min-height:0}
-.slot{position:relative;overflow:hidden}
-.slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.slot.hasimg{font-size:0}
+
+/* ─── персонаж: «досье» — слева кто он сейчас, справа текст сверху вниз ─── */
+.dz{display:grid;grid-template-columns:minmax(280px,340px) minmax(0,760px);gap:40px;justify-content:center;padding:28px 24px 60px}
+.dz-side{position:sticky;top:calc(var(--top) + 20px);align-self:start;display:flex;flex-direction:column;gap:10px;max-height:calc(100vh - var(--top) - 40px);overflow:auto;scrollbar-width:none}
+.dz-side::-webkit-scrollbar{display:none}
+.dz-side>*{flex:none}
+.dz-photo{position:relative;border-radius:18px;overflow:hidden;background:var(--raise);aspect-ratio:3/4;margin-bottom:8px}
+.dz-photo>img,.dz-photo>canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 22%}
+.dz-photo canvas{image-rendering:pixelated}
+.dz-photo.noimg{aspect-ratio:auto;height:0;margin:0}
+.dz-photo.noimg>*{display:none}
+.dz-photo::after{content:"";position:absolute;inset:auto 0 0;height:30%;background:linear-gradient(180deg,transparent,rgba(26,23,22,.85));pointer-events:none}
+.dz-gal{position:absolute;left:10px;right:10px;bottom:10px;z-index:2;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.dz-gal::-webkit-scrollbar{display:none}
+.dz-gal button{all:unset;cursor:pointer;flex:none;width:40px;height:52px;border-radius:8px;overflow:hidden;opacity:.6;box-shadow:0 0 0 1px rgba(255,255,255,.15);transition:opacity .2s,box-shadow .2s}
+.dz-gal button.on{opacity:1;box-shadow:0 0 0 2px var(--ochre)}
+.dz-gal img{width:100%;height:100%;object-fit:cover;object-position:50% 20%}
+.dz-name{font:900 clamp(38px,4.4vw,58px)/.95 var(--disp);letter-spacing:-.03em;margin:0}
+.dz-sub{font:600 11px var(--disp);letter-spacing:.18em;color:var(--ochre);line-height:1.5}
+.dz-now{display:grid;gap:6px;margin:6px 0 0;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.dz-now div{display:grid;grid-template-columns:86px 1fr;gap:10px;align-items:baseline}
+.dz-now dt{font:11px var(--mono);color:var(--mute);text-transform:uppercase;letter-spacing:.06em}
+.dz-now dd{margin:0;font-size:14px}
+.dz-links{display:flex;flex-wrap:wrap;gap:4px}
+.dz-main{min-width:0}
+.dz-lead{font:500 21px/1.5 var(--body,inherit);margin:0 0 18px;color:var(--text)}
+.dz-p{font-size:16.5px;line-height:1.65;color:#ddd5cb;margin:0 0 12px;max-width:68ch}
+.dz-facts{margin:6px 0 10px}
+.dz-later{margin-top:22px;font-size:13px;color:var(--mute);border-top:1px dashed var(--line);padding-top:12px}
+.dz-sec{margin-top:38px}
+.dz-sec>h2{font:800 13px var(--disp);letter-spacing:.16em;text-transform:uppercase;color:var(--mute);margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline}
+.dz-sec>h2 small{font:11px var(--mono);letter-spacing:0;text-transform:none;color:var(--ochre)}
+.dz-two{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.dz-two h3{margin:0 0 6px;font:11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.dz-things{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.dz-thing{display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:start;padding:10px 12px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
+.dz-thing.debt{border-color:rgba(212,106,74,.45)}
+.dz-thing.new{border-color:var(--ochre);animation:swap .5s var(--ease)}
+.dz-thing b{font-weight:600}
+.dz-thing p{margin:2px 0 0;font-size:13.5px;line-height:1.45;color:var(--mute)}
+.dz-ic{width:40px;height:40px;border-radius:10px;background:var(--raise);display:grid;place-items:center;font-size:20px;overflow:hidden}
+.dz-ic.img img{width:100%;height:100%;object-fit:cover}
+.dz-debt{margin-left:8px;font:10px var(--mono);color:var(--ember);border:1px solid rgba(212,106,74,.5);border-radius:99px;padding:0 6px;vertical-align:2px}
+.dz-none{color:var(--mute);font-size:14px;padding:6px 0}
+.dz-acc{border-bottom:1px solid var(--line)}
+.dz-acc summary{cursor:pointer;list-style:none;padding:12px 0;font:700 17px var(--disp);display:flex;justify-content:space-between;align-items:center}
+.dz-acc summary::-webkit-details-marker{display:none}
+.dz-acc summary::after{content:"+";font:400 22px var(--mono);color:var(--mute);transition:transform .25s var(--ease)}
+.dz-acc[open] summary::after{transform:rotate(45deg);color:var(--ochre)}
+.dz-acc[open]{padding-bottom:8px}
+.dz-path{list-style:none;margin:0;padding:0;position:relative}
+.dz-path::before{content:"";position:absolute;left:97px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.dz-era{margin:18px 0 10px 116px;font:10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ochre)}
+.dz-yr{display:grid;grid-template-columns:86px 1fr;gap:30px;padding:0 0 22px;position:relative}
+.dz-yr::before{content:"";position:absolute;left:92px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--ground);border:2px solid var(--mute)}
+.dz-yr.now::before{border-color:var(--ochre);background:var(--ochre);box-shadow:0 0 0 5px rgba(217,164,65,.18)}
+.dz-when{text-align:right}
+.dz-when b{display:block;font:800 15px var(--disp);color:var(--text)}
+.dz-yr.now .dz-when b{color:var(--ochre)}
+.dz-when span{font:11px var(--mono);color:var(--mute)}
+.dz-what h3{margin:0 0 4px;font:700 17px var(--disp)}
+.dz-what h3 small{display:block;font:12px var(--mono);color:var(--mute);margin-top:3px;font-weight:400}
+.dz-what p{margin:0;font-size:15.5px;line-height:1.6;color:#d6cec4}
+.dz-delta{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.dz-delta span{font:12px var(--mono);padding:2px 8px;border-radius:99px;border:1px solid var(--line)}
+.dz-delta .in{color:#a9c48f;border-color:rgba(155,179,131,.4)}
+.dz-delta .in.debt{color:var(--ember);border-color:rgba(212,106,74,.45)}
+.dz-delta .out{color:var(--mute);text-decoration:line-through;text-decoration-color:rgba(157,147,138,.6)}
+.dz-talk{margin-top:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.dz-talk summary{cursor:pointer;list-style:none;padding:9px 12px;font:12px var(--mono);color:var(--ochre)}
+.dz-talk summary::-webkit-details-marker{display:none}
+.dz-talk summary::before{content:"▸ "}
+.dz-talk[open] summary::before{content:"▾ "}
+.dz-chat{padding:0 12px 12px}
+.dz-seen{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.dz-seen li{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:9px 12px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
+.dz-seen a:first-child{display:flex;gap:12px;align-items:baseline;color:var(--text);min-width:0}
+.dz-seen span{flex:none;font:11px var(--mono);color:var(--ochre);min-width:74px}
+.dz-seen b{font-weight:500}
+.dz-scene{flex:none;font:12px var(--mono);color:var(--ochre)}
+@media (max-width:900px){
+  .dz{grid-template-columns:1fr;gap:18px;padding:16px 16px 50px}
+  .dz-side{position:static;max-height:none;overflow:visible}
+  .dz-photo{max-height:62vh;aspect-ratio:3/4;width:100%}
+  .dz-two{grid-template-columns:1fr}
+  .dz-lead{font-size:19px}
+  .dz-path::before{left:9px}
+  .dz-yr{grid-template-columns:1fr;gap:4px;padding-left:30px}
+  .dz-yr::before{left:4px}
+  .dz-when{text-align:left;display:flex;gap:10px;align-items:baseline}
+  .dz-era{margin-left:30px}
+}
 
 /* ─── место ─── */
 .plsense{border-left:3px solid var(--ochre);padding:4px 0 4px 16px;font-style:italic;color:#d6cec4}
@@ -745,7 +754,7 @@ a.fac::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;backg
 .game .gbar a:hover {transform:none; box-shadow:none;}
 .game .gwrap {min-width:0; padding:12px 18px 18px;}
 .game .gwrap iframe {border:1px solid var(--line); border-radius:4px; box-shadow:none;}
-@media(max-width:700px) {
+@media(max-width:700px){
   .game .gbar {padding:8px 12px; gap:6px;}
   .game .gbar b {width:100%;}
   .game .gbar .glinks {display:flex; margin-left:0; width:100%;}

@@ -1,210 +1,126 @@
-/* Страница персонажа. Полный профиль — раскладка «Панели», иначе короткая карточка. */
-import { $, $$, esc, IMG, mapHTML, drawRoutes, drawPins, markPlace, markRoute, daysFor, daysLabel, closedFor, travel, pixelate, mountChat, countUp, personChip, placeChip, MODE_LABEL, canonSources } from '../ui.js';
+/* Страница персонажа — «досье». Одна раскладка для всех: слева портрет и кто он сейчас,
+   справа текст сверху вниз. У кого собран полный профиль (Данные/Люди/*.js), добавляются
+   «При себе и за душой», разделы «Кто он» и «Путь» — летопись по годам с тем, что пришло и ушло,
+   и разговоры прямо в своих годах. Ничего не переключается и не прячется за наведением. */
+import { $, $$, esc, IMG, pixelate, mountChat, personChip, placeChip, canonSources } from '../ui.js';
 import { personById } from '../../Данные/people.js';
 import { placeById } from '../../Данные/places.js';
-import { ROUTES, routeById } from '../../Данные/routes.js';
+import { EVENTS } from '../../Данные/events.js';
+import { SCENES } from '../../Данные/scenes.js';
 
 export function render(root, [id]){
   const p = personById(id);
   if (!p){ root.innerHTML = '<div class="page"><h1 class="h1">Нет такого человека</h1><p><a href="#/people">К списку людей</a></p></div>'; return; }
-  return p.profile ? full(root, p) : short(root, p);
-}
-
-function personNotice(p){
-  return p.frozen ? '<p class="pending"><span class="badge draft">заморожен</span> Персонаж выведен из сюжета. Описание сохранено для справки; использовать его можно после решения автора.</p>' : '';
-}
-
-function short(root, p){
-  const pl = p.place ? placeById(p.place) : null;
-  root.innerHTML = `<div class="short" data-title="${esc(p.name)}">
-    <section class="card c-photo"><img src="${IMG + (p.img || 'Лица/' + p.id + '.jpg')}" alt="${esc(p.name)}" onerror="this.remove()"><span class="stamp">${esc(p.role.toUpperCase())}</span></section>
-    <section class="body">
-      <div class="eyebrow"><a href="#/people">люди</a></div>
-      <h1 class="bigname">${esc(p.name)}<span>${esc((p.alias || p.role).toUpperCase())}</span></h1>
-      ${personNotice(p)}
-      <p style="margin-top:22px">${esc(p.lead)}</p>
-      ${(p.bio || []).map(t => '<p>' + esc(t) + '</p>').join('')}
-      ${p.facts.length ? '<div>' + p.facts.map(f => '<span class="chip">' + esc(f) + '</span>').join('') + '</div>' : ''}
-      ${pl ? '<div style="margin-top:10px">' + placeChip(pl.id) + '</div>' : ''}
-      ${canonSources('people', p.id)}
-      <div class="pending">Хронология, вещи и разговоры для этого персонажа ещё не собраны.</div>
-    </section>
-    <section class="card c-map"><div class="mhead"><b style="font-weight:500">Где искать</b><a href="#/map">на общую карту</a></div>
-      <div class="map" id="map">${mapHTML()}</div><div class="mfoot">${pl ? esc(pl.lead) : 'Место не закреплено.'}</div></section>
-  </div>`;
-  const map = $('#map', root);
-  drawRoutes($('svg', map)); map.classList.add('quiet'); drawPins(map);
-  if (pl) markPlace(map, pl.id);
-}
-
-function full(root, p){
-  const P = p.profile, YEARS = Object.keys(P.years).map(Number).sort((a, b) => a - b);
-  const MIN = YEARS[0] - 2, MAX = Math.max(1027, YEARS[YEARS.length - 1] + 1);
-  /* отметки идут через равный шаг: близкие даты (весна и осень одного года) не слипаются */
-  const MARKS = [...YEARS, ...(P.eras || []).filter(([y]) => y > MIN && y < MAX).map(e => e[0])].sort((a, b) => a - b);
-  const pct = y => 5 + MARKS.indexOf(y) / Math.max(1, MARKS.length - 1) * 90;
+  const P = p.profile || null;
+  const YEARS = P ? Object.keys(P.years).map(Number).sort((a, b) => a - b) : [];
+  const NOW = YEARS[YEARS.length - 1];
+  const now = P ? P.years[NOW] : null;
+  const age = y => P && P.born ? Math.floor(y - P.born) : null;
+  const label = y => String(P.years[y].label || y);
+  const place = now ? now.place : p.place;
+  const gallery = P && (P.gallery || []).length ? P.gallery : [p.img || 'Лица/' + p.id + '.jpg'];
   const stops = [];
 
-  root.innerHTML = `<div class="frame" data-title="${esc(p.name)}">
-    <section class="c-name">
-      <div class="eyebrow"><a href="#/people">люди</a></div>
-      <h1 class="bigname">${esc(p.name)}${P.born ? '<b class="age" id="age"></b>' : ''}<span>${esc(P.subtitle)}</span></h1>
-      ${personNotice(p)}
-      <div class="now"><div class="yearbig yearN"></div><div class="where"><small>ГДЕ</small><span id="where"></span></div></div>
-      <div style="margin-top:12px">${(P.links || []).map(personChip).join('')}</div>
-      ${canonSources('people', p.id)}
-      ${P.secret ? '<details class="secret"><summary>только для автора</summary><div class="secret-pop">' + esc(P.secret) + '</div></details>' : ''}
-    </section>
-    <section class="card c-photo">
-      <img src="${IMG + p.img}" alt="${esc(p.name)}" id="pImg"><canvas id="pCv" hidden></canvas>
-      ${(P.gallery || []).length > 1 ? '<div class="gal-wrap"><button class="gal-arrow" data-gstep="-1" aria-label="Предыдущий портрет">‹</button><div class="gal">' + P.gallery.map((g, i) => '<button data-g="' + g + '" class="' + (i ? '' : 'on') + '" aria-label="Портрет ' + (i + 1) + '"><img src="' + IMG + g + '" alt="" loading="lazy"></button>').join('') + '</div><button class="gal-arrow" data-gstep="1" aria-label="Следующий портрет">›</button></div>' : ''}
-      <button class="pxbtn" id="px" aria-pressed="false">пиксель</button>
-      <span class="stamp" id="stamp"></span>
-    </section>
-    <section class="card c-story"><h3>ЧТО ПРОИСХОДИТ</h3><div class="in"><p class="story" id="story"></p></div></section>
-    ${P.desc && P.desc.length ? `<section class="card c-desc" id="cdesc"><h3>ОПИСАНИЕ</h3><div class="in">${P.desc.map(s => '<h4>' + esc(s.h) + '</h4>' + s.p.map(t => '<p>' + esc(t) + '</p>').join('')).join('')}</div></section>` : ''}
-    <section class="card c-time"><h3>ГОД</h3><div class="tl-scroll" id="tlScroll"><div class="tl" id="tl"><div class="ax"></div><div class="fill" id="fill"></div></div></div></section>
-    <section class="card c-stats"><h3>СОСТОЯНИЕ <small>к этому году</small></h3><div class="in" id="stats"></div></section>
-    <section class="card c-map" id="cmap">
-      <div class="mhead">
-        <div class="seg" role="group" aria-label="Режим карты"><button data-mm="path" aria-pressed="true">Место в этот год</button><button data-mm="trip" aria-pressed="false">Как добраться</button></div>
-        <a href="#/map">на общую карту</a>
+  /* что при человеке сейчас; к какому году летописи прикрепить появление и уход вещи */
+  const live = (x, y) => x.from <= y && (x.to == null || x.to >= y);
+  const yearOf = from => YEARS.find(y => y >= from) ?? YEARS[0];
+  const yearAfter = to => YEARS.find(y => y > to + .999);
+
+  const thing = (x, cls = '') => '<li class="dz-thing' + (x.debt ? ' debt' : '') + cls + '">' +
+    '<span class="dz-ic" data-pic="' + esc(x.pic || '') + '">' + esc(x.i || '•') + '</span>' +
+    '<div><b>' + esc(x.n) + '</b>' + (x.debt ? '<span class="dz-debt">долг</span>' : '') + '<p>' + esc(x.t) + '</p></div></li>';
+
+  /* «сейчас»: возраст и где; у короткой карточки — роль, если подзаголовок занят прозвищем */
+  const nowRows = [
+    age(NOW) != null ? '<div><dt>возраст</dt><dd>' + age(NOW) + ' лет</dd></div>' : '',
+    now ? '<div><dt>' + esc(label(NOW)) + '</dt><dd>' + esc(now.where) + '</dd></div>' : p.alias ? '<div><dt>кто</dt><dd>' + esc(p.role) + '</dd></div>' : '',
+  ].filter(Boolean);
+
+  const side = `
+    <aside class="dz-side">
+      <div class="dz-photo">
+        <img src="${IMG + gallery[0]}" alt="${esc(p.name)}" id="pImg" onerror="this.closest('.dz-photo').classList.add('noimg')"><canvas id="pCv" hidden></canvas>
+        <button class="pxbtn" id="px" aria-pressed="false">пиксель</button>
+        ${gallery.length > 1 ? '<div class="dz-gal">' + gallery.map((g, i) => '<button data-g="' + esc(g) + '" class="' + (i ? '' : 'on') + '" aria-label="Портрет ' + (i + 1) + '"><img src="' + IMG + g + '" alt="" loading="lazy"></button>').join('') + '</div>' : ''}
       </div>
-      <div class="map" id="map">${mapHTML('<div class="token" id="token" hidden>🐴</div>')}</div>
-      <div class="mfoot" id="mfoot"></div>
-    </section>
-    <section class="card c-talk"><h3>РАЗГОВОР <small id="talkWhere"></small></h3><div class="in" id="talk"></div></section>
-    <section class="card c-items"><h3>ВЕЩИ И ДОЛГИ <small>к этому году</small></h3><div class="in">
-      <div class="sub">При себе</div><div class="slots" id="items"></div>
-      <div class="sub">Долги и обещания</div><div class="slots" id="debts"></div>
-      <div class="tip" id="tip">Наведи на ячейку.</div>
-    </div></section>
-  </div>`;
+      <div class="eyebrow"><a href="#/people">люди</a></div>
+      <h1 class="dz-name">${esc(p.name)}</h1>
+      <div class="dz-sub">${esc(P ? P.subtitle : (p.alias || p.role).toUpperCase())}</div>
+      ${p.frozen ? '<p class="pending"><span class="badge draft">заморожен</span> Персонаж выведен из сюжета. Описание сохранено для справки.</p>' : ''}
+      ${nowRows.length ? '<dl class="dz-now">' + nowRows.join('') + '</dl>' : ''}
+      ${place && placeById(place) ? '<div>' + placeChip(place) + '</div>' : ''}
+      ${P && (P.links || []).length ? '<div class="dz-links">' + P.links.map(personChip).join('') + '</div>' : ''}
+      ${canonSources('people', p.id)}
+      ${P && P.secret ? '<details class="secret"><summary>только для автора</summary><div class="secret-pop">' + esc(P.secret) + '</div></details>' : ''}
+    </aside>`;
 
-  /* шкала лет */
-  const tl = $('#tl', root);
-  tl.style.setProperty('--n', MARKS.length); /* на телефоне шкала шире экрана и листается */
-  YEARS.forEach(y => { const b = document.createElement('button'); b.className = 'tick'; b.dataset.y = y; b.style.left = pct(y) + '%';
-    b.innerHTML = '<span class="yr">' + esc(P.years[y].label || y) + '</span><span class="dot"></span><span class="lab">' + esc(P.years[y].mark) + '</span>'; b.onclick = () => show(y); tl.appendChild(b); });
-  (P.eras || []).filter(([y]) => y > MIN && y < MAX).forEach(([y, l]) => { const d = document.createElement('div'); d.className = 'tick era'; d.style.left = pct(y) + '%';
-    d.innerHTML = '<span class="yr">' + y + '</span><span class="dot"></span><span class="lab">' + esc(l) + '</span>'; tl.appendChild(d); });
+  /* короткая карточка: вступление, биография, факты */
+  const intro = '<p class="dz-lead">' + esc(p.lead) + '</p>' +
+    (!P ? (p.bio || []).map(t => '<p class="dz-p">' + esc(t) + '</p>').join('') +
+      ((p.facts || []).length ? '<div class="dz-facts">' + p.facts.map(f => '<span class="chip">' + esc(f) + '</span>').join('') + '</div>' : '') +
+      '<p class="dz-later">Полного досье — летописи по годам, вещей и разговоров — у этого человека пока нет.</p>' : '');
 
-  $('#stats', root).innerHTML = P.statNames.map((k, i) => '<div class="st ' + (P.statTones[i] || '') + '"><div class="tr"><div class="v"></div><b>0</b><span class="d"></span></div>' + esc(k) + '</div>').join('');
-
-  /* карта */
-  const map = $('#map', root), svg = $('svg', map);
-  let mapMode = 'path', year = YEARS[YEARS.length - 1], prev = null, stopTrip = null;
-  const trip = {route:0, mode:'horse'};
-  drawRoutes(svg, i => { if (mapMode === 'trip'){ trip.route = i; paintMap(); } });
-  drawPins(map);
-  $$('[data-mm]', root).forEach(b => b.onclick = () => { mapMode = b.dataset.mm; $$('[data-mm]', root).forEach(x => x.setAttribute('aria-pressed', x === b)); paintMap(); });
-
-  function paintMap(){
-    stopTrip && stopTrip(); stopTrip = null;
-    const s = P.years[year], foot = $('#mfoot', root);
-    markPlace(map, s.place);
-    if (mapMode === 'path'){
-      map.classList.add('quiet');
-      const ri = s.route ? ROUTES.indexOf(routeById(s.route)) : -1;
-      markRoute(svg, ri);
-      const pl = placeById(s.place);
-      foot.innerHTML = '<b>' + esc(s.where) + '</b>' + (ri >= 0 ? '<div class="evline">Указанный маршрут: ' + esc(ROUTES[ri].n) + ', ' + esc(ROUTES[ri].e) + '.</div>' : '<div class="evline">' + (pl ? placeChip(pl.id) : '') + '</div>');
-    } else {
-      map.classList.remove('quiet');
-      markRoute(svg, trip.route, 'autumn', trip.mode);
-      const r = ROUTES[trip.route], d = daysFor(r, 'autumn', trip.mode), c = closedFor(r, 'autumn', trip.mode);
-      foot.innerHTML = '<div class="row"><select id="rsel" aria-label="Тракт">' + ROUTES.map((x, i) => '<option value="' + i + '"' + (i === trip.route ? ' selected' : '') + '>' + esc(x.n + ' · ' + x.e) + '</option>').join('') + '</select>' +
-        '<select id="msel" aria-label="Как">' + Object.entries(MODE_LABEL).map(([k, l]) => '<option value="' + k + '"' + (k === trip.mode ? ' selected' : '') + '>' + l + '</option>').join('') + '</select>' +
-        '<button class="go" id="go"' + (c ? ' disabled' : '') + '>В путь</button></div>' +
-        '<div class="nums"><span id="dn">0</span> / ' + daysLabel(r, 'autumn', trip.mode) + '<small>дней осенью</small></div><div class="evline" id="ev">' + esc(r.note) + ' Срок с сезонной поправкой; при отсутствии срока в каноне — оценка по длине.</div>';
-      $('#rsel', root).onchange = e => { trip.route = +e.target.value; paintMap(); };
-      $('#msel', root).onchange = e => { trip.mode = e.target.value; paintMap(); };
-      $('#go', root).onclick = () => { stopTrip && stopTrip(); stopTrip = travel(r, {token:$('#token', root), days:d,
-        onDay:k => { const n = $('#dn', root); if (n) n.textContent = k; },
-        onEvent:(t, k, bad) => { const ev = $('#ev', root); if (ev){ ev.className = 'evline' + (bad ? ' bad' : ''); ev.textContent = 'День ' + k + '. ' + t; } },
-        onDone:() => { const ev = $('#ev', root); if (ev) ev.textContent += ' Прибыли.'; }}); };
-    }
+  let body = intro;
+  if (P){
+    const things = (P.things || []).filter(x => live(x, NOW)), promises = (P.promises || []).filter(x => live(x, NOW));
+    body += `
+      <section class="dz-sec" id="carry"><h2>При себе и за душой <small>${esc(label(NOW))}</small></h2>
+        <div class="dz-two">
+          <div><h3>При себе</h3><ul class="dz-things">${things.map(x => thing(x)).join('') || '<li class="dz-none">ничего примечательного</li>'}</ul></div>
+          <div><h3>Долги и обещания</h3><ul class="dz-things" id="debts">${promises.map(x => thing(x)).join('') || '<li class="dz-none">никому не должен</li>'}</ul></div>
+        </div>
+      </section>
+      ${(P.desc || []).length ? '<section class="dz-sec"><h2>О человеке</h2>' + P.desc.map((s, i) =>
+        '<details class="dz-acc"' + (i ? '' : ' open') + '><summary>' + esc(s.h) + '</summary>' + s.p.map(t => '<p class="dz-p">' + esc(t) + '</p>').join('') + '</details>').join('') + '</section>' : ''}
+      <section class="dz-sec"><h2>Путь</h2><ol class="dz-path">${YEARS.map(y => {
+        const s = P.years[y];
+        const era = (P.eras || []).find(([e], k, arr) => e <= y && YEARS.find(z => z >= e) === y);
+        const came = [...(P.things || []), ...(P.promises || [])].filter(x => yearOf(x.from) === y);
+        const went = [...(P.things || []), ...(P.promises || [])].filter(x => x.to != null && yearAfter(x.to) === y);
+        const talk = (P.talks || {})[y];
+        return (era ? '<li class="dz-era">' + esc(era[1]) + '</li>' : '') +
+          '<li class="dz-yr' + (y === NOW ? ' now' : '') + '" id="y' + String(y).replace('.', '_') + '">' +
+          '<div class="dz-when"><b>' + esc(label(y)) + '</b>' + (age(y) != null ? '<span>' + age(y) + ' лет</span>' : '') + '</div>' +
+          '<div class="dz-what"><h3>' + esc(s.mark[0].toUpperCase() + s.mark.slice(1)) + '<small>' + esc(s.where) + '</small></h3><p>' + esc(s.text) + '</p>' +
+          (came.length || went.length ? '<div class="dz-delta">' + came.map(x => '<span class="in' + (x.debt ? ' debt' : '') + '">+ ' + esc(x.n) + '</span>').join('') + went.map(x => '<span class="out">− ' + esc(x.n) + '</span>').join('') + '</div>' : '') +
+          (talk ? '<details class="dz-talk" data-y="' + y + '"><summary>Разговор · ' + esc(talk.where) + (talk.draft ? ' <span class="badge draft">набросок</span>' : '') + '</summary><div class="dz-chat"></div></details>' : '') +
+          '</div></li>';
+      }).join('')}</ol></section>`;
   }
 
-  /* вещи */
-  const tip = $('#tip', root);
-  function slot(it, box, cls = ''){
-    const b = document.createElement('button'); b.className = 'slot ' + cls + (it.debt ? ' debt' : ''); b.textContent = it.i; b.setAttribute('aria-label', it.n);
-    if (it.pic){ const im = new Image(); im.alt = ''; im.onload = () => { b.classList.add('hasimg'); b.appendChild(im); }; im.src = IMG + 'Предметы/' + it.pic + '.png'; }
-    const sh = () => { $$('.slot', root).forEach(s => s.classList.remove('on')); b.classList.add('on'); tip.innerHTML = '<b>' + esc(it.n) + '.</b> ' + esc(it.t); };
-    b.onmouseenter = sh; b.onfocus = sh; b.onclick = sh; box.appendChild(b); return b;
-  }
-  function paintItems(){
-    const it = $('#items', root), db = $('#debts', root); it.innerHTML = ''; db.innerHTML = ''; tip.textContent = 'Наведи на ячейку.';
-    (P.things || []).filter(x => x.from <= year && (x.to == null || x.to >= year)).forEach(x => slot(x, it));
-    (P.promises || []).filter(x => x.from <= year && (x.to == null || x.to >= year)).forEach(x => slot(x, db));
-    for (let k = it.children.length; k < 6; k++){ const g = document.createElement('div'); g.className = 'slot ghost'; it.appendChild(g); }
-  }
+  /* где человек есть в хронике и в прозе */
+  const seen = EVENTS.map((e, i) => [e, i]).filter(([e]) => (e.people || []).includes(p.id));
+  if (seen.length) body += '<section class="dz-sec"><h2>В хронике и сценах <small>' + seen.length + '</small></h2><ul class="dz-seen">' + seen.map(([e, i]) => {
+    const sc = SCENES.find(x => (x.events || [x.event]).includes(e.slug));
+    return '<li><a href="#/chronicle/' + i + '"><span>' + esc(e.y) + '</span><b>' + esc(e.h) + '</b></a>' +
+      (sc ? '<a class="dz-scene" href="#/scenes/' + esc(sc.arc) + '">📖 сцена' + (sc.status === 'готово' ? '' : ' · черновик') + '</a>' : '') + '</li>';
+  }).join('') + '</ul></section>';
 
-  /* разговор */
-  let stopChat = null;
-  function paintTalk(){
-    stopChat && stopChat(); stopChat = null;
-    const t = (P.talks || {})[year], box = $('#talk', root);
-    $('#talkWhere', root).innerHTML = t ? (t.draft ? '<span class="badge draft">набросок</span> ' : '') + esc(t.where) : '';
-    if (!t){ box.innerHTML = '<p class="locked">В этом году разговора нет. Годы с разговором: ' + Object.keys(P.talks || {}).join(', ') + '.</p>'; return; }
-    box.innerHTML = (t.draft ? '<p class="pending">Набросок разговора, автором не подтверждён.</p>' : '') + '<div id="chat"></div>';
-    stopChat = mountChat($('#chat', root), t.tree, {gains:P.gains || {}, onGain:g => { const box = $('#debts', root); if (box) slot(g, box, 'new').focus({preventScroll:true}); }});
-  }
-  stops.push(() => { stopTrip && stopTrip(); stopChat && stopChat(); });
+  root.innerHTML = '<div class="dz" data-title="' + esc(p.name) + '">' + side + '<div class="dz-main">' + body + '</div></div>';
 
-  function show(y){
-    year = y; const s = P.years[y];
-    $$('.tick[data-y]', root).forEach(t => t.setAttribute('aria-current', +t.dataset.y === y));
-    const wrap = $('#tlScroll', root), cur = $('.tick[aria-current="true"]', root);
-    if (wrap && cur && wrap.scrollWidth > wrap.clientWidth + 24) wrap.scrollTo({left:cur.offsetLeft - wrap.clientWidth / 2, behavior:prev == null ? 'auto' : 'smooth'});
-    $('#fill', root).style.width = pct(y) + '%';
-    countUp($$('.yearN', root), Math.floor(prev || y), Math.floor(y));
-    $('#where', root).textContent = s.where;
-    const st = $('#story', root); st.classList.remove('swap'); void st.offsetWidth; st.classList.add('swap'); st.textContent = s.text;
-    $$('.st', root).forEach((b, i) => { const v = s.stats[i], o = prev ? P.years[prev].stats[i] : v, d = v - o;
-      b.querySelector('.v').style.height = v * 10 + '%'; b.querySelector('b').textContent = v;
-      const el = b.querySelector('.d'); el.textContent = d ? (d > 0 ? '+' + d : d) : ''; el.className = 'd ' + (d > 0 ? 'up' : 'down'); });
-    const age = (y - YEARS[0]) / Math.max(1, YEARS[YEARS.length - 1] - YEARS[0]);
-    $('#pImg', root).style.filter = 'saturate(' + (1.1 - age * .45) + ') brightness(' + (1.05 - age * .18) + ')';
-    $('#stamp', root).textContent = (P.born ? Math.floor(y - P.born) + ' ЛЕТ · ' : '') + (s.label || y).toString().toUpperCase();
-    const ageEl = $('#age', root); if (ageEl) ageEl.textContent = Math.floor(y - P.born) + ' лет';
-    paintMap(); paintItems(); paintTalk();
-    prev = y;
-  }
+  /* картинки вещей, если нарисованы: Изображения/Предметы/<pic>.png; нет файла — остаётся значок */
+  $$('.dz-ic[data-pic]', root).forEach(s => { const pic = s.dataset.pic; if (!pic) return;
+    const im = new Image(); im.alt = ''; im.onload = () => { s.textContent = ''; s.appendChild(im); s.classList.add('img'); }; im.src = IMG + 'Предметы/' + pic + '.png'; });
 
-  $('#px', root).onclick = e => { const on = e.currentTarget.getAttribute('aria-pressed') !== 'true'; e.currentTarget.setAttribute('aria-pressed', on);
-    $('#pImg', root).hidden = on; $('#pCv', root).hidden = !on; if (on) pixelate($('#pImg', root).getAttribute('src'), $('#pCv', root)); };
-  /* лента портретов: клик по превью, стрелки по краям, колесо листает вбок */
-  const gal = $('.gal', root), thumbs = $$('.gal button', root);
-  let gi = 0;
-  function pickPortrait(k){
-    gi = (k + thumbs.length) % thumbs.length; const b = thumbs[gi];
-    thumbs.forEach(x => x.classList.toggle('on', x === b));
-    $('#pImg', root).setAttribute('src', IMG + b.dataset.g);
-    if ($('#px', root).getAttribute('aria-pressed') === 'true') pixelate(IMG + b.dataset.g, $('#pCv', root));
-    gal.scrollLeft = b.offsetLeft - (gal.clientWidth - b.offsetWidth) / 2;
-  }
-  thumbs.forEach((b, k) => b.onclick = () => pickPortrait(k));
-  $$('[data-gstep]', root).forEach(b => b.onclick = () => pickPortrait(gi + +b.dataset.gstep));
-  if (gal) gal.addEventListener('wheel', e => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)){ gal.scrollLeft += e.deltaY; e.preventDefault(); } }, {passive:false});
+  /* разговор открывается внутри своего года; заработанное в разговоре падает в «Долги и обещания» */
+  $$('.dz-talk', root).forEach(d => d.addEventListener('toggle', () => {
+    if (!d.open || d.dataset.on) return; d.dataset.on = 1;
+    const t = P.talks[d.dataset.y];
+    stops.push(mountChat($('.dz-chat', d), t.tree, {gains:P.gains || {}, onGain:g => {
+      const box = $('#debts', root); if (!box) return;
+      $('.dz-none', box)?.remove(); box.insertAdjacentHTML('beforeend', thing(g, ' new'));
+    }}));
+  }));
 
-  /* описание сворачивается, если не помещается в разумную высоту */
-  const desc = $('#cdesc', root);
-  if (desc){
-    const in_ = $('.in', desc);
-    if (in_.scrollHeight > 360){
-      desc.classList.add('clamp');
-      const more = document.createElement('button'); more.className = 'desc-more'; more.textContent = 'Показать полностью';
-      more.onclick = () => { const open = desc.classList.toggle('clamp') === false; more.textContent = open ? 'Свернуть' : 'Показать полностью'; };
-      desc.appendChild(more);
-    }
-  }
+  /* портрет: галерея и пиксель */
+  const img = $('#pImg', root), cv = $('#pCv', root), px = $('#px', root);
+  px.onclick = () => { const on = px.getAttribute('aria-pressed') !== 'true'; px.setAttribute('aria-pressed', on);
+    img.hidden = on; cv.hidden = !on; if (on) pixelate(img.getAttribute('src'), cv); };
+  $$('.dz-gal button', root).forEach(b => b.onclick = () => {
+    $$('.dz-gal button', root).forEach(x => x.classList.toggle('on', x === b));
+    img.setAttribute('src', IMG + b.dataset.g);
+    if (px.getAttribute('aria-pressed') === 'true') pixelate(IMG + b.dataset.g, cv);
+  });
 
-  const keys = e => { if (e.target.closest('.chat-opts,select,input')) return; const i = YEARS.indexOf(year);
-    if (e.key === 'ArrowRight' && i < YEARS.length - 1) show(YEARS[i + 1]); if (e.key === 'ArrowLeft' && i > 0) show(YEARS[i - 1]); };
-  addEventListener('keydown', keys); stops.push(() => removeEventListener('keydown', keys));
-
-  show(year);
-  return () => stops.forEach(f => f());
+  return () => stops.forEach(f => f && f());
 }
