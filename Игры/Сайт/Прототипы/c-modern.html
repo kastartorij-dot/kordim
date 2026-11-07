@@ -131,7 +131,7 @@ h1 span{color:var(--mute);font-weight:500}
     <button class="node"><img src="../Изображения/Лица/grace-portrait.jpg" alt="">Грейс</button>
     <button class="node"><img src="../Изображения/Лица/nemo-portrait.png" alt="">Никто</button>
     <button class="node" aria-current="true"><img src="../Изображения/Лица/elowen.jpg" alt="">Элоуэн «Игла»</button>
-    <button class="node"><img src="../Изображения/Лица/kraim.jpg" alt="">Крайм Руфус</button>
+    <button class="node"><img src="../Изображения/Лица/kraim.jpg" alt="">Руфус Крайм</button>
     <button class="node"><img src="../Изображения/Лица/kael-roofs-03.jpg" alt="">Каэл</button>
     <div class="grp">Места</div>
     <button class="node"><span class="dot">◆</span>Ошерск</button>
@@ -154,7 +154,7 @@ h1 span{color:var(--mute);font-weight:500}
     <dl class="props">
       <dt>Возраст</dt><dd>29</dd>
       <dt>Где</dt><dd><span class="chip pl" data-place="0">Ошерск · Синий двор</span></dd>
-      <dt>Крыша</dt><dd><span class="chip"><img src="../Изображения/Лица/kraim.jpg" alt="">Крайм Руфус</span></dd>
+      <dt>Крыша</dt><dd><span class="chip"><img src="../Изображения/Лица/kraim.jpg" alt="">Руфус Крайм</span></dd>
       <dt>Знает</dt><dd><span class="chip"><img src="../Изображения/Лица/nemo-portrait.png" alt="">Никто · 5 лет</span></dd>
       <dt>Статус</dt><dd><span class="chip warn">изгнана из Ложи</span><span class="chip warn">долг Никто не закрыт</span></dd>
     </dl>
@@ -235,7 +235,7 @@ const tog=()=>$('#work').classList.toggle('mapfocus');$('#expand').onclick=tog;$
 const io=new IntersectionObserver(es=>es.forEach((e,i)=>{if(e.isIntersecting){setTimeout(()=>e.target.classList.add('in'),i*120);io.unobserve(e.target)}}));
 document.querySelectorAll('.ev').forEach(e=>io.observe(e));
 /* палитра поиска */
-const IDX=[['Элоуэн «Игла»','персонаж'],['Никто','персонаж'],['Грейс','персонаж'],['Крайм Руфус','персонаж'],['Ошерск','место'],['Столица','место'],['Лесной тракт','тракт'],['Контора Сайдена','фракция'],['Алхимическая Ложа','фракция'],['Белая Чума','событие · 986']];
+const IDX=[['Элоуэн «Игла»','персонаж'],['Никто','персонаж'],['Грейс','персонаж'],['Руфус Крайм','персонаж'],['Ошерск','место'],['Столица','место'],['Лесной тракт','тракт'],['Контора Сайдена','фракция'],['Алхимическая Ложа','фракция'],['Белая Чума','событие · 986']];
 const pal=$('#pal'),pin=$('#pin'),pres=$('#pres');
 function renderPal(){const q=pin.value.toLowerCase();pres.innerHTML=IDX.filter(x=>x[0].toLowerCase().includes(q)).map((x,i)=>'<button class="'+(i?'':'on')+'">'+x[0]+'<small>'+x[1]+'</small></button>').join('')}
 function openPal(){pal.hidden=false;pin.value='';renderPal();pin.focus()}
