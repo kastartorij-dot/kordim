@@ -1,6 +1,7 @@
 // Собирает из Проза/*.md читалку для вычитки: красивый текст, пометки
 // «не нравится / вопрос / заметка» на выделенных словах, выгрузка пометок для чата.
 // Пометки живут в браузере (localStorage) и переживают пересборку: место ищется по цитате.
+// Ссылка «✎ Редактор» в шапке и в оглавлении ведёт на Редактор.html — его собирает editor.mjs.
 // Результат — Проза/Читалка/<файл>.html (для ПК, в гит не идёт, см. .gitignore) и та же
 // читалка на сайте: Игры/Сайт/Читалка/ (в гите, уезжает на сайт с push; с телефона —
 // kordim.kastartorij.workers.dev/read). Проза на сайте и так есть в «Сценах», нового наружу не уходит.
@@ -314,6 +315,8 @@ a { display: block; background: var(--paper); border: 1px solid var(--rule); bor
 a b { display: block; font: 600 19px/1.3 "Literata", Georgia, serif; margin-bottom: 3px; }
 a span { color: var(--muted); font-size: 14px; }
 a.home { display: inline-block; padding: 6px 12px; border-radius: 999px; font-size: 14px; margin-bottom: 20px; }
+a.editor { border-color: var(--accent); margin-bottom: 22px; }
+a.editor b { color: var(--accent); }
 p { color: var(--muted); font-size: 14px; margin-top: 24px; }
 </style>
 </head>
@@ -322,6 +325,7 @@ p { color: var(--muted); font-size: 14px; margin-top: 24px; }
   <a class="home" href="../Приложение/">⌂ Кордим — на главную</a>
   <div class="kicker">Кордим · проза</div>
   <h1>Читалка</h1>
+  <a class="editor" href="Редактор.html"><b>✎ Редактор</b><span>Что Claude ждёт от тебя: решения, вопросы, что придумать · будущие арки</span></a>
 ${rows}
   <p>Пометки хранятся в этом браузере. Когда закончишь — «Заметки» → «Скопировать для Claude» и вставь в чат.</p>
 </main>

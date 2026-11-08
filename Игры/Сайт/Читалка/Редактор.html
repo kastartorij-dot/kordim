@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#f5efe3">
+<title>Редактор</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5efe3;
+  --paper: #fbf7ef;
+  --ink: #2a241d;
+  --muted: #8a7f70;
+  --faint: #c9bfae;
+  --rule: #e4dac8;
+  --accent: #8c3b2a;
+  --accent-soft: rgba(140, 59, 42, .1);
+  --ok: #2a8a63;
+  --ok-soft: rgba(46, 150, 110, .14);
+  --ui-bg: #fffaf2;
+  --ui-shadow: 0 6px 24px rgba(60, 40, 20, .16);
+  --size: 19px;
+}
+:root[data-theme="dark"] {
+  --bg: #161411;
+  --paper: #1d1a16;
+  --ink: #ddd4c6;
+  --muted: #8f8577;
+  --faint: #4a443b;
+  --rule: #2f2a24;
+  --accent: #d98b6c;
+  --accent-soft: rgba(217, 139, 108, .12);
+  --ok: #5cc79a;
+  --ok-soft: rgba(80, 200, 150, .14);
+  --ui-bg: #26221d;
+  --ui-shadow: 0 6px 24px rgba(0, 0, 0, .5);
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 72px; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: "Literata", Georgia, "Times New Roman", serif; font-size: var(--size); line-height: 1.6;
+  -webkit-font-smoothing: antialiased; transition: background .25s, color .25s;
+}
+button, textarea { font: inherit; color: inherit; }
+.ui { font-family: "PT Sans", "Segoe UI", Arial, sans-serif; }
+#progress { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: var(--ok); z-index: 30; transition: width .3s; }
+
+.home, .top button {
+  border: 1px solid var(--rule); background: var(--ui-bg); border-radius: 999px; color: inherit; text-decoration: none;
+  padding: 6px 12px; font-size: 14px; cursor: pointer; box-shadow: var(--ui-shadow);
+}
+.home { position: fixed; top: 10px; left: 12px; z-index: 20; }
+.top { position: fixed; top: 10px; right: 12px; z-index: 20; display: flex; gap: 6px; }
+.home:hover, .top button:hover { border-color: var(--muted); }
+#ansBtn b { color: var(--ok); }
+
+main { max-width: 42em; margin: 0 auto; padding: 88px 16px 120px; }
+.sheet {
+  background: var(--paper); border-radius: 6px; padding: 56px clamp(18px, 6vw, 64px) 64px;
+  box-shadow: 0 1px 0 var(--rule), 0 20px 50px -30px rgba(60, 40, 20, .35);
+}
+header { text-align: center; margin-bottom: 28px; }
+.kicker { font-size: 13px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
+h1 { font-weight: 600; font-size: 2.1em; line-height: 1.15; margin: .35em 0 .3em; letter-spacing: -.01em; }
+.meta { font-size: 14px; color: var(--muted); }
+.meta b { color: var(--ok); }
+.tabs { display: flex; justify-content: center; gap: 4px; margin: 22px auto 0; padding: 4px; width: max-content; max-width: 100%;
+  border: 1px solid var(--rule); border-radius: 999px; background: var(--bg); }
+.tabs button { border: 0; background: transparent; border-radius: 999px; padding: 6px 16px; font-size: 14px; cursor: pointer; color: var(--muted); }
+.tabs button[aria-selected="true"] { background: var(--paper); color: var(--ink); font-weight: 700; box-shadow: 0 1px 3px rgba(60, 40, 20, .18); }
+.tabs button small { color: var(--ok); font-weight: 700; margin-left: 4px; font-size: 12px; }
+.intro { font-size: .86em; line-height: 1.55; color: var(--ink); margin: 26px 0 0; text-align: left; border-top: 1px solid var(--rule); padding-top: 18px; }
+.intro p { margin: 0 0 .6em; }
+.filters { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-top: 16px; }
+.chip { border: 1px solid var(--rule); background: transparent; border-radius: 999px; padding: 5px 12px; font-size: 13px; cursor: pointer; }
+.chip[aria-pressed="true"] { border-color: var(--ink); background: var(--bg); font-weight: 700; }
+
+.toc { font-size: 14px; margin: 18px 0 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; }
+.toc a { color: var(--muted); text-decoration: none; border-bottom: 1px dotted var(--faint); }
+.toc a:hover { color: var(--accent); }
+.toc a small { color: var(--ok); }
+
+h2 { font-size: 1.25em; font-weight: 600; margin: 2.2em 0 .8em; line-height: 1.25; display: flex; align-items: baseline; gap: 10px; }
+h2 small { font-family: "PT Sans", Arial, sans-serif; font-size: 13px; font-weight: 400; color: var(--muted); }
+
+.card {
+  position: relative; border: 1px solid var(--rule); border-radius: 12px; padding: 18px 18px 14px; margin: 0 0 16px;
+  background: var(--paper); transition: border-color .2s, box-shadow .2s;
+}
+.card.done { border-color: color-mix(in srgb, var(--ok) 45%, var(--rule)); box-shadow: inset 4px 0 0 var(--ok); }
+.card.hidden { display: none; }
+.card .head { display: flex; gap: 10px; align-items: baseline; }
+.card .id { font-family: "PT Sans", Arial, sans-serif; font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-soft);
+  border-radius: 6px; padding: 1px 7px; flex: none; letter-spacing: .03em; }
+.card.done .id { color: var(--ok); background: var(--ok-soft); }
+.card h3 { margin: 0; font-size: 1.05em; font-weight: 600; line-height: 1.35; }
+.card .tags { display: flex; flex-wrap: wrap; gap: 4px 6px; margin: 8px 0 0; }
+.card .tags span { font-family: "PT Sans", Arial, sans-serif; font-size: 12.5px; color: var(--muted); background: var(--bg); border-radius: 6px; padding: 2px 8px; }
+.card .ctx { font-size: .86em; line-height: 1.55; margin-top: 10px; }
+.card .ctx p { margin: 0 0 .55em; }
+.card .ctx ul { margin: 0 0 .55em; padding-left: 1.2em; }
+.card .ctx li { margin: 0 0 .3em; }
+.card code { font-family: "PT Sans", Arial, sans-serif; font-size: .88em; background: var(--bg); border-radius: 4px; padding: 0 .25em; }
+.opinion { font-size: .86em; line-height: 1.55; margin: 10px 0 4px; padding: 10px 12px; border-radius: 10px; background: var(--accent-soft); }
+.opinion .lbl { font-family: "PT Sans", Arial, sans-serif; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 3px; }
+.opinion p { margin: 0 0 .4em; }
+.opinion p:last-child { margin: 0; }
+
+.opts { display: flex; flex-direction: column; gap: 6px; margin: 12px 0 0; }
+.opts.row { flex-direction: row; flex-wrap: wrap; }
+.opt {
+  display: flex; gap: 10px; align-items: flex-start; text-align: left; width: 100%;
+  border: 1px solid var(--rule); background: var(--bg); border-radius: 10px; padding: 8px 12px; cursor: pointer;
+  font-family: "PT Sans", Arial, sans-serif; font-size: 15px; line-height: 1.4; -webkit-tap-highlight-color: transparent;
+}
+.opts.row .opt { width: auto; border-radius: 999px; padding: 6px 14px; }
+.opt:hover { border-color: var(--muted); }
+.opt .k { flex: none; width: 1.6em; height: 1.6em; border-radius: 50%; border: 1px solid var(--faint); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; color: var(--muted); margin-top: -1px; }
+.opt .rec { color: var(--accent); font-size: 12px; white-space: nowrap; }
+.opt[aria-pressed="true"] { border-color: var(--ok); background: var(--ok-soft); }
+.opt[aria-pressed="true"] .k { background: var(--ok); border-color: var(--ok); color: #fff; }
+.opt em { font-style: italic; color: var(--muted); }
+
+.ans { margin-top: 10px; }
+.ans textarea {
+  width: 100%; min-height: 3.2em; resize: none; overflow: hidden; border: 1px solid var(--rule); border-radius: 10px;
+  background: var(--ui-bg); color: var(--ink); padding: 9px 12px; font: 15.5px/1.45 "PT Sans", Arial, sans-serif; display: block;
+}
+.ans textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
+.ans .st { font-family: "PT Sans", Arial, sans-serif; font-size: 12px; color: var(--muted); min-height: 1.3em; margin-top: 4px; display: flex; gap: 10px; }
+.ans .st .old { color: var(--accent); }
+.ans .st .clr { margin-left: auto; border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 12px; padding: 0; }
+.ans .st .clr:hover { color: var(--accent); }
+.free h3 { font-size: 1.05em; }
+.free .ans textarea { min-height: 6em; }
+.empty { text-align: center; color: var(--muted); font-size: 15px; padding: 24px 0; }
+.end { text-align: center; color: var(--muted); margin-top: 2.5em; font-size: .9em; letter-spacing: .3em; }
+
+/* выгрузка */
+#drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; width: min(460px, 100vw); z-index: 35;
+  background: var(--ui-bg); box-shadow: var(--ui-shadow); transform: translateX(105%); transition: transform .22s ease;
+  display: flex; flex-direction: column;
+}
+#drawer.on { transform: translateX(0); }
+.dh { padding: 16px 18px 12px; border-bottom: 1px solid var(--rule); }
+.dh h3 { margin: 0 0 6px; font-size: 18px; display: flex; justify-content: space-between; align-items: center; }
+.dh p { margin: 0 0 10px; font-size: 13px; color: var(--muted); line-height: 1.45; }
+.acts { display: flex; gap: 6px; flex-wrap: wrap; }
+.pbtn { border: 0; background: var(--accent); color: #fff; border-radius: 10px; padding: 8px 16px; cursor: pointer; font-size: 14px; font-weight: 700; }
+.tbtn { border: 1px solid var(--rule); background: transparent; border-radius: 10px; padding: 7px 12px; font-size: 14px; cursor: pointer; }
+.lbtn { border: 0; background: transparent; color: var(--muted); padding: 8px 10px; cursor: pointer; font-size: 14px; }
+.lbtn:hover { color: var(--ink); }
+.lbtn.danger:hover { color: var(--accent); }
+.copied { font-size: 13px; color: var(--ok); min-height: 1.2em; margin-top: 6px; }
+#preview { flex: 1; overflow: auto; margin: 0; padding: 14px 18px 40px; font: 13.5px/1.5 "PT Sans", Arial, sans-serif; white-space: pre-wrap; word-break: break-word; color: var(--ink); }
+.warn { position: fixed; left: 12px; bottom: 12px; font-size: 13px; color: var(--accent); z-index: 20; max-width: 22em; }
+
+@media (max-width: 760px) {
+  :root { --size: 17.5px; }
+  main { padding: 60px 0 120px; }
+  .sheet { border-radius: 0; padding: 36px 14px 48px; box-shadow: none; }
+  .card { padding: 14px 13px 10px; border-radius: 10px; }
+  .home span, #ansBtn span { display: none; }
+  .home { top: 8px; left: 8px; }
+  .top { top: 8px; right: 8px; }
+}
+@media (pointer: coarse) {
+  .top button, .home { min-height: 38px; min-width: 38px; display: inline-flex; align-items: center; justify-content: center; padding: 5px 10px; }
+  .ans textarea { font-size: 16px; }
+  .opt { padding: 10px 12px; }
+  .dh { padding-top: calc(16px + env(safe-area-inset-top)); }
+}
+@media print {
+  .top, .home, #drawer, #progress, .filters, .toc { display: none !important; }
+  body { background: #fff; }
+  .sheet { box-shadow: none; }
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<a class="home ui" href="index.html" title="В читалку">← <span>Читалка</span></a>
+<div class="top ui">
+  <button id="smaller" title="Мельче">А−</button>
+  <button id="bigger" title="Крупнее">А+</button>
+  <button id="theme" title="Тема">☾</button>
+  <button id="ansBtn" title="Ответы и выгрузка для Claude"><span>Ответы </span><b id="count">0</b></button>
+</div>
+
+<main>
+  <div class="sheet">
+    <header>
+      <div class="kicker ui">Кордим · редактор</div>
+      <h1 id="title"></h1>
+      <div class="meta ui" id="meta"></div>
+      <div class="tabs ui" id="tabs" role="tablist"></div>
+      <div class="intro" id="intro"></div>
+      <div class="filters ui" id="filters">
+        <button class="chip" data-f="all" aria-pressed="true">Все</button>
+        <button class="chip" data-f="open">Без ответа</button>
+        <button class="chip" data-f="done">С ответом</button>
+      </div>
+      <nav class="toc ui" id="toc"></nav>
+    </header>
+    <div id="body"></div>
+    <div class="end">⁂</div>
+  </div>
+</main>
+
+<aside id="drawer" class="ui" aria-label="Ответы">
+  <div class="dh">
+    <h3><span>Ответы для Claude</span> <button class="lbtn" id="closeDrawer" title="Закрыть">✕</button></h3>
+    <p>Скопируй и вставь в чат: туда уйдут ответы с обеих страниц. Когда Claude их внесёт, нажми «Очистить», чтобы они не пришли второй раз.</p>
+    <div class="acts">
+      <button class="pbtn" id="copyAll">Скопировать для Claude</button>
+      <button class="tbtn" id="download">Файлом</button>
+      <button class="lbtn danger" id="clearAll">Очистить</button>
+    </div>
+    <div class="copied" id="copied"></div>
+  </div>
+  <pre id="preview"></pre>
+</aside>
+<div class="warn ui" id="warn"></div>
+
+<script>
+var DOCS = [{"id":"вопросы","kind":"вопросы","tab":"Ждёт тебя","title":"Ждёт тебя","updated":"08.11.2026","file":"Канон/Редактор/01_Ждёт_тебя.md","intro":["Не канон, рабочий список. Здесь всё, где без тебя дальше не пойти: что выбрать, что решить, что придумать. У каждого вопроса есть короткая справка, мои варианты и поле для ответа. Если мой совет подходит, нажми вариант со звёздочкой, писать ничего не нужно. Можно отвечать не на всё сразу: ответы хранятся в этом браузере, пока не скопируешь их для Claude."],"sections":[{"title":"Проза: решения по готовым текстам","items":[{"id":"В01","title":"«Нора»: на какой ночи звучит «Кейра»","meta":[],"ctx":[{"kind":"p","html":"В тексте Грейс говорит имя в бреду на вторую ночь. В каноне, в профиле Грейс, сказано «на четвёртую». Но по записи 14 жар ломается к четвёртому утру, и в тексте так же, так что четвёртой ночи бреда просто нет."}],"opinion":[],"options":[{"k":"а","html":"Текст оставить, в каноне исправить на «на вторую ночь». \u003cem>Советую.\u003c/em>","rec":true},{"k":"б","html":"Растянуть болезнь на четыре ночи. Тогда сдвигаются все дни до сделки с Арном и запись 14.","rec":false}],"h":"15e092ba"},{"id":"В02","title":"«Нора»: «не по-нашему»","meta":[],"ctx":[{"kind":"p","html":"Язык в Кордиме один (запись 32), а Грейс нарочно говорит без акцента. Сейчас в бреду у неё прорезается другой выговор, мягче и тягучее, и Арн замечает: «Слова наши, а выговор чужой». Тихий намёк на север."}],"opinion":[],"options":[{"k":"а","html":"Оставить так. \u003cem>Советую.\u003c/em>","rec":true},{"k":"б","html":"Вернуть настоящий чужой язык. Тогда нужна оговорка в записи 32: что за язык и откуда он у Астернов.","rec":false},{"k":"в","html":"Убрать реплику Арна, пусть заметит только Никто.","rec":false}],"h":"6da3c446"},{"id":"В03","title":"«Нора»: «полгода подпирал поленом»","meta":[],"ctx":[{"kind":"p","html":"Отца Арна убили в начале зимы, а сейчас ранняя весна. Арн один месяца три-четыре, не полгода. Фраза дословно из канона, поэтому я её не трогал."}],"opinion":[],"options":[{"k":"а","html":"«Всю зиму» и в тексте, и в каноне. \u003cem>Советую.\u003c/em>","rec":true},{"k":"б","html":"Оставить «полгода» как округление Никто.","rec":false}],"h":"ccaa9a11"},{"id":"В04","title":"«Нора»: кто говорит «То, что даром, потом становится должком»","meta":[],"ctx":[{"kind":"p","html":"В исходнике это говорила Грейс. В каноне (запись 24) платы «настоял Никто», и я отдал реплику ему."}],"opinion":[],"options":[{"k":"а","html":"Оставить Никто, как в каноне.","rec":false},{"k":"б","html":"Вернуть Грейс: у неё фраза суше и весомее, запись 24 поправить. \u003cem>Советую.\u003c/em>","rec":true}],"h":"03e64f62"},{"id":"В05","title":"«Дело Дюра»: деньги «при своих»","meta":[],"ctx":[{"kind":"p","html":"По канону пара вышла в ноль. По ценам того же канона не выходит: получили сто девяносто кордов, потратили меньше двадцати. Это полтора года жалованья вольного бойца."}],"opinion":[],"options":[{"k":"а","html":"Сумму оставить, а «ноль» сделать оценкой Грейс: деньги есть, но заплачено рукой Никто, лошадьми и тем, что их видели вблизи. «Мы вышли живыми. — Это и есть ноль» остаётся. \u003cem>Советую.\u003c/em>","rec":true},{"k":"б","html":"Настоящий ноль: снизить ставку на порядок в тексте и в записи 49.","rec":false},{"k":"в","html":"Ноль оставить и показать, куда ушли деньги (долг, лечение, чья-то доля). Это новый канон, придумать его можешь только ты.","rec":false}],"h":"105263fa"},{"id":"В06","title":"«Дело Дюра»: девять тел или семь","meta":[],"ctx":[{"kind":"p","html":"Канон говорит «девять трупов». В тексте видно семь смертей. Бек с болтом в бедре остаётся во дворе, Каппа с ножом в бедре за воротами, что с ними, не сказано. Безоружного старика-конюха Никто убивает молча, а Сэм потом думает, что эти двое «не убивают лишнего»."}],"opinion":[],"options":[{"k":"а","html":"Старика Никто сбивает с ног и бросает в дровах («Лежи»), Бека Грейс выволакивает за ворота. Мёртвых семь, запись 49 поправить. \u003cem>Советую.\u003c/em>","rec":true},{"k":"б","html":"Оставить девять и показать, что Бек и Каппа умерли. По канону, но темнее, чем мир с 13.09.","rec":false},{"k":"в","html":"Оставить за кадром: доклад говорит «девять», читатель догадывается сам.","rec":false}],"h":"37f4955a"},{"id":"В07","title":"«Дело Дюра»: выстрел на двести шагов","meta":[],"ctx":[{"kind":"p","html":"Рабочая дальность у Грейс по канону восемьдесят шагов, а днём она дважды бьёт с гребня на сто восемьдесят — двести."}],"opinion":[],"options":[{"k":"а","html":"Восемьдесят — рабочая дальность, двести днём с упора по стоящему — предел. Грейс так и говорит: «Это дальше, чем я люблю». \u003cem>Советую.\u003c/em>","rec":true},{"k":"б","html":"Придвинуть гребень к ста двадцати шагам по всему тексту.","rec":false},{"k":"в","html":"Поправить канон.","rec":false}],"h":"c81c2e68"},{"id":"В08","title":"«Дело Дюра»: поправки к записи 49","meta":[],"ctx":[{"kind":"p","html":"Две формулировки канона не сходятся с текстом. «Грейс сняла четверых с гребня»: днём с гребня она положила двоих, ещё двоих снял ножами Никто. И «Керра вернулась во Врата через неделю», а по тексту прошло недели три-четыре."}],"opinion":[],"options":[{"k":"а","html":"Писать «днём вдвоём вывели из строя четверых» и «через несколько недель». \u003cem>Советую.\u003c/em>","rec":true},{"k":"б","html":"Не так, напишу ниже.","rec":false}],"h":"17f5e57a"},{"id":"В09","title":"Приёмка «Норы»","meta":[],"ctx":[{"kind":"p","html":"Все правки по разбору внесены 06.11, четыре вопроса выше остались за тобой. Статус пока «черновик»."}],"opinion":[],"options":[{"k":"а","html":"Принимаю, ставь «готово» (после ответов выше).","rec":false},{"k":"б","html":"Нужен ещё круг вычитки.","rec":false},{"k":"в","html":"Ещё не дочитано.","rec":false}],"h":"2dfe067b"},{"id":"В10","title":"Приёмка «Дела Дюра»","meta":[],"ctx":[{"kind":"p","html":"То же: правки по разбору внесены 06.11, есть схема двора на 23 шага, открыты вопросы В05–В08."}],"opinion":[],"options":[{"k":"а","html":"Принимаю, ставь «готово» (после ответов выше).","rec":false},{"k":"б","html":"Нужен ещё круг вычитки.","rec":false},{"k":"в","html":"Ещё не дочитано.","rec":false}],"h":"2d89554b"},{"id":"В11","title":"Приёмка «Лиха у Врат»","meta":[],"ctx":[{"kind":"p","html":"Финальная версия до концовки с Кергом: три круга вычитки, сцена 5 «Сапоги» дописана. Рассказ обрывается до возвращения Керга (вопрос В14)."}],"opinion":[],"options":[{"k":"а","html":"Принимаю как есть, концовка будет отдельным рассказом.","rec":false},{"k":"б","html":"Принимаю, когда допишем концовку.","rec":false},{"k":"в","html":"Нужен ещё круг вычитки.","rec":false}],"h":"42393a3a"},{"id":"В12","title":"Ошерск: лошади в «Утопленнике»","meta":[],"ctx":[{"kind":"p","html":"Грейс заплатила за три дня и велела лошадей не трогать. Сундук люди Варга забрали, о лошадях никто не спросил. Нить висит."}],"opinion":[],"options":[{"k":"а","html":"За лошадьми никто не приходит. Для Гальта это довод, что героев нет в живых. \u003cem>Советую.\u003c/em>","rec":true},{"k":"б","html":"Хозяин через неделю продаёт их и молчит.","rec":false},{"k":"в","html":"Никто потом тихо их забирает, и этим выдаёт, что живы.","rec":false}],"h":"aa8a126a"}]},{"title":"Отряд «Лихо»","items":[{"id":"В13","title":"Пересекаются ли Лихо с Грейс и Никто лично","meta":[],"ctx":[{"kind":"p","html":"Решено, что между 1024 и 1026 у Лихо будут свои арки. Не решено, встретятся ли они с героями или только через мир. Общая ниточка уже есть: Тишак занижал охрану и тем, и другим."}],"opinion":[],"options":[{"k":"а","html":"Встречаются один раз, по делу Тишака, без дружбы и вражды. \u003cem>Советую.\u003c/em>","rec":true},{"k":"б","html":"Только через мир: слухи, общие люди, Тишак.","rec":false},{"k":"в","html":"Сводить их плотнее, вплоть до общего дела.","rec":false}],"h":"8a814cda"},{"id":"В14","title":"Концовка: Керг возвращается","meta":[],"ctx":[{"kind":"p","html":"Охрана клянётся, что Лихо в дом не входили. Раненый охранник считал их людьми Пёстрого. Пёстрого Кергу не достать, а Лихо искать недолго: их имена орали на весь двор."}],"opinion":[],"options":[{"k":"а","html":"Керг считает их сообщниками Пёстрого и ищет. Лихо приходится доказывать обратное или уходить из Врат на зиму.","rec":false},{"k":"б","html":"Керг умнее: понимает, что их подставили, и нанимает самих Лихо найти Пёстрого. \u003cem>Мне так интереснее.\u003c/em>","rec":true},{"k":"в","html":"Керг молчит и ждёт. Счёт откладывается на год.","rec":false}],"h":"0e33c96a"},{"id":"В15","title":"План Раска на пятнадцать человек","meta":[],"ctx":[{"kind":"p","html":"Раск хочет свой отряд в пятнадцать-двадцать человек, а путь к этому лежит через славу, из-за которой их и наняли как расходник. Теперь он знает, что дело строилось вокруг них как приманки. Что это делает с его целью?"}],"opinion":[],"options":[{"k":"а","html":"Он откладывает цель: сначала деньги и тишина. \u003cem>Советую.\u003c/em>","rec":true},{"k":"б","html":"Упирается сильнее: «чтобы такого больше не было, нужно пятнадцать».","rec":false},{"k":"в","html":"Ссорится из-за этого с Ленном.","rec":false}],"h":"e80d3e5b"},{"id":"В16","title":"Ленн и Нотариус: чем кончается линия","meta":[],"ctx":[{"kind":"p","html":"Ленн пять лет собирает всё, чтобы закрыть старое дело с Нотариусом. Нотариус знает, что Ленн жив, и ничего не делает."}],"opinion":[],"options":[{"k":"а","html":"Фон: линия живёт, но не взрывается.","rec":false},{"k":"б","html":"Попытка и провал: Ленн выбирает момент, и момент не тот.","rec":false},{"k":"в","html":"Удар, который меняет канон Порта.","rec":false}],"h":"c8803f63"},{"id":"В17","title":"Что в ящике Керга","meta":[],"ctx":[{"kind":"p","html":"Решено: необычная тяжёлая ценность, пока без названия. Когда назовём?"}],"opinion":[],"options":[{"k":"а","html":"Не называть, пока не дойдёт сюжет. \u003cem>Советую.\u003c/em>","rec":true},{"k":"б","html":"Назову сейчас (напиши ниже, что там).","rec":false}],"h":"d8c55c1f"}]},{"title":"Контора Сайдена и деньги","items":[{"id":"В18","title":"Потолок поручительства","meta":[],"ctx":[{"kind":"p","html":"Одно сорванное дело на триста кордов — годовой доход Сайдена. Либо есть сумма, выше которой он только сводит стороны, либо его слово на крупных делах стоит меньше, чем кажется, и Седрик это знает."}],"opinion":[],"options":[{"k":"а","html":"Есть потолок, выше него Сайден только сводит стороны.","rec":false},{"k":"б","html":"Потолка нет, но крупное слово стоит меньше, и Седрик это знает. \u003cem>Советую: это интереснее.\u003c/em>","rec":true}],"h":"8046a5b8"},{"id":"В19","title":"Мелочи конторы","meta":[],"ctx":[{"kind":"p","html":"Три строки, которых нет в каноне: кто во Вратах пересылает дела Сайдену и как он относится к Тишаку; что стало со второй конторой и когда (я бы написал: кончилась не поножовщиной, а тем, что за неё перестали ручаться); и «контора» встречается дважды — у Сайдена и почтовая у Пряхи, не путать ли."}],"opinion":[],"options":[{"k":"а","html":"Сделай как предлагаешь, я потом посмотрю.","rec":false},{"k":"б","html":"Напишу ниже.","rec":false}],"h":"74886c48"},{"id":"В20","title":"Жетоны в связке Бранта","meta":[],"ctx":[{"kind":"p","html":"Запись 41: Брант срезает жетоны с тех, с кого Сайден снял слово. Запись 52: Тэйву жетон срезали при людях во дворе конторы, и «у него срезать нечего». Получается противоречие."}],"opinion":[],"options":[{"k":"а","html":"Контора срезает сама и при людях; Брант охотится на тех, кто успел уйти до того, как сняли. \u003cem>Советую.\u003c/em>","rec":true},{"k":"б","html":"Брант охотится на тех, кто ещё под словом, но объявлен городом вне закона.","rec":false},{"k":"в","html":"Срезают не всегда, как придётся.","rec":false}],"h":"f034c99a"}]},{"title":"Власть, деревня, право","items":[{"id":"В21","title":"Совет Столицы или Совет королевства","meta":[],"ctx":[{"kind":"p","html":"Отложено тобой 23.10. От этого зависят налоги, армия и почему король слаб. Король Идвальд III держит армию около 2 500 человек и занят южной границей; Вейр правит Столицей через Совет."}],"opinion":[],"options":[{"k":"а","html":"Совет Вейра управляет Столицей и округой, на страну влияет деньгами и договорами. Корона держит войну и межгородские дела, но без денег местных ничего не может. \u003cem>Советую.\u003c/em>","rec":true},{"k":"б","html":"Совет королевства: общегосударственный орган. Тогда нужно придумать, кто в нём заседает от городов и Домов.","rec":false},{"k":"в","html":"Ещё отложить.","rec":false}],"h":"7ea74735"},{"id":"В22","title":"Деревня, земля и налог","meta":[],"ctx":[{"kind":"p","html":"Вне городов живёт больше 80% людей, а описан только Кальвер. Сейчас известно одно: Кальвер платит налоги за своих должников разом и поэтому крупнейший плательщик. Мой набросок: землю держат Дома, Корона, Церковь и свободные дворы; в деревне налог собирает староста и отдаёт держателю земли; платят зерном, монетой — только у дороги и реки; после Чумы земли больше, чем рук, поэтому держат не землю, а людей."}],"opinion":[],"options":[{"k":"а","html":"Набросок годится, распиши запись.","rec":false},{"k":"б","html":"Сначала решу Совет (В21), потом это.","rec":false},{"k":"в","html":"Не так (напиши ниже).","rec":false}],"h":"b003d359"},{"id":"В23","title":"Пять случаев обычной жизни","meta":[],"ctx":[{"kind":"p","html":"Вместо энциклопедии пять случаев (Л10). Мои предложения:"},{"kind":"li","html":"Умер хозяин двора: двор держит вдова, пока старший сын не войдёт в возраст. Кредитор берёт долю урожая, а не землю: пустой двор никому не нужен."},{"kind":"li","html":"Неурожай: налог зерном. Не хватило — заём у держателя земли под следующий урожай. Зависимость начинается, когда заём заверяют у нотариуса."},{"kind":"li","html":"Работник уходит: после Чумы руки дороги, его держит не закон, а долг и жильё. Если долг на бумаге, переманивший выкупает долг."},{"kind":"li","html":"Сосед захватил выпас: разбирает староста со стариками, межу помнят свидетели. Если деревни разные — суд держателя земли за плату."},{"kind":"li","html":"Подмастерье открывает дело: нужен поручитель-мастер и взнос цеху. После Чумы цеха охотнее берут вдов и чужаков, но взнос не снижают."}],"opinion":[],"options":[{"k":"а","html":"Все пять годятся, вноси.","rec":false},{"k":"б","html":"Годятся с правками (ниже).","rec":false},{"k":"в","html":"Не так, обсудим.","rec":false}],"h":"5c2a1347"},{"id":"В24","title":"Наследство, долг, вдовы и сироты","meta":[],"ctx":[{"kind":"p","html":"Это прямо питает арку Астернов: четверо детей разъехались по чужим домам, двое младших умерли. Нужно решить, кто опекает сирот должника и что достаётся кредитору."}],"opinion":[],"options":[{"k":"а","html":"Опеку назначают кредиторы, и это законный способ взыскания: ребёнок отрабатывает долг семьи. \u003cem>Так уже выходит из линии Кейры.\u003c/em>","rec":false},{"k":"б","html":"Опекает родня или Церковь, кредиторы опеку выкупают.","rec":false},{"k":"в","html":"Напишу ниже.","rec":false}],"h":"e364fb1e"},{"id":"В25","title":"Откуда Грейс уверена, что брат мёртв","meta":[],"ctx":[{"kind":"p","html":"В каноне не прописано. Через Нотариуса это закрывать нельзя: тогда он узнаёт, кто она."}],"opinion":[],"options":[{"k":"а","html":"Она не уверена, она так решила: Корн не пришёл, а если бы был жив, пришёл бы. \u003cem>Советую: это больнее и честнее.\u003c/em>","rec":true},{"k":"б","html":"Ей так сказали в долговом хозяйстве.","rec":false},{"k":"в","html":"Она видела бумагу или слышала слух (какой — ниже).","rec":false}],"h":"f2f0d3fc"}]},{"title":"Бой, вещи, оружие","items":[{"id":"В26","title":"Новый арбалет через Локи","meta":[],"ctx":[{"kind":"p","html":"Старый утонул с баржей. Локи механик, но супероружия не давать. Если новый отличается от старого, это решение про бой Грейс, а не про железо. Пока она без арбалета — лучший момент показать её ближний бой."}],"opinion":[],"options":[{"k":"а","html":"Такой же тяжёлый, двести фунтов, козья ножка. Локи собирает его из чужих частей.","rec":false},{"k":"б","html":"Легче и быстрее, но слабее: болт не берёт бригандину. Грейс приходится стрелять ближе. \u003cem>Мне интереснее.\u003c/em>","rec":true},{"k":"в","html":"Тяжелее и сильнее, но взвод дольше.","rec":false}],"h":"6c9317a8"},{"id":"В27","title":"Чем Грейс платит Локи","meta":[],"ctx":[{"kind":"p","html":"Золото Локи не берёт, только живую плату: секрет. После Ошерска у пары есть что продать: второй канал Крайма, сундук Сел, Варг. Продать это — опасно."}],"opinion":[],"options":[{"k":"а","html":"Платят ошерским секретом и потом за это отвечают. \u003cem>Советую: из этого вырастает следующая арка.\u003c/em>","rec":true},{"k":"б","html":"Платит Никто, чем-то своим.","rec":false},{"k":"в","html":"Грейс платит личным, и это дорого (чем — ниже).","rec":false}],"h":"1b55d804"},{"id":"В28","title":"Рыцари, броня, уровень вещей","meta":[],"ctx":[{"kind":"p","html":"Набросок в очереди (раздел 4): вещи на уровне XIV века; рыцарь — личная присяга, а не сословие, их на страну десятки; лестница брони от стёганки до лат; латник — событие, и тогда работает Берта."}],"opinion":[],"options":[{"k":"а","html":"Принимаю, отдельной записью в лорбуке. \u003cem>Советую.\u003c/em>","rec":true},{"k":"б","html":"Принимаю, но правилом рядом с «Физикой боя».","rec":false},{"k":"в","html":"Переделать (ниже).","rec":false}],"h":"6534042f"},{"id":"В29","title":"Марс под реальную физику","meta":[],"ctx":[{"kind":"p","html":"Марс, «бог войны», гигант с копьём насквозь, спорит с правилом «физика реальная»."}],"opinion":[],"options":[{"k":"а","html":"Он большой и очень сильный, но человек. «Бог войны» — так его зовут линдасцы, копьё насквозь — байка. \u003cem>Советую.\u003c/em>","rec":true},{"k":"б","html":"Оставить как есть.","rec":false}],"h":"da9c6a9e"},{"id":"В30","title":"Почти дословные имена: Марс и Локи","meta":[],"ctx":[{"kind":"p","html":"Это единственные места, где источник просвечивает (Локи от Флоки, Марс от Марса)."}],"opinion":[],"options":[{"k":"а","html":"Оставить.","rec":false},{"k":"б","html":"Переименовать (варианты ниже).","rec":false}],"h":"cf4e25aa"},{"id":"В31","title":"Система роста по образцу KCD2","meta":[],"ctx":[{"kind":"p","html":"Идея: навыки от повторения, телесные привычки, никаких уровней. «Человек, который слишком долго делал одну и ту же страшную работу». Нужна ли она вообще без игры?"}],"opinion":[],"options":[{"k":"а","html":"Не нужна, игры вне плана.","rec":false},{"k":"б","html":"Нужна как правило письма: что у кого в руках от привычки.","rec":false},{"k":"в","html":"Нужна полностью.","rec":false}],"h":"a6a71101"}]},{"title":"Люди и отношения","items":[{"id":"В32","title":"Линия Никто и Элоуэн","meta":[],"ctx":[{"kind":"p","html":"Три старых варианта потерялись в старых чатах. Мои три: Никто видел её дважды, до Грейс; долг 1024-го не закрыт; нож на полке она не убрала; «Эли» её не звал никто."}],"opinion":[],"options":[{"k":"а","html":"Без романа: два человека, которые друг другу не врут. Тепло есть, шага не делает никто.","rec":false},{"k":"б","html":"Было коротко в 1023-м и кончилось долгом. Неоплаченный долг стоит между ними сильнее любой ссоры.","rec":false},{"k":"в","html":"Всё впереди, и Грейс при этом рядом.","rec":false}],"h":"62926411"},{"id":"В33","title":"Взрослая линия героев","meta":[],"ctx":[{"kind":"p","html":"Четыре вопроса без ответов с сентября: формат (отдельный блок или в карточке), точка развития отношений, тон Никто без маски, кто первый и при каких обстоятельствах. Ответь словами, как видишь."}],"opinion":[],"options":[{"k":"а","html":"Пока не трогать.","rec":false},{"k":"б","html":"Отвечу ниже.","rec":false}],"h":"b6692d48"},{"id":"В34","title":"Марна Вельт и Кейн","meta":[],"ctx":[{"kind":"p","html":"Внесена 06.11 по рабочей карточке: знает, что Дорров двое, и молчит; с Кейном деловое уважение без близости."}],"opinion":[],"options":[{"k":"а","html":"Так и есть.","rec":false},{"k":"б","html":"Иначе (ниже).","rec":false}],"h":"c31d152a"}]},{"title":"Кандидатки ЛИЦА и новые люди","items":[{"id":"В35","title":"Рена «Тихая» (№ 5): что она видела","meta":[],"ctx":[{"kind":"p","html":"В черновике она «видела Грейс и Никто вместе». Но то, что Грейс работает с напарником, знают даже враги, крючок ничего не стоит. Что она видела на самом деле?"}],"opinion":[],"options":[{"k":"а","html":"Грейс без шляпы, в лицо.","rec":false},{"k":"б","html":"Дорогу к Норе. \u003cem>Советую: это опасно по-настоящему.\u003c/em>","rec":true},{"k":"в","html":"Обоих без масок, вне дела, как людей.","rec":false}],"h":"ea923113"},{"id":"В36","title":"Тира Орра (№ 15): архив Ложи","meta":[],"ctx":[{"kind":"p","html":"Черновик: архив Ложи за годы Чумы у неё. Но запись 17 говорит, что знание держится на одной Орре, которой шестьдесят восемь, и в этом цена молчания Ложи. Заодно: Орра — женщина, правильно «дочь мастера Веш Орры»."}],"opinion":[],"options":[{"k":"а","html":"Архива у Тиры нет. Она знает, где он, и знает, что мать не успеет его передать. \u003cem>Советую.\u003c/em>","rec":true},{"k":"б","html":"Архив у неё, тогда цена молчания Ложи другая.","rec":false}],"h":"c9470606"},{"id":"В37","title":"Мастер Ирша (№ 13): другая роль","meta":[],"ctx":[{"kind":"p","html":"По черновику она «поставила ожог» Элоуэн, но теперь клеймить её никто не стал: ожог получился сам при побеге."}],"opinion":[],"options":[{"k":"а","html":"Это она пришла за Элоуэн «сломать руки» и опоздала. \u003cem>Советую.\u003c/em>","rec":true},{"k":"б","html":"Другая роль (ниже).","rec":false}],"h":"9b6bb18e"},{"id":"В38","title":"Сестра Ана (№ 3): берёт деньги или нет","meta":[],"ctx":[{"kind":"p","html":"В черновике она единственная в Церкви, кто берёт деньги. В ЛИЦА, наоборот, единственная, кто не берёт."}],"opinion":[],"options":[{"k":"а","html":"Берёт, и свои её за это боятся. Бран покрывает.","rec":false},{"k":"б","html":"Не берёт, и именно поэтому опасна. \u003cem>Советую.\u003c/em>","rec":true}],"h":"76112c2d"},{"id":"В39","title":"Мэй (№ 9) и Ярна Сотт (№ 17): одна ниша","meta":[],"ctx":[{"kind":"p","html":"Обе хозяйки заведений, обе фильтруют сведения наверх. У Ярны ещё не выбран характер: «Дама Порта» (играет благородную, срывается на портовое) или прямая с низким голосом из черновика."}],"opinion":[],"options":[{"k":"а","html":"Развести: Мэй в Порту, продаёт тишину; Ярна в «Синем часе», продаёт сведения. Характер Ярны — оба слоя: маска для гостей и обычный день.","rec":false},{"k":"б","html":"Оставить одну (какую — ниже).","rec":false}],"h":"e61119e9"},{"id":"В40","title":"Дагна (№ 11): запрет Коллегии","meta":[],"ctx":[{"kind":"p","html":"«Коллегия не проводит женщин в мастера» — это правило всего мира или её личная история?"}],"opinion":[],"options":[{"k":"а","html":"Личная история: её мастер не провёл. \u003cem>Советую: мир после Чумы не может себе позволить такой запрет.\u003c/em>","rec":true},{"k":"б","html":"Правило Коллегии.","rec":false}],"h":"671ac106"},{"id":"В41","title":"Аделла (№ 12): королева сейчас?","meta":[],"ctx":[{"kind":"p","html":"Жена Идвальда III, полгода в седле при армии, ведёт политику письмами. Фигура большого уровня."}],"opinion":[],"options":[{"k":"а","html":"Ввести сейчас, но за кадром, как фон.","rec":false},{"k":"б","html":"Держать про запас, пока не понадобится. \u003cem>Советую.\u003c/em>","rec":true}],"h":"7ac85d29"},{"id":"В42","title":"Нэн Сел (№ 14): медленное старение","meta":[],"ctx":[{"kind":"p","html":"В описании «стареет медленно и иначе, чем местные». В мире без магии это читается как нечеловеческая природа."}],"opinion":[],"options":[{"k":"а","html":"Убрать: просто моложавая, южные корни. \u003cem>Советую.\u003c/em>","rec":true},{"k":"б","html":"Имелось в виду другое (ниже).","rec":false}],"h":"1b1cff7f"},{"id":"В43","title":"№ 18, медно-рыжая","meta":[],"ctx":[{"kind":"p","html":"У неё не выбрано ничего: ни имени, ни роли, ни портрета мира. Придумать тебе или мне предложить три варианта?"}],"opinion":[],"options":[{"k":"а","html":"Предложи три варианта.","rec":false},{"k":"б","html":"Придумаю (ниже).","rec":false}],"h":"2e49b612"},{"id":"В44","title":"Нэра, кандидатка Порта","meta":[],"ctx":[{"kind":"p","html":"Внешность утверждена 28.09. Имя, занятие, характер и связь с Портом Теней — нет."}],"opinion":[],"options":[{"k":"а","html":"Предложи варианты.","rec":false},{"k":"б","html":"Напишу ниже.","rec":false},{"k":"в","html":"Пока не нужна.","rec":false}],"h":"f81da7c6"},{"id":"В45","title":"Одиннадцать НПС из старой генерации","meta":[],"ctx":[{"kind":"p","html":"Совместимы шестеро: Тибо «Счётчик» (скупщик расписок), Эйра «Слепая» (командир «Тихих», зеркало Грейс), Тевр «Молодой» (изучает Грейс, чтобы превзойти), Серра «Двойная», Ок Сенн (из слуг замка Астерн, десять лет ради одного вопроса к Кейре), Рейн Мор (видел девочку в окне). Двоих надо переписать под контору (Лисс «Болт», Рогх «Гравий»). Двоих не брать."}],"opinion":[],"options":[{"k":"а","html":"Брать шестерых, переписать двоих. \u003cem>Советую, но вводить по одному, когда понадобятся.\u003c/em>","rec":true},{"k":"б","html":"Брать только некоторых (кого — ниже).","rec":false},{"k":"в","html":"Никого пока.","rec":false}],"h":"a81171ba"},{"id":"В46","title":"Амиция для Чумного квартала","meta":[],"ctx":[{"kind":"p","html":"Девочка с пращой, которая бережёт младшего брата. Зеркало Грейс, сестры, которая брата потеряла. Запись 34 ждёт своего человека."}],"opinion":[],"options":[{"k":"а","html":"Беру.","rec":false},{"k":"б","html":"Не надо.","rec":false}],"h":"713b80b6"},{"id":"В47","title":"Локи: даты","meta":[],"ctx":[{"kind":"p","html":"Ни одной точной даты, полный профиль не собрать. Нужны хотя бы: сколько ему лет, когда пришёл в Порт, когда завёл «птичек», когда Юна осталась при нём."}],"opinion":[],"options":[{"k":"а","html":"Придумай сам, я посмотрю.","rec":false},{"k":"б","html":"Напишу ниже.","rec":false}],"h":"9f61772e"},{"id":"В48","title":"Бордели и Ярна Сотт в записи 28","meta":[],"ctx":[{"kind":"p","html":"Черновик есть: три уровня, крючки на Сибиллу, Элоуэн и Нотариуса, выход и цена. В мастере сейчас три строки."}],"opinion":[],"options":[{"k":"а","html":"Вшивать. \u003cem>Советую.\u003c/em>","rec":true},{"k":"б","html":"Не вшивать.","rec":false}],"h":"d66da643"}]},{"title":"Сайт и инструменты","items":[{"id":"В49","title":"Пароль на сайт","meta":[],"ctx":[{"kind":"p","html":"Отложено 16.09. Ссылка нигде не публикуется. Закрыть можно тумблером Cloudflare Access в дашборде проекта."}],"opinion":[],"options":[{"k":"а","html":"Пока не нужно.","rec":false},{"k":"б","html":"Закрыть.","rec":false}],"h":"ba19033e"},{"id":"В50","title":"«Входящие» и правка с телефона","meta":[],"ctx":[{"kind":"p","html":"Раньше думали о «Входящих» и правке канона прямо с сайта. Сейчас с телефона работает облачный Code, а этот редактор закрывает ответы на вопросы."}],"opinion":[],"options":[{"k":"а","html":"Не нужно, хватает Code и редактора. \u003cem>Советую.\u003c/em>","rec":true},{"k":"б","html":"Нужно.","rec":false}],"h":"cf5724c3"},{"id":"В51","title":"Картинки Каэла на ПК","meta":[],"ctx":[{"kind":"p","html":"\u003ccode>kael-roofs-01.png\u003c/code>, \u003ccode>-02.jpg\u003c/code>, \u003ccode>-04.jpg\u003c/code> никогда не попадали в git. Наверное, лежат на твоём ПК."}],"opinion":[],"options":[{"k":"а","html":"Найду и положу.","rec":false},{"k":"б","html":"Их нет, забыть.","rec":false}],"h":"cdae294d"},{"id":"В52","title":"Инструменты под SillyTavern","meta":[],"ctx":[{"kind":"p","html":"Сборщик контекста для отыгрыша. Нужен ещё?"}],"opinion":[],"options":[{"k":"а","html":"Нет.","rec":false},{"k":"б","html":"Да.","rec":false}],"h":"abde9ec3"}]}]},{"id":"арки","kind":"арки","tab":"Будущие арки","title":"Будущие арки","updated":"08.11.2026","file":"Канон/Редактор/02_Будущие_арки.md","intro":["Не канон, очередь на отыгрыш. У каждой арки: когда и с кем, о чём она в двух словах и почему, по-моему, её стоит играть. Отметь, какие хочешь скоро, какие потом, а какие не хочешь совсем. Если есть мысль, как она должна пойти, напиши в поле. Порядок внутри групп — мой совет, с чего начинать."],"sections":[{"title":"Основная линия: осень 1026, после Ошерска","items":[{"id":"А01","title":"Хват и три ножа","meta":["Когда: осень 1026, после возвращения в Нору","Кто: Грейс, Никто, Арн, Хват и четверо","Где: Ручейный, просека"],"ctx":[{"kind":"p","html":"Весной Грейс сказала Арну, что придёт за бандой сама. У Хвата на голове шляпа отца Арна, а за поясом три ножа Никто. В Ручейном кто-то помнит мужика со шрамом, который переспрашивал про главного. Арн считает банду шестерыми и не знает, что Гнида мертва. Тракты раскисают, и арбалета у Грейс нет: он утонул с баржей."}],"opinion":["Самое старое обещание в мире, и долго его держать нельзя. Без этой арки Никто без причины ходит с тремя пустыми петлями, об этом была твоя просьба 05.11. Здесь три хороших вопроса: идёт ли с ними Арн, что он сделает со шляпой и как Грейс воюет без арбалета. Лучший момент показать её ближний бой (сцепка, свет, узлы). Если сыграть до Локи, без арбалета, бой выйдет злее и честнее."],"options":[{"k":"а","html":"Хочу следующей","rec":false},{"k":"б","html":"Хочу, но позже","rec":false},{"k":"в","html":"Не сейчас","rec":false},{"k":"г","html":"Не хочу","rec":false}],"short":true,"h":"d90050c2"},{"id":"А02","title":"Новый арбалет: Локи","meta":["Когда: осень 1026","Кто: Грейс, Никто, Локи, Юна","Где: Порт Теней, лачуга на сваях"],"ctx":[{"kind":"p","html":"Локи золота не берёт, только живую плату: секрет. Супероружия он не даст, а даст что-то, что меняет бой Грейс (вопрос В26). Платить пара может тем, что вынесла из Ошерска: второй канал Крайма, сундук Сел, Варг. Продать такое — значит, что кто-то однажды узнает, откуда утекло."}],"opinion":["В прозе Порт Теней ещё не появлялся, а это самое атмосферное место мира: туман, в трёх шагах теряешь человека. Локи — чистое удовольствие для сцены: шут снаружи и железная система внутри. А цена арбалета сама становится завязкой для следующей арки (А03). Короткая арка, одна-две сцены."],"options":[{"k":"а","html":"Хочу следующей","rec":false},{"k":"б","html":"Хочу, но позже","rec":false},{"k":"в","html":"Не сейчас","rec":false},{"k":"г","html":"Не хочу","rec":false}],"short":true,"h":"35c30361"},{"id":"А03","title":"Крайм ищет утечку","meta":["Когда: осень-зима 1026","Кто: Крайм, Варг, Гальт, позже Грейс и Никто","Где: Ошерск, Приречье"],"ctx":[{"kind":"p","html":"Крайм знает, чья работа сундук: Варг остаётся в Ошерске у него под носом. Гальт считает героев мёртвыми, но тел не видел, а за лошадьми в «Утопленнике» никто не пришёл. Если пара продала Локи ошерский секрет, ниточка рано или поздно ведёт к ним."}],"opinion":["Хороша тем, что это последствия, а не новый враг. Мир помнит, что сделали герои. Можно начать без них, глазами Крайма или Гальта, и они узнают, что «мёртвые» живы. Тон спокойный, почти шахматный."],"options":[{"k":"а","html":"Хочу следующей","rec":false},{"k":"б","html":"Хочу, но позже","rec":false},{"k":"в","html":"Не сейчас","rec":false},{"k":"г","html":"Не хочу","rec":false}],"short":true,"h":"9d336dff"},{"id":"А04","title":"Счёт к Тишаку","meta":["Когда: осень-зима 1026","Кто: Грейс, Никто, Тишак, возможно Лихо","Где: Врата"],"ctx":[{"kind":"p","html":"Весной 1025-го Тишак продал паре «четверых по данным января», а вышло девять. Лихо его простили, когда он вернул деньги и извинился. Счёт Грейс и Никто остался: Тишак отказался доплачивать за девятерых и не поверил, что человек в доспехе сгорел. Он прав, Сэм Нор жив (А05)."}],"opinion":["Это главная ниточка от Лиха к основной линии, ради неё её и прокладывали. Можно впервые свести героев с Лихом (вопрос В13): у двери одного и того же должника. И это хороший повод показать отказ конторы самим героям, после которого они идут к посреднику."],"options":[{"k":"а","html":"Хочу следующей","rec":false},{"k":"б","html":"Хочу, но позже","rec":false},{"k":"в","html":"Не сейчас","rec":false},{"k":"г","html":"Не хочу","rec":false}],"short":true,"h":"674a5c73"},{"id":"А05","title":"Сэм Нор и Магна Рохт","meta":["Когда: 1026–1027","Кто: Магна Рохт, Сэм Нор, Седрик, затем Грейс и Никто","Где: Топь, Столица"],"ctx":[{"kind":"p","html":"Магна ищет не убийц Дюра, а выгодоприобретателя. Седрик дал ей пустой ответ. Сэм Нор в Топи — единственный живой, кто знает приметы обоих и видел их работу вблизи. Он молчит по расчёту, не из благодарности, а расчёт может поменяться."}],"opinion":["Прошлое догоняет, и догоняет его не злодей, а деловая женщина с хорошим вопросом. Можно соединить с кейсом про сержанта с казной (А21): Топь беспокойная, и Сэм там не один такой."],"options":[{"k":"а","html":"Хочу следующей","rec":false},{"k":"б","html":"Хочу, но позже","rec":false},{"k":"в","html":"Не сейчас","rec":false},{"k":"г","html":"Не хочу","rec":false}],"short":true,"h":"15f35fef"},{"id":"А06","title":"Дело Астернов как товар","meta":["Когда: не раньше 1027","Кто: Ворн Далле, Лия Далле, Торн, Седой, Грейс","Где: Столица, побережье"],"ctx":[{"kind":"p","html":"Ворн Далле подписал приговор Астернам не за взятку: формально всё сходилось. Только он может показать Грейс, что платежи были. Бумаги за полуслепого деда разбирает внучка Лия, честная до неловкости, и она прочтёт всё первой. Три исхода, и у каждого свой человек, которому нужно разное."}],"opinion":["Сердце линии Грейс, но играть её рано. Она дорожает от ожидания, как и поход Седого. Я бы начал с маленького шага: Лия находит одну бумагу и не знает, что с ней делать. Папка не должна решить сюжет: как только её можно унести, линия становится квестом."],"options":[{"k":"а","html":"Хочу следующей","rec":false},{"k":"б","html":"Хочу, но позже","rec":false},{"k":"в","html":"Не сейчас","rec":false},{"k":"г","html":"Не хочу","rec":false}],"short":true,"h":"9e4b8f01"},{"id":"А07","title":"Судно Дома Сел (кейс 4)","meta":["Когда: 1026–1027","Кто: Грейс, Никто, Седой, Торн, Дом Сел","Где: море, Порт Теней"],"ctx":[{"kind":"p","html":"Клинки Седого взяли судно Дома Сел, а на нём компромат на Совет. Дом нанимает Грейс уничтожить корабль. Грейс не знает, что Седой её брат. Седой знает. Торн знает тоже."}],"opinion":["Самая заряженная завязка во всей очереди: сестра против брата, и знает об этом только он. Но она тратит главный секрет мира. Играть только тогда, когда решишь, что пора. До этого держать в запасе."],"options":[{"k":"а","html":"Хочу следующей","rec":false},{"k":"б","html":"Хочу, но позже","rec":false},{"k":"в","html":"Не сейчас","rec":false},{"k":"г","html":"Не хочу","rec":false}],"short":true,"h":"5fcd009f"}]},{"title":"Предыстория: назад во времени","items":[{"id":"А08","title":"Весна 1024: срок долга Элоуэн","meta":["Когда: весна 1024","Кто: Никто, Элоуэн","Где: Ошерск, Синий двор"],"ctx":[{"kind":"p","html":"Микстура в долг, цена — плеть и желчь к весне. Он приходит платить, а её нет там, где он её оставил. Нож на полке между дурманом и живицей она не убрала. «Эли» её не звал никто."}],"opinion":["Всё для неё уже готово, ничего не надо придумывать. Это поиск, не бой: тихая, тёплая и тревожная арка про человека без имени, который держит слово. Заодно закрывает вопрос, погашен ли долг (сейчас намеренно открыт). Короткая, хорошо идёт между большими."],"options":[{"k":"а","html":"Хочу следующей","rec":false},{"k":"б","html":"Хочу, но позже","rec":false},{"k":"в","html":"Не сейчас","rec":false},{"k":"г","html":"Не хочу","rec":false}],"short":true,"h":"36a6bfba"},{"id":"А09","title":"Две встречи Никто и Элоуэн","meta":["Когда: ~1021 и ~1023","Кто: Никто, Элоуэн, Каэл","Где: Столица (колокольня), Ошерск"],"ctx":[{"kind":"p","html":"Первая встреча в Столице: ей около двадцати пяти, она ещё в Ложе, запястье целое, Никто ещё при Каэле. Вторая в Ошерске: изгнание позади, ожог на месте, Каэл ушёл, Грейс ещё нет. Канон прямо говорит, что содержание обеих встреч — отдельная арка."}],"opinion":["Без неё линия Никто и Элоуэн (вопрос В32) висит в воздухе: мы знаем, что встречались, но не знаем, что между ними. Сыграть до А08, и срок долга ударит сильнее."],"options":[{"k":"а","html":"Хочу следующей","rec":false},{"k":"б","html":"Хочу, но позже","rec":false},{"k":"в","html":"Не сейчас","rec":false},{"k":"г","html":"Не хочу","rec":false}],"short":true,"h":"71631695"},{"id":"А10","title":"Торн складывает два и два","meta":["Когда: 1026","Кто: Торн, Седой","Где: Порт Теней, корабль"],"ctx":[{"kind":"p","html":"Сцена без героев. «Стальная Грейс — это Кейра Астерн». Торн идёт к Седому, и тот отвечает: «Скормлю морю по кускам». Торн его за это уважает, и самое дорогое его знание против Кальверов лежит мёртвым грузом."}],"opinion":["Одна сцена, а держит на себе пол-мира. Её стоит сыграть раньше А07: тогда читатель знает то, чего не знает Грейс, и каждая их встреча с Клинками будет звенеть."],"options":[{"k":"а","html":"Хочу следующей","rec":false},{"k":"б","html":"Хочу, но позже","rec":false},{"k":"в","html":"Не сейчас","rec":false},{"k":"г","html":"Не хочу","rec":false}],"short":true,"h":"c20bbcb9"},{"id":"А11","title":"Переулок и первые месяцы","meta":["Когда: ~1024","Кто: Грейс, Никто, Локи, Сурн","Где: Порт Теней"],"ctx":[{"kind":"p","html":"Канон: засада на пятерых и одного метателя, фонарь гаснет, клинок у горла, вопрос вместо мольбы. Ценнее самой дуэли месяцы после: где Локи взял с них живую плату, где Сурн внёс их приметы, как два чужих человека стали парой."}],"opinion":["Как они встретились — это вопрос, который задаст любой читатель. Дуэль короткая, а месяцы после — то, что делает их парой. Без романтики, на работе и недоверии."],"options":[{"k":"а","html":"Хочу следующей","rec":false},{"k":"б","html":"Хочу, но позже","rec":false},{"k":"в","html":"Не сейчас","rec":false},{"k":"г","html":"Не хочу","rec":false}],"short":true,"h":"a2cd8f38"},{"id":"А12","title":"Дорога на Ручейный глазами Арна","meta":["Когда: ранняя весна 1026","Кто: Арн, Грейс, Никто","Где: от Норы до Ручейного"],"ctx":[{"kind":"p","html":"Арн ведёт двух чужих людей к единственному месту, где есть лошади и соль. Он шестнадцатилетний охотник, который зиму прожил один, а рядом раненая женщина и мужик со шрамом, который слишком много болтает."}],"opinion":["Мир глазами человека, который не профессионал. Малые ставки, много быта, тёплый тон. Хорошо читается после «Норы» и до А01."],"options":[{"k":"а","html":"Хочу следующей","rec":false},{"k":"б","html":"Хочу, но позже","rec":false},{"k":"в","html":"Не сейчас","rec":false},{"k":"г","html":"Не хочу","rec":false}],"short":true,"h":"66e85c12"},{"id":"А13","title":"Кейра в долговом хозяйстве","meta":["Когда: 1011–1013","Кто: Кейра, взыскатели, двое младших, Корн","Где: чужие дома"],"ctx":[{"kind":"p","html":"Опека взыскателей; Кальвер — лишь один из поздних кредиторов. Двое младших умирают в первые три года. Корн приходит один раз и опаздывает."}],"opinion":["Самая тяжёлая арка в очереди, и потому её надо писать осторожно: не лекция по экономике, а три образа — пустой замок, дети во дворе, подпись, которую человек не помнит. Объясняет Грейс целиком, но тон должен держаться спокойным."],"options":[{"k":"а","html":"Хочу следующей","rec":false},{"k":"б","html":"Хочу, но позже","rec":false},{"k":"в","html":"Не сейчас","rec":false},{"k":"г","html":"Не хочу","rec":false}],"short":true,"h":"48411387"},{"id":"А14","title":"Одиннадцать лет Грейс","meta":["Когда: 1013–1024","Кто: Грейс","Где: везде"],"ctx":[{"kind":"p","html":"Кто её доучил, откуда имя Грейс, первое дело, как она стала «Смертью в кожаном плаще»."}],"opinion":["Большая и разбирается на куски. Можно не играть целиком, а брать по одному эпизоду, когда нужен: первое дело, первая шляпа."],"options":[{"k":"а","html":"Хочу следующей","rec":false},{"k":"б","html":"Хочу, но позже","rec":false},{"k":"в","html":"Не сейчас","rec":false},{"k":"г","html":"Не хочу","rec":false}],"short":true,"h":"cf529eab"},{"id":"А15","title":"Восемь лет с Каэлом","meta":["Когда: 1014–1022","Кто: Никто, Каэл","Где: Столица, крыши"],"ctx":[{"kind":"p","html":"Откуда маска идиота, откуда Берта и Дырокол, когда и почему Каэл ушёл: без слов, когда начал придавать значение тому, выживет ли мальчишка."}],"opinion":["Каэл первый в очереди тех, кого раскрывать. Старик, который всегда знал, где Никто, и никогда не приходил, — сильнейший второстепенный характер мира. Колокольня уже есть в хронике."],"options":[{"k":"а","html":"Хочу следующей","rec":false},{"k":"б","html":"Хочу, но позже","rec":false},{"k":"в","html":"Не сейчас","rec":false},{"k":"г","html":"Не хочу","rec":false}],"short":true,"h":"0d82e284"},{"id":"А16","title":"Поход Седого на запад","meta":["Когда: 1019–1022","Кто: Корн, будущий Седой","Где: море, запад"],"ctx":[{"kind":"p","html":"Ушёл матросом, вернулся один, седым, и за три года собрал флот."}],"opinion":["Держать напоследок. Чем дольше ждёт, тем дороже стоит. Пока о западе ничего не известно, это лучшая тайна мира."],"options":[{"k":"а","html":"Хочу следующей","rec":false},{"k":"б","html":"Хочу, но позже","rec":false},{"k":"в","html":"Не сейчас","rec":false},{"k":"г","html":"Не хочу","rec":false}],"short":true,"h":"54b8ec3a"},{"id":"А17","title":"Три попытки заселить мыс","meta":["Когда: после 1011","Кто: солевары, барон-покупатель, торги","Где: мыс Астернов"],"ctx":[{"kind":"p","html":"Три раза пытались заселить, каждый раз одно и то же, после третьего мыс не трогают. Это чужое расследование и единственный проверяемый след к разлому."}],"opinion":["Можно сыграть кем-то посторонним, как страшную историю у огня, только без мистики. Работает на тайну, ничего не раскрывая."],"options":[{"k":"а","html":"Хочу следующей","rec":false},{"k":"б","html":"Хочу, но позже","rec":false},{"k":"в","html":"Не сейчас","rec":false},{"k":"г","html":"Не хочу","rec":false}],"short":true,"h":"01ca99dc"}]},{"title":"Отряд «Лихо»","items":[{"id":"А18","title":"Керг возвращается","meta":["Когда: осень 1024","Кто: Раск, Бирк, Тэйв, Ленн, Керг","Где: Врата"],"ctx":[{"kind":"p","html":"Концовка двора Керга. Что Керг делает, когда вернётся (вопрос В14). Лихо — на виду, Пёстрый ушёл."}],"opinion":["Рассказ сейчас обрывается на полуслове, и его хочется дочитать. Если Керг нанимает самих Лихо искать Пёстрого, получается следующая арка сама собой."],"options":[{"k":"а","html":"Хочу следующей","rec":false},{"k":"б","html":"Хочу, но позже","rec":false},{"k":"в","html":"Не сейчас","rec":false},{"k":"г","html":"Не хочу","rec":false}],"short":true,"h":"60ee45d3"},{"id":"А19","title":"Год Тэйва","meta":["Когда: ~1021","Кто: Тэйв, Сайден, хозяйка, обозник, люди Кесса","Где: Столица, тракт"],"ctx":[{"kind":"p","html":"Тэйв три года ходил под словом Сайдена и слетел с треском. Потом год шаг за шагом: «зайди попозже», хозяйка перестаёт писать мелом и просит вперёд, обозник берёт другого, на тракте люди Кесса берут всё. Никто ни разу не говорит «чёрный список»."}],"opinion":["Лучший способ показать, как устроена контора, без единой лекции. У каждого своя причина, и они складываются в одну. Тихая, грустная и очень кордимская арка."],"options":[{"k":"а","html":"Хочу следующей","rec":false},{"k":"б","html":"Хочу, но позже","rec":false},{"k":"в","html":"Не сейчас","rec":false},{"k":"г","html":"Не хочу","rec":false}],"short":true,"h":"6e4f3021"},{"id":"А20","title":"Ленн и Нотариус","meta":["Когда: 1025–1026","Кто: Ленн, Нотариус, Лихо","Где: Порт Теней"],"ctx":[{"kind":"p","html":"Ленн пять лет собирает всё, чтобы закрыть старое дело. Нотариус знает, что он жив, и ничего не делает: живой Ленн — доказательство его правоты."}],"opinion":["Зависит от вопроса В16. Если удар, это крупнейшее событие для Порта. Если провал, это лучшая трагедия Лиха."],"options":[{"k":"а","html":"Хочу следующей","rec":false},{"k":"б","html":"Хочу, но позже","rec":false},{"k":"в","html":"Не сейчас","rec":false},{"k":"г","html":"Не хочу","rec":false}],"short":true,"h":"76ed00f2"}]},{"title":"Завязки из правовых кейсов","items":[{"id":"А21","title":"Сержант с казной в Топи (кейс 5)","meta":["Когда: любое","Кто: сержант, Грейс и Никто или Лихо","Где: Топь"],"ctx":[{"kind":"p","html":"Сержант сбежал с казной в Топь и объявил себя правителем."}],"opinion":["Смешная и опасная одновременно. Хороший заказ для Лиха или для пары. Добавляет Топи жизни и связывается с Сэмом Нором (А05)."],"options":[{"k":"а","html":"Хочу следующей","rec":false},{"k":"б","html":"Хочу, но позже","rec":false},{"k":"в","html":"Не сейчас","rec":false},{"k":"г","html":"Не хочу","rec":false}],"short":true,"h":"6611ac6f"},{"id":"А22","title":"Дочь Хорда (кейс 1)","meta":["Когда: любое","Кто: капитан стражи, Дом Хорд, армия","Где: Столица"],"ctx":[{"kind":"p","html":"Капитан стражи убил проститутку, а она оказалась дочерью Хорда. Хорд грозит остановить поставки армии."}],"opinion":["Показывает власть без меча: одним письмом встаёт армия. Хорошо ляжет после ответа на В21 (Совет и король). Герои могут быть с любой стороны."],"options":[{"k":"а","html":"Хочу следующей","rec":false},{"k":"б","html":"Хочу, но позже","rec":false},{"k":"в","html":"Не сейчас","rec":false},{"k":"г","html":"Не хочу","rec":false}],"short":true,"h":"3f53f829"},{"id":"А23","title":"Бумага мимо конторы (кейс 2)","meta":["Когда: любое","Кто: человек под словом Сайдена, Вейр","Где: Столица"],"ctx":[{"kind":"p","html":"Писался под Гильдию, нужно переписать: Сайден дел против Вейра не берёт, значит, бумага шла мимо конторы, и её нашёл сам Вейр."}],"opinion":["Хорошая проверка конторы на прочность: что делает Сайден, когда его человек работал на стороне против самого опасного человека в стране."],"options":[{"k":"а","html":"Хочу следующей","rec":false},{"k":"б","html":"Хочу, но позже","rec":false},{"k":"в","html":"Не сейчас","rec":false},{"k":"г","html":"Не хочу","rec":false}],"short":true,"h":"fb51025f"},{"id":"А24","title":"Колодец в Чумном квартале (кейс 3)","meta":["Когда: любое","Кто: алхимик Ложи, Чумной квартал","Где: Столица"],"ctx":[{"kind":"p","html":"В исходнике алхимик Ложи отравил колодец ради проверки микстуры, сорок мёртвых."}],"opinion":["В таком виде это старый гримдарк. Я бы смягчил: заболели несколько семей, и Ложа тихо платит за лечение, чтобы никто не спросил, откуда. Тогда это не ужас, а цена молчания, как у Ложи в записи 17. Решать тебе."],"options":[{"k":"а","html":"Хочу следующей","rec":false},{"k":"б","html":"Хочу, но позже","rec":false},{"k":"в","html":"Не сейчас","rec":false},{"k":"г","html":"Не хочу","rec":false}],"short":true,"h":"3daa9ba9"}]}]}];
+(function () {
+  var P = 'kordim-editor:';
+  var root = document.documentElement;
+  var storageOk = true;
+  function load(k, def) {
+    try { var v = localStorage.getItem(P + k); return v == null ? def : JSON.parse(v); }
+    catch (e) { storageOk = false; showWarn(); return def; }
+  }
+  function save(k, v) {
+    try { if (v == null) localStorage.removeItem(P + k); else localStorage.setItem(P + k, JSON.stringify(v)); }
+    catch (e) { storageOk = false; showWarn(); }
+  }
+  function showWarn() {
+    if (!storageOk) document.getElementById('warn').textContent = 'Браузер не даёт сохранять ответы — скопируй их перед закрытием вкладки.';
+  }
+
+  // ответы: id → {pick, text, h}; h — версия вопроса, на которую ответили
+  function ans(id) { return load('a:' + id, null); }
+  function setAns(item, a) {
+    if (!a || (!a.pick && !(a.text || '').trim())) save('a:' + item.id, null);
+    else { a.h = item.h; save('a:' + item.id, a); }
+  }
+  function isDone(item) { var a = ans(item.id); return !!(a && (a.pick || (a.text || '').trim())); }
+
+  var cur = 0, filter = 'all';
+  var hash = decodeURIComponent(location.hash.slice(1));
+  DOCS.forEach(function (d, i) { if (hash === d.id) cur = i; });
+  if (!hash) { var last = load('tab', null); DOCS.forEach(function (d, i) { if (last === d.id) cur = i; }); }
+
+  function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+  function itemsOf(d) { var out = []; d.sections.forEach(function (s) { out = out.concat(s.items); }); return out; }
+  function grow(t) { t.style.height = 'auto'; t.style.height = (t.scrollHeight + 2) + 'px'; }
+
+  function counts() {
+    var total = 0, done = 0;
+    DOCS.forEach(function (d) { itemsOf(d).forEach(function (it) { total++; if (isDone(it)) done++; }); });
+    return { total: total, done: done };
+  }
+  function refreshCounts() {
+    var c = counts();
+    document.getElementById('count').textContent = c.done;
+    document.getElementById('progress').style.width = (c.total ? c.done / c.total * 100 : 0) + '%';
+    var d = DOCS[cur], its = itemsOf(d), dn = its.filter(isDone).length;
+    document.getElementById('meta').innerHTML = (d.kind === 'арки' ? 'Арок: ' : 'Вопросов: ') + its.length + ' · отвечено <b>' + dn + '</b>' + (d.updated ? ' · обновлено ' + d.updated : '');
+    Array.prototype.forEach.call(document.querySelectorAll('#tabs button'), function (b, i) {
+      var n = itemsOf(DOCS[i]).filter(isDone).length;
+      b.querySelector('small').textContent = n ? n : '';
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('#toc a'), function (a, i) {
+      var s = d.sections[i], n = s.items.filter(isDone).length;
+      a.querySelector('small').textContent = ' ' + n + '/' + s.items.length;
+    });
+  }
+
+  function applyFilter() {
+    var shown = 0;
+    Array.prototype.forEach.call(document.querySelectorAll('.card[data-id]'), function (c) {
+      var done = c.classList.contains('done');
+      var hide = (filter === 'open' && done) || (filter === 'done' && !done);
+      c.classList.toggle('hidden', hide);
+      if (!hide) shown++;
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('section[data-sec]'), function (s) {
+      s.style.display = s.querySelector('.card[data-id]:not(.hidden)') ? '' : 'none';
+    });
+    document.getElementById('emptyNote').style.display = shown ? 'none' : '';
+  }
+
+  function card(item, d) {
+    var c = el('article', 'card');
+    c.dataset.id = item.id;
+    c.id = item.id;
+    var head = el('div', 'head');
+    head.appendChild(el('span', 'id', item.id));
+    head.appendChild(el('h3', '', item.title));
+    c.appendChild(head);
+    if (item.meta && item.meta.length) {
+      var tg = el('div', 'tags ui');
+      item.meta.forEach(function (m) { tg.appendChild(el('span', '', m)); });
+      c.appendChild(tg);
+    }
+    if (item.ctx.length) {
+      var ctx = el('div', 'ctx'), ul = null;
+      item.ctx.forEach(function (b) {
+        if (b.kind === 'li') { if (!ul) { ul = el('ul'); ctx.appendChild(ul); } ul.appendChild(el('li', '', b.html)); }
+        else { ul = null; ctx.appendChild(el('p', '', b.html)); }
+      });
+      c.appendChild(ctx);
+    }
+    if (item.opinion.length) {
+      var op = el('div', 'opinion');
+      op.appendChild(el('span', 'lbl ui', d.kind === 'арки' ? 'Почему стоит — моё мнение' : 'Моё мнение'));
+      item.opinion.forEach(function (h) { op.appendChild(el('p', '', h)); });
+      c.appendChild(op);
+    }
+    var a = ans(item.id) || {};
+    var opts = el('div', 'opts' + (item.short ? ' row' : ''));
+    item.options.forEach(function (o) {
+      var b = el('button', 'opt');
+      b.type = 'button';
+      b.innerHTML = (item.short ? '' : '<span class="k">' + o.k + '</span>') + '<span>' + o.html + (o.rec ? ' <span class="rec">★</span>' : '') + '</span>';
+      b.setAttribute('aria-pressed', a.pick === o.k ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        var now = ans(item.id) || {};
+        now.pick = now.pick === o.k ? '' : o.k;
+        setAns(item, now);
+        Array.prototype.forEach.call(opts.children, function (x, i) { x.setAttribute('aria-pressed', item.options[i].k === now.pick ? 'true' : 'false'); });
+        sync();
+      });
+      opts.appendChild(b);
+    });
+    if (item.options.length) c.appendChild(opts);
+
+    var box = el('div', 'ans ui');
+    var t = el('textarea');
+    t.placeholder = item.options.length ? 'Свой ответ, поправка или мысль — если нужно…' : 'Твой ответ…';
+    t.value = a.text || '';
+    t.rows = 2;
+    var st = el('div', 'st');
+    var stMsg = el('span'), stOld = el('span', 'old'), clr = el('button', 'clr', 'стереть ответ');
+    clr.type = 'button';
+    st.appendChild(stMsg); st.appendChild(stOld); st.appendChild(clr);
+    box.appendChild(t); box.appendChild(st);
+    c.appendChild(box);
+    var timer;
+    t.addEventListener('input', function () {
+      grow(t);
+      clearTimeout(timer);
+      stMsg.textContent = '…';
+      timer = setTimeout(function () {
+        var now = ans(item.id) || {};
+        now.text = t.value;
+        setAns(item, now);
+        stMsg.textContent = storageOk ? 'сохранено' : '';
+        sync();
+      }, 350);
+    });
+    clr.addEventListener('click', function () {
+      if (!confirm('Стереть ответ на ' + item.id + '?')) return;
+      save('a:' + item.id, null);
+      t.value = ''; grow(t);
+      Array.prototype.forEach.call(opts.children, function (x) { x.setAttribute('aria-pressed', 'false'); });
+      stMsg.textContent = '';
+      sync();
+    });
+    function sync() {
+      var now = ans(item.id);
+      var done = isDone(item);
+      c.classList.toggle('done', done);
+      clr.style.display = done ? '' : 'none';
+      stOld.textContent = now && now.h && now.h !== item.h ? 'вопрос изменился после твоего ответа — проверь' : '';
+      refreshCounts();
+      if (!document.getElementById('drawer').classList.contains('on')) return;
+      renderPreview();
+    }
+    c._sync = sync;
+    c._grow = function () { grow(t); };
+    return c;
+  }
+
+  function freeCard(d) {
+    var c = el('article', 'card free');
+    var head = el('div', 'head');
+    head.appendChild(el('h3', '', d.kind === 'арки' ? 'Своя арка или мысль про очередь' : 'Что ещё сказать'));
+    c.appendChild(head);
+    c.appendChild(el('div', 'ctx', '<p>' + (d.kind === 'арки'
+      ? 'Арка, которой здесь нет, другой порядок, что выкинуть совсем. Пиши как угодно.'
+      : 'Вопрос, которого тут нет, идея, поправка к миру — что угодно.') + '</p>'));
+    var box = el('div', 'ans ui'), t = el('textarea'), st = el('div', 'st');
+    t.placeholder = 'Пиши свободно…';
+    t.value = load('free:' + d.id, '') || '';
+    box.appendChild(t); box.appendChild(st); c.appendChild(box);
+    var timer;
+    t.addEventListener('input', function () {
+      grow(t); clearTimeout(timer); st.textContent = '…';
+      timer = setTimeout(function () { save('free:' + d.id, t.value.trim() ? t.value : null); st.textContent = storageOk ? 'сохранено' : ''; if (document.getElementById('drawer').classList.contains('on')) renderPreview(); }, 350);
+    });
+    c._grow = function () { grow(t); };
+    return c;
+  }
+
+  function render() {
+    var d = DOCS[cur];
+    document.title = 'Редактор — ' + d.tab;
+    document.getElementById('title').textContent = d.title;
+    var tabs = document.getElementById('tabs');
+    tabs.innerHTML = '';
+    DOCS.forEach(function (x, i) {
+      var b = el('button', '', x.tab + '<small></small>');
+      b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', i === cur ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        if (i === cur) return;
+        cur = i; save('tab', DOCS[i].id);
+        history.replaceState(null, '', '#' + encodeURIComponent(DOCS[i].id));
+        render(); window.scrollTo(0, 0);
+      });
+      tabs.appendChild(b);
+    });
+    document.getElementById('intro').innerHTML = d.intro.map(function (h) { return '<p>' + h + '</p>'; }).join('');
+    var toc = document.getElementById('toc');
+    toc.innerHTML = '';
+    d.sections.forEach(function (s, i) {
+      var a = el('a', '', s.title + '<small></small>');
+      a.href = '#s' + i;
+      a.addEventListener('click', function (e) { e.preventDefault(); var t = document.getElementById('s' + i); if (t) t.scrollIntoView({ behavior: 'smooth' }); });
+      toc.appendChild(a);
+    });
+    var body = document.getElementById('body');
+    body.innerHTML = '';
+    var cards = [];
+    d.sections.forEach(function (s, i) {
+      var sec = el('section');
+      sec.dataset.sec = i;
+      var h = el('h2', '', s.title);
+      h.id = 's' + i;
+      sec.appendChild(h);
+      s.items.forEach(function (it) { var c = card(it, d); cards.push(c); sec.appendChild(c); });
+      body.appendChild(sec);
+    });
+    var empty = el('div', 'empty ui', filter === 'open' ? 'Здесь всё отвечено.' : 'Пока ни одного ответа.');
+    empty.id = 'emptyNote';
+    body.appendChild(empty);
+    var fc = freeCard(d);
+    body.appendChild(fc);
+    cards.forEach(function (c) { c._sync(); });
+    requestAnimationFrame(function () { cards.concat([fc]).forEach(function (c) { c._grow(); }); });
+    applyFilter();
+    refreshCounts();
+    var target = location.hash.slice(1);
+    if (target && document.getElementById(decodeURIComponent(target)) && /^[А-ЯA-Z]\d/.test(decodeURIComponent(target)))
+      document.getElementById(decodeURIComponent(target)).scrollIntoView();
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('#filters .chip'), function (b) {
+    b.addEventListener('click', function () {
+      filter = b.dataset.f;
+      Array.prototype.forEach.call(document.querySelectorAll('#filters .chip'), function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      document.getElementById('emptyNote').textContent = filter === 'open' ? 'Здесь всё отвечено.' : 'Пока ни одного ответа.';
+      applyFilter();
+    });
+  });
+
+  // выгрузка: только отвеченное, по страницам, с коротким текстом варианта
+  function plain(h) { var e = document.createElement('div'); e.innerHTML = h; return e.textContent.replace(/\s+/g, ' ').trim(); }
+  function cut(s, n) { return s.length > n ? s.slice(0, n - 1).replace(/[\s,.;:]+$/, '') + '…' : s; }
+  function exportText() {
+    var out = [], c = counts();
+    var dt = new Date(), dd = ('0' + dt.getDate()).slice(-2) + '.' + ('0' + (dt.getMonth() + 1)).slice(-2) + '.' + dt.getFullYear();
+    out.push('# Ответы из редактора — ' + dd);
+    out.push('Источник: ' + DOCS.map(function (d) { return d.file; }).join(', ') + '. Отвечено ' + c.done + ' из ' + c.total + '.');
+    DOCS.forEach(function (d) {
+      var block = [];
+      itemsOf(d).forEach(function (it) {
+        var a = ans(it.id);
+        if (!a || !(a.pick || (a.text || '').trim())) return;
+        var o = it.options.filter(function (x) { return x.k === a.pick; })[0];
+        var line = it.id + ' · ' + plain(it.title);
+        if (o) line += it.short ? ' — ' + plain(o.html) : '\n   выбор: (' + o.k + ') ' + cut(plain(o.html).replace(/\s*★$/, ''), 110);
+        if ((a.text || '').trim()) line += '\n   → ' + a.text.trim().replace(/\n/g, '\n     ');
+        if (a.h && a.h !== it.h) line += '\n   (ответ дан на прошлую версию вопроса)';
+        block.push(line);
+      });
+      var free = (load('free:' + d.id, '') || '').trim();
+      if (free) block.push('Своё:\n   ' + free.replace(/\n/g, '\n   '));
+      if (block.length) { out.push(''); out.push('## ' + d.tab); out.push(''); out.push(block.join('\n\n')); }
+    });
+    if (out.length === 2) return '';
+    return out.join('\n') + '\n';
+  }
+  function renderPreview() {
+    var t = exportText();
+    document.getElementById('preview').textContent = t || 'Пока нет ни одного ответа. Выбери вариант или напиши что-нибудь в поле под вопросом.';
+  }
+  var drawer = document.getElementById('drawer');
+  document.getElementById('ansBtn').addEventListener('click', function () { renderPreview(); drawer.classList.toggle('on'); document.getElementById('copied').textContent = ''; });
+  document.getElementById('closeDrawer').addEventListener('click', function () { drawer.classList.remove('on'); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') drawer.classList.remove('on'); });
+  function copied(msg) { document.getElementById('copied').textContent = msg; }
+  document.getElementById('copyAll').addEventListener('click', function () {
+    var t = exportText();
+    if (!t) { copied('Нечего копировать.'); return; }
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      try { document.execCommand('copy'); copied('Скопировано. Вставь в чат с Claude.'); }
+      catch (e) { copied('Не получилось — выдели текст ниже и скопируй вручную.'); }
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { copied('Скопировано. Вставь в чат с Claude.'); }, fallback);
+    else fallback();
+  });
+  document.getElementById('download').addEventListener('click', function () {
+    var t = exportText();
+    if (!t) { copied('Нечего сохранять.'); return; }
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([t], { type: 'text/markdown;charset=utf-8' }));
+    a.download = 'Ответы_редактор.md';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  });
+  document.getElementById('clearAll').addEventListener('click', function () {
+    if (!confirm('Стереть все ответы на обеих страницах? Сначала убедись, что Claude их получил.')) return;
+    DOCS.forEach(function (d) { itemsOf(d).forEach(function (it) { save('a:' + it.id, null); }); save('free:' + d.id, null); });
+    render(); renderPreview(); copied('Очищено.');
+  });
+
+  // размер и тема
+  var size = load('size', null);
+  function applySize() { if (size) root.style.setProperty('--size', size + 'px'); }
+  applySize();
+  function base() { return parseFloat(getComputedStyle(root).getPropertyValue('--size')) || 19; }
+  document.getElementById('smaller').addEventListener('click', function () { size = Math.max(14, base() - 1); applySize(); save('size', size); });
+  document.getElementById('bigger').addEventListener('click', function () { size = Math.min(26, base() + 1); applySize(); save('size', size); });
+  var theme = load('theme', window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  function applyTheme() {
+    root.dataset.theme = theme;
+    document.getElementById('theme').textContent = theme === 'dark' ? '☀' : '☾';
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.content = theme === 'dark' ? '#161411' : '#f5efe3';
+  }
+  applyTheme();
+  document.getElementById('theme').addEventListener('click', function () { theme = theme === 'dark' ? 'light' : 'dark'; applyTheme(); save('theme', theme); });
+
+  window.addEventListener('hashchange', function () {
+    var h = decodeURIComponent(location.hash.slice(1));
+    DOCS.forEach(function (d, i) { if (h === d.id && i !== cur) { cur = i; render(); } });
+  });
+  render();
+  showWarn();
+})();
+</script>
+</body>
+</html>

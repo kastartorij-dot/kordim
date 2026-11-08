@@ -75,6 +75,8 @@ button { font: inherit; color: inherit; }
 }
 .top button:hover { border-color: var(--muted); }
 #notesBtn b { color: var(--accent); }
+.edlink { display: inline-block; margin-top: 14px; font-size: 14px; color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); }
+.edlink:hover { border-bottom-style: solid; }
 .home {
   position: fixed; top: 10px; left: 12px; z-index: 20; color: inherit; text-decoration: none;
   border: 1px solid var(--rule); background: var(--ui-bg); border-radius: 999px;
@@ -312,7 +314,7 @@ mark.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
   .item:hover { background: transparent; border-color: transparent; }
 }
 @media print {
-  .top, .home, #nextChg, #delpop, .extras, #selbar, #drawer, #editor, #progress, .hint { display: none !important; }
+  .top, .home, .edlink, #nextChg, #delpop, .extras, #selbar, #drawer, #editor, #progress, .hint { display: none !important; }
   body { background: #fff; }
   .sheet { box-shadow: none; }
 }
@@ -337,6 +339,7 @@ mark.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
       <div class="meta ui" id="meta"></div>
       <div class="tabs ui" id="tabs" role="tablist"></div>
       <div class="extras ui" id="extras"></div>
+      <a class="edlink ui" href="Редактор.html" title="Решения, вопросы и будущие арки — ответить для Claude">✎ Редактор: что ждёт тебя и будущие арки</a>
       <div class="hint ui">
         <span class="only-mouse">Выдели слово или кусок текста — снизу появится панель: <b>не нравится</b>, <b>вопрос</b> или <b>заметка</b>
         (или клавиши <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>). Номер строки слева от абзаца — заметка на весь абзац.

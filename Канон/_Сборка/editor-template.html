@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#f5efe3">
+<title>Редактор</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5efe3;
+  --paper: #fbf7ef;
+  --ink: #2a241d;
+  --muted: #8a7f70;
+  --faint: #c9bfae;
+  --rule: #e4dac8;
+  --accent: #8c3b2a;
+  --accent-soft: rgba(140, 59, 42, .1);
+  --ok: #2a8a63;
+  --ok-soft: rgba(46, 150, 110, .14);
+  --ui-bg: #fffaf2;
+  --ui-shadow: 0 6px 24px rgba(60, 40, 20, .16);
+  --size: 19px;
+}
+:root[data-theme="dark"] {
+  --bg: #161411;
+  --paper: #1d1a16;
+  --ink: #ddd4c6;
+  --muted: #8f8577;
+  --faint: #4a443b;
+  --rule: #2f2a24;
+  --accent: #d98b6c;
+  --accent-soft: rgba(217, 139, 108, .12);
+  --ok: #5cc79a;
+  --ok-soft: rgba(80, 200, 150, .14);
+  --ui-bg: #26221d;
+  --ui-shadow: 0 6px 24px rgba(0, 0, 0, .5);
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 72px; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: "Literata", Georgia, "Times New Roman", serif; font-size: var(--size); line-height: 1.6;
+  -webkit-font-smoothing: antialiased; transition: background .25s, color .25s;
+}
+button, textarea { font: inherit; color: inherit; }
+.ui { font-family: "PT Sans", "Segoe UI", Arial, sans-serif; }
+#progress { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: var(--ok); z-index: 30; transition: width .3s; }
+
+.home, .top button {
+  border: 1px solid var(--rule); background: var(--ui-bg); border-radius: 999px; color: inherit; text-decoration: none;
+  padding: 6px 12px; font-size: 14px; cursor: pointer; box-shadow: var(--ui-shadow);
+}
+.home { position: fixed; top: 10px; left: 12px; z-index: 20; }
+.top { position: fixed; top: 10px; right: 12px; z-index: 20; display: flex; gap: 6px; }
+.home:hover, .top button:hover { border-color: var(--muted); }
+#ansBtn b { color: var(--ok); }
+
+main { max-width: 42em; margin: 0 auto; padding: 88px 16px 120px; }
+.sheet {
+  background: var(--paper); border-radius: 6px; padding: 56px clamp(18px, 6vw, 64px) 64px;
+  box-shadow: 0 1px 0 var(--rule), 0 20px 50px -30px rgba(60, 40, 20, .35);
+}
+header { text-align: center; margin-bottom: 28px; }
+.kicker { font-size: 13px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
+h1 { font-weight: 600; font-size: 2.1em; line-height: 1.15; margin: .35em 0 .3em; letter-spacing: -.01em; }
+.meta { font-size: 14px; color: var(--muted); }
+.meta b { color: var(--ok); }
+.tabs { display: flex; justify-content: center; gap: 4px; margin: 22px auto 0; padding: 4px; width: max-content; max-width: 100%;
+  border: 1px solid var(--rule); border-radius: 999px; background: var(--bg); }
+.tabs button { border: 0; background: transparent; border-radius: 999px; padding: 6px 16px; font-size: 14px; cursor: pointer; color: var(--muted); }
+.tabs button[aria-selected="true"] { background: var(--paper); color: var(--ink); font-weight: 700; box-shadow: 0 1px 3px rgba(60, 40, 20, .18); }
+.tabs button small { color: var(--ok); font-weight: 700; margin-left: 4px; font-size: 12px; }
+.intro { font-size: .86em; line-height: 1.55; color: var(--ink); margin: 26px 0 0; text-align: left; border-top: 1px solid var(--rule); padding-top: 18px; }
+.intro p { margin: 0 0 .6em; }
+.filters { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-top: 16px; }
+.chip { border: 1px solid var(--rule); background: transparent; border-radius: 999px; padding: 5px 12px; font-size: 13px; cursor: pointer; }
+.chip[aria-pressed="true"] { border-color: var(--ink); background: var(--bg); font-weight: 700; }
+
+.toc { font-size: 14px; margin: 18px 0 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; }
+.toc a { color: var(--muted); text-decoration: none; border-bottom: 1px dotted var(--faint); }
+.toc a:hover { color: var(--accent); }
+.toc a small { color: var(--ok); }
+
+h2 { font-size: 1.25em; font-weight: 600; margin: 2.2em 0 .8em; line-height: 1.25; display: flex; align-items: baseline; gap: 10px; }
+h2 small { font-family: "PT Sans", Arial, sans-serif; font-size: 13px; font-weight: 400; color: var(--muted); }
+
+.card {
+  position: relative; border: 1px solid var(--rule); border-radius: 12px; padding: 18px 18px 14px; margin: 0 0 16px;
+  background: var(--paper); transition: border-color .2s, box-shadow .2s;
+}
+.card.done { border-color: color-mix(in srgb, var(--ok) 45%, var(--rule)); box-shadow: inset 4px 0 0 var(--ok); }
+.card.hidden { display: none; }
+.card .head { display: flex; gap: 10px; align-items: baseline; }
+.card .id { font-family: "PT Sans", Arial, sans-serif; font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-soft);
+  border-radius: 6px; padding: 1px 7px; flex: none; letter-spacing: .03em; }
+.card.done .id { color: var(--ok); background: var(--ok-soft); }
+.card h3 { margin: 0; font-size: 1.05em; font-weight: 600; line-height: 1.35; }
+.card .tags { display: flex; flex-wrap: wrap; gap: 4px 6px; margin: 8px 0 0; }
+.card .tags span { font-family: "PT Sans", Arial, sans-serif; font-size: 12.5px; color: var(--muted); background: var(--bg); border-radius: 6px; padding: 2px 8px; }
+.card .ctx { font-size: .86em; line-height: 1.55; margin-top: 10px; }
+.card .ctx p { margin: 0 0 .55em; }
+.card .ctx ul { margin: 0 0 .55em; padding-left: 1.2em; }
+.card .ctx li { margin: 0 0 .3em; }
+.card code { font-family: "PT Sans", Arial, sans-serif; font-size: .88em; background: var(--bg); border-radius: 4px; padding: 0 .25em; }
+.opinion { font-size: .86em; line-height: 1.55; margin: 10px 0 4px; padding: 10px 12px; border-radius: 10px; background: var(--accent-soft); }
+.opinion .lbl { font-family: "PT Sans", Arial, sans-serif; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 3px; }
+.opinion p { margin: 0 0 .4em; }
+.opinion p:last-child { margin: 0; }
+
+.opts { display: flex; flex-direction: column; gap: 6px; margin: 12px 0 0; }
+.opts.row { flex-direction: row; flex-wrap: wrap; }
+.opt {
+  display: flex; gap: 10px; align-items: flex-start; text-align: left; width: 100%;
+  border: 1px solid var(--rule); background: var(--bg); border-radius: 10px; padding: 8px 12px; cursor: pointer;
+  font-family: "PT Sans", Arial, sans-serif; font-size: 15px; line-height: 1.4; -webkit-tap-highlight-color: transparent;
+}
+.opts.row .opt { width: auto; border-radius: 999px; padding: 6px 14px; }
+.opt:hover { border-color: var(--muted); }
+.opt .k { flex: none; width: 1.6em; height: 1.6em; border-radius: 50%; border: 1px solid var(--faint); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; color: var(--muted); margin-top: -1px; }
+.opt .rec { color: var(--accent); font-size: 12px; white-space: nowrap; }
+.opt[aria-pressed="true"] { border-color: var(--ok); background: var(--ok-soft); }
+.opt[aria-pressed="true"] .k { background: var(--ok); border-color: var(--ok); color: #fff; }
+.opt em { font-style: italic; color: var(--muted); }
+
+.ans { margin-top: 10px; }
+.ans textarea {
+  width: 100%; min-height: 3.2em; resize: none; overflow: hidden; border: 1px solid var(--rule); border-radius: 10px;
+  background: var(--ui-bg); color: var(--ink); padding: 9px 12px; font: 15.5px/1.45 "PT Sans", Arial, sans-serif; display: block;
+}
+.ans textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
+.ans .st { font-family: "PT Sans", Arial, sans-serif; font-size: 12px; color: var(--muted); min-height: 1.3em; margin-top: 4px; display: flex; gap: 10px; }
+.ans .st .old { color: var(--accent); }
+.ans .st .clr { margin-left: auto; border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 12px; padding: 0; }
+.ans .st .clr:hover { color: var(--accent); }
+.free h3 { font-size: 1.05em; }
+.free .ans textarea { min-height: 6em; }
+.empty { text-align: center; color: var(--muted); font-size: 15px; padding: 24px 0; }
+.end { text-align: center; color: var(--muted); margin-top: 2.5em; font-size: .9em; letter-spacing: .3em; }
+
+/* выгрузка */
+#drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; width: min(460px, 100vw); z-index: 35;
+  background: var(--ui-bg); box-shadow: var(--ui-shadow); transform: translateX(105%); transition: transform .22s ease;
+  display: flex; flex-direction: column;
+}
+#drawer.on { transform: translateX(0); }
+.dh { padding: 16px 18px 12px; border-bottom: 1px solid var(--rule); }
+.dh h3 { margin: 0 0 6px; font-size: 18px; display: flex; justify-content: space-between; align-items: center; }
+.dh p { margin: 0 0 10px; font-size: 13px; color: var(--muted); line-height: 1.45; }
+.acts { display: flex; gap: 6px; flex-wrap: wrap; }
+.pbtn { border: 0; background: var(--accent); color: #fff; border-radius: 10px; padding: 8px 16px; cursor: pointer; font-size: 14px; font-weight: 700; }
+.tbtn { border: 1px solid var(--rule); background: transparent; border-radius: 10px; padding: 7px 12px; font-size: 14px; cursor: pointer; }
+.lbtn { border: 0; background: transparent; color: var(--muted); padding: 8px 10px; cursor: pointer; font-size: 14px; }
+.lbtn:hover { color: var(--ink); }
+.lbtn.danger:hover { color: var(--accent); }
+.copied { font-size: 13px; color: var(--ok); min-height: 1.2em; margin-top: 6px; }
+#preview { flex: 1; overflow: auto; margin: 0; padding: 14px 18px 40px; font: 13.5px/1.5 "PT Sans", Arial, sans-serif; white-space: pre-wrap; word-break: break-word; color: var(--ink); }
+.warn { position: fixed; left: 12px; bottom: 12px; font-size: 13px; color: var(--accent); z-index: 20; max-width: 22em; }
+
+@media (max-width: 760px) {
+  :root { --size: 17.5px; }
+  main { padding: 60px 0 120px; }
+  .sheet { border-radius: 0; padding: 36px 14px 48px; box-shadow: none; }
+  .card { padding: 14px 13px 10px; border-radius: 10px; }
+  .home span, #ansBtn span { display: none; }
+  .home { top: 8px; left: 8px; }
+  .top { top: 8px; right: 8px; }
+}
+@media (pointer: coarse) {
+  .top button, .home { min-height: 38px; min-width: 38px; display: inline-flex; align-items: center; justify-content: center; padding: 5px 10px; }
+  .ans textarea { font-size: 16px; }
+  .opt { padding: 10px 12px; }
+  .dh { padding-top: calc(16px + env(safe-area-inset-top)); }
+}
+@media print {
+  .top, .home, #drawer, #progress, .filters, .toc { display: none !important; }
+  body { background: #fff; }
+  .sheet { box-shadow: none; }
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<a class="home ui" href="index.html" title="В читалку">← <span>Читалка</span></a>
+<div class="top ui">
+  <button id="smaller" title="Мельче">А−</button>
+  <button id="bigger" title="Крупнее">А+</button>
+  <button id="theme" title="Тема">☾</button>
+  <button id="ansBtn" title="Ответы и выгрузка для Claude"><span>Ответы </span><b id="count">0</b></button>
+</div>
+
+<main>
+  <div class="sheet">
+    <header>
+      <div class="kicker ui">Кордим · редактор</div>
+      <h1 id="title"></h1>
+      <div class="meta ui" id="meta"></div>
+      <div class="tabs ui" id="tabs" role="tablist"></div>
+      <div class="intro" id="intro"></div>
+      <div class="filters ui" id="filters">
+        <button class="chip" data-f="all" aria-pressed="true">Все</button>
+        <button class="chip" data-f="open">Без ответа</button>
+        <button class="chip" data-f="done">С ответом</button>
+      </div>
+      <nav class="toc ui" id="toc"></nav>
+    </header>
+    <div id="body"></div>
+    <div class="end">⁂</div>
+  </div>
+</main>
+
+<aside id="drawer" class="ui" aria-label="Ответы">
+  <div class="dh">
+    <h3><span>Ответы для Claude</span> <button class="lbtn" id="closeDrawer" title="Закрыть">✕</button></h3>
+    <p>Скопируй и вставь в чат: туда уйдут ответы с обеих страниц. Когда Claude их внесёт, нажми «Очистить», чтобы они не пришли второй раз.</p>
+    <div class="acts">
+      <button class="pbtn" id="copyAll">Скопировать для Claude</button>
+      <button class="tbtn" id="download">Файлом</button>
+      <button class="lbtn danger" id="clearAll">Очистить</button>
+    </div>
+    <div class="copied" id="copied"></div>
+  </div>
+  <pre id="preview"></pre>
+</aside>
+<div class="warn ui" id="warn"></div>
+
+<script>
+var DOCS = __DATA__;
+(function () {
+  var P = 'kordim-editor:';
+  var root = document.documentElement;
+  var storageOk = true;
+  function load(k, def) {
+    try { var v = localStorage.getItem(P + k); return v == null ? def : JSON.parse(v); }
+    catch (e) { storageOk = false; showWarn(); return def; }
+  }
+  function save(k, v) {
+    try { if (v == null) localStorage.removeItem(P + k); else localStorage.setItem(P + k, JSON.stringify(v)); }
+    catch (e) { storageOk = false; showWarn(); }
+  }
+  function showWarn() {
+    if (!storageOk) document.getElementById('warn').textContent = 'Браузер не даёт сохранять ответы — скопируй их перед закрытием вкладки.';
+  }
+
+  // ответы: id → {pick, text, h}; h — версия вопроса, на которую ответили
+  function ans(id) { return load('a:' + id, null); }
+  function setAns(item, a) {
+    if (!a || (!a.pick && !(a.text || '').trim())) save('a:' + item.id, null);
+    else { a.h = item.h; save('a:' + item.id, a); }
+  }
+  function isDone(item) { var a = ans(item.id); return !!(a && (a.pick || (a.text || '').trim())); }
+
+  var cur = 0, filter = 'all';
+  var hash = decodeURIComponent(location.hash.slice(1));
+  DOCS.forEach(function (d, i) { if (hash === d.id) cur = i; });
+  if (!hash) { var last = load('tab', null); DOCS.forEach(function (d, i) { if (last === d.id) cur = i; }); }
+
+  function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+  function itemsOf(d) { var out = []; d.sections.forEach(function (s) { out = out.concat(s.items); }); return out; }
+  function grow(t) { t.style.height = 'auto'; t.style.height = (t.scrollHeight + 2) + 'px'; }
+
+  function counts() {
+    var total = 0, done = 0;
+    DOCS.forEach(function (d) { itemsOf(d).forEach(function (it) { total++; if (isDone(it)) done++; }); });
+    return { total: total, done: done };
+  }
+  function refreshCounts() {
+    var c = counts();
+    document.getElementById('count').textContent = c.done;
+    document.getElementById('progress').style.width = (c.total ? c.done / c.total * 100 : 0) + '%';
+    var d = DOCS[cur], its = itemsOf(d), dn = its.filter(isDone).length;
+    document.getElementById('meta').innerHTML = (d.kind === 'арки' ? 'Арок: ' : 'Вопросов: ') + its.length + ' · отвечено <b>' + dn + '</b>' + (d.updated ? ' · обновлено ' + d.updated : '');
+    Array.prototype.forEach.call(document.querySelectorAll('#tabs button'), function (b, i) {
+      var n = itemsOf(DOCS[i]).filter(isDone).length;
+      b.querySelector('small').textContent = n ? n : '';
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('#toc a'), function (a, i) {
+      var s = d.sections[i], n = s.items.filter(isDone).length;
+      a.querySelector('small').textContent = ' ' + n + '/' + s.items.length;
+    });
+  }
+
+  function applyFilter() {
+    var shown = 0;
+    Array.prototype.forEach.call(document.querySelectorAll('.card[data-id]'), function (c) {
+      var done = c.classList.contains('done');
+      var hide = (filter === 'open' && done) || (filter === 'done' && !done);
+      c.classList.toggle('hidden', hide);
+      if (!hide) shown++;
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('section[data-sec]'), function (s) {
+      s.style.display = s.querySelector('.card[data-id]:not(.hidden)') ? '' : 'none';
+    });
+    document.getElementById('emptyNote').style.display = shown ? 'none' : '';
+  }
+
+  function card(item, d) {
+    var c = el('article', 'card');
+    c.dataset.id = item.id;
+    c.id = item.id;
+    var head = el('div', 'head');
+    head.appendChild(el('span', 'id', item.id));
+    head.appendChild(el('h3', '', item.title));
+    c.appendChild(head);
+    if (item.meta && item.meta.length) {
+      var tg = el('div', 'tags ui');
+      item.meta.forEach(function (m) { tg.appendChild(el('span', '', m)); });
+      c.appendChild(tg);
+    }
+    if (item.ctx.length) {
+      var ctx = el('div', 'ctx'), ul = null;
+      item.ctx.forEach(function (b) {
+        if (b.kind === 'li') { if (!ul) { ul = el('ul'); ctx.appendChild(ul); } ul.appendChild(el('li', '', b.html)); }
+        else { ul = null; ctx.appendChild(el('p', '', b.html)); }
+      });
+      c.appendChild(ctx);
+    }
+    if (item.opinion.length) {
+      var op = el('div', 'opinion');
+      op.appendChild(el('span', 'lbl ui', d.kind === 'арки' ? 'Почему стоит — моё мнение' : 'Моё мнение'));
+      item.opinion.forEach(function (h) { op.appendChild(el('p', '', h)); });
+      c.appendChild(op);
+    }
+    var a = ans(item.id) || {};
+    var opts = el('div', 'opts' + (item.short ? ' row' : ''));
+    item.options.forEach(function (o) {
+      var b = el('button', 'opt');
+      b.type = 'button';
+      b.innerHTML = (item.short ? '' : '<span class="k">' + o.k + '</span>') + '<span>' + o.html + (o.rec ? ' <span class="rec">★</span>' : '') + '</span>';
+      b.setAttribute('aria-pressed', a.pick === o.k ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        var now = ans(item.id) || {};
+        now.pick = now.pick === o.k ? '' : o.k;
+        setAns(item, now);
+        Array.prototype.forEach.call(opts.children, function (x, i) { x.setAttribute('aria-pressed', item.options[i].k === now.pick ? 'true' : 'false'); });
+        sync();
+      });
+      opts.appendChild(b);
+    });
+    if (item.options.length) c.appendChild(opts);
+
+    var box = el('div', 'ans ui');
+    var t = el('textarea');
+    t.placeholder = item.options.length ? 'Свой ответ, поправка или мысль — если нужно…' : 'Твой ответ…';
+    t.value = a.text || '';
+    t.rows = 2;
+    var st = el('div', 'st');
+    var stMsg = el('span'), stOld = el('span', 'old'), clr = el('button', 'clr', 'стереть ответ');
+    clr.type = 'button';
+    st.appendChild(stMsg); st.appendChild(stOld); st.appendChild(clr);
+    box.appendChild(t); box.appendChild(st);
+    c.appendChild(box);
+    var timer;
+    t.addEventListener('input', function () {
+      grow(t);
+      clearTimeout(timer);
+      stMsg.textContent = '…';
+      timer = setTimeout(function () {
+        var now = ans(item.id) || {};
+        now.text = t.value;
+        setAns(item, now);
+        stMsg.textContent = storageOk ? 'сохранено' : '';
+        sync();
+      }, 350);
+    });
+    clr.addEventListener('click', function () {
+      if (!confirm('Стереть ответ на ' + item.id + '?')) return;
+      save('a:' + item.id, null);
+      t.value = ''; grow(t);
+      Array.prototype.forEach.call(opts.children, function (x) { x.setAttribute('aria-pressed', 'false'); });
+      stMsg.textContent = '';
+      sync();
+    });
+    function sync() {
+      var now = ans(item.id);
+      var done = isDone(item);
+      c.classList.toggle('done', done);
+      clr.style.display = done ? '' : 'none';
+      stOld.textContent = now && now.h && now.h !== item.h ? 'вопрос изменился после твоего ответа — проверь' : '';
+      refreshCounts();
+      if (!document.getElementById('drawer').classList.contains('on')) return;
+      renderPreview();
+    }
+    c._sync = sync;
+    c._grow = function () { grow(t); };
+    return c;
+  }
+
+  function freeCard(d) {
+    var c = el('article', 'card free');
+    var head = el('div', 'head');
+    head.appendChild(el('h3', '', d.kind === 'арки' ? 'Своя арка или мысль про очередь' : 'Что ещё сказать'));
+    c.appendChild(head);
+    c.appendChild(el('div', 'ctx', '<p>' + (d.kind === 'арки'
+      ? 'Арка, которой здесь нет, другой порядок, что выкинуть совсем. Пиши как угодно.'
+      : 'Вопрос, которого тут нет, идея, поправка к миру — что угодно.') + '</p>'));
+    var box = el('div', 'ans ui'), t = el('textarea'), st = el('div', 'st');
+    t.placeholder = 'Пиши свободно…';
+    t.value = load('free:' + d.id, '') || '';
+    box.appendChild(t); box.appendChild(st); c.appendChild(box);
+    var timer;
+    t.addEventListener('input', function () {
+      grow(t); clearTimeout(timer); st.textContent = '…';
+      timer = setTimeout(function () { save('free:' + d.id, t.value.trim() ? t.value : null); st.textContent = storageOk ? 'сохранено' : ''; if (document.getElementById('drawer').classList.contains('on')) renderPreview(); }, 350);
+    });
+    c._grow = function () { grow(t); };
+    return c;
+  }
+
+  function render() {
+    var d = DOCS[cur];
+    document.title = 'Редактор — ' + d.tab;
+    document.getElementById('title').textContent = d.title;
+    var tabs = document.getElementById('tabs');
+    tabs.innerHTML = '';
+    DOCS.forEach(function (x, i) {
+      var b = el('button', '', x.tab + '<small></small>');
+      b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', i === cur ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        if (i === cur) return;
+        cur = i; save('tab', DOCS[i].id);
+        history.replaceState(null, '', '#' + encodeURIComponent(DOCS[i].id));
+        render(); window.scrollTo(0, 0);
+      });
+      tabs.appendChild(b);
+    });
+    document.getElementById('intro').innerHTML = d.intro.map(function (h) { return '<p>' + h + '</p>'; }).join('');
+    var toc = document.getElementById('toc');
+    toc.innerHTML = '';
+    d.sections.forEach(function (s, i) {
+      var a = el('a', '', s.title + '<small></small>');
+      a.href = '#s' + i;
+      a.addEventListener('click', function (e) { e.preventDefault(); var t = document.getElementById('s' + i); if (t) t.scrollIntoView({ behavior: 'smooth' }); });
+      toc.appendChild(a);
+    });
+    var body = document.getElementById('body');
+    body.innerHTML = '';
+    var cards = [];
+    d.sections.forEach(function (s, i) {
+      var sec = el('section');
+      sec.dataset.sec = i;
+      var h = el('h2', '', s.title);
+      h.id = 's' + i;
+      sec.appendChild(h);
+      s.items.forEach(function (it) { var c = card(it, d); cards.push(c); sec.appendChild(c); });
+      body.appendChild(sec);
+    });
+    var empty = el('div', 'empty ui', filter === 'open' ? 'Здесь всё отвечено.' : 'Пока ни одного ответа.');
+    empty.id = 'emptyNote';
+    body.appendChild(empty);
+    var fc = freeCard(d);
+    body.appendChild(fc);
+    cards.forEach(function (c) { c._sync(); });
+    requestAnimationFrame(function () { cards.concat([fc]).forEach(function (c) { c._grow(); }); });
+    applyFilter();
+    refreshCounts();
+    var target = location.hash.slice(1);
+    if (target && document.getElementById(decodeURIComponent(target)) && /^[А-ЯA-Z]\d/.test(decodeURIComponent(target)))
+      document.getElementById(decodeURIComponent(target)).scrollIntoView();
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('#filters .chip'), function (b) {
+    b.addEventListener('click', function () {
+      filter = b.dataset.f;
+      Array.prototype.forEach.call(document.querySelectorAll('#filters .chip'), function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      document.getElementById('emptyNote').textContent = filter === 'open' ? 'Здесь всё отвечено.' : 'Пока ни одного ответа.';
+      applyFilter();
+    });
+  });
+
+  // выгрузка: только отвеченное, по страницам, с коротким текстом варианта
+  function plain(h) { var e = document.createElement('div'); e.innerHTML = h; return e.textContent.replace(/\s+/g, ' ').trim(); }
+  function cut(s, n) { return s.length > n ? s.slice(0, n - 1).replace(/[\s,.;:]+$/, '') + '…' : s; }
+  function exportText() {
+    var out = [], c = counts();
+    var dt = new Date(), dd = ('0' + dt.getDate()).slice(-2) + '.' + ('0' + (dt.getMonth() + 1)).slice(-2) + '.' + dt.getFullYear();
+    out.push('# Ответы из редактора — ' + dd);
+    out.push('Источник: ' + DOCS.map(function (d) { return d.file; }).join(', ') + '. Отвечено ' + c.done + ' из ' + c.total + '.');
+    DOCS.forEach(function (d) {
+      var block = [];
+      itemsOf(d).forEach(function (it) {
+        var a = ans(it.id);
+        if (!a || !(a.pick || (a.text || '').trim())) return;
+        var o = it.options.filter(function (x) { return x.k === a.pick; })[0];
+        var line = it.id + ' · ' + plain(it.title);
+        if (o) line += it.short ? ' — ' + plain(o.html) : '\n   выбор: (' + o.k + ') ' + cut(plain(o.html).replace(/\s*★$/, ''), 110);
+        if ((a.text || '').trim()) line += '\n   → ' + a.text.trim().replace(/\n/g, '\n     ');
+        if (a.h && a.h !== it.h) line += '\n   (ответ дан на прошлую версию вопроса)';
+        block.push(line);
+      });
+      var free = (load('free:' + d.id, '') || '').trim();
+      if (free) block.push('Своё:\n   ' + free.replace(/\n/g, '\n   '));
+      if (block.length) { out.push(''); out.push('## ' + d.tab); out.push(''); out.push(block.join('\n\n')); }
+    });
+    if (out.length === 2) return '';
+    return out.join('\n') + '\n';
+  }
+  function renderPreview() {
+    var t = exportText();
+    document.getElementById('preview').textContent = t || 'Пока нет ни одного ответа. Выбери вариант или напиши что-нибудь в поле под вопросом.';
+  }
+  var drawer = document.getElementById('drawer');
+  document.getElementById('ansBtn').addEventListener('click', function () { renderPreview(); drawer.classList.toggle('on'); document.getElementById('copied').textContent = ''; });
+  document.getElementById('closeDrawer').addEventListener('click', function () { drawer.classList.remove('on'); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') drawer.classList.remove('on'); });
+  function copied(msg) { document.getElementById('copied').textContent = msg; }
+  document.getElementById('copyAll').addEventListener('click', function () {
+    var t = exportText();
+    if (!t) { copied('Нечего копировать.'); return; }
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      try { document.execCommand('copy'); copied('Скопировано. Вставь в чат с Claude.'); }
+      catch (e) { copied('Не получилось — выдели текст ниже и скопируй вручную.'); }
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { copied('Скопировано. Вставь в чат с Claude.'); }, fallback);
+    else fallback();
+  });
+  document.getElementById('download').addEventListener('click', function () {
+    var t = exportText();
+    if (!t) { copied('Нечего сохранять.'); return; }
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([t], { type: 'text/markdown;charset=utf-8' }));
+    a.download = 'Ответы_редактор.md';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  });
+  document.getElementById('clearAll').addEventListener('click', function () {
+    if (!confirm('Стереть все ответы на обеих страницах? Сначала убедись, что Claude их получил.')) return;
+    DOCS.forEach(function (d) { itemsOf(d).forEach(function (it) { save('a:' + it.id, null); }); save('free:' + d.id, null); });
+    render(); renderPreview(); copied('Очищено.');
+  });
+
+  // размер и тема
+  var size = load('size', null);
+  function applySize() { if (size) root.style.setProperty('--size', size + 'px'); }
+  applySize();
+  function base() { return parseFloat(getComputedStyle(root).getPropertyValue('--size')) || 19; }
+  document.getElementById('smaller').addEventListener('click', function () { size = Math.max(14, base() - 1); applySize(); save('size', size); });
+  document.getElementById('bigger').addEventListener('click', function () { size = Math.min(26, base() + 1); applySize(); save('size', size); });
+  var theme = load('theme', window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  function applyTheme() {
+    root.dataset.theme = theme;
+    document.getElementById('theme').textContent = theme === 'dark' ? '☀' : '☾';
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.content = theme === 'dark' ? '#161411' : '#f5efe3';
+  }
+  applyTheme();
+  document.getElementById('theme').addEventListener('click', function () { theme = theme === 'dark' ? 'light' : 'dark'; applyTheme(); save('theme', theme); });
+
+  window.addEventListener('hashchange', function () {
+    var h = decodeURIComponent(location.hash.slice(1));
+    DOCS.forEach(function (d, i) { if (h === d.id && i !== cur) { cur = i; render(); } });
+  });
+  render();
+  showWarn();
+})();
+</script>
+</body>
+</html>
