@@ -27,7 +27,7 @@ export function render(root, [id]){
   const yearAfter = to => YEARS.find(y => y > to + .999);
 
   const thing = (x, cls = '') => '<li class="dz-thing' + (x.debt ? ' debt' : '') + cls + '">' +
-    '<span class="dz-ic" data-pic="' + esc(x.pic || '') + '">' + esc(x.i || '•') + '</span>' +
+    (x.pic ? '<span class="dz-ic" data-pic="' + esc(x.pic) + '"></span>' : '') +
     '<div><b>' + esc(x.n) + '</b>' + (x.debt ? '<span class="dz-debt">долг</span>' : '') + '<p>' + esc(x.t) + '</p></div></li>';
 
   /* «сейчас»: возраст и где; у короткой карточки — роль, если подзаголовок занят прозвищем */
@@ -93,14 +93,14 @@ export function render(root, [id]){
   if (seen.length) body += '<section class="dz-sec"><h2>В хронике и сценах <small>' + seen.length + '</small></h2><ul class="dz-seen">' + seen.map(([e, i]) => {
     const sc = SCENES.find(x => (x.events || [x.event]).includes(e.slug));
     return '<li><a href="#/chronicle/' + i + '"><span>' + esc(e.y) + '</span><b>' + esc(e.h) + '</b></a>' +
-      (sc ? '<a class="dz-scene" href="#/scenes/' + esc(sc.arc) + '">📖 сцена' + (sc.status === 'готово' ? '' : ' · черновик') + '</a>' : '') + '</li>';
+      (sc ? '<a class="dz-scene" href="#/scenes/' + esc(sc.arc) + '">сцена' + (sc.status === 'готово' ? '' : ' · черновик') + ' →</a>' : '') + '</li>';
   }).join('') + '</ul></section>';
 
   root.innerHTML = '<div class="dz" data-title="' + esc(p.name) + '">' + side + '<div class="dz-main">' + body + '</div></div>';
 
   /* картинки вещей, если нарисованы: Изображения/Предметы/<pic>.png; нет файла — остаётся значок */
-  $$('.dz-ic[data-pic]', root).forEach(s => { const pic = s.dataset.pic; if (!pic) return;
-    const im = new Image(); im.alt = ''; im.onload = () => { s.textContent = ''; s.appendChild(im); s.classList.add('img'); }; im.src = IMG + 'Предметы/' + pic + '.png'; });
+  $$('.dz-ic[data-pic]', root).forEach(s => {
+    const im = new Image(); im.alt = ''; im.onload = () => { s.appendChild(im); s.closest('.dz-thing').classList.add('pic'); }; im.src = IMG + 'Предметы/' + s.dataset.pic + '.png'; });
 
   /* разговор открывается внутри своего года; заработанное в разговоре падает в «Долги и обещания» */
   $$('.dz-talk', root).forEach(d => d.addEventListener('toggle', () => {
