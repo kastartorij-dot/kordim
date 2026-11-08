@@ -1,4 +1,5 @@
-import { $, esc, IMG, mapHTML, drawRoutes, drawPins, markPlace, markRoute, personChip, canonSources } from '../ui.js';
+import { $, esc, IMG, mapHTML, drawRoutes, drawPins, markPlace, personChip, canonSources } from '../ui.js';
+import { ROAD_PLACES } from '../road.js';
 import { placeById } from '../../Данные/places.js';
 import { ROUTES } from '../../Данные/routes.js';
 import { PEOPLE } from '../../Данные/people.js';
@@ -7,7 +8,7 @@ import { FACTIONS } from '../../Данные/factions.js';
 export function render(root, [id]){
   const p = placeById(id);
   if (!p){ root.innerHTML = '<div class="page"><h1 class="h1">Нет такого места</h1><p><a href="#/places">К списку мест</a></p></div>'; return; }
-  const routes = ROUTES.filter(r => r.from === id || r.to === id);
+  const routes = ROUTES.filter(r => r.from === id || r.to === id || (r.stops || []).some(s => s.place === id));
   const here = PEOPLE.filter(x => x.place === id);
   const facs = FACTIONS.filter(f => f.seat === id);
   root.innerHTML = `<div class="place" data-title="${esc(p.name)}">
@@ -30,7 +31,7 @@ export function render(root, [id]){
     <div style="display:grid;gap:18px;align-content:start">
       <section class="card c-map"><div class="mhead"><b style="font-weight:500">На карте</b><a href="#/map">общая карта</a></div>
         <div class="map" id="map" style="margin:0 12px 12px;border-radius:12px">${mapHTML()}</div></section>
-      <section class="card"><h3>ТРАКТЫ ОТСЮДА</h3><ul class="list">${routes.length ? routes.map(r => '<li><b>' + esc(r.n) + '</b> · ' + esc(r.e) + '<div style="color:var(--mute);font-size:13px">' + esc(r.holder) + '</div></li>').join('') : '<li class="empty">Трактов нет или они не описаны.</li>'}</ul></section>
+      <section class="card"><h3>ТРАКТЫ ОТСЮДА${ROAD_PLACES.includes(id) ? ' <a href="#/map/' + id + '">проложить путь →</a>' : ''}</h3><ul class="list">${routes.length ? routes.map(r => '<li><b>' + esc(r.n) + '</b> · ' + esc(r.e) + '<div style="color:var(--mute);font-size:13px">' + esc(r.holder) + '</div></li>').join('') : '<li class="empty">Трактов нет или они не описаны.</li>'}</ul></section>
     </div>
   </div>`;
   const map = $('#map', root);

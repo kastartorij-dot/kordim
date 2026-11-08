@@ -1,13 +1,15 @@
 /* Мир: статьи с шапкой, крупными цифрами, карточками разделов и интерактивными вставками. */
-import { $, $$, esc, IMG, SPEED, groundFactor, MODE_LABEL, plural, canonSources } from '../ui.js';
+import { $, $$, esc, IMG, plural, canonSources } from '../ui.js';
+import { plan, MODE_LABEL, ROAD_PLACES, placeName, fmtDays, dayWord, moneyRound } from '../road.js';
 import { ARTICLES } from '../../Данные/articles.js';
 import { GOODS, COIN } from '../../Данные/goods.js';
 /* средняя цена товара из goods.js, в грошах */
 const avg = id => { const g = GOODS.flatMap(([, items]) => items).find(i => i[0] === id); return (g[2] + g[3]) / 2; };
 import { icon } from '../icons.js';
+import { WOUNDS, INFECTION, UNIT_DAYS, UNIT_FORMS, woundById } from '../../Данные/wounds.js';
 
 const heroBg = id => "background-image:url('" + IMG + 'Мир/' + id + ".jpg'),radial-gradient(circle at 85% 30%,rgba(217,164,65,.22),transparent 55%),repeating-linear-gradient(135deg,rgba(255,255,255,.025) 0 2px,transparent 2px 14px)";
-const WIDGETS = { shop, coins, travel:travelCalc };
+const WIDGETS = { shop, coins, travel:travelCalc, wound:woundCalc };
 
 export function render(root, [id]){
   const a = ARTICLES.find(x => x.id === id) || ARTICLES[0];
@@ -88,18 +90,52 @@ function coins(box){
   amt.oninput = paint; bindSeg(box, 'u', v => { u = +v; paint(); }); paint();
 }
 
-/* сколько идти */
+/* сколько идти: тот же расчёт, что на карте (Скрипты/road.js), без карты */
 function travelCalc(box){
   box.className = 'card widget';
-  box.innerHTML = '<h3>СКОЛЬКО ИДТИ</h3><p class="pending">Приблизительно для проходимой дороги. Зимние запреты отдельных трактов проверяйте на карте; сроки конкретных маршрутов — в записи 15.</p><div class="row"><input type="range" id="mi" min="10" max="300" value="111" aria-label="Мили"><b id="mil"></b></div>' +
-    '<div class="row" style="margin-top:10px">' + seg('m', Object.entries(MODE_LABEL), 'horse') + seg('s', [['summer', 'лето'], ['autumn', 'осень'], ['winter', 'зима']], 'autumn') + '</div><div class="wout" id="out"></div>';
-  let mode = 'horse', season = 'autumn'; const mi = $('#mi', box), out = $('#out', box);
+  const opts = ROAD_PLACES.map(id => [id, placeName(id)]).sort((a, b) => a[1].localeCompare(b[1], 'ru'));
+  const sel = (id, v) => '<select id="' + id + '" aria-label="' + (id === 'f' ? 'Откуда' : 'Куда') + '">' + opts.map(([k, n]) => '<option value="' + k + '"' + (k === v ? ' selected' : '') + '>' + esc(n) + '</option>').join('') + '</select>';
+  box.innerHTML = '<h3>СКОЛЬКО ИДТИ</h3><div class="row road-pick">' + sel('f', 'capital') + '<span>→</span>' + sel('t', 'shadowport') + '</div>' +
+    '<div class="row" style="margin-top:10px">' + seg('m', Object.entries(MODE_LABEL), 'horse') + seg('s', [['summer', 'лето'], ['autumn', 'осень'], ['winter', 'зима']], 'autumn') + '</div><div class="wout" id="out"></div><div id="legs" class="road-legs"></div>';
+  let mode = 'horse', season = 'autumn'; const f = $('#f', box), t = $('#t', box), out = $('#out', box);
   const paint = () => {
-    const miles = +mi.value, f = groundFactor(season);
-    const road = miles / SPEED[mode], ground = road * f;
-    $('#mil', box).textContent = miles + ' миль' + (miles === 111 ? ' — Столица → Врата' : miles === 148 ? ' — лесной тракт' : '');
-    out.innerHTML = [['≈ ' + n1(road), 'дней по хорошей дороге'], ['≈ ' + n1(ground), 'дней по грунту в этот сезон'], [Math.ceil(ground) * 5 + ' гр.', 'пример бюджета по 5 грошей в день']]
+    const P = f.value === t.value ? null : plan({ from: f.value, to: t.value, season, mode, people: 2 });
+    if (!P){ out.innerHTML = '<div><b>—</b><small>' + (f.value === t.value ? 'выбери два разных места' : 'зимой этим способом не пройти') + '</small></div>'; $('#legs', box).innerHTML = ''; return; }
+    out.innerHTML = [['≈ ' + fmtDays(P.days), dayWord(P.days) + (P.estimated ? ', местами оценка' : '')], [P.miles, 'миль'], [moneyRound(P.cost.lo, P.cost.hi), 'в дороге на двоих']]
       .map(([b, s]) => '<div><b>' + b + '</b><small>' + s + '</small></div>').join('');
+    $('#legs', box).innerHTML = P.legs.map(l => esc(l.route.n) + ' · ' + fmtDays(l.days) + ' ' + dayWord(l.days)).join(' → ') +
+      (P.warns.length ? '<div class="evline bad">' + P.warns.map(esc).join(' ') + '</div>' : '') +
+      ' <a href="#/map/' + f.value + '/' + t.value + '">на карте →</a>';
   };
-  mi.oninput = paint; bindSeg(box, 'm', v => { mode = v; paint(); }); bindSeg(box, 's', v => { season = v; paint(); }); paint();
+  f.onchange = t.onchange = paint; bindSeg(box, 'm', v => { mode = v; paint(); }); bindSeg(box, 's', v => { season = v; paint(); }); paint();
+}
+
+/* когда встанет: сроки записи 14 (Данные/wounds.js) на одной шкале дней */
+function woundCalc(box){
+  box.className = 'card widget';
+  box.innerHTML = '<h3>КОГДА ВСТАНЕТ</h3><div class="row">' + seg('w', WOUNDS.map(w => [w.id, w.short]), 'bolt') + seg('x', [['plain', 'без микстуры'], ['mix', 'с микстурой']], 'mix') + '</div>' +
+    '<div class="wout" id="out"></div><div class="wtl" id="tl"></div><div id="more"></div>';
+  let wid = 'bolt', mx = 'mix';
+  const fmtR = ({r, u}) => (r[0] === r[1] ? r[0] : r[0] + '–' + r[1]) + ' ' + plural(r[1], UNIT_FORMS[u]);
+  const days = ({r, u}) => r.map(x => x * UNIT_DAYS[u]);
+  const mixGood = GOODS.flatMap(([, it]) => it).find(i => i[0] === 'mixture');
+  const out = $('#out', box);
+  const paint = () => {
+    const w = woundById(wid), hasMix = !!w.mix, kind = hasMix ? mx : 'plain', steps = w[kind];
+    $$('[data-x]', box).forEach(b => { b.disabled = !hasMix && b.dataset.x === 'mix'; b.setAttribute('aria-pressed', b.dataset.x === kind); });
+    const ready = steps.ready, rd = days(ready).map(Math.round);
+    out.innerHTML = '<div><b>' + fmtR(ready) + '</b><small>' + esc(ready.what) + '</small></div>' + (ready.u === 'd' ? '' :
+      '<div><b>' + (rd[0] === rd[1] ? rd[0] : rd[0] + '–' + rd[1]) + '</b><small>' + plural(rd[1], ['день', 'дня', 'дней']) + ' от ранения</small></div>');
+    const max = Math.max(...Object.values(steps).map(s => days(s)[1])) * 1.08;
+    const pc = d => (d / max * 100).toFixed(2) + '%';
+    $('#tl', box).innerHTML = Object.values(steps).map(s => { const [a, b] = days(s);
+      return '<div class="wtl-row"><span>' + esc(s.what) + '</span><div class="wtl-bar"><i style="width:' + pc(a) + '"></i><em style="left:' + pc(a) + ';width:calc(' + pc(b - a) + ' + 3px)"></em></div><b>' + fmtR(s) + '</b></div>'; }).join('') +
+      '<div class="wtl-axis"><span>ранен</span><span>' + Math.round(max) + ' ' + plural(Math.round(max), ['день', 'дня', 'дней']) + '</span></div>';
+    $('#more', box).innerHTML = '<p class="pending">' + esc(w.survive) + (w.infect ? ' Без обработки заражение приходит через ' + fmtR(w.infect) + '.' : '') + '</p>' +
+      (kind === 'mix'
+        ? '<p class="pending">Микстура: ' + money(mixGood[2], mixGood[3]) + '. ' + esc(mixGood[5]) + ' Алхимия даёт шанс выжить и ускоряет — но не отменяет.</p>'
+        : '<div class="winf"><b>Заражение без микстуры</b><ol><li><span>2-я ночь</span>' + esc(INFECTION.when) + '</li><li><span>3 ночи</span>' + esc(INFECTION.care) + '</li><li><span>4-е утро</span>' + esc(INFECTION.end) + '</li></ol></div>') +
+      '<p class="pending">Никакого «к утру почти оправился»: боль, слабость и скованность остаются в сцене и мешают действовать.</p>';
+  };
+  bindSeg(box, 'w', v => { wid = v; paint(); }); bindSeg(box, 'x', v => { mx = v; paint(); }); paint();
 }

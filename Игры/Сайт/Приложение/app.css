@@ -176,11 +176,12 @@ select{background:var(--raise);border:1px solid var(--line);border-radius:8px;pa
 .token{position:absolute;transform:translate(-50%,-80%);font-size:22px;filter:drop-shadow(0 2px 3px #000);pointer-events:none;transition:left .09s linear,top .09s linear}
 
 .atlas{position:relative;height:calc(100vh - var(--top));overflow:hidden;cursor:grab;background:#0f0d0c;touch-action:none}
-.atlas-zoom{right:14px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;padding:4px;gap:4px;cursor:default}
+.atlas-zoom{left:14px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;padding:4px;gap:4px;cursor:default}
 .atlas-zoom button{width:36px;height:36px;border:0;border-radius:7px;background:transparent;color:var(--text);font:500 20px var(--mono);line-height:1;cursor:pointer}
 .atlas-zoom button:hover{background:var(--raise);color:var(--ochre)}
 .atlas.drag{cursor:grabbing}
 .atlas .world{position:absolute;left:0;top:0;width:2000px;transform-origin:0 0;will-change:transform}
+.atlas .world.glide{transition:transform .45s var(--ease)}
 .atlas .world .map{border-radius:0}
 body[data-season="summer"] .atlas .map>img{filter:saturate(1.1) brightness(.9) contrast(1.05)}
 body[data-season="autumn"] .atlas .map>img{filter:sepia(.35) saturate(1.05) hue-rotate(-12deg) brightness(.82)}
@@ -206,6 +207,74 @@ body[data-season="autumn"] .rain{opacity:.55}
 .feed div{font-size:13px;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.04);animation:swap .4s var(--ease)}
 .feed .bad{background:rgba(212,106,74,.12);color:#f0b2a4}
 .atlas-hint{left:14px;bottom:14px;padding:6px 10px;font:11px var(--mono);color:var(--mute)}
+/* ─── карта: дорога от А до Б (с 08.11) ─── */
+.atlas-card{max-height:calc(100% - 100px);overflow:auto;overscroll-behavior:contain}
+.sheet-h{all:unset;box-sizing:border-box;display:flex;align-items:baseline;gap:8px;width:100%;cursor:pointer;font:600 15px var(--disp);padding-bottom:8px}
+.sheet-h span{flex:1;min-width:0}
+.sheet-h b{color:var(--ochre);font-weight:700;margin-left:6px;white-space:nowrap}
+.sheet-h i{font-style:normal;color:var(--mute);transition:transform .2s}
+.atlas-card.collapsed .sheet-h{padding-bottom:0}
+.atlas-card.collapsed .sheet-h i{transform:rotate(-90deg)}
+.atlas-card.collapsed .sheet-b{display:none}
+.plan-ends{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end}
+.plan-ends label{display:grid;gap:3px;min-width:0}
+.plan-ends small,.tr-group small{font:10px var(--mono);color:var(--mute);text-transform:uppercase;letter-spacing:.08em}
+.plan-ends select{width:100%;min-width:0;background:var(--raise);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px 8px;font:14px var(--body)}
+.iconbtn{all:unset;cursor:pointer;width:34px;height:34px;display:grid;place-items:center;border-radius:8px;background:var(--raise);color:var(--ochre);font-size:16px}
+.plan-opts{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:10px 0 2px;font-size:13px;color:var(--mute)}
+.stepper{display:inline-flex;align-items:center;gap:2px;background:var(--raise);border-radius:8px;padding:2px}
+.stepper button{all:unset;cursor:pointer;width:28px;height:28px;display:grid;place-items:center;border-radius:6px;color:var(--text);font:500 16px var(--mono)}
+.stepper button:hover{color:var(--ochre)}
+.stepper b{min-width:44px;text-align:center;color:var(--text);font:500 13px var(--mono)}
+.tog{display:inline-flex;gap:6px;align-items:center;cursor:pointer}
+.tog input{accent-color:var(--ochre);width:16px;height:16px}
+.atlas-card .bignums{display:grid;grid-template-columns:auto auto 1fr;gap:18px;align-items:end}
+.atlas-card .bignums div{white-space:nowrap}
+.atlas-card .bignums div:last-child{font-size:18px;white-space:normal}
+.legs{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:8px;counter-reset:leg}
+.legs li{counter-increment:leg;position:relative;padding:8px 10px 8px 34px;border-radius:10px;background:rgba(255,255,255,.035);font-size:13px}
+.legs li::before{content:counter(leg);position:absolute;left:10px;top:9px;width:16px;height:16px;border-radius:50%;background:var(--ochre);color:#1a1510;font:600 10px/16px var(--mono);text-align:center}
+.leg-h{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.leg-h b{font-weight:600;font-size:14px}
+.leg-h span{font:12px var(--mono);color:var(--text);white-space:nowrap}
+.leg-h em{font-style:normal;color:var(--mute);border:1px dashed var(--line);border-radius:5px;padding:0 4px;margin-left:4px}
+.leg-e{color:var(--mute);margin:2px 0 4px}
+.leg-ev summary,.costs summary{cursor:pointer;color:var(--dusk);font-size:12px;margin-top:4px}
+.leg-ev div{margin-top:4px;padding-left:10px;border-left:2px solid var(--line);color:var(--mute)}
+.leg-ev div.bad{border-color:var(--ember);color:#eeac98}
+.alt-row{display:flex;gap:8px;align-items:baseline;margin-top:10px;font-size:13px;color:var(--mute)}
+.alt-key{flex:none;width:18px;border-top:2px dashed var(--dusk);transform:translateY(-4px)}
+.go-row{display:flex;gap:12px;align-items:center;margin:12px 0 4px}
+.go-row span{font:12px var(--mono);color:var(--mute)}
+.costs{margin-top:8px;font-size:13px}
+.costs div{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px solid var(--line)}
+.costs div span{color:var(--mute)}
+.costs p{color:var(--mute);font-size:12px;margin:8px 0 0}
+.plan-line{fill:none;stroke:var(--ochre);stroke-width:4;vector-effect:non-scaling-stroke;stroke-linecap:round;stroke-linejoin:round;pointer-events:none;filter:drop-shadow(0 0 4px rgba(0,0,0,.8))}
+.plan-line.alt{stroke:var(--dusk);stroke-width:2.5;stroke-dasharray:6 7;opacity:.85;filter:none}
+.atlas[data-layer="road"] .route:not(.sel){opacity:.28}
+.pin.start i{width:11px;height:11px;background:var(--text);box-shadow:0 0 0 3px rgba(217,164,65,.6)}
+.atlas[data-layer="trade"] .road-only{display:none}
+/* ─── карта: торговля ─── */
+.map.trade .route{opacity:.22}
+.map.trade .route.hit{opacity:1;stroke:var(--sage);stroke-width:3.5}
+.map.trade .route.sel{opacity:1;stroke:var(--ochre)}
+.map.trade .route.cut{opacity:1;stroke:var(--ember);stroke-width:4;stroke-dasharray:4 5}
+.res-mark{position:absolute;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:50%;border:1px solid var(--line);background:rgba(34,30,28,.92);font-size:14px;line-height:1;display:grid;place-items:center;cursor:pointer;padding:0;transition:transform .15s}
+.res-mark:hover,.res-mark.on{transform:translate(-50%,-50%) scale(1.25);border-color:var(--ochre)}
+.res-mark.hit{border-color:var(--ember);box-shadow:0 0 0 3px rgba(212,106,74,.35);filter:grayscale(.6)}
+.tr-detail{padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.04);margin-bottom:10px;font-size:13px}
+.tr-detail h3{margin:0 0 4px;font:600 15px var(--disp)}
+.tr-detail p{margin:4px 0 0}
+.tr-detail.lever{background:rgba(212,106,74,.1)}
+.tr-hint{color:var(--mute);font-size:13px;margin:0 0 10px}
+.tr-group{margin-top:8px}
+.tr-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
+.tr-chips button{all:unset;cursor:pointer;font-size:12px;padding:4px 9px;border-radius:99px;border:1px solid var(--line);background:var(--raise);color:var(--text)}
+.tr-chips button[aria-pressed="true"]{border-color:var(--ochre);color:var(--ochre)}
+.tr-chips button.hit{border-color:var(--ember);color:#eeac98}
+.tr-chips button.lever{border-style:dashed}
+.canon-src{display:inline-block;margin-top:10px;font-size:12px;color:var(--dusk)}
 
 /* ─── места и фракции ─── */
 .places{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
@@ -336,7 +405,13 @@ body[data-season="autumn"] .rain{opacity:.55}
   .atlas-hint{display:none}
 }
 @media (max-width:700px){
-  .atlas-card{max-height:32vh;padding:12px 14px}
+  .atlas-card{max-height:52vh;padding:12px 14px}
+  .atlas-bar{right:0;left:0;top:8px;border-radius:0;border-width:1px 0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:5px 10px}
+  .atlas-bar::-webkit-scrollbar{display:none}
+  .atlas-bar .seg{flex:none}
+  .atlas-zoom{top:64px;transform:none;flex-direction:row}
+  .atlas-zoom button{width:32px;height:32px}
+  .atlas-card{max-height:46vh;left:8px;right:8px;bottom:8px}
   .atlas-card .bignums{gap:16px;margin:8px 0}
   .atlas-card .bignums div{font-size:22px}
   .atlas-card .feed{max-height:96px}
@@ -523,6 +598,9 @@ a.fac::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;backg
 .widget input[type=number]{width:110px;background:var(--raise);border:1px solid var(--line);border-radius:8px;padding:5px 8px}
 .widget input[type=range]{accent-color:var(--ochre);width:260px}
 .widget .row b{font-weight:500}
+.widget .road-pick{display:grid;grid-template-columns:1fr auto 1fr;gap:8px}
+.widget .road-pick select{min-width:0;width:100%}
+.widget .road-legs{margin-top:10px;font-size:13px;color:var(--mute)}
 .wout{margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
 .wout div{background:var(--raise);border-radius:10px;padding:10px 12px}
 .wout b{display:block;font:700 20px var(--disp)}
@@ -918,3 +996,51 @@ a.fac::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;backg
   .pl-bar .seg button{padding:5px 8px;font-size:12px}
 }
 .tile-plan .n{font:900 24px/1 var(--disp)}
+
+/* ─── трекер раны (Мир → Раны и бой) ─── */
+.wtl{margin-top:14px;display:grid;gap:8px}
+.wtl-row{display:grid;grid-template-columns:150px 1fr 100px;gap:10px;align-items:center;font-size:13px}
+.wtl-row span{color:var(--mute)}
+.wtl-row b{font:500 12px var(--mono);text-align:right}
+.wtl-bar{position:relative;height:10px;border-radius:6px;background:rgba(255,255,255,.05)}
+.wtl-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:rgba(212,106,74,.35)}
+.wtl-bar em{position:absolute;top:-2px;bottom:-2px;border-radius:6px;background:var(--ochre)}
+.wtl-axis{display:flex;justify-content:space-between;margin-left:160px;margin-right:110px;font:10px var(--mono);color:var(--mute)}
+.winf{margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(212,106,74,.08);font-size:13px}
+.winf b{font-weight:600}
+.winf ol{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:6px}
+.winf li{display:grid;grid-template-columns:70px 1fr;gap:10px}
+.winf li span{font:11px var(--mono);color:#eeac98}
+.seg button[disabled]{opacity:.35;cursor:not-allowed}
+@media (max-width:700px){.wtl-row{grid-template-columns:1fr 84px}.wtl-row .wtl-bar{grid-column:1/-1;grid-row:2}.wtl-axis{margin:0}}
+
+/* ─── фракции: схема «кто с кем» ─── */
+.rel-map{padding:16px 18px;margin:18px 0 22px}
+.rel-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.rel-head h3{margin:0}
+.rel-key{display:flex;gap:14px;font:11px var(--mono);color:var(--mute)}
+.rel-key i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}
+.rel-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:start;margin-top:6px}
+.rel-svg{width:100%;height:auto;display:block;overflow:visible}
+.rel-e{fill:none;stroke-width:2.2;opacity:.75;transition:opacity .2s,stroke-width .2s}
+.rel-e.spor{stroke-dasharray:6 5}
+.rel-n{cursor:pointer;outline:none}
+.rel-n circle{stroke:var(--panel);stroke-width:3;transition:r .2s}
+.rel-n .hit{fill:transparent;stroke:none}
+.rel-n text{fill:var(--text);font:500 15px var(--body);paint-order:stroke;stroke:var(--panel);stroke-width:4px}
+.rel-n.lone{opacity:.45}
+.rel-n:hover circle:first-child,.rel-n:focus-visible circle:first-child{r:12}
+.rel-map.focus .rel-e{opacity:.08}
+.rel-map.focus .rel-e.on{opacity:1;stroke-width:3.5}
+.rel-map.focus .rel-n{opacity:.3}
+.rel-map.focus .rel-n.on{opacity:1}
+.rel-map.focus .rel-n.on text{fill:var(--ochre)}
+.rel-hint{margin:0 0 8px;color:var(--mute);font-size:13px}
+.rel-list{display:grid;gap:2px;max-height:520px;overflow:auto}
+.rel-row{display:grid;grid-template-columns:auto 1fr;gap:10px;padding:8px 4px;border-top:1px solid var(--line);font-size:14px}
+.rel-row small{display:block;color:var(--mute);font-size:13px;line-height:1.4;margin-top:2px}
+.rel-row .t{font:10px var(--mono);padding:1px 6px;border-radius:5px;align-self:start;margin-top:3px;border:1px solid}
+.rel-row .t.soyuz{color:var(--sage)}.rel-row .t.spor{color:var(--ember)}.rel-row .t.delo{color:var(--dusk)}
+.rel-map.focus .rel-row:not(.on){display:none}
+@media (max-width:900px){.rel-grid{grid-template-columns:1fr}.rel-list{max-height:none}}
+@media (max-width:600px){.rel-n text{font-size:23px;stroke-width:5px}.rel-n circle:first-child{r:12}.rel-e{stroke-width:3}.rel-map{padding:14px 10px}}

@@ -61,6 +61,10 @@ EVENTS.forEach((e, i) => {
 ROUTES.forEach(r => {
   if (!placeIds.has(r.from)) bad(`routes.js: ${r.id}`, 'место (from)', r.from);
   if (!placeIds.has(r.to)) bad(`routes.js: ${r.id}`, 'место (to)', r.to);
+  for (const st of r.stops || []) {
+    if (!placeIds.has(st.place)) bad(`routes.js: ${r.id}`, 'место (stops)', st.place);
+    if (!(st.i > 0 && st.i < r.p.length - 1)) { console.log(`⚠ routes.js: ${r.id}: остановка ${st.place} не посреди линии p`); problems++; }
+  }
   const modes = ['horse', 'foot', 'cart'];
   for (const mode of r.winterClosed || []) {
     if (!modes.includes(mode)) { console.log(`⚠ routes.js: ${r.id}: неизвестный способ в winterClosed: ${mode}`); problems++; }
@@ -84,6 +88,15 @@ if (chargedCanon !== CHARGED.length) {
   console.log(`⚠ questions.js: «Заряжено» ${CHARGED.length} пунктов, в Канон/Приложения/что-заряжено.md — ${chargedCanon}`);
   problems++;
 }
+
+// Торговля на карте (trade.js): места, тракты и ресурсы рычагов существуют.
+const { RESOURCES, LEVERS } = await load('trade.js');
+const resIds = new Set(RESOURCES.map(r => r.id));
+RESOURCES.forEach(r => { r.places.forEach(id => { if (!placeIds.has(id)) bad('trade.js: ' + r.id, 'место', id); });
+  r.routes.forEach(id => { if (!routeIds.has(id)) bad('trade.js: ' + r.id, 'тракт', id); }); });
+LEVERS.forEach(l => { if (l.place && !placeIds.has(l.place)) bad('trade.js: ' + l.id, 'место', l.place);
+  l.routes.forEach(id => { if (!routeIds.has(id)) bad('trade.js: ' + l.id, 'тракт', id); });
+  l.hits.forEach(id => { if (!resIds.has(id)) bad('trade.js: ' + l.id, 'ресурс', id); }); });
 
 // Любая карточка ведёт к существующим блокам; опечатка в привязке не скрывается в интерфейсе.
 const sourceTargets = {people:PEOPLE, places:PLACES, factions:FACTIONS, articles:ARTICLES, events:EVENTS};

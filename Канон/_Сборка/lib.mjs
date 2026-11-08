@@ -10,6 +10,7 @@
 //   {{pop:brook}}                   → «~2 000»         (places.js: число из начала поля pop)
 //   {{pace:foot}}                   → «20–25»          (routes.js PACE: миль в день; foot, rain, horse, cart)
 //   {{days:river.horse}}            → «2 дня»          (routes.js: срок тракта; |число — без «дней»)
+//   {{wound:bolt.mix.ready}}        → «10–14 дней»     (wounds.js: срок раны; cut.infect — когда приходит заражение)
 // Неизвестная подстановка роняет сборку с понятной ошибкой: число не может тихо пропасть.
 // Внутри `обратных кавычек` подстановки не раскрываются — так их упоминают в тексте.
 
@@ -24,6 +25,7 @@ export const DATA = path.join(ROOT, 'Игры', 'Сайт', 'Приложени�
 const { GOODS, COIN } = await import(pathToFileURL(path.join(DATA, 'goods.js')).href);
 const { PLACES } = await import(pathToFileURL(path.join(DATA, 'places.js')).href);
 const { ROUTES, PACE } = await import(pathToFileURL(path.join(DATA, 'routes.js')).href);
+const { WOUNDS, UNIT_FORMS } = await import(pathToFileURL(path.join(DATA, 'wounds.js')).href);
 
 const PRICES = new Map(GOODS.flatMap(([, items]) => items.map(([id, , lo, hi]) => [id, [lo, hi]])));
 const PLACE_BY_ID = new Map(PLACES.map(p => [p.id, p]));
@@ -91,7 +93,14 @@ function substituteRaw(text, where) {
       if (!d) fail(`нет срока «${mode}» у тракта «${rid}» в routes.js`);
       return flags.includes('число') ? range(d) : `${range(d)} ${plural(d[1], ['день', 'дня', 'дней'])}`;
     }
-    return fail(`неизвестный вид «${kind}» (есть price, coin, pop, pace, days)`);
+    if (kind === 'wound') {
+      const [wid, ...rest] = key.split('.');
+      const w = WOUNDS.find(x => x.id === wid);
+      const v = rest.reduce((o, k) => o?.[k], w);
+      if (!w || !v?.r || !UNIT_FORMS[v.u]) fail(`нет срока «${key}» в wounds.js`);
+      return flags.includes('число') ? range(v.r) : `${range(v.r)} ${plural(v.r[1], UNIT_FORMS[v.u])}`;
+    }
+    return fail(`неизвестный вид «${kind}» (есть price, coin, pop, pace, days, wound)`);
   });
 }
 

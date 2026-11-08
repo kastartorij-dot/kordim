@@ -1,7 +1,7 @@
-/* Общие утилиты: DOM, ссылки, карта, путешествие, пикселизация, разговор. */
+/* Общие утилиты: DOM, ссылки, карта, пикселизация, разговор. Дорога и сроки — road.js. */
 import { PLACES, placeById } from '../Данные/places.js';
 import { sourcesOf } from './canon-links.js';
-import { ROUTES, PACE } from '../Данные/routes.js';
+import { ROUTES } from '../Данные/routes.js';
 import { personById } from '../Данные/people.js';
 
 export const $ = (s, r = document) => r.querySelector(s);
@@ -50,15 +50,6 @@ export function drawRoutes(svg, onPick){
     svg.append(a, f);
   });
 }
-export function markRoute(svg, i, season = 'summer', mode = 'horse'){
-  const lines = svg.querySelectorAll('.route'), flows = svg.querySelectorAll('.flow');
-  ROUTES.forEach((r, k) => {
-    const c = closedFor(r, season, mode);
-    lines[k].classList.toggle('sel', k === i);
-    lines[k].classList.toggle('closed', c);
-    flows[k].classList.toggle('sel', k === i && !c);
-  });
-}
 export function drawPins(map, onPick){
   PLACES.filter(p => p.x != null).forEach(p => {
     const b = document.createElement('button');
@@ -72,55 +63,8 @@ export function markPlace(map, id){
   $$('.pin', map).forEach(p => p.classList.toggle('here', p.dataset.id === id));
 }
 
-/* средняя скорость для расчёта, миль в день: середина диапазона из routes.js, вниз до целого */
-const mid = ([a, b]) => Math.floor((a + b) / 2);
-export const SPEED = {horse:mid(PACE.horse), foot:mid(PACE.foot), cart:mid(PACE.cart)};
-export const MODE_LABEL = {horse:'верхом', foot:'пешком', cart:'обозом'};
-/* Для летнего, осеннего и зимнего режимов карты; весенняя распутица здесь не моделируется. */
-export const groundFactor = season => season === 'summer' ? 1 : 2;
-export function dayRangeFor(r, season, mode){
-  const estimate = r.miles / SPEED[mode], base = r.days?.[mode] || [estimate, estimate];
-  const factor = r.ground ? groundFactor(season) : 1;
-  return base.map(d => d * factor);
-}
-export function daysFor(r, season, mode){
-  const [lo, hi] = dayRangeFor(r, season, mode);
-  return (lo + hi) / 2;
-}
-export function daysLabel(r, season, mode){
-  const [lo, hi] = dayRangeFor(r, season, mode);
-  return '≈ ' + fmt(lo) + (lo === hi ? '' : '–' + fmt(hi));
-}
-export function closedFor(r, season, mode){
-  /* k — оформление линии, не способ движения; остановка барж не закрывает сухопутный путь. */
-  return season === 'winter' && (r.winterClosed || []).includes(mode);
-}
-export const fmt = d => d.toFixed(1).replace('.0', '').replace('.', ',');
 /* склонение по числу: plural(2, ['связь','связи','связей']) → 'связи' */
 export const plural = (n, f) => { const a = Math.abs(n) % 100, b = a % 10; return a > 10 && a < 20 ? f[2] : b > 1 && b < 5 ? f[1] : b === 1 ? f[0] : f[2]; };
-
-/* путешествие: токен идёт по линии, дни и события — в колбэки */
-export function travel(r, {token, days, onDay, onEvent, onDone, speed = 90}){
-  const pts = [];
-  for (let s = 0; s < r.p.length - 1; s++)
-    for (let t = 0; t < 12; t++){
-      const a = r.p[s], b = r.p[s + 1];
-      pts.push([a[0] + (b[0] - a[0]) * t / 12, a[1] + (b[1] - a[1]) * t / 12]);
-    }
-  pts.push(r.p[r.p.length - 1]);
-  const total = Math.max(1, Math.round(days)), every = Math.max(1, Math.floor(pts.length / r.ev.length));
-  let k = 0, last = 0;
-  token.hidden = false;
-  const id = setInterval(() => {
-    const [x, y] = pts[k];
-    token.style.left = x + '%'; token.style.top = y + '%';
-    const day = Math.min(total, Math.floor(k / pts.length * total) + 1);
-    if (day !== last){ last = day; onDay && onDay(day, total); }
-    if (k % every === 0){ const e = r.ev[k / every]; if (e) onEvent && onEvent(e.replace(/^!/, ''), day, e.startsWith('!')); }
-    if (++k >= pts.length){ clearInterval(id); onDone && onDone(total); }
-  }, speed);
-  return () => { clearInterval(id); token.hidden = true; };
-}
 
 /* ─── пикселизация (средний пиксель: size 140, levels 8) ─── */
 const cache = {};
