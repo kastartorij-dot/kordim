@@ -82,5 +82,21 @@ if (fs.existsSync(DATA)) {
   }
 }
 
+// Числа в блоках — подстановки из данных сайта (lib.mjs). Неизвестная подстановка — ошибка.
+// Компакт пишется руками и подстановок не знает: население городов в нём сверяется
+// со строкой «Города» из опорных цифр, собранной из places.js.
+const { substitute } = await import('./lib.mjs');
+for (const rel of allFiles) {
+  try { substitute(fs.readFileSync(path.join(KANON, rel), 'utf8'), rel); }
+  catch (e) { console.log('⚠ ' + e.message); problems++; }
+}
+{
+  const ref = substitute(fs.readFileSync(path.join(KANON, 'Приложения', 'опорные-цифры.md'), 'utf8').replace(/\r/g, ''), 'опорные цифры');
+  const cities = (ref.match(/^\| Города \| (.+?) \|$/m) || [])[1];
+  const compact = fs.readFileSync(path.join(KANON, '01_Компакт_канон.md'), 'utf8').replace(/\r/g, '');
+  if (!cities) { console.log('⚠ опорные цифры: нет строки «Города»'); problems++; }
+  else if (!compact.includes(cities)) { console.log('⚠ 01_Компакт_канон.md: население городов разошлось с данными. Должно быть: ' + cities); problems++; }
+}
+
 console.log(problems ? `\nНайдено ${problems} проблем.` : '\nOK: запретов не найдено, ключи на месте.');
 process.exit(problems ? 1 : 0);

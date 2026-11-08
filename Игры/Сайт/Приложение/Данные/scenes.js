@@ -81,8 +81,9 @@ export const SCENES = [
     "people": [
       "grace",
       "nikto",
-      "arn",
-      "kraim"
+      "varg",
+      "kraim",
+      "arn"
     ],
     "place": "oshersk",
     "words": 9769,

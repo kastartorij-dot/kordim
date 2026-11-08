@@ -1,6 +1,8 @@
 // Собирает Канон/00_КАНОН_Мастер_Кордим.md обратно из блоков по манифест.json.
 // --check сверяет результат с текущим мастером байт-в-байт и ничего не пишет.
 // Без флага — перезаписывает мастер собранной версией (запускать после правки блоков).
+// Числа в блоках — подстановки из данных сайта (goods.js, places.js); мастер получает значения.
+// Значит, правка цены в goods.js тоже требует пересборки, и --check это поймает.
 //
 // node Канон/_Сборка/build.mjs           — пересобрать мастер
 // node Канон/_Сборка/build.mjs --check   — только проверить, что сборка не разошлась
@@ -8,6 +10,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { substitute } from './lib.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const KANON = path.join(ROOT, 'Канон');
@@ -24,7 +27,8 @@ function readBody(relPath) {
   let close = -1;
   for (let i = 1; i < lines.length; i++) if (lines[i] === '---') { close = i; break; }
   if (close < 0) throw new Error(`${relPath}: не нашёл закрывающую черту шапки`);
-  return lines.slice(close + 1).join('\n');
+  // Числа ({{price:…}}, {{pop:…}}, {{coin:…}}) подставляются из данных сайта — см. lib.mjs.
+  return substitute(lines.slice(close + 1).join('\n'), relPath);
 }
 
 const manifest = JSON.parse(fs.readFileSync(path.join(KANON, 'манифест.json'), 'utf8'));
