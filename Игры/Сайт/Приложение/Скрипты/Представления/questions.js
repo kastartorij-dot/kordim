@@ -60,8 +60,8 @@ export function render(root){
     <div class="eyebrow">работа над миром</div><h1 class="h1">Вопросы</h1>
     <p class="lead">Заряженное — крючки, которые уже лежат в сюжете. Открытое — то, что автор ещё не решил. Ниже — где мир пока молчит. Это обзор материалов: не каждому человеку нужен полный профиль, а каждому событию — сцена или иллюстрация.</p>
     <div class="qgrid">
-      <section class="card"><h3>ЗАРЯЖЕНО <small>${CHARGED.length}</small></h3>${CHARGED.map(([t, d, ppl]) => '<div class="q"><b>' + esc(t) + '</b><p>' + esc(d) + '</p><div style="margin-top:6px">' + ppl.map(personChip).join('') + '</div></div>').join('')}</section>
-      <section class="card"><h3>ОТКРЫТО <small>${OPEN.length}</small></h3>${OPEN.map(([t, d]) => '<div class="q"><b>' + esc(t) + '</b><p>' + esc(d) + '</p></div>').join('')}</section>
+      <section class="card"><h3>ЗАРЯЖЕНО <small>${CHARGED.length}</small></h3>${CHARGED.map(([t, d, ppl]) => '<div class="q">' + (d.startsWith(t) ? '<p><b>' + esc(t) + '</b>' + esc(d.slice(t.length)) + '</p>' : '<b>' + esc(t) + '</b>' + (d ? '<p>' + esc(d) + '</p>' : '')) + '<div style="margin-top:6px">' + ppl.map(personChip).join('') + '</div></div>').join('')}</section>
+      <section class="card"><h3>ОТКРЫТО <small>${OPEN.length}</small></h3>${OPEN.map(([t, d]) => '<div class="q">' + (d.startsWith(t) ? '<p><b>' + esc(t) + '</b>' + esc(d.slice(t.length)) + '</p>' : '<b>' + esc(t) + '</b>' + (d ? '<p>' + esc(d) + '</p>' : '')) + '</div>').join('')}</section>
     </div>
     <section class="card sil" id="silence"><h3>ГДЕ МИР МОЛЧИТ <small>куда расти</small></h3>
       <div class="sil-grid">${ROWS.map((r, i) => '<div data-row="' + i + '">' + rowHTML(r, r.items ? r.items() : null) + '</div>').join('')}</div>

@@ -1,7 +1,7 @@
 /* Общие утилиты: DOM, ссылки, карта, путешествие, пикселизация, разговор. */
 import { PLACES, placeById } from '../Данные/places.js';
 import { sourcesOf } from './canon-links.js';
-import { ROUTES } from '../Данные/routes.js';
+import { ROUTES, PACE } from '../Данные/routes.js';
 import { personById } from '../Данные/people.js';
 
 export const $ = (s, r = document) => r.querySelector(s);
@@ -72,7 +72,9 @@ export function markPlace(map, id){
   $$('.pin', map).forEach(p => p.classList.toggle('here', p.dataset.id === id));
 }
 
-export const SPEED = {horse:37, foot:22, cart:15};
+/* средняя скорость для расчёта, миль в день: середина диапазона из routes.js, вниз до целого */
+const mid = ([a, b]) => Math.floor((a + b) / 2);
+export const SPEED = {horse:mid(PACE.horse), foot:mid(PACE.foot), cart:mid(PACE.cart)};
 export const MODE_LABEL = {horse:'верхом', foot:'пешком', cart:'обозом'};
 /* Для летнего, осеннего и зимнего режимов карты; весенняя распутица здесь не моделируется. */
 export const groundFactor = season => season === 'summer' ? 1 : 2;

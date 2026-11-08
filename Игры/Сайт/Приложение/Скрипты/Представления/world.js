@@ -1,7 +1,9 @@
 /* Мир: статьи с шапкой, крупными цифрами, карточками разделов и интерактивными вставками. */
 import { $, $$, esc, IMG, SPEED, groundFactor, MODE_LABEL, plural, canonSources } from '../ui.js';
 import { ARTICLES } from '../../Данные/articles.js';
-import { GOODS } from '../../Данные/goods.js';
+import { GOODS, COIN } from '../../Данные/goods.js';
+/* средняя цена товара из goods.js, в грошах */
+const avg = id => { const g = GOODS.flatMap(([, items]) => items).find(i => i[0] === id); return (g[2] + g[3]) / 2; };
 import { icon } from '../icons.js';
 
 const heroBg = id => "background-image:url('" + IMG + 'Мир/' + id + ".jpg'),radial-gradient(circle at 85% 30%,rgba(217,164,65,.22),transparent 55%),repeating-linear-gradient(135deg,rgba(255,255,255,.025) 0 2px,transparent 2px 14px)";
@@ -35,13 +37,13 @@ function bindSeg(box, name, cb){
 
 /* цена в грошах → «15–20 кордов», «3–5 марок», «2 гроша» */
 function money(lo, hi){
-  const unit = hi >= 200 ? [200, ['корд', 'корда', 'кордов']] : hi >= 10 ? [10, ['марка', 'марки', 'марок']] : [1, ['грош', 'гроша', 'грошей']];
+  const unit = hi >= COIN.корд ? [COIN.корд, ['корд', 'корда', 'кордов']] : hi >= COIN.марка ? [COIN.марка, ['марка', 'марки', 'марок']] : [1, ['грош', 'гроша', 'грошей']];
   const a = lo / unit[0], b = hi / unit[0], f = v => n1(v);
   return (a === b ? f(a) : f(a) + '–' + f(b)) + ' ' + plural(Math.round(b), unit[1]);
 }
-/* сколько это в работе подёнщика: 9 грошей в день, 25 рабочих дней в месяц */
+/* сколько это в работе подёнщика: средний дневной заработок из goods.js, 25 рабочих дней в месяц */
 function inLife(g){
-  const d = g / 9;
+  const d = g / avg('day-labour');
   if (d < 1) return 'меньше дня работы подёнщика';
   if (d < 60) return '≈ ' + n1(d) + ' ' + plural(Math.round(d), ['день', 'дня', 'дней']) + ' работы подёнщика';
   const m = d / 25;
@@ -75,13 +77,13 @@ function shop(box){
 function coins(box){
   box.className = 'card widget';
   box.innerHTML = '<h3>ПЕРЕСЧЁТ В ЖИЗНЬ</h3><div class="row"><input type="number" id="amt" value="70" min="0" aria-label="Сумма">' +
-    seg('u', [['200', 'кордов'], ['10', 'марок'], ['1', 'грошей']], '200') + '</div><div class="wout" id="out"></div>';
-  let u = 200; const amt = $('#amt', box), out = $('#out', box);
+    seg('u', [[String(COIN.корд), 'кордов'], [String(COIN.марка), 'марок'], ['1', 'грошей']], String(COIN.корд)) + '</div><div class="wout" id="out"></div>';
+  let u = COIN.корд; const amt = $('#amt', box), out = $('#out', box);
   const paint = () => {
     const g = Math.max(0, +amt.value || 0) * u;
-    const k = Math.floor(g / 200), m = Math.floor(g % 200 / 10), gr = Math.round(g % 10);
-    out.innerHTML = [[k + ' · ' + m + ' · ' + gr, 'кордов · марок · грошей'], [n1(g / 9), 'дней работы подёнщика'], [n1(g / 10), 'ночей в отдельной комнате'],
-      [n1(g), 'мисок похлёбки с хлебом'], [n1(g / 2200), 'верховых лошадей']].map(([b, s]) => '<div><b>' + b + '</b><small>' + s + '</small></div>').join('');
+    const k = Math.floor(g / COIN.корд), m = Math.floor(g % COIN.корд / COIN.марка), gr = Math.round(g % COIN.марка);
+    out.innerHTML = [[k + ' · ' + m + ' · ' + gr, 'кордов · марок · грошей'], [n1(g / avg('day-labour')), 'дней работы подёнщика'], [n1(g / avg('room')), 'ночей в отдельной комнате'],
+      [n1(g / avg('stew')), 'мисок похлёбки с хлебом'], [n1(g / avg('horse-saddle')), 'верховых лошадей']].map(([b, s]) => '<div><b>' + b + '</b><small>' + s + '</small></div>').join('');
   };
   amt.oninput = paint; bindSeg(box, 'u', v => { u = +v; paint(); }); paint();
 }

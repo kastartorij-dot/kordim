@@ -1,8 +1,24 @@
 /* Канон: чтение блоков мира (герои, правила, лорбук, приложения) прямо в вики.
    Данные — canon.js, автосборка из Канон/*.md скриптом Канон/_Сборка/export-wiki.mjs.
    Пока только чтение: поиск, разделы, статус, ключи. Правка и «Входящие» — позже. */
-import { $, $$, esc } from '../ui.js';
+import { $, $$, esc, personChip, placeChip } from '../ui.js';
 import { CANON } from '../../Данные/canon.js';
+import { FACTIONS } from '../../Данные/factions.js';
+import { ARTICLES } from '../../Данные/articles.js';
+
+/* чипы «о ком и о чём» из links в шапке блока: люди, места, фракции, статьи «Мир» */
+function linkChips(links = []){
+  const chip = l => {
+    const [kind, id] = l.split(':');
+    if (kind === 'people') return personChip(id);
+    if (kind === 'places') return placeChip(id);
+    if (kind === 'factions') { const f = FACTIONS.find(x => x.id === id); return f ? '<a class="chip" href="#/faction/' + id + '">' + esc(f.name) + '</a>' : ''; }
+    if (kind === 'articles') { const a = ARTICLES.find(x => x.id === id); return a ? '<a class="chip" href="#/world/' + id + '">' + esc(a.title) + '</a>' : ''; }
+    return '';
+  };
+  const html = links.map(chip).join('');
+  return html ? '<div class="canon-links">' + html + '</div>' : '';
+}
 
 const GROUPS = [
   { k: 'герои', label: 'Герои', c: 'var(--ochre)' },
@@ -86,6 +102,7 @@ export function render(root, [param]) {
       </button>
       <div class="canon-body" hidden>
         ${st.note ? `<p class="canon-note" style="--c:${st.c}">${esc(st.label)}: ${esc(st.note)}</p>` : ''}
+        ${linkChips(item.links)}
         ${item.ключи && item.ключи.length ? `<div class="canon-keys">${item.ключи.map(k => `<span>${esc(k)}</span>`).join('')}</div>` : ''}
         <div class="canon-text">${md(item.текст)}</div>
       </div>

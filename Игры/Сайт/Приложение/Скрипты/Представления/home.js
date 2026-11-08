@@ -59,7 +59,7 @@ export function render(root){
     </div>
     <div class="home-next">${changes()}${waiting()}${silence()}</div>
     <div class="row2">
-      <section class="card"><h3>ЗАРЯЖЕНО <a href="#/questions">все</a></h3><ul class="list">${CHARGED.slice(0,5).map(c => '<li><b>' + esc(c[0]) + '.</b> ' + esc(c[1]) + '</li>').join('')}</ul></section>
+      <section class="card"><h3>ЗАРЯЖЕНО <a href="#/questions">все</a></h3><ul class="list">${CHARGED.slice(0,5).map(c => '<li>' + (c[1].startsWith(c[0]) ? '<b>' + esc(c[0]) + '</b>' + esc(c[1].slice(c[0].length)) : '<b>' + esc(c[0]) + '.</b> ' + esc(c[1])) + '</li>').join('')}</ul></section>
       <section class="card"><h3>ПОСЛЕДНЕЕ В ХРОНИКЕ <a href="#/chronicle">вся</a></h3><ul class="list">${EVENTS.filter(e => e.s >= 1024).slice(-5).map(e => '<li><b>' + esc(e.y) + '.</b> ' + esc(e.t) + '</li>').join('')}</ul></section>
     </div>
   </div>`;
