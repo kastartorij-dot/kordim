@@ -1,0 +1,998 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f5efe3">
+<title>Хват и три ножа</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5efe3;
+  --paper: #fbf7ef;
+  --ink: #2a241d;
+  --muted: #8a7f70;
+  --faint: #c9bfae;
+  --rule: #e4dac8;
+  --accent: #8c3b2a;
+  --ui-bg: #fffaf2;
+  --ui-shadow: 0 6px 24px rgba(60, 40, 20, .16);
+  --m-dislike: rgba(214, 72, 52, .22);
+  --m-dislike-line: #c4412d;
+  --m-question: rgba(52, 116, 214, .2);
+  --m-question-line: #2f68c0;
+  --m-note: rgba(222, 170, 40, .3);
+  --m-note-line: #b9850f;
+  --chg: rgba(46, 150, 110, .2);
+  --chg-line: #2a8a63;
+  --size: 20px;
+}
+:root[data-theme="dark"] {
+  --bg: #161411;
+  --paper: #1d1a16;
+  --ink: #ddd4c6;
+  --muted: #8f8577;
+  --faint: #4a443b;
+  --rule: #2f2a24;
+  --accent: #d98b6c;
+  --ui-bg: #26221d;
+  --ui-shadow: 0 6px 24px rgba(0, 0, 0, .5);
+  --m-dislike: rgba(240, 100, 80, .26);
+  --m-dislike-line: #f07a63;
+  --m-question: rgba(100, 160, 250, .24);
+  --m-question-line: #7fb0ff;
+  --m-note: rgba(240, 190, 60, .24);
+  --m-note-line: #e8b94a;
+  --chg: rgba(80, 200, 150, .2);
+  --chg-line: #5cc79a;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 80px; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Literata", Georgia, "Times New Roman", serif;
+  font-size: var(--size);
+  line-height: 1.68;
+  -webkit-font-smoothing: antialiased;
+  transition: background .25s, color .25s;
+}
+button { font: inherit; color: inherit; }
+.ui { font-family: "PT Sans", "Segoe UI", Arial, sans-serif; }
+
+#progress { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: var(--accent); z-index: 30; }
+
+.top {
+  position: fixed; top: 10px; right: 12px; z-index: 20;
+  display: flex; gap: 6px;
+}
+.top button {
+  border: 1px solid var(--rule); background: var(--ui-bg); border-radius: 999px;
+  padding: 6px 12px; font-size: 14px; cursor: pointer; box-shadow: var(--ui-shadow);
+}
+.top button:hover { border-color: var(--muted); }
+#notesBtn b { color: var(--accent); }
+.edlink { display: inline-block; margin-top: 14px; font-size: 14px; color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); }
+.edlink:hover { border-bottom-style: solid; }
+.home {
+  position: fixed; top: 10px; left: 12px; z-index: 20; color: inherit; text-decoration: none;
+  border: 1px solid var(--rule); background: var(--ui-bg); border-radius: 999px;
+  padding: 6px 12px; font-size: 14px; box-shadow: var(--ui-shadow);
+}
+.home:hover { border-color: var(--muted); }
+#swap { font-weight: 700; }
+
+main {
+  max-width: 40em;
+  margin: 0 auto;
+  padding: 88px 16px 160px;
+}
+.sheet {
+  background: var(--paper);
+  border-radius: 6px;
+  padding: 64px clamp(20px, 7vw, 76px) 72px;
+  box-shadow: 0 1px 0 var(--rule), 0 20px 50px -30px rgba(60, 40, 20, .35);
+}
+header { text-align: center; margin-bottom: 48px; }
+.kicker { font-size: 13px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
+h1 { font-weight: 600; font-size: 2.1em; line-height: 1.15; margin: .35em 0 .3em; letter-spacing: -.01em; }
+.meta { font-size: 14px; color: var(--muted); }
+.meta .draft { color: var(--accent); }
+.hint {
+  margin: 28px auto 0; max-width: 30em; font-size: 14px; line-height: 1.5; color: var(--muted);
+  border-top: 1px solid var(--rule); padding-top: 16px;
+}
+.hint kbd { font-family: inherit; border: 1px solid var(--rule); border-radius: 4px; padding: 0 5px; font-size: 12px; }
+
+article { hyphens: auto; -webkit-hyphens: auto; }
+article p {
+  margin: 0; text-indent: 1.5em; position: relative;
+}
+article p.first { text-indent: 0; }
+article p.first::first-letter {
+  float: left; font-size: 3.4em; line-height: .9; padding: .06em .08em 0 0; font-weight: 600; color: var(--accent);
+}
+article p .ln {
+  position: absolute; left: -3.6em; top: .32em; width: 2.8em; text-align: right; text-indent: 0;
+  font-family: "PT Sans", Arial, sans-serif; font-size: 12px; color: var(--faint);
+  cursor: pointer; user-select: none; -webkit-user-select: none;
+  opacity: 0; transition: opacity .15s;
+}
+article p:hover .ln { opacity: 1; }
+article p .ln:hover { color: var(--accent); }
+article p.has-note .ln { opacity: 1; color: var(--muted); }
+article h2 { font-size: 1.15em; text-align: center; margin: 2em 0 1em; font-weight: 600; }
+.break {
+  text-align: center; color: var(--muted); margin: 1.6em 0; letter-spacing: .6em; font-size: .9em;
+  user-select: none; -webkit-user-select: none;
+}
+.end { text-align: center; color: var(--muted); margin-top: 3em; font-size: .9em; letter-spacing: .3em; }
+
+/* правки против прошлой версии */
+.extras { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.extras a, .extras button { border: 1px solid var(--rule); background: var(--ui-bg); color: inherit; border-radius: 999px; padding: 6px 14px; font-size: 14px; text-decoration: none; cursor: pointer; }
+.extras button[aria-pressed="true"] { border-color: var(--chg-line); color: var(--chg-line); font-weight: 700; }
+.extras .sw { display: inline-block; width: .9em; height: .9em; border-radius: 3px; background: var(--chg); box-shadow: inset 0 -2px 0 var(--chg-line); vertical-align: -1px; margin-right: 4px; }
+body.show-chg article ins { background: var(--chg); box-shadow: inset 0 -2px 0 var(--chg-line); text-decoration: none; border-radius: 2px; }
+article ins { text-decoration: none; }
+body.show-chg article:not(.doc) p.chg::before { content: ""; position: absolute; left: -.9em; top: .4em; bottom: .4em; width: 3px; border-radius: 2px; background: var(--chg-line); }
+.del { display: none; }
+body.show-chg .del { display: inline; cursor: pointer; color: var(--m-dislike-line); font-family: "PT Sans", Arial, sans-serif; font-size: .7em; vertical-align: super; padding: 0 .15em; user-select: none; -webkit-user-select: none; }
+body.show-chg .del::after { content: "✂"; }
+#delpop { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 36; width: min(560px, calc(100vw - 24px));
+  background: var(--ui-bg); border: 1px solid var(--rule); border-radius: 14px; box-shadow: var(--ui-shadow); padding: 12px 14px; display: none; font-size: 14px; }
+#delpop.on { display: block; }
+#delpop .q { font-family: "Literata", Georgia, serif; font-size: 15px; text-decoration: line-through; text-decoration-color: var(--m-dislike-line); color: var(--muted); max-height: 12em; overflow: auto; margin-top: 4px; }
+#nextChg { position: fixed; left: 12px; bottom: 14px; z-index: 20; display: none; border: 1px solid var(--chg-line); color: var(--chg-line); background: var(--ui-bg); border-radius: 999px; padding: 7px 14px; font-size: 14px; box-shadow: var(--ui-shadow); cursor: pointer; }
+body.show-chg.has-chg #nextChg { display: block; }
+
+/* вкладки: рассказ / разбор */
+.tabs { display: none; justify-content: center; gap: 4px; margin: 22px auto 0; padding: 4px; width: max-content; max-width: 100%;
+  border: 1px solid var(--rule); border-radius: 999px; background: var(--bg); }
+.tabs.on { display: flex; }
+.tabs button { border: 0; background: transparent; border-radius: 999px; padding: 6px 16px; font-size: 14px; cursor: pointer; color: var(--muted); }
+.tabs button[aria-selected="true"] { background: var(--paper); color: var(--ink); font-weight: 700; box-shadow: 0 1px 3px rgba(60, 40, 20, .18); }
+.tabs button b { color: var(--accent); font-weight: 700; margin-left: 4px; }
+
+/* разбор: документ, а не проза */
+article.doc { hyphens: manual; -webkit-hyphens: manual; font-size: .9em; line-height: 1.6; }
+article.doc p { text-indent: 0; margin: 0 0 .7em; }
+article.doc p.tag-h2 { font-weight: 600; font-size: 1.3em; line-height: 1.3; margin: 1.8em 0 .6em; }
+article.doc p.tag-h3 { font-weight: 600; font-size: 1.08em; margin: 1.4em 0 .5em; }
+article.doc p.tag-quote { border-left: 3px solid var(--faint); padding-left: .9em; margin: 0 0 .25em; color: var(--ink); font-style: italic; }
+article.doc p.tag-quote + p:not(.tag-quote) { margin-top: .7em; }
+article.doc p.tag-li { padding-left: 1.3em; margin: 0 0 .35em; }
+article.doc p.tag-li::before { content: "•"; position: absolute; left: .3em; color: var(--muted); }
+article.doc p.tag-li[data-m]::before { content: attr(data-m); left: 0; font-size: .9em; }
+article.doc p.tag-li.d1 { margin-left: 1.3em; }
+article.doc p.tag-li.d2 { margin-left: 2.6em; }
+article.doc .break { margin: 1.2em 0; }
+/* ссылки разбора на строки рассказа */
+article.doc .ref { color: var(--accent); text-decoration: underline dotted; text-underline-offset: 3px; cursor: pointer; }
+article.doc .ref:hover { text-decoration-style: solid; }
+article.doc p.jumphead { cursor: pointer; }
+article.doc p.jumphead:hover .ref { text-decoration-style: solid; }
+article p.target { background: var(--m-note); border-radius: 3px; box-shadow: 0 0 0 .35em var(--m-note); }
+article p.target.first::first-letter { color: var(--accent); }
+@keyframes pulse { from { box-shadow: 0 0 0 .35em var(--m-note), 0 0 0 .9em var(--m-note); } to { box-shadow: 0 0 0 .35em var(--m-note), 0 0 0 .35em transparent; } }
+article p.target.pulse { animation: pulse 1.2s ease-out 2; }
+article.doc code { font-family: "PT Sans", Arial, sans-serif; font-size: .88em; background: var(--bg); border-radius: 4px; padding: 0 .25em; }
+
+mark { color: inherit; border-radius: 2px; cursor: pointer; padding: .05em 0; -webkit-tap-highlight-color: transparent; }
+mark.t-dislike { background: var(--m-dislike); box-shadow: inset 0 -2px 0 var(--m-dislike-line); }
+mark.t-question { background: var(--m-question); box-shadow: inset 0 -2px 0 var(--m-question-line); }
+mark.t-note { background: var(--m-note); box-shadow: inset 0 -2px 0 var(--m-note-line); }
+mark.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* панель выделения */
+#selbar {
+  position: fixed; left: 50%; bottom: 18px; transform: translate(-50%, 140%);
+  background: var(--ui-bg); border: 1px solid var(--rule); border-radius: 14px; box-shadow: var(--ui-shadow);
+  padding: 8px; display: flex; gap: 6px; align-items: center; z-index: 25;
+  transition: transform .18s ease; max-width: calc(100vw - 24px);
+}
+#selbar.on { transform: translate(-50%, 0); }
+#selbar .q { font-size: 13px; color: var(--muted); max-width: 16em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 6px; }
+.tbtn {
+  border: 1px solid var(--rule); background: transparent; border-radius: 10px; padding: 7px 12px;
+  font-size: 14px; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;
+}
+.tbtn:hover { border-color: var(--muted); }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none; }
+.dot.t-dislike { background: var(--m-dislike-line); }
+.dot.t-question { background: var(--m-question-line); }
+.dot.t-note { background: var(--m-note-line); }
+.tbtn small { color: var(--muted); font-size: 11px; }
+#selbar .para { font-weight: 700; }
+#selbar .para[aria-pressed="true"] { border-color: var(--ink); background: var(--paper); }
+.sep { width: 1px; align-self: stretch; background: var(--rule); margin: 2px 2px; }
+
+/* редактор заметки */
+#editor {
+  position: fixed; inset: 0; background: rgba(20, 15, 10, .35); z-index: 40;
+  display: none; align-items: flex-end; justify-content: center; padding: 16px;
+}
+#editor.on { display: flex; }
+.ed {
+  background: var(--ui-bg); border-radius: 16px; box-shadow: var(--ui-shadow); width: min(560px, 100%);
+  padding: 18px 18px 14px; margin-bottom: 4vh;
+}
+.ed .quote {
+  font-family: "Literata", Georgia, serif; font-size: 16px; line-height: 1.5; max-height: 9em; overflow: auto;
+  border-left: 3px solid var(--faint); padding: 2px 0 2px 12px; margin-bottom: 12px; color: var(--ink);
+}
+.ed .where { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.types { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.types .tbtn[aria-pressed="true"] { border-color: var(--ink); background: var(--paper); font-weight: 700; }
+.ed textarea {
+  width: 100%; min-height: 96px; resize: vertical; border: 1px solid var(--rule); border-radius: 10px;
+  background: var(--paper); color: var(--ink); padding: 10px 12px; font: 15px/1.45 "PT Sans", Arial, sans-serif;
+}
+.ed textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
+.row { display: flex; gap: 8px; justify-content: flex-end; align-items: center; margin-top: 12px; }
+.row .grow { flex: 1; }
+.pbtn { border: 0; background: var(--accent); color: #fff; border-radius: 10px; padding: 8px 16px; cursor: pointer; font-size: 14px; font-weight: 700; }
+.lbtn { border: 0; background: transparent; color: var(--muted); padding: 8px 10px; cursor: pointer; font-size: 14px; }
+.lbtn:hover { color: var(--ink); }
+.lbtn.danger:hover { color: var(--m-dislike-line); }
+
+/* список заметок */
+#drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 100vw); z-index: 35;
+  background: var(--ui-bg); box-shadow: var(--ui-shadow); transform: translateX(105%); transition: transform .22s ease;
+  display: flex; flex-direction: column;
+}
+#drawer.on { transform: translateX(0); }
+.dh { padding: 16px 18px 12px; border-bottom: 1px solid var(--rule); }
+.dh .tabnote { font-size: 12px; color: var(--muted); margin: -4px 0 10px; }
+.dh .old { display: none; font-size: 13px; line-height: 1.4; background: var(--paper); border: 1px solid var(--rule); border-radius: 10px; padding: 8px 10px; margin: 0 0 10px; }
+.dh .old.on { display: block; }
+.dh .old button { margin-top: 6px; }
+.grp { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin: 14px 10px 4px; }
+.grp:first-child { margin-top: 4px; }
+.item.old-round { opacity: .55; }
+.dh h3 { margin: 0 0 10px; font-size: 18px; display: flex; justify-content: space-between; align-items: center; }
+.dh .acts { display: flex; gap: 6px; flex-wrap: wrap; }
+.dh .copied { font-size: 13px; color: var(--accent); min-height: 1.2em; margin-top: 6px; }
+#list { overflow: auto; padding: 8px 10px 40px; flex: 1; }
+.item { padding: 10px 10px 12px; border-radius: 10px; cursor: pointer; border: 1px solid transparent; }
+.item:hover { background: var(--paper); border-color: var(--rule); }
+.item .h { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.item .h b { color: var(--ink); font-size: 13px; }
+.item .qq { font-family: "Literata", Georgia, serif; font-size: 14px; line-height: 1.45; margin: 4px 0 2px; color: var(--ink); }
+.item .c { font-size: 14px; line-height: 1.4; }
+.item .h .ed-it { margin-left: auto; padding: 2px 8px; font-size: 13px; }
+.only-touch { display: none; }
+.item.lost .qq { text-decoration: line-through; opacity: .6; }
+.empty { color: var(--muted); font-size: 14px; padding: 20px 12px; line-height: 1.5; }
+.filters { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.filters .tbtn { padding: 4px 10px; font-size: 13px; }
+.filters .tbtn[aria-pressed="true"] { border-color: var(--ink); }
+
+.warn { position: fixed; left: 12px; bottom: 12px; font-size: 13px; color: var(--m-dislike-line); z-index: 20; max-width: 22em; }
+
+@media (max-width: 760px) {
+  :root { --size: 18px; }
+  main { padding: 64px 0 160px; }
+  .sheet { border-radius: 0; padding: 40px 18px 56px; box-shadow: none; }
+  article p .ln { display: none; }
+  .top { top: 8px; right: 8px; }
+  .top button { padding: 5px 10px; }
+  .home { top: 8px; left: 8px; padding: 5px 10px; }
+  .home span { display: none; }
+  article.doc { font-size: .95em; }
+  #selbar .q { display: none; }
+  #selbar small { display: none; }
+  .ed { margin-bottom: 0; }
+}
+/* палец: панель выделения сверху (снизу её закрывают меню браузера), окно заметки сверху (снизу клавиатура) */
+@media (pointer: coarse) {
+  #delpop { top: calc(8px + env(safe-area-inset-top)); bottom: auto; }
+  body.selecting #nextChg { visibility: hidden; }
+  .only-touch { display: inline; }
+  .only-mouse { display: none; }
+  .top button { min-height: 38px; min-width: 38px; }
+  .home { min-height: 38px; min-width: 38px; display: inline-flex; align-items: center; justify-content: center; padding: 5px 10px; }
+  body.selecting .home { visibility: hidden; }
+  #selbar {
+    top: calc(8px + env(safe-area-inset-top)); bottom: auto; transform: translate(-50%, -160%);
+    padding: 6px; gap: 4px; flex-wrap: nowrap;
+  }
+  #selbar.on { transform: translate(-50%, 0); }
+  #selbar .q, #selbar small { display: none; }
+  .tbtn { padding: 9px 11px; }
+  body.selecting .top { visibility: hidden; }
+  #editor { align-items: flex-start; padding-top: calc(12px + env(safe-area-inset-top)); }
+  .ed textarea { font-size: 16px; min-height: 84px; }
+  .ed .quote { max-height: 6.5em; }
+  #edSave small { display: none; }
+  .dh { padding-top: calc(16px + env(safe-area-inset-top)); }
+  #list { padding-bottom: calc(40px + env(safe-area-inset-bottom)); }
+  .item:hover { background: transparent; border-color: transparent; }
+}
+@media print {
+  .top, .home, .edlink, #nextChg, #delpop, .extras, #selbar, #drawer, #editor, #progress, .hint { display: none !important; }
+  body { background: #fff; }
+  .sheet { box-shadow: none; }
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<a class="home ui" href="../Приложение/" title="На главную сайта">⌂ <span>Кордим</span></a>
+<div class="top ui">
+  <button id="swap" title="Другая вкладка" hidden></button>
+  <button id="smaller" title="Мельче">А−</button>
+  <button id="bigger" title="Крупнее">А+</button>
+  <button id="theme" title="Тема">☾</button>
+  <button id="notesBtn">Заметки <b id="count">0</b></button>
+</div>
+
+<main>
+  <div class="sheet">
+    <header>
+      <div class="kicker ui" id="kicker">Кордим · проза</div>
+      <h1 id="title"></h1>
+      <div class="meta ui" id="meta"></div>
+      <div class="tabs ui" id="tabs" role="tablist"></div>
+      <div class="extras ui" id="extras"></div>
+      <a class="edlink ui" href="Редактор.html" title="Решения, вопросы и будущие арки — ответить для Claude">✎ Редактор: что ждёт тебя и будущие арки</a>
+      <div class="hint ui">
+        <span class="only-mouse">Выдели слово или кусок текста — снизу появится панель: <b>не нравится</b>, <b>вопрос</b> или <b>заметка</b>
+        (или клавиши <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>). Номер строки слева от абзаца — заметка на весь абзац.
+        Щелчок по выделенному — изменить.</span>
+        <span class="only-touch">Зажми слово пальцем и потяни ручки выделения — сверху появится панель: <b>не нравится</b>, <b>вопрос</b>
+        или <b>заметка</b>. Кнопка <b>¶</b> растягивает выделение на весь абзац. Тап по цветному — изменить.</span>
+        Когда закончишь: «Заметки» → «Скопировать для Claude» и вставь в чат. Копировать один раз: туда попадают и рассказ, и разбор.
+      </div>
+    </header>
+    <article id="text"></article>
+    <div class="end">⁂</div>
+  </div>
+</main>
+
+<div id="selbar" class="ui">
+  <span class="q" id="selq"></span>
+  <button class="tbtn para" id="selPara" title="Весь абзац" aria-pressed="false">¶</button>
+  <span class="sep"></span>
+  <button class="tbtn" data-type="dislike"><span class="dot t-dislike"></span>Не нравится <small>1</small></button>
+  <button class="tbtn" data-type="question"><span class="dot t-question"></span>Вопрос <small>2</small></button>
+  <button class="tbtn" data-type="note"><span class="dot t-note"></span>Заметка <small>3</small></button>
+</div>
+
+<div id="editor" class="ui">
+  <div class="ed" role="dialog" aria-modal="true">
+    <div class="where" id="edWhere"></div>
+    <div class="quote" id="edQuote"></div>
+    <div class="types" id="edTypes">
+      <button class="tbtn" data-type="dislike"><span class="dot t-dislike"></span>Не нравится</button>
+      <button class="tbtn" data-type="question"><span class="dot t-question"></span>Вопрос</button>
+      <button class="tbtn" data-type="note"><span class="dot t-note"></span>Заметка</button>
+    </div>
+    <textarea id="edText" placeholder="Что не так, что спросить, как лучше… (можно оставить пустым)"></textarea>
+    <div class="row">
+      <button class="lbtn danger" id="edDelete">Удалить</button>
+      <span class="grow"></span>
+      <button class="lbtn" id="edCancel">Отмена</button>
+      <button class="pbtn" id="edSave">Сохранить <small style="opacity:.7;font-weight:400">Ctrl+Enter</small></button>
+    </div>
+  </div>
+</div>
+
+<aside id="drawer" class="ui" aria-label="Заметки">
+  <div class="dh">
+    <h3><span id="drawerTitle">Заметки</span> <button class="lbtn" id="closeDrawer" title="Закрыть">✕</button></h3>
+    <div class="tabnote" id="tabnote"></div>
+    <div class="old" id="oldBox"><span id="oldText"></span><br><button class="lbtn danger" id="oldClear">Убрать пометки прошлого круга</button></div>
+    <div class="acts">
+      <button class="pbtn" id="copyAll">Скопировать для Claude</button>
+      <button class="tbtn" id="download">Сохранить файлом</button>
+      <button class="lbtn danger" id="clearAll">Очистить</button>
+    </div>
+    <div class="filters" id="filters">
+      <button class="tbtn" data-f="all" aria-pressed="true">Все</button>
+      <button class="tbtn" data-f="dislike"><span class="dot t-dislike"></span>Не нравится</button>
+      <button class="tbtn" data-f="question"><span class="dot t-question"></span>Вопросы</button>
+      <button class="tbtn" data-f="note"><span class="dot t-note"></span>Заметки</button>
+    </div>
+    <div class="copied" id="copied"></div>
+  </div>
+  <div id="list"></div>
+</aside>
+<div class="warn ui" id="warn"></div>
+<button class="ui" id="nextChg" title="Следующая правка">↓ правка</button>
+<div class="ui" id="delpop"><b>Убрано</b> <button class="lbtn" id="delClose" style="float:right;padding:0 4px">✕</button><div class="q" id="delText"></div></div>
+
+<script>
+var DOCS = [{"id":"Хват_и_три_ножа","tab":"Рассказ","file":"Проза/Хват_и_три_ножа.md","title":"Хват и три ножа","status":"черновик","blocks":[{"kind":"p","line":8,"text":"*Поздняя осень 1026 года, полторы недели после возвращения из Ошерска.*"},{"kind":"break"},{"kind":"h","text":"I. Девять"},{"kind":"p","line":14,"text":"Дождь шёл третий день, и Грейс выучила его наизусть. Над очагом он стучал по дранке ровно, как пальцами по столу, у порога капал в ведро, которое Арн подставил ещё в первую ночь, а когда ветер заходил с севера, стихал, будто кто-то прикрывал крышу ладонью. Она лежала на спине, смотрела в темноту под крышей и слушала, как дышит Никто."},{"kind":"p","line":16,"text":"Дышал он плохо. Спина у него затянулась, как и должна была затянуться после микстуры, и рубец под повязкой был сухой, розовый и чистый. Она проверяла его каждое утро и каждый раз нюхала полотно, хотя он над этим смеялся, и гнить там было нечему. Зато река вышла из него не вся. То, что он наглотался в реке, осело в груди и каждый вечер поднималось жаром, и по вечерам он сначала становился разговорчивее обычного, что было трудно себе представить, потом тише, а к ночи горячим и мокрым, и тогда в его дыхании появлялся сырой хрип, как в мехах, которые давно не смазывали. Кашлял он, придерживая рукой спину. Утром вставал, держась за стену, шутил про стену и садился обратно. К обеду мог дойти до поленницы. Неделю назад не мог и этого, так что дело шло, медленно, по-честному, без чудес, и Грейс знала это не хуже него. Она просто не любила это слушать."},{"kind":"p","line":18,"text":"В темноте тихо скрипнула кожа."},{"kind":"p","line":20,"text":"Она не повернула головы. Звук был знакомый до последней нотки: ремень потянули из-под топчана, пряжка стукнула о доску, и бандальера легла ему на грудь. Потом короткий шорох, с которым нож выходит из разношенной петли."},{"kind":"p","line":22,"text":"— Один, — сказал Никто шёпотом."},{"kind":"p","line":24,"text":"Нож лёг на одеяло. Второй вышел так же мягко."},{"kind":"p","line":26,"text":"— Два."},{"kind":"p","line":28,"text":"Грейс слушала, как он считает, и считала вместе с ним, не желая того. На девятом он остановился. Пальцы прошли по ремню дальше, туда, где три петли висели пустыми с весны, и она услышала, как он провёл по ним, одну, другую, третью, и как замер."},{"kind":"p","line":30,"text":"— Девять, — сказал он с удивлением, будто ему недодали сдачи."},{"kind":"p","line":32,"text":"Ножи по одному вернулись в петли. Потом снова скрипнула пряжка."},{"kind":"p","line":34,"text":"— Один."},{"kind":"p","line":36,"text":"На третий раз она встала."},{"kind":"p","line":38,"text":"Пол был холодный, и холод сразу поднялся по ногам. Она подошла, присела на край его топчана и положила ладонь ему на лоб. Лоб был горячий и мокрый, но не так, как бывает плохо: она знала, как бывает плохо, у неё самой весной полоса от раны доползла до локтя, и тогда это был другой жар, сухой и злой, от которого кожа делалась как бумага. Этот был просто тяжёлый. И всё равно, пока ладонь лежала у него на лбу, Грейс не двигалась и не дышала, совсем недолго, пока не поняла, что не дышит. Потом выдохнула и рассердилась на себя за эту задержку, как сердилась каждый раз."},{"kind":"p","line":40,"text":"— Ты чего не спишь? — спросила она."},{"kind":"p","line":42,"text":"— Считаю."},{"kind":"p","line":44,"text":"— Я слышу."},{"kind":"p","line":46,"text":"— Не сходится, Колючка. — Он улыбнулся в темноту, она это услышала. — Двенадцать было. Я точно помню, что двенадцать. Я много чего не помню, ты знаешь, а это помню, так что это серьёзно."},{"kind":"p","line":48,"text":"— Трёх нет с весны."},{"kind":"p","line":50,"text":"— Знаю. — Он помолчал, и в груди у него хрипнуло. — Знаю, где они. Пока считаю, всё время знаю. А дохожу до девяти, и они опять не там."},{"kind":"p","line":52,"text":"Она взяла его руку с ремня. Он не держал, отдал сразу, только пальцы ещё какое-то время шарили по одеялу, ища пряжку. Грейс сняла бандальеру у него с груди, свернула и положила на табурет у изголовья, так, чтобы он мог дотянуться, не поворачиваясь."},{"kind":"p","line":54,"text":"— Не на пол, — сказал он."},{"kind":"p","line":56,"text":"— Не на пол."},{"kind":"p","line":58,"text":"— Там сыро. Они потом пятнами пойдут, а у меня масла мало."},{"kind":"p","line":60,"text":"— Спи."},{"kind":"p","line":62,"text":"— Сплю, — согласился он и почти сразу уснул, а пальцы так и остались у неё на запястье, слабые и горячие. Она сидела и ждала, пока они разожмутся сами. Ждать пришлось долго, и снимать их она не стала."},{"kind":"break"},{"kind":"p","line":66,"text":"Потом она сидела у очага, раздвинула угли и положила полено, сырое с одного бока, и смотрела, как оно сначала шипит, а потом сдаётся."},{"kind":"p","line":68,"text":"Над её топчаном торчал из стены пустой крюк. Арн вбил его, когда у неё в Норе появился свой топчан, в Ошерск она сняла арбалет с этого крюка, и теперь он лежал где-то в иле под мостом вместе с ремнём, который она перешивала дважды. Обрывок ремня она привезла и сунула в сундук, сама не зная зачем. Каждый раз, ложась, она смотрела на этот крюк, и каждый раз рука сама шла к правому плечу, туда, где лежала лямка. Это было глупо, и она это знала, и рука всё равно шла."},{"kind":"p","line":70,"text":"Она сказала Арну весной: «Я приду за ними сама». С тех пор прошло больше полугода."},{"kind":"p","line":72,"text":"Грейс никогда не врала себе в том, что касалось работы. Это было единственное правило, которое она соблюдала без исключений, потому что на нём держались все остальные. Поэтому сейчас, глядя на полено, она перебрала всё честно. Весной у неё не поднималась рука, и это была правда. Потом нужны были деньги, лошади, железо, соль для мальчишки, и это тоже была правда. Потом был Порт, потом заказ, потом Ошерск. Ни одна из причин не была выдумкой, каждую она могла бы предъявить кому угодно. Только лежали они одна на другой так плотно, что за полгода между ними не нашлось ни одной свободной недели. А так не бывает, она знала это по себе: неделя находится всегда, когда её ищут."},{"kind":"p","line":74,"text":"Теперь причин стало больше, и самая лучшая лежала под мостом в Ошерске. Без арбалета к пятерым не ходят. Это сказал бы любой, кто её знает, и Никто сказал бы первым. Неприятно было именно это: что так сказал бы любой и что ей это удобно."},{"kind":"p","line":76,"text":"Она сказала тогда не подумав. Она вообще редко говорила, не подумав, а тогда мальчишка ответил ей «да», когда она спросила, хочет ли он их найти, и она увидела это «да» целиком, каким оно станет, если оставить его в срубе одного на зиму: шесть стрел, шестнадцать лет и тропа на юг. Она сказала «я приду сама», чтобы закрыть ему эту тропу. Обещание это было или нет, она тогда не решала. Ей нужно было, чтобы он остался дома."},{"kind":"p","line":78,"text":"Полено разгорелось. Никто во сне что-то сказал, слов было не разобрать, но голос был довольный, и она поймала себя на том, что прислушивается, не скажет ли он ещё."},{"kind":"break"},{"kind":"p","line":82,"text":"*Утро.*"},{"kind":"p","line":84,"text":"К утру дождь кончился. С елей ещё капало, и капли были крупные, тяжёлые, от каждой на лужах у порога расходились круги. Арн сидел у двери на чурбаке, где было светлее, и точил наконечники."},{"kind":"p","line":86,"text":"Грейс не сразу поняла, что видит. На тряпке перед ним лежали стрелы, все с новыми древками, светлыми, гладкими, оперёнными серым гусиным пером. Весной у него было шесть стрел, и он каждый раз их искал. Наконечников из Ручейного было двенадцать, и они лежали в сундуке. Теперь сундук был не нужен: все двенадцать сидели на древках. Он сделал это за осень, пока их не было, и никому не сказал, потому что некому было говорить."},{"kind":"p","line":88,"text":"Он вёл бруском по жалу короткими движениями от себя, проверял его большим пальцем и брал следующий."},{"kind":"p","line":90,"text":"«В этом доме все что-нибудь считают», — подумала Грейс, и Никто у неё в голове немедленно согласился, что это, по крайней мере, лучше, чем если бы никто ничего не считал."},{"kind":"p","line":92,"text":"— Можно про стрельбу спросить? — сказал Арн, не поднимая головы."},{"kind":"p","line":94,"text":"— Спрашивай."},{"kind":"p","line":96,"text":"— Ты весной сказала стоять в двадцати шагах. Чтобы он не мог достать."},{"kind":"p","line":98,"text":"— Сказала."},{"kind":"p","line":100,"text":"— А если он не знает, что ты там? — Брусок остановился. — Тогда сколько? Чтобы наверняка."},{"kind":"p","line":102,"text":"Она посмотрела на стрелы и сосчитала их, хотя не собиралась: двенадцать. Кто идёт на зверя наверняка, берёт по две стрелы на голову: одну на выстрел, вторую на того, кто не лёг. Арн считал их шестерыми, и двенадцать выходило ровно. Она не стала проверять это на пальцах. Она это просто увидела, так же, как видела выход из комнаты, едва в неё войдя."},{"kind":"p","line":104,"text":"И ещё она почувствовала у щеки ложе. Холодное, тяжёлое, гладкое там, где его тёрли до неё чужие руки, и слишком большое для тринадцатилетней девчонки, которой поставили руку от скуки. Она не вспоминала, просто оно легло к щеке само, как ложилось всегда, когда она видела у мальчишки в руках оружие и этот взгляд поверх него."},{"kind":"p","line":106,"text":"— Кто не знает? — спросила она."},{"kind":"p","line":108,"text":"— Олень."},{"kind":"p","line":110,"text":"Врать он не умел и знал это, поэтому сказал и посмотрел на неё прямо, не забирая слова назад. Мол, сказал «олень», а ты понимай как хочешь."},{"kind":"p","line":112,"text":"— Олень ходит один, — сказала Грейс."},{"kind":"p","line":114,"text":"Арн подумал над этим и кивнул. Потом снова взялся за брусок."},{"kind":"p","line":116,"text":"— За просекой ещё заимки есть, — сказал он немного погодя, глядя на жало. — У Рябого ручья две семьи. И старик один, дальше, на бобра ставит. Прошлой зимой их не трогали, они дальше. — Брусок прошёл по железу и остановился. — Этой зимой они на ближних ничего не возьмут. Ближних уже взяли."},{"kind":"p","line":118,"text":"Он не упрекал её. Она бы предпочла, чтобы упрекал: на упрёк можно ответить, а это было просто то, что он знал и сказал вслух, как говорят о погоде. Снег скоро. Дрова сухие. Ближних уже взяли."},{"kind":"p","line":120,"text":"— Сколько стрел? — спросила она, хотя видела сама."},{"kind":"p","line":122,"text":"— Двенадцать."},{"kind":"p","line":124,"text":"— Убери их в сундук."},{"kind":"p","line":126,"text":"Арн не пошевелился. Не из упрямства, она это видела, он просто не понял, зачем. Потом понял, и что-то в нём закрылось, тихо и аккуратно, как он закрывал за собой дверь."},{"kind":"p","line":128,"text":"— Ты сказала, что придёшь сама, — сказал он."},{"kind":"p","line":130,"text":"— Сказала."},{"kind":"p","line":132,"text":"— Ну вот, — сказал Арн, и больше ничего, и собрал стрелы с тряпки, и унёс их к сундуку, и положил сверху, не закрывая крышку."},{"kind":"p","line":134,"text":"Грейс посмотрела на Никто. Он спал после ночи, повернувшись лицом к стене, и одна рука свешивалась с топчана к табурету, где лежала бандальера. Посмотрела на пустой крюк над своим топчаном. На открытый сундук."},{"kind":"p","line":136,"text":"Потом встала и пошла проверить, высохли ли у очага её сапоги."}],"schemes":[],"ver":"c14ab538ee"}];
+if (!Array.isArray(DOCS)) DOCS = [DOCS];
+(function () {
+  var TYPES = { dislike: 'Не нравится', question: 'Вопрос', note: 'Заметка' };
+  // настройки (размер, тема) — общие на всю читалку, под ключом основного текста;
+  // пометки и место чтения — у каждой вкладки свои (у основной — прежние ключи, старые пометки целы)
+  var KEY = 'kordim-reader:' + DOCS[0].id;
+  var DOC = DOCS[0], cur = 0;
+  function dkey(d, k) { return 'kordim-reader:' + d.id + ':' + k; }
+  var root = document.documentElement;
+
+  // хранилище: в приватном окне или при запрете может не работать — тогда предупреждаем
+  var storageOk = true;
+  function loadRaw(key, def) {
+    try { var v = localStorage.getItem(key); return v == null ? def : JSON.parse(v); }
+    catch (e) { storageOk = false; return def; }
+  }
+  function saveRaw(key, v) {
+    try { localStorage.setItem(key, JSON.stringify(v)); }
+    catch (e) { storageOk = false; showWarn(); }
+  }
+  function load(k, def) { return loadRaw(KEY + ':' + k, def); }
+  function save(k, v) { saveRaw(KEY + ':' + k, v); }
+  function saveNotes() { saveRaw(dkey(DOC, 'notes'), notes); }
+  function showWarn() {
+    if (!storageOk) document.getElementById('warn').textContent =
+      'Браузер не даёт сохранять заметки — скопируй их перед закрытием вкладки.';
+  }
+
+  // текст: абзацы склеены через \n, у каждого — смещение начала в общей строке
+  var paras, full, starts;
+  function prep(d) {
+    var ps = d.blocks.filter(function (b) { return b.kind === 'p'; });
+    var f = '', st = [];
+    ps.forEach(function (p, i) { if (i) f += '\n'; st.push(f.length); f += p.text; });
+    // в разборе «стр. N» и «стр. N–M» — ссылки на строки рассказа
+    if (d.style === 'doc' && DOCS[0] !== d) ps.forEach(function (p) {
+      if (p.refs) return;
+      p.refs = [];
+      var re = /стр\.\s*(\d+)(?:\s*[–-]\s*(\d+))?/g, m;
+      while ((m = re.exec(p.text))) p.refs.push([m.index, m.index + m[0].length, +m[1], +(m[2] || m[1])]);
+      // заголовок заметки (Н1. / В12. / З2–З3. … целиком жирный) — тап по нему ведёт к первой ссылке
+      var fm = p.fmt || [];
+      p.jump = p.refs.length && /^[А-ЯЁ]{1,2}\d/.test(p.text) && fm.some(function (f) { return f[2] === 'b' && f[0] === 0; }) ? p.refs[0] : null;
+    });
+    return { paras: ps, full: f, starts: st };
+  }
+
+  function paraAt(off) {
+    var lo = 0, hi = starts.length - 1;
+    while (lo < hi) { var mid = (lo + hi + 1) >> 1; if (starts[mid] <= off) lo = mid; else hi = mid - 1; }
+    return lo;
+  }
+
+  var notes = [];
+  var filter = 'all';
+
+  // текст мог поменяться после правки файла — ищем цитату заново, ближайшее вхождение к старому месту
+  function reanchor(notes, full) {
+    notes.forEach(function (n) {
+      if (full.slice(n.start, n.end) === n.quote) { n.lost = false; return; }
+      var best = -1, from = 0, idx;
+      while ((idx = full.indexOf(n.quote, from)) !== -1) {
+        if (best < 0 || Math.abs(idx - n.start) < Math.abs(best - n.start)) best = idx;
+        from = idx + 1;
+      }
+      if (best >= 0) { n.start = best; n.end = best + n.quote.length; n.lost = false; }
+      else n.lost = true;
+    });
+  }
+
+  function lineIn(t, off) {
+    var lo = 0, hi = t.starts.length - 1;
+    while (lo < hi) { var mid = (lo + hi + 1) >> 1; if (t.starts[mid] <= off) lo = mid; else hi = mid - 1; }
+    return t.paras[lo].line;
+  }
+  function whereIn(t, n) {
+    var a = lineIn(t, n.start), b = lineIn(t, Math.max(n.start, n.end - 1));
+    return a === b ? 'стр. ' + a : 'стр. ' + a + '–' + b;
+  }
+  function whereOf(n) { return whereIn({ paras: paras, starts: starts }, n); }
+
+  function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  // разметка
+  var article = document.getElementById('text');
+  var pEls = [];
+  function build() {
+    var isDoc = DOC.style === 'doc';
+    document.title = DOCS[0].title + (cur ? ' — ' + DOC.tab.toLowerCase() : '');
+    document.getElementById('title').textContent = DOC.title;
+    document.getElementById('kicker').textContent = isDoc ? 'Кордим · ' + DOCS[0].title : 'Кордим · проза';
+    var words = full.split(/\s+/).filter(Boolean).length;
+    var mins = Math.round(words / 180);
+    document.getElementById('meta').innerHTML =
+      (DOC.status ? '<span class="draft">' + esc(DOC.status) + '</span> · ' : '') +
+      (isDoc ? esc(DOC.file) + ' · ' : '') +
+      words.toLocaleString('ru-RU') + ' слов · около ' + mins + ' мин чтения';
+    article.innerHTML = '';
+    article.className = isDoc ? 'doc' : '';
+    pEls = [];
+    var pi = 0, afterBreak = true;
+    DOC.blocks.forEach(function (b) {
+      if (b.kind === 'break') { var d = document.createElement('div'); d.className = 'break'; d.textContent = '✦ ✦ ✦'; article.appendChild(d); afterBreak = true; return; }
+      if (b.kind === 'h') { var h = document.createElement('h2'); h.textContent = b.text; article.appendChild(h); afterBreak = true; return; }
+      var p = document.createElement('p');
+      p.dataset.i = pi++;
+      if (isDoc) {
+        p.className = 'tag-' + (b.tag || 'p') + (b.depth ? ' d' + Math.min(b.depth, 2) : '');
+        if (b.marker) p.dataset.m = b.marker;
+      } else if (afterBreak && /^[^—–-]/.test(b.text)) p.className = 'first';
+      afterBreak = false;
+      article.appendChild(p);
+      pEls.push(p);
+    });
+  }
+
+  function paint() {
+    pEls.forEach(function (p, i) {
+      var s0 = starts[i], s1 = s0 + paras[i].text.length;
+      var cuts = [0, paras[i].text.length], live = [], fmt = paras[i].fmt || [];
+      fmt.forEach(function (f) { cuts.push(f[0], f[1]); });
+      var refs = paras[i].refs || [];
+      refs.forEach(function (r) { cuts.push(r[0], r[1]); });
+      var ins = paras[i].ins || [], dels = paras[i].del || [];
+      ins.forEach(function (r) { cuts.push(r[0], r[1]); });
+      dels.forEach(function (d) { cuts.push(d[0]); });
+      notes.forEach(function (n) {
+        if (n.lost || n.end <= s0 || n.start >= s1) return;
+        var a = Math.max(n.start, s0) - s0, b = Math.min(n.end, s1) - s0;
+        live.push({ n: n, a: a, b: b }); cuts.push(a, b);
+      });
+      cuts = cuts.filter(function (v, k, arr) { return arr.indexOf(v) === k; }).sort(function (x, y) { return x - y; });
+      var html = '<span class="ln" title="Заметка на весь абзац">' + paras[i].line + '</span>';
+      function delAt(pos) {
+        var out = '';
+        dels.forEach(function (d, di) { if (d[0] === pos) out += '<span class="del" data-p="' + i + '" data-d="' + di + '" title="Убрано — показать"></span>'; });
+        return out;
+      }
+      for (var k = 0; k < cuts.length - 1; k++) {
+        var a = cuts[k], b = cuts[k + 1], seg = esc(paras[i].text.slice(a, b));
+        html += delAt(a);
+        ins.forEach(function (r) { if (r[0] <= a && r[1] >= b) seg = '<ins>' + seg + '</ins>'; });
+        fmt.forEach(function (f) { if (f[0] <= a && f[1] >= b) seg = '<' + f[2] + '>' + seg + '</' + f[2] + '>'; });
+        refs.forEach(function (r) { if (r[0] <= a && r[1] >= b) seg = '<span class="ref" data-a="' + r[2] + '" data-b="' + r[3] + '" title="Открыть в рассказе">' + seg + '</span>'; });
+        var cover = live.filter(function (x) { return x.a <= a && x.b >= b; });
+        if (!cover.length) { html += seg; continue; }
+        var top = cover[cover.length - 1].n;
+        html += '<mark class="t-' + top.type + '" data-ids="' + cover.map(function (x) { return x.n.id; }).join(',') + '">' + seg + '</mark>';
+      }
+      html += delAt(paras[i].text.length);
+      p.innerHTML = html;
+      p.classList.toggle('chg', !!paras[i].chg);
+      p.classList.toggle('has-note', live.length > 0);
+      if (paras[i].jump) { p.classList.add('jumphead'); p.dataset.a = paras[i].jump[2]; p.dataset.b = paras[i].jump[3]; }
+    });
+    document.getElementById('count').textContent = totalNotes();
+    renderTabs();
+    renderList();
+  }
+
+  // выделение → смещения в общей строке
+  var pending = null;
+  function pointOffset(node, off) {
+    var el = node.nodeType === 1 ? node : node.parentNode;
+    var p = el.closest && el.closest('article p');
+    if (!p) return null;
+    var r = document.createRange();
+    r.setStart(p, 0);
+    r.setEnd(node, off);
+    var text = r.toString();
+    var ln = p.querySelector('.ln');
+    if (ln && r.intersectsNode(ln)) text = text.slice(ln.textContent.length);
+    return starts[+p.dataset.i] + text.length;
+  }
+  function readSelection() {
+    var sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.rangeCount) return null;
+    var r = sel.getRangeAt(0);
+    if (!article.contains(r.commonAncestorContainer)) return null;
+    var a = pointOffset(r.startContainer, r.startOffset);
+    var b = pointOffset(r.endContainer, r.endOffset);
+    if (a == null || b == null) {
+      // край выделения на разделителе сцены — подтягиваем к ближайшему абзацу
+      var ps = pEls.filter(function (p) { return r.intersectsNode(p); });
+      if (!ps.length) return null;
+      if (a == null) a = starts[+ps[0].dataset.i];
+      if (b == null) { var last = +ps[ps.length - 1].dataset.i; b = starts[last] + paras[last].text.length; }
+    }
+    while (a < b && /\s/.test(full[a])) a++;
+    while (b > a && /\s/.test(full[b - 1])) b--;
+    // недовыделенное слово добираем целиком
+    var letter = /[0-9A-Za-zА-Яа-яЁё]/;
+    while (a > 0 && letter.test(full[a - 1]) && letter.test(full[a])) a--;
+    while (b < full.length && letter.test(full[b]) && letter.test(full[b - 1])) b++;
+    if (b <= a) return null;
+    return { start: a, end: b };
+  }
+
+  var selbar = document.getElementById('selbar');
+  var selTimer;
+  document.addEventListener('selectionchange', function () {
+    clearTimeout(selTimer);
+    selTimer = setTimeout(function () {
+      if (editorOpen) return;
+      var got = readSelection();
+      if (!got && pending && Date.now() - selbarTouch < 800) return;
+      pending = got;
+      wholePara = false;
+      showSel();
+    }, 120);
+  });
+  var wholePara = false;
+  function showSel() {
+    selbar.classList.toggle('on', !!pending);
+    document.body.classList.toggle('selecting', !!pending);
+    document.getElementById('selPara').setAttribute('aria-pressed', wholePara);
+    if (pending) document.getElementById('selq').textContent = '«' + full.slice(pending.start, pending.end).replace(/\n/g, ' ') + '»';
+  }
+  // растянуть выделенное до границ абзацев (на телефоне номеров строк не видно — это вместо них)
+  document.getElementById('selPara').addEventListener('click', function () {
+    if (!pending) return;
+    if (!wholePara) {
+      pending.raw = { start: pending.start, end: pending.end };
+      var a = paraAt(pending.start), b = paraAt(pending.end - 1);
+      pending.start = starts[a]; pending.end = starts[b] + paras[b].text.length;
+      wholePara = true;
+    } else if (pending.raw) {
+      pending.start = pending.raw.start; pending.end = pending.raw.end; wholePara = false;
+    }
+    showSel();
+  });
+  selbar.addEventListener('mousedown', function (e) { e.preventDefault(); });
+  // на телефоне тап по панели может снять выделение — заметку всё равно ставим на то, что было выделено
+  var selbarTouch = 0;
+  selbar.addEventListener('pointerdown', function () { selbarTouch = Date.now(); });
+  selbar.querySelectorAll('.tbtn[data-type]').forEach(function (b) {
+    b.addEventListener('click', function () { if (pending) openEditor({ start: pending.start, end: pending.end, type: b.dataset.type }); });
+  });
+
+  // редактор
+  var editor = document.getElementById('editor'), edText = document.getElementById('edText');
+  var editorOpen = false, editing = null, edType = 'note';
+  function setType(t) {
+    edType = t;
+    document.querySelectorAll('#edTypes .tbtn').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.type === t); });
+  }
+  document.querySelectorAll('#edTypes .tbtn').forEach(function (b) { b.addEventListener('click', function () { setType(b.dataset.type); }); });
+  function openEditor(n) {
+    editing = n;
+    editorOpen = true;
+    setType(n.type);
+    var q = n.quote || full.slice(n.start, n.end);
+    document.getElementById('edQuote').textContent = q;
+    document.getElementById('edWhere').textContent = whereOf(n) + (n.id ? '' : ' · новая');
+    document.getElementById('edDelete').style.visibility = n.id ? 'visible' : 'hidden';
+    edText.value = n.comment || '';
+    selbar.classList.remove('on');
+    document.body.classList.remove('selecting');
+    editor.classList.add('on');
+    setTimeout(function () { edText.focus(); }, 30);
+  }
+  function closeEditor() { editor.classList.remove('on'); editorOpen = false; editing = null; }
+  function commit() {
+    if (!editing) return;
+    if (editing.id) {
+      editing.type = edType; editing.comment = edText.value.trim();
+    } else {
+      notes.push({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        type: edType, start: editing.start, end: editing.end,
+        quote: full.slice(editing.start, editing.end), comment: edText.value.trim(), at: new Date().toISOString(), v: DOCS[0].ver
+      });
+      window.getSelection().removeAllRanges();
+    }
+    notes.sort(function (x, y) { return x.start - y.start; });
+    saveNotes();
+    closeEditor();
+    paint();
+  }
+  document.getElementById('edSave').addEventListener('click', commit);
+  document.getElementById('edCancel').addEventListener('click', closeEditor);
+  document.getElementById('edDelete').addEventListener('click', function () {
+    if (!editing || !editing.id) return;
+    notes = notes.filter(function (n) { return n !== editing; });
+    saveNotes(); closeEditor(); paint();
+  });
+  editor.addEventListener('mousedown', function (e) { if (e.target === editor) closeEditor(); });
+  edText.addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); commit(); } });
+
+  // щелчок по выделенному месту или по номеру строки
+  article.addEventListener('click', function (e) {
+    var ln = e.target.closest('.ln');
+    if (ln) {
+      var i = +ln.parentNode.dataset.i;
+      openEditor({ start: starts[i], end: starts[i] + paras[i].text.length, type: 'note' });
+      return;
+    }
+    var collapsed = window.getSelection().isCollapsed;
+    var dl = e.target.closest('.del');
+    if (dl) { showDel(paras[+dl.dataset.p].del[+dl.dataset.d][1]); return; }
+    var ref = e.target.closest('.ref');
+    if (ref && collapsed) { jumpTo(+ref.dataset.a, +ref.dataset.b); return; }
+    var m = e.target.closest('mark');
+    var jh = e.target.closest('p.jumphead');
+    if (jh && collapsed && !m) { jumpTo(+jh.dataset.a, +jh.dataset.b); return; }
+    if (m && collapsed) {
+      var ids = m.dataset.ids.split(',');
+      var n = notes.filter(function (x) { return x.id === ids[ids.length - 1]; })[0];
+      if (n) openEditor(n);
+    }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { if (editorOpen) closeEditor(); else drawer.classList.remove('on'); return; }
+    if (editorOpen || e.ctrlKey || e.metaKey || e.altKey) return;
+    var t = { '1': 'dislike', '2': 'question', '3': 'note' }[e.key];
+    if (t && pending) { e.preventDefault(); openEditor({ start: pending.start, end: pending.end, type: t }); }
+  });
+
+  // список заметок
+  var drawer = document.getElementById('drawer');
+  document.getElementById('notesBtn').addEventListener('click', function () { drawer.classList.toggle('on'); });
+  document.getElementById('closeDrawer').addEventListener('click', function () { drawer.classList.remove('on'); });
+  document.querySelectorAll('#filters .tbtn').forEach(function (b) {
+    b.addEventListener('click', function () {
+      filter = b.dataset.f;
+      document.querySelectorAll('#filters .tbtn').forEach(function (x) { x.setAttribute('aria-pressed', x === b); });
+      renderList();
+    });
+  });
+  // список: пометки всех вкладок разом, по группам; у чужой вкладки место считается по её тексту
+  function isOld(n) { return !!DOCS[0].ver && n.v !== DOCS[0].ver; }
+  function allNotes() {
+    var out = [];
+    DOCS.forEach(function (d, i) {
+      var ns = docNotes(d), t = d === DOC ? { paras: paras, starts: starts } : prep(d);
+      if (d !== DOC) reanchor(ns, t.full);
+      ns.forEach(function (n) { out.push({ n: n, i: i, d: d, t: t }); });
+    });
+    return out;
+  }
+  function renderList() {
+    var list = document.getElementById('list');
+    var all = allNotes();
+    var shown = all.filter(function (x) { return filter === 'all' || x.n.type === filter; });
+    var old = all.filter(function (x) { return isOld(x.n); }).length;
+    document.getElementById('oldBox').classList.toggle('on', old > 0);
+    document.getElementById('oldText').textContent = old
+      ? 'Пометок с прошлого круга: ' + old + ' (бледные). Если ты их уже отправил и правки внесены — убери, чтобы не ушли второй раз.' : '';
+    if (!all.length) { list.innerHTML = '<div class="empty">Пока пусто. Выдели в тексте то, что царапает, и выбери, что это.</div>'; return; }
+    if (!shown.length) { list.innerHTML = '<div class="empty">В этом фильтре заметок нет.</div>'; return; }
+    list.innerHTML = '';
+    var lastTab = -1;
+    shown.forEach(function (x) {
+      var n = x.n;
+      if (DOCS.length > 1 && x.i !== lastTab) {
+        lastTab = x.i;
+        var g = document.createElement('div');
+        g.className = 'grp';
+        g.textContent = x.d.tab + ' · ' + docNotes(x.d).length;
+        list.appendChild(g);
+      }
+      var d = document.createElement('div');
+      d.className = 'item' + (n.lost ? ' lost' : '') + (isOld(n) ? ' old-round' : '');
+      var q = n.quote.length > 220 ? n.quote.slice(0, 220) + '…' : n.quote;
+      d.innerHTML = '<div class="h"><span class="dot t-' + n.type + '"></span><b>' + TYPES[n.type] + '</b>' +
+        (n.lost ? 'место не найдено после правки' : whereIn(x.t, n)) + '<button class="lbtn ed-it" title="Изменить">✎</button></div>' +
+        '<div class="qq">«' + esc(q) + '»</div>' + (n.comment ? '<div class="c">' + esc(n.comment) + '</div>' : '');
+      d.addEventListener('click', function (e) { goNote(x.i, n.id, !!e.target.closest('.ed-it')); });
+      d.addEventListener('dblclick', function () { goNote(x.i, n.id, true); });
+      list.appendChild(d);
+    });
+  }
+  // пометка с другой вкладки: сначала открыть ту вкладку, потом искать
+  function goNote(i, id, edit) {
+    if (i !== cur) setDoc(i, true);
+    var n = notes.filter(function (x) { return x.id === id; })[0];
+    if (!n) return;
+    if (edit) openEditor(n); else jump(n);
+  }
+  function jump(n) {
+    if (n.lost) { openEditor(n); return; }
+    var m = article.querySelector('mark[data-ids*="' + n.id + '"]');
+    if (!m) return;
+    if (window.innerWidth < 760) drawer.classList.remove('on');
+    m.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    var all = article.querySelectorAll('mark[data-ids*="' + n.id + '"]');
+    all.forEach(function (x) { x.classList.add('flash'); });
+    setTimeout(function () { all.forEach(function (x) { x.classList.remove('flash'); }); }, 1600);
+  }
+
+  // выгрузка
+  // все вкладки в одну выгрузку: у каждой свой файл и свои номера строк
+  function docNotes(d) { return d === DOC ? notes : loadRaw(dkey(d, 'notes'), []); }
+  function totalNotes() { return DOCS.reduce(function (s, d) { return s + docNotes(d).length; }, 0); }
+  function exportDoc(d, multi) {
+    var ns = docNotes(d);
+    var t = d === DOC ? { paras: paras, starts: starts } : prep(d);
+    if (d !== DOC) reanchor(ns, t.full);
+    var head = multi ? '# ' + d.tab + '\n' : '';
+    var out = head + (d.style === 'doc' ? DOCS[0].title + ' — ' + d.tab.toLowerCase() : d.title) +
+      ' — заметки к вычитке (' + ns.length + ')\nФайл: ' + d.file + '\n';
+    ['dislike', 'question', 'note'].forEach(function (tp) {
+      var part = ns.filter(function (n) { return n.type === tp; });
+      if (!part.length) return;
+      out += '\n## ' + { dislike: 'Не нравится', question: 'Вопросы', note: 'Заметки' }[tp] + '\n';
+      part.forEach(function (n, k) {
+        out += '\n' + (k + 1) + '. ' + (n.lost ? 'место не найдено' : whereIn(t, n)) + ': «' + n.quote.replace(/\n/g, ' / ') + '»\n';
+        if (n.comment) out += '   → ' + n.comment.replace(/\n/g, '\n     ') + '\n';
+      });
+    });
+    return out;
+  }
+  function exportText() {
+    var withNotes = DOCS.filter(function (d) { return docNotes(d).length; });
+    var multi = DOCS.length > 1;
+    return withNotes.map(function (d) { return exportDoc(d, multi); }).join('\n');
+  }
+  function flashMsg(s) { var c = document.getElementById('copied'); c.textContent = s; setTimeout(function () { c.textContent = ''; }, 2600); }
+  document.getElementById('copyAll').addEventListener('click', function () {
+    if (!totalNotes()) { flashMsg('Заметок пока нет.'); return; }
+    var text = exportText();
+    var fallback = function () {
+      var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); flashMsg('Скопировано — вставь в чат.'); } catch (e) { flashMsg('Не вышло скопировать — сохрани файлом.'); }
+      ta.remove();
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText)
+      navigator.clipboard.writeText(text).then(function () { flashMsg('Скопировано — вставь в чат.'); }, fallback);
+    else fallback();
+  });
+  document.getElementById('download').addEventListener('click', function () {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([exportText()], { type: 'text/markdown;charset=utf-8' }));
+    a.download = DOCS[0].title.replace(/\s+/g, '_') + '_заметки.md';
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+  document.getElementById('clearAll').addEventListener('click', function () {
+    var total = totalNotes();
+    var what = DOCS.length > 1 ? ' — и к рассказу, и к разбору' : '';
+    if (!total || !confirm('Удалить все заметки' + what + ' (' + total + ')? Сначала лучше скопировать.')) return;
+    DOCS.forEach(function (d) { saveRaw(dkey(d, 'notes'), []); });
+    notes = []; paint();
+  });
+
+  document.getElementById('oldClear').addEventListener('click', function () {
+    DOCS.forEach(function (d) {
+      var ns = docNotes(d).filter(function (n) { return !isOld(n); });
+      if (d === DOC) notes = ns;
+      saveRaw(dkey(d, 'notes'), ns);
+    });
+    paint();
+  });
+
+  // чтение: размер, тема, прогресс, место
+  var size = load('size', window.innerWidth < 760 ? 18 : 20);
+  function applySize() { root.style.setProperty('--size', size + 'px'); }
+  document.getElementById('smaller').addEventListener('click', function () { size = Math.max(15, size - 1); applySize(); save('size', size); });
+  document.getElementById('bigger').addEventListener('click', function () { size = Math.min(28, size + 1); applySize(); save('size', size); });
+  var theme = load('theme', window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  function applyTheme() {
+    root.dataset.theme = theme; document.getElementById('theme').textContent = theme === 'dark' ? '☀' : '☾';
+    document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#161411' : '#f5efe3';
+  }
+  document.getElementById('theme').addEventListener('click', function () { theme = theme === 'dark' ? 'light' : 'dark'; applyTheme(); save('theme', theme); });
+
+  var bar = document.getElementById('progress'), saveTimer;
+  window.addEventListener('scroll', function () {
+    var h = document.documentElement.scrollHeight - innerHeight;
+    bar.style.width = (h > 0 ? scrollY / h * 100 : 0) + '%';
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () { saveRaw(posKey(), scrollY / Math.max(1, document.documentElement.scrollHeight)); }, 300);
+  }, { passive: true });
+
+  // правки и схемы — у основного текста
+  var delpop = document.getElementById('delpop');
+  function showDel(t) { document.getElementById('delText').textContent = t; delpop.classList.add('on'); }
+  document.getElementById('delClose').addEventListener('click', function () { delpop.classList.remove('on'); });
+  var showChg = load('chg', true);
+  function applyChg() {
+    var has = !!(DOC.diffFrom && DOC.changed);
+    document.body.classList.toggle('show-chg', has && showChg);
+    document.body.classList.toggle('has-chg', has);
+    var b = document.getElementById('chgBtn');
+    if (b) b.setAttribute('aria-pressed', showChg);
+  }
+  function renderExtras() {
+    var box = document.getElementById('extras'), d0 = DOCS[0];
+    box.innerHTML = '';
+    if (cur === 0 && d0.diffFrom && d0.changed) {
+      var b = document.createElement('button');
+      b.id = 'chgBtn';
+      b.innerHTML = '<span class="sw"></span>Правки: ' + d0.changed + ' абз.';
+      b.title = 'Подсветить, что изменилось с прошлой версии (' + d0.diffFrom + ')';
+      b.addEventListener('click', function () { showChg = !showChg; save('chg', showChg); applyChg(); });
+      box.appendChild(b);
+    }
+    (d0.schemes || []).forEach(function (sc) {
+      var a = document.createElement('a');
+      a.href = sc.href; a.textContent = '▶ ' + sc.title;
+      box.appendChild(a);
+    });
+    applyChg();
+  }
+  document.getElementById('nextChg').addEventListener('click', function () {
+    var ps = article.querySelectorAll('p.chg'), y = innerHeight * .35;
+    for (var k = 0; k < ps.length; k++) {
+      if (ps[k].getBoundingClientRect().top > y + 4) {
+        var r = ps[k].getBoundingClientRect();
+        scrollTo(0, scrollY + r.top - y);
+        return;
+      }
+    }
+    if (ps.length) scrollTo(0, scrollY + ps[0].getBoundingClientRect().top - y);
+  });
+
+  // вкладки
+  function posKey() { return cur ? dkey(DOC, 'pos') : KEY + ':pos'; }
+  var here = {}; // точное место на вкладке, пока страница открыта (между переключениями)
+  var tabsEl = document.getElementById('tabs');
+  function renderTabs() {
+    if (DOCS.length < 2) return;
+    tabsEl.classList.add('on');
+    tabsEl.innerHTML = '';
+    DOCS.forEach(function (d, i) {
+      var b = document.createElement('button');
+      b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', i === cur);
+      var c = docNotes(d).length;
+      b.innerHTML = esc(d.tab) + (c ? '<b>' + c + '</b>' : '');
+      b.addEventListener('click', function () { if (i !== cur) { setDoc(i, true); } });
+      tabsEl.appendChild(b);
+    });
+    var other = DOCS[cur ? 0 : 1], swap = document.getElementById('swap');
+    swap.hidden = false;
+    swap.textContent = '⇄ ' + other.tab;
+    document.getElementById('tabnote').textContent =
+      'Здесь пометки и к рассказу, и к разбору. «Скопировать для Claude» берёт всё сразу — копировать один раз, с любой вкладки.';
+  }
+  // из разбора — к строкам рассказа: открыть вкладку и подсветить абзацы.
+  // Место в разборе запоминается, «⇄ Разбор» вернёт туда же.
+  function jumpTo(a, b) { setDoc(0, true, { a: a, b: b || a }); }
+  function showTarget(t) {
+    var hit = [];
+    pEls.forEach(function (p, i) { var l = paras[i].line; if (l >= t.a && l <= t.b) hit.push(p); });
+    if (!hit.length) {
+      // строка указала не на абзац (пустая, разрыв) — берём ближайший следующий
+      var k = 0; while (k < paras.length - 1 && paras[k].line < t.a) k++;
+      hit = [pEls[k]];
+    }
+    hit.forEach(function (p) { p.classList.add('target', 'pulse'); });
+    requestAnimationFrame(function () {
+      var r = hit[0].getBoundingClientRect();
+      var y = scrollY + r.top - Math.max(90, (innerHeight - Math.min(r.height * hit.length, innerHeight * .6)) / 2);
+      scrollTo(0, Math.max(0, y));
+    });
+  }
+  function setDoc(i, user, target) {
+    if (user) { saveRaw(posKey(), scrollY / Math.max(1, document.documentElement.scrollHeight)); here[cur] = scrollY; }
+    clearTimeout(saveTimer);
+    cur = i; DOC = DOCS[i];
+    var t = prep(DOC); paras = t.paras; full = t.full; starts = t.starts;
+    notes = loadRaw(dkey(DOC, 'notes'), []);
+    pending = null; selbar.classList.remove('on'); document.body.classList.remove('selecting');
+    build(); reanchor(notes, full); paint(); showWarn(); renderExtras();
+    if (DOCS.length > 1) {
+      save('tab', i);
+      try { history.replaceState(null, '', i ? '#' + encodeURIComponent(DOC.tab.toLowerCase()) : location.pathname + location.search); } catch (e) {}
+    }
+    if (target) { showTarget(target); return; }
+    var pos = loadRaw(posKey(), 0), exact = here[i];
+    requestAnimationFrame(function () { scrollTo(0, exact != null ? exact : pos ? pos * document.documentElement.scrollHeight : 0); });
+  }
+
+  document.getElementById('swap').addEventListener('click', function () { setDoc(cur ? 0 : 1, true); });
+
+  applySize(); applyTheme();
+  var start = 0, hash = decodeURIComponent(location.hash.slice(1)).toLowerCase();
+  // #стр-116 или #стр-110-118 — сразу к строкам рассказа (ссылки со схем)
+  var lm = hash.match(/^стр-(\d+)(?:-(\d+))?$/);
+  if (lm) { setDoc(0, false, { a: +lm[1], b: +(lm[2] || lm[1]) }); return; }
+  if (hash) DOCS.forEach(function (d, i) { if (d.tab.toLowerCase() === hash) start = i; });
+  else start = Math.min(load('tab', 0) || 0, DOCS.length - 1);
+  setDoc(start, false);
+})();
+</script>
+</body>
+</html>
