@@ -1,0 +1,998 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f5efe3">
+<title>Никто и Элоуэн: две встречи</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5efe3;
+  --paper: #fbf7ef;
+  --ink: #2a241d;
+  --muted: #8a7f70;
+  --faint: #c9bfae;
+  --rule: #e4dac8;
+  --accent: #8c3b2a;
+  --ui-bg: #fffaf2;
+  --ui-shadow: 0 6px 24px rgba(60, 40, 20, .16);
+  --m-dislike: rgba(214, 72, 52, .22);
+  --m-dislike-line: #c4412d;
+  --m-question: rgba(52, 116, 214, .2);
+  --m-question-line: #2f68c0;
+  --m-note: rgba(222, 170, 40, .3);
+  --m-note-line: #b9850f;
+  --chg: rgba(46, 150, 110, .2);
+  --chg-line: #2a8a63;
+  --size: 20px;
+}
+:root[data-theme="dark"] {
+  --bg: #161411;
+  --paper: #1d1a16;
+  --ink: #ddd4c6;
+  --muted: #8f8577;
+  --faint: #4a443b;
+  --rule: #2f2a24;
+  --accent: #d98b6c;
+  --ui-bg: #26221d;
+  --ui-shadow: 0 6px 24px rgba(0, 0, 0, .5);
+  --m-dislike: rgba(240, 100, 80, .26);
+  --m-dislike-line: #f07a63;
+  --m-question: rgba(100, 160, 250, .24);
+  --m-question-line: #7fb0ff;
+  --m-note: rgba(240, 190, 60, .24);
+  --m-note-line: #e8b94a;
+  --chg: rgba(80, 200, 150, .2);
+  --chg-line: #5cc79a;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 80px; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Literata", Georgia, "Times New Roman", serif;
+  font-size: var(--size);
+  line-height: 1.68;
+  -webkit-font-smoothing: antialiased;
+  transition: background .25s, color .25s;
+}
+button { font: inherit; color: inherit; }
+.ui { font-family: "PT Sans", "Segoe UI", Arial, sans-serif; }
+
+#progress { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: var(--accent); z-index: 30; }
+
+.top {
+  position: fixed; top: 10px; right: 12px; z-index: 20;
+  display: flex; gap: 6px;
+}
+.top button {
+  border: 1px solid var(--rule); background: var(--ui-bg); border-radius: 999px;
+  padding: 6px 12px; font-size: 14px; cursor: pointer; box-shadow: var(--ui-shadow);
+}
+.top button:hover { border-color: var(--muted); }
+#notesBtn b { color: var(--accent); }
+.edlink { display: inline-block; margin-top: 14px; font-size: 14px; color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); }
+.edlink:hover { border-bottom-style: solid; }
+.home {
+  position: fixed; top: 10px; left: 12px; z-index: 20; color: inherit; text-decoration: none;
+  border: 1px solid var(--rule); background: var(--ui-bg); border-radius: 999px;
+  padding: 6px 12px; font-size: 14px; box-shadow: var(--ui-shadow);
+}
+.home:hover { border-color: var(--muted); }
+#swap { font-weight: 700; }
+
+main {
+  max-width: 40em;
+  margin: 0 auto;
+  padding: 88px 16px 160px;
+}
+.sheet {
+  background: var(--paper);
+  border-radius: 6px;
+  padding: 64px clamp(20px, 7vw, 76px) 72px;
+  box-shadow: 0 1px 0 var(--rule), 0 20px 50px -30px rgba(60, 40, 20, .35);
+}
+header { text-align: center; margin-bottom: 48px; }
+.kicker { font-size: 13px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
+h1 { font-weight: 600; font-size: 2.1em; line-height: 1.15; margin: .35em 0 .3em; letter-spacing: -.01em; }
+.meta { font-size: 14px; color: var(--muted); }
+.meta .draft { color: var(--accent); }
+.hint {
+  margin: 28px auto 0; max-width: 30em; font-size: 14px; line-height: 1.5; color: var(--muted);
+  border-top: 1px solid var(--rule); padding-top: 16px;
+}
+.hint kbd { font-family: inherit; border: 1px solid var(--rule); border-radius: 4px; padding: 0 5px; font-size: 12px; }
+
+article { hyphens: auto; -webkit-hyphens: auto; }
+article p {
+  margin: 0; text-indent: 1.5em; position: relative;
+}
+article p.first { text-indent: 0; }
+article p.first::first-letter {
+  float: left; font-size: 3.4em; line-height: .9; padding: .06em .08em 0 0; font-weight: 600; color: var(--accent);
+}
+article p .ln {
+  position: absolute; left: -3.6em; top: .32em; width: 2.8em; text-align: right; text-indent: 0;
+  font-family: "PT Sans", Arial, sans-serif; font-size: 12px; color: var(--faint);
+  cursor: pointer; user-select: none; -webkit-user-select: none;
+  opacity: 0; transition: opacity .15s;
+}
+article p:hover .ln { opacity: 1; }
+article p .ln:hover { color: var(--accent); }
+article p.has-note .ln { opacity: 1; color: var(--muted); }
+article h2 { font-size: 1.15em; text-align: center; margin: 2em 0 1em; font-weight: 600; }
+.break {
+  text-align: center; color: var(--muted); margin: 1.6em 0; letter-spacing: .6em; font-size: .9em;
+  user-select: none; -webkit-user-select: none;
+}
+.end { text-align: center; color: var(--muted); margin-top: 3em; font-size: .9em; letter-spacing: .3em; }
+
+/* правки против прошлой версии */
+.extras { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.extras a, .extras button { border: 1px solid var(--rule); background: var(--ui-bg); color: inherit; border-radius: 999px; padding: 6px 14px; font-size: 14px; text-decoration: none; cursor: pointer; }
+.extras button[aria-pressed="true"] { border-color: var(--chg-line); color: var(--chg-line); font-weight: 700; }
+.extras .sw { display: inline-block; width: .9em; height: .9em; border-radius: 3px; background: var(--chg); box-shadow: inset 0 -2px 0 var(--chg-line); vertical-align: -1px; margin-right: 4px; }
+body.show-chg article ins { background: var(--chg); box-shadow: inset 0 -2px 0 var(--chg-line); text-decoration: none; border-radius: 2px; }
+article ins { text-decoration: none; }
+body.show-chg article:not(.doc) p.chg::before { content: ""; position: absolute; left: -.9em; top: .4em; bottom: .4em; width: 3px; border-radius: 2px; background: var(--chg-line); }
+.del { display: none; }
+body.show-chg .del { display: inline; cursor: pointer; color: var(--m-dislike-line); font-family: "PT Sans", Arial, sans-serif; font-size: .7em; vertical-align: super; padding: 0 .15em; user-select: none; -webkit-user-select: none; }
+body.show-chg .del::after { content: "✂"; }
+#delpop { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 36; width: min(560px, calc(100vw - 24px));
+  background: var(--ui-bg); border: 1px solid var(--rule); border-radius: 14px; box-shadow: var(--ui-shadow); padding: 12px 14px; display: none; font-size: 14px; }
+#delpop.on { display: block; }
+#delpop .q { font-family: "Literata", Georgia, serif; font-size: 15px; text-decoration: line-through; text-decoration-color: var(--m-dislike-line); color: var(--muted); max-height: 12em; overflow: auto; margin-top: 4px; }
+#nextChg { position: fixed; left: 12px; bottom: 14px; z-index: 20; display: none; border: 1px solid var(--chg-line); color: var(--chg-line); background: var(--ui-bg); border-radius: 999px; padding: 7px 14px; font-size: 14px; box-shadow: var(--ui-shadow); cursor: pointer; }
+body.show-chg.has-chg #nextChg { display: block; }
+
+/* вкладки: рассказ / разбор */
+.tabs { display: none; justify-content: center; gap: 4px; margin: 22px auto 0; padding: 4px; width: max-content; max-width: 100%;
+  border: 1px solid var(--rule); border-radius: 999px; background: var(--bg); }
+.tabs.on { display: flex; }
+.tabs button { border: 0; background: transparent; border-radius: 999px; padding: 6px 16px; font-size: 14px; cursor: pointer; color: var(--muted); }
+.tabs button[aria-selected="true"] { background: var(--paper); color: var(--ink); font-weight: 700; box-shadow: 0 1px 3px rgba(60, 40, 20, .18); }
+.tabs button b { color: var(--accent); font-weight: 700; margin-left: 4px; }
+
+/* разбор: документ, а не проза */
+article.doc { hyphens: manual; -webkit-hyphens: manual; font-size: .9em; line-height: 1.6; }
+article.doc p { text-indent: 0; margin: 0 0 .7em; }
+article.doc p.tag-h2 { font-weight: 600; font-size: 1.3em; line-height: 1.3; margin: 1.8em 0 .6em; }
+article.doc p.tag-h3 { font-weight: 600; font-size: 1.08em; margin: 1.4em 0 .5em; }
+article.doc p.tag-quote { border-left: 3px solid var(--faint); padding-left: .9em; margin: 0 0 .25em; color: var(--ink); font-style: italic; }
+article.doc p.tag-quote + p:not(.tag-quote) { margin-top: .7em; }
+article.doc p.tag-li { padding-left: 1.3em; margin: 0 0 .35em; }
+article.doc p.tag-li::before { content: "•"; position: absolute; left: .3em; color: var(--muted); }
+article.doc p.tag-li[data-m]::before { content: attr(data-m); left: 0; font-size: .9em; }
+article.doc p.tag-li.d1 { margin-left: 1.3em; }
+article.doc p.tag-li.d2 { margin-left: 2.6em; }
+article.doc .break { margin: 1.2em 0; }
+/* ссылки разбора на строки рассказа */
+article.doc .ref { color: var(--accent); text-decoration: underline dotted; text-underline-offset: 3px; cursor: pointer; }
+article.doc .ref:hover { text-decoration-style: solid; }
+article.doc p.jumphead { cursor: pointer; }
+article.doc p.jumphead:hover .ref { text-decoration-style: solid; }
+article p.target { background: var(--m-note); border-radius: 3px; box-shadow: 0 0 0 .35em var(--m-note); }
+article p.target.first::first-letter { color: var(--accent); }
+@keyframes pulse { from { box-shadow: 0 0 0 .35em var(--m-note), 0 0 0 .9em var(--m-note); } to { box-shadow: 0 0 0 .35em var(--m-note), 0 0 0 .35em transparent; } }
+article p.target.pulse { animation: pulse 1.2s ease-out 2; }
+article.doc code { font-family: "PT Sans", Arial, sans-serif; font-size: .88em; background: var(--bg); border-radius: 4px; padding: 0 .25em; }
+
+mark { color: inherit; border-radius: 2px; cursor: pointer; padding: .05em 0; -webkit-tap-highlight-color: transparent; }
+mark.t-dislike { background: var(--m-dislike); box-shadow: inset 0 -2px 0 var(--m-dislike-line); }
+mark.t-question { background: var(--m-question); box-shadow: inset 0 -2px 0 var(--m-question-line); }
+mark.t-note { background: var(--m-note); box-shadow: inset 0 -2px 0 var(--m-note-line); }
+mark.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* панель выделения */
+#selbar {
+  position: fixed; left: 50%; bottom: 18px; transform: translate(-50%, 140%);
+  background: var(--ui-bg); border: 1px solid var(--rule); border-radius: 14px; box-shadow: var(--ui-shadow);
+  padding: 8px; display: flex; gap: 6px; align-items: center; z-index: 25;
+  transition: transform .18s ease; max-width: calc(100vw - 24px);
+}
+#selbar.on { transform: translate(-50%, 0); }
+#selbar .q { font-size: 13px; color: var(--muted); max-width: 16em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 6px; }
+.tbtn {
+  border: 1px solid var(--rule); background: transparent; border-radius: 10px; padding: 7px 12px;
+  font-size: 14px; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;
+}
+.tbtn:hover { border-color: var(--muted); }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none; }
+.dot.t-dislike { background: var(--m-dislike-line); }
+.dot.t-question { background: var(--m-question-line); }
+.dot.t-note { background: var(--m-note-line); }
+.tbtn small { color: var(--muted); font-size: 11px; }
+#selbar .para { font-weight: 700; }
+#selbar .para[aria-pressed="true"] { border-color: var(--ink); background: var(--paper); }
+.sep { width: 1px; align-self: stretch; background: var(--rule); margin: 2px 2px; }
+
+/* редактор заметки */
+#editor {
+  position: fixed; inset: 0; background: rgba(20, 15, 10, .35); z-index: 40;
+  display: none; align-items: flex-end; justify-content: center; padding: 16px;
+}
+#editor.on { display: flex; }
+.ed {
+  background: var(--ui-bg); border-radius: 16px; box-shadow: var(--ui-shadow); width: min(560px, 100%);
+  padding: 18px 18px 14px; margin-bottom: 4vh;
+}
+.ed .quote {
+  font-family: "Literata", Georgia, serif; font-size: 16px; line-height: 1.5; max-height: 9em; overflow: auto;
+  border-left: 3px solid var(--faint); padding: 2px 0 2px 12px; margin-bottom: 12px; color: var(--ink);
+}
+.ed .where { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.types { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.types .tbtn[aria-pressed="true"] { border-color: var(--ink); background: var(--paper); font-weight: 700; }
+.ed textarea {
+  width: 100%; min-height: 96px; resize: vertical; border: 1px solid var(--rule); border-radius: 10px;
+  background: var(--paper); color: var(--ink); padding: 10px 12px; font: 15px/1.45 "PT Sans", Arial, sans-serif;
+}
+.ed textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
+.row { display: flex; gap: 8px; justify-content: flex-end; align-items: center; margin-top: 12px; }
+.row .grow { flex: 1; }
+.pbtn { border: 0; background: var(--accent); color: #fff; border-radius: 10px; padding: 8px 16px; cursor: pointer; font-size: 14px; font-weight: 700; }
+.lbtn { border: 0; background: transparent; color: var(--muted); padding: 8px 10px; cursor: pointer; font-size: 14px; }
+.lbtn:hover { color: var(--ink); }
+.lbtn.danger:hover { color: var(--m-dislike-line); }
+
+/* список заметок */
+#drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 100vw); z-index: 35;
+  background: var(--ui-bg); box-shadow: var(--ui-shadow); transform: translateX(105%); transition: transform .22s ease;
+  display: flex; flex-direction: column;
+}
+#drawer.on { transform: translateX(0); }
+.dh { padding: 16px 18px 12px; border-bottom: 1px solid var(--rule); }
+.dh .tabnote { font-size: 12px; color: var(--muted); margin: -4px 0 10px; }
+.dh .old { display: none; font-size: 13px; line-height: 1.4; background: var(--paper); border: 1px solid var(--rule); border-radius: 10px; padding: 8px 10px; margin: 0 0 10px; }
+.dh .old.on { display: block; }
+.dh .old button { margin-top: 6px; }
+.grp { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin: 14px 10px 4px; }
+.grp:first-child { margin-top: 4px; }
+.item.old-round { opacity: .55; }
+.dh h3 { margin: 0 0 10px; font-size: 18px; display: flex; justify-content: space-between; align-items: center; }
+.dh .acts { display: flex; gap: 6px; flex-wrap: wrap; }
+.dh .copied { font-size: 13px; color: var(--accent); min-height: 1.2em; margin-top: 6px; }
+#list { overflow: auto; padding: 8px 10px 40px; flex: 1; }
+.item { padding: 10px 10px 12px; border-radius: 10px; cursor: pointer; border: 1px solid transparent; }
+.item:hover { background: var(--paper); border-color: var(--rule); }
+.item .h { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.item .h b { color: var(--ink); font-size: 13px; }
+.item .qq { font-family: "Literata", Georgia, serif; font-size: 14px; line-height: 1.45; margin: 4px 0 2px; color: var(--ink); }
+.item .c { font-size: 14px; line-height: 1.4; }
+.item .h .ed-it { margin-left: auto; padding: 2px 8px; font-size: 13px; }
+.only-touch { display: none; }
+.item.lost .qq { text-decoration: line-through; opacity: .6; }
+.empty { color: var(--muted); font-size: 14px; padding: 20px 12px; line-height: 1.5; }
+.filters { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.filters .tbtn { padding: 4px 10px; font-size: 13px; }
+.filters .tbtn[aria-pressed="true"] { border-color: var(--ink); }
+
+.warn { position: fixed; left: 12px; bottom: 12px; font-size: 13px; color: var(--m-dislike-line); z-index: 20; max-width: 22em; }
+
+@media (max-width: 760px) {
+  :root { --size: 18px; }
+  main { padding: 64px 0 160px; }
+  .sheet { border-radius: 0; padding: 40px 18px 56px; box-shadow: none; }
+  article p .ln { display: none; }
+  .top { top: 8px; right: 8px; }
+  .top button { padding: 5px 10px; }
+  .home { top: 8px; left: 8px; padding: 5px 10px; }
+  .home span { display: none; }
+  article.doc { font-size: .95em; }
+  #selbar .q { display: none; }
+  #selbar small { display: none; }
+  .ed { margin-bottom: 0; }
+}
+/* палец: панель выделения сверху (снизу её закрывают меню браузера), окно заметки сверху (снизу клавиатура) */
+@media (pointer: coarse) {
+  #delpop { top: calc(8px + env(safe-area-inset-top)); bottom: auto; }
+  body.selecting #nextChg { visibility: hidden; }
+  .only-touch { display: inline; }
+  .only-mouse { display: none; }
+  .top button { min-height: 38px; min-width: 38px; }
+  .home { min-height: 38px; min-width: 38px; display: inline-flex; align-items: center; justify-content: center; padding: 5px 10px; }
+  body.selecting .home { visibility: hidden; }
+  #selbar {
+    top: calc(8px + env(safe-area-inset-top)); bottom: auto; transform: translate(-50%, -160%);
+    padding: 6px; gap: 4px; flex-wrap: nowrap;
+  }
+  #selbar.on { transform: translate(-50%, 0); }
+  #selbar .q, #selbar small { display: none; }
+  .tbtn { padding: 9px 11px; }
+  body.selecting .top { visibility: hidden; }
+  #editor { align-items: flex-start; padding-top: calc(12px + env(safe-area-inset-top)); }
+  .ed textarea { font-size: 16px; min-height: 84px; }
+  .ed .quote { max-height: 6.5em; }
+  #edSave small { display: none; }
+  .dh { padding-top: calc(16px + env(safe-area-inset-top)); }
+  #list { padding-bottom: calc(40px + env(safe-area-inset-bottom)); }
+  .item:hover { background: transparent; border-color: transparent; }
+}
+@media print {
+  .top, .home, .edlink, #nextChg, #delpop, .extras, #selbar, #drawer, #editor, #progress, .hint { display: none !important; }
+  body { background: #fff; }
+  .sheet { box-shadow: none; }
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<a class="home ui" href="../Приложение/" title="На главную сайта">⌂ <span>Кордим</span></a>
+<div class="top ui">
+  <button id="swap" title="Другая вкладка" hidden></button>
+  <button id="smaller" title="Мельче">А−</button>
+  <button id="bigger" title="Крупнее">А+</button>
+  <button id="theme" title="Тема">☾</button>
+  <button id="notesBtn">Заметки <b id="count">0</b></button>
+</div>
+
+<main>
+  <div class="sheet">
+    <header>
+      <div class="kicker ui" id="kicker">Кордим · проза</div>
+      <h1 id="title"></h1>
+      <div class="meta ui" id="meta"></div>
+      <div class="tabs ui" id="tabs" role="tablist"></div>
+      <div class="extras ui" id="extras"></div>
+      <a class="edlink ui" href="Редактор.html" title="Решения, вопросы и будущие арки — ответить для Claude">✎ Редактор: что ждёт тебя и будущие арки</a>
+      <div class="hint ui">
+        <span class="only-mouse">Выдели слово или кусок текста — снизу появится панель: <b>не нравится</b>, <b>вопрос</b> или <b>заметка</b>
+        (или клавиши <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>). Номер строки слева от абзаца — заметка на весь абзац.
+        Щелчок по выделенному — изменить.</span>
+        <span class="only-touch">Зажми слово пальцем и потяни ручки выделения — сверху появится панель: <b>не нравится</b>, <b>вопрос</b>
+        или <b>заметка</b>. Кнопка <b>¶</b> растягивает выделение на весь абзац. Тап по цветному — изменить.</span>
+        Когда закончишь: «Заметки» → «Скопировать для Claude» и вставь в чат. Копировать один раз: туда попадают и рассказ, и разбор.
+      </div>
+    </header>
+    <article id="text"></article>
+    <div class="end">⁂</div>
+  </div>
+</main>
+
+<div id="selbar" class="ui">
+  <span class="q" id="selq"></span>
+  <button class="tbtn para" id="selPara" title="Весь абзац" aria-pressed="false">¶</button>
+  <span class="sep"></span>
+  <button class="tbtn" data-type="dislike"><span class="dot t-dislike"></span>Не нравится <small>1</small></button>
+  <button class="tbtn" data-type="question"><span class="dot t-question"></span>Вопрос <small>2</small></button>
+  <button class="tbtn" data-type="note"><span class="dot t-note"></span>Заметка <small>3</small></button>
+</div>
+
+<div id="editor" class="ui">
+  <div class="ed" role="dialog" aria-modal="true">
+    <div class="where" id="edWhere"></div>
+    <div class="quote" id="edQuote"></div>
+    <div class="types" id="edTypes">
+      <button class="tbtn" data-type="dislike"><span class="dot t-dislike"></span>Не нравится</button>
+      <button class="tbtn" data-type="question"><span class="dot t-question"></span>Вопрос</button>
+      <button class="tbtn" data-type="note"><span class="dot t-note"></span>Заметка</button>
+    </div>
+    <textarea id="edText" placeholder="Что не так, что спросить, как лучше… (можно оставить пустым)"></textarea>
+    <div class="row">
+      <button class="lbtn danger" id="edDelete">Удалить</button>
+      <span class="grow"></span>
+      <button class="lbtn" id="edCancel">Отмена</button>
+      <button class="pbtn" id="edSave">Сохранить <small style="opacity:.7;font-weight:400">Ctrl+Enter</small></button>
+    </div>
+  </div>
+</div>
+
+<aside id="drawer" class="ui" aria-label="Заметки">
+  <div class="dh">
+    <h3><span id="drawerTitle">Заметки</span> <button class="lbtn" id="closeDrawer" title="Закрыть">✕</button></h3>
+    <div class="tabnote" id="tabnote"></div>
+    <div class="old" id="oldBox"><span id="oldText"></span><br><button class="lbtn danger" id="oldClear">Убрать пометки прошлого круга</button></div>
+    <div class="acts">
+      <button class="pbtn" id="copyAll">Скопировать для Claude</button>
+      <button class="tbtn" id="download">Сохранить файлом</button>
+      <button class="lbtn danger" id="clearAll">Очистить</button>
+    </div>
+    <div class="filters" id="filters">
+      <button class="tbtn" data-f="all" aria-pressed="true">Все</button>
+      <button class="tbtn" data-f="dislike"><span class="dot t-dislike"></span>Не нравится</button>
+      <button class="tbtn" data-f="question"><span class="dot t-question"></span>Вопросы</button>
+      <button class="tbtn" data-f="note"><span class="dot t-note"></span>Заметки</button>
+    </div>
+    <div class="copied" id="copied"></div>
+  </div>
+  <div id="list"></div>
+</aside>
+<div class="warn ui" id="warn"></div>
+<button class="ui" id="nextChg" title="Следующая правка">↓ правка</button>
+<div class="ui" id="delpop"><b>Убрано</b> <button class="lbtn" id="delClose" style="float:right;padding:0 4px">✕</button><div class="q" id="delText"></div></div>
+
+<script>
+var DOCS = [{"id":"Никто_и_Элоуэн_две_встречи","tab":"Рассказ","file":"Проза/Никто_и_Элоуэн_две_встречи.md","title":"Никто и Элоуэн: две встречи","status":"черновик","blocks":[{"kind":"h","text":"Часть I. Столица, ~1021. Первая встреча"},{"kind":"h","text":"Заказ"},{"kind":"p","line":14,"text":"Каэл сказал: заберёшь свёрток, отдашь мне, не разворачивай. На вопрос «что там» не ответил, потому что вопрос был проверкой, и Никто это понял ещё на середине фразы."},{"kind":"p","line":16,"text":"Идти нужно было в Нижний город, во двор бывшей дубильни, где горели два костра и стояла очередь. Нижний город лечился здесь, потому что в церковной лечебнице к весне не осталось мест, а помирать во дворе было теплее, чем в переулке."},{"kind":"p","line":18,"text":"Никто просидел на крыше дольше, чем требовалось. Морозило. Пар от котлов шёл ровным столбом."},{"kind":"p","line":20,"text":"Он спустился по водостоку и вошёл через задний проём, как входят люди, которых не должны запомнить."},{"kind":"h","text":"Госпиталь"},{"kind":"p","line":24,"text":"Внутри было светлее, чем снаружи. Длинный стол под окнами, жаровня, запах — спирт, кровь, что-то травяное и сладковатое поверх. Он разложил запах на составляющие машинально, как учили: мак, живица, что-то ещё. У стола работала женщина в мужском колете и фартуке, и работала быстро."},{"kind":"p","line":26,"text":"Никто сел на перевёрнутый ящик у стены и стал ждать старуху со свёртком."},{"kind":"p","line":28,"text":"И начал считать."},{"kind":"p","line":30,"text":"Она мыла руки спиртом. Не ополаскивала — мыла, между пальцами, до запястий, и делала это перед каждым. Спирт в Нижнем городе пьют, а не льют на ладони. Нити у неё лежали в кипятке, и парень, притащивший воду, полез было к столу — она рявкнула, и он отдёрнул руку, как от печки. Инструмент был хороший. Не «неплохой для трущоб» — хороший, ровная сталь, такую в этом квартале можно только украсть, а красить её тут не у кого."},{"kind":"p","line":32,"text":"Сюжет номер девять, подумал он. Женщина, которая моет руки покойникам."},{"kind":"p","line":34,"text":"Потом привели старика с распоротым предплечьем. Она усадила его, взяла кружку с горячим, подержала ладони на боках кружки, потёрла руки друг о друга — и только после этого тронула его руку."},{"kind":"p","line":36,"text":"Вот на этом он и сбился со счёта."},{"kind":"p","line":38,"text":"Это не было ни милосердием, ни спектаклем. Никто, кому холодные пальцы лезли в открытое, никогда об этом не говорит вслух, потому что об этом не принято, — а она просто грела руки о кружку и делала вид, что так и надо. Он смотрел на её лицо и обнаружил, что смотрит уже долго. Лицо было обыкновенное. Волосы туго стянуты, у виска выбилась прядь. Она сказала старику что-то короткое и злое, старик хмыкнул и перестал дёргаться."},{"kind":"p","line":40,"text":"Она была хорошенькая. Он поймал себя на этой мысли и не понял, откуда та взялась, потому что минуту назад ничего подобного там не лежало."},{"kind":"p","line":42,"text":"Никто отвернулся к стене и стал разглядывать балки. Балки были в саже."},{"kind":"p","line":44,"text":"Старуха принесла свёрток — промасленная холстина, перевязка накрест, вес небольшой, внутри что-то плотно уложенное. Он взял, сунул за пазуху и пошёл к выходу."},{"kind":"p","line":46,"text":"И тут поймал взгляд."},{"kind":"p","line":48,"text":"Женщина у стола смотрела на его голову. Не отвела глаза, когда он повернулся, — это и было плохо. Люди на шрам смотрят полсекунды и отворачиваются. Она смотрела как на работу: провела глазами по всей линии от затылка к уху, задержалась там, где кожа шла складкой, и на её лице что-то произошло. Секунду она соображала. Потом сообразила."},{"kind":"p","line":50,"text":"Он видел, как она поняла."},{"kind":"p","line":52,"text":"Не «ожог». Не «обварился». Она поняла — чем именно, и как лили, и что лили ровно."},{"kind":"p","line":54,"text":"Дальше он не думал."},{"kind":"p","line":56,"text":"Через два шага её рука была заведена за спину, а сама она — в закутке за печью, где никто не стоял, потому что было жарко. Нож он держал не у горла, а под рёбрами, снизу, как держат, когда не собираются пугать."},{"kind":"p","line":58,"text":"— Не ори, — сказал он. — Ты не успеешь, а я успею."},{"kind":"p","line":60,"text":"Она не орала. Он это отметил. Дышала часто, но не орала, и — он проверил взглядом — правую руку держала подальше от лезвия, инстинктивно, ладонью к себе. Берегла руки. Даже сейчас."},{"kind":"p","line":62,"text":"— Ложа, — сказал он. — Ты из Ложи."},{"kind":"p","line":64,"text":"— Ты мне ребро проткнёшь, дурак."},{"kind":"p","line":66,"text":"— Ты из Ложи."},{"kind":"p","line":68,"text":"— Да, — сказала она. — И что?"},{"kind":"p","line":70,"text":"Он ждал вранья. Вранья не было, и это сбило ритм."},{"kind":"p","line":72,"text":"— Что ты здесь делаешь."},{"kind":"p","line":74,"text":"— Шью. Ты мешаешь."},{"kind":"p","line":76,"text":"— Женщина из Ложи в трущобах шьёт бесплатно."},{"kind":"p","line":78,"text":"— С тебя возьму, — сказала она. — Если доживёшь."},{"kind":"p","line":80,"text":"Он развернул её лицом к себе и придвинул так, чтобы она видела шрам близко. Совсем близко. С этого расстояния его обычно начинают бояться."},{"kind":"p","line":82,"text":"— Ты знаешь, что это."},{"kind":"p","line":84,"text":"Она посмотрела. Не отшатнулась."},{"kind":"p","line":86,"text":"— Кислота, — сказала она. — Ваша. То есть наша. Такой рисунок даёт одна."},{"kind":"p","line":88,"text":"— Дальше."},{"kind":"p","line":90,"text":"— Дальше ничего. Лили не в драке. — Она сглотнула. — Лили, когда ты лежал. Линия ровная, начало на затылке. Человек, который дёргается, так не горит."},{"kind":"p","line":92,"text":"— Кто."},{"kind":"p","line":94,"text":"— Я не знаю."},{"kind":"p","line":96,"text":"— Кто."},{"kind":"p","line":98,"text":"— Я. Не. Знаю, — сказала она, и в голосе прорезалась злость, а не страх. — Я варю мази для лодочников и шью пьяных. Я не знаю, кто с тобой это сделал. Я слышала однажды, что кто-то из наших ушёл на вольные хлеба и работает без реестра. Слышала в коридоре. Ни имени, ни места, и я не пошла спрашивать, потому что тому, кто спрашивает, ломают руки."},{"kind":"p","line":100,"text":"Он держал её ещё несколько секунд."},{"kind":"p","line":102,"text":"Считал не слова. Слова врут дёшево. Считал зрачки, пульс под большим пальцем, то, как она стояла — не отклоняясь назад, а вбок, к проходу, куда ушла бы, если б смогла. Считал спирт на её пальцах и то, что она успела вытереть руки, прежде чем он её сюда затащил. Считал, что она сказала «наша» и поправилась, а не наоборот."},{"kind":"p","line":104,"text":"Тот, кто резал ему череп, не грел ладони о кружку."},{"kind":"p","line":106,"text":"Никто убрал нож."},{"kind":"p","line":108,"text":"Она не отскочила. Прислонилась к стене, растёрла запястье и посмотрела на него так, будто прикидывала, сколько на нём швов."},{"kind":"p","line":110,"text":"— У тебя рука дрянная, — сказала она. — Левая. Ты ею почти не берёшь."},{"kind":"p","line":112,"text":"— Заживёт."},{"kind":"p","line":114,"text":"— Не заживёт. Она уже зажила, как срослось, так и будет. — Она перевела дух. — Приходи в среду, посмотрю. Бесплатно."},{"kind":"p","line":116,"text":"— Зачем."},{"kind":"p","line":118,"text":"Она пожала плечами."},{"kind":"p","line":120,"text":"— Стол пустой не бывает."},{"kind":"p","line":122,"text":"Он не ответил. За печью было жарко, где-то в зале кто-то тонко скулил, и парень тащил новый котёл."},{"kind":"p","line":124,"text":"— Как тебя звать, — спросила она."},{"kind":"p","line":126,"text":"Он мог назвать любое имя. Он назвал двенадцать имён за прошлый год, и все были короткие, чтобы не запоминались."},{"kind":"p","line":128,"text":"— Никто, — сказал он."},{"kind":"p","line":130,"text":"Она не засмеялась и не переспросила. Кивнула, как принимают дозу — записала и пошла дальше."},{"kind":"p","line":132,"text":"— Элоуэн."},{"kind":"p","line":134,"text":"Он вышел в зал и пошёл к проёму, чувствуя ладонью свёрток под курткой. У самой двери оглянулся."},{"kind":"p","line":136,"text":"Она уже стояла у стола, и в руках у неё была кружка. Грела ладони. И смотрела на него."},{"kind":"p","line":138,"text":"Они смотрели друг на друга через весь зал секунды три. Ни один не отвёл глаза первым — просто в какой-то момент она поставила кружку и повернулась к своему старику, потому что у старика текло."},{"kind":"p","line":140,"text":"Никто вышел на мороз и полез обратно на крышу."},{"kind":"h","text":"Поиск"},{"kind":"p","line":144,"text":"В среду он пришёл. Двор был пустой, котлы холодные, стол вынесен."},{"kind":"p","line":146,"text":"Никто спрашивал у старухи, у водоноса, у пономаря в лечебнице, у двух нищих на углу — и получал разное, а сходилось только одно: была и нет. Каэл на второй вопрос посмотрел на него длинно и сказал, что мальчик слишком дорого платит за лицо, которое видел один раз. На третий вопрос не ответил вовсе. На четвёртый сказал: «Хорошо. Ищи. Я посмотрю, сколько ты за неё отдашь», — и это было хуже отказа, поэтому Никто больше не спрашивал."},{"kind":"p","line":148,"text":"Он искал ещё месяца два. Сам."},{"kind":"p","line":150,"text":"Не нашёл."},{"kind":"h","text":"Часть II. Колокольня. Поворот"},{"kind":"p","line":154,"text":"Два месяца — это восемь недель, и он считал их."},{"kind":"p","line":156,"text":"Ходил в Нижний город без дела. Брал заказы, которые вели туда, и брал их дешевле, чем стоило, а Каэл смотрел на цифры и молчал. Спрашивал у чтецов. Отдал нищему на Мельничной три гроша за имя знахарки, знахарка оказалась не та. Заплатил серебром лодочнику, который клялся, что вёз женщину с сундуком вниз по реке в конце месяца, — лодочник врал, но врал складно, и Никто потратил четыре дня, прежде чем это понял."},{"kind":"p","line":158,"text":"К восьмой неделе он перестал болтать."},{"kind":"p","line":160,"text":"Это заметили. Маска шута сходила с него не как краска, а как штукатурка — кусками, и под ней оказывалось ровное и неподвижное, от чего люди на рынке начинали смотреть в сторону. Он не орал и не дерзил. Он выполнял и уходил."},{"kind":"p","line":162,"text":"Каэл нашёл его на коньке колокольни у Трёх мостов, куда лазили только они двое."},{"kind":"p","line":164,"text":"Старик поднялся с той стороны, где не было ни лестницы, ни водостока, — просто был внизу и стал наверху, и трос за ним шёл беззвучно. Сел в трёх шагах. Свесил ноги над семью саженями пустоты. Под ними в тумане горели фонари барж."},{"kind":"p","line":166,"text":"Долго ничего не говорил."},{"kind":"p","line":168,"text":"— Кулачные, — сказал наконец Никто. — Ты их снял."},{"kind":"p","line":170,"text":"— Ты первый заметил за год."},{"kind":"p","line":172,"text":"— Я всегда замечал."},{"kind":"p","line":174,"text":"— Ты всегда говорил, — поправил Каэл. — Это разное."},{"kind":"p","line":176,"text":"Внизу проползла баржа. Никто смотрел на неё, пока она не ушла под мост."},{"kind":"p","line":178,"text":"— Расскажи мне про неё, — сказал Каэл."},{"kind":"p","line":180,"text":"— Нечего."},{"kind":"p","line":182,"text":"— Тогда расскажи, сколько ты за неё отдал. Это я хотя бы посчитаю."},{"kind":"p","line":184,"text":"Никто молчал."},{"kind":"p","line":186,"text":"— Восемнадцать марок, — сказал старик. — Два контракта, взятых ниже цены, потому что они вели в Нижний. Четыре дня на лодочника, который тебе врал в лицо, а ты слушал, потому что хотел слушать. Три недели ты спишь по четыре часа. Ты стал хуже, мальчик. Не медленнее — хуже. Ты вчера вошёл в дом с одной стороны и не посмотрел вторую."},{"kind":"p","line":188,"text":"— Там не было второй."},{"kind":"p","line":190,"text":"— Ты не посмотрел. — Каэл повернул голову. — Ты не знаешь, была она или нет. Ты просто вошёл."},{"kind":"p","line":192,"text":"Ветер тянул с каналов, и пахло гнилью и ладаном, как всегда пахнет над Столицей осенью."},{"kind":"p","line":194,"text":"— Я скажу тебе, как это устроено, — сказал Каэл. — Не для того, чтобы тебя утешить. Утешать я не умею и не хочу учиться."},{"kind":"p","line":196,"text":"— Валяй."},{"kind":"p","line":198,"text":"— Человек — это набор привычек, который держится, пока ему ничего не дорого. Ты видел женщину полчаса. Она тебе ничего не сделала. Она даже не была тебе добра — она предложила посмотреть руку, потому что у неё стол пустой не бывает. И этого хватило, чтобы ты за восемь недель стал стоить дешевле, чем стоил в начале."},{"kind":"p","line":200,"text":"— Я не..."},{"kind":"p","line":202,"text":"— Ты стоишь дешевле, — повторил старик спокойно. — Это не оскорбление. Это цена. Я тебя не воспитывал и не жалел. Я тебя натаскивал, чтобы ты жил. Живут те, у кого ничего нет. Не потому, что им везёт, а потому, что их нельзя взять за руку и повести."},{"kind":"p","line":204,"text":"Он замолчал. Потом добавил, тем же ровным голосом:"},{"kind":"p","line":206,"text":"— Всё, что тебе дорого, — это ручка, за которую тебя понесут. Иногда чужой человек. Иногда ты сам себя."},{"kind":"p","line":208,"text":"Никто посмотрел на него сбоку."},{"kind":"p","line":210,"text":"Старик сидел прямо, руки на коленях, и смотрел вниз, на фонари. Лицо было такое же, как всегда. Но фразу он сказал целиком, до конца, а обычно рубил на половине и уходил, — и это была первая трещина, которую Никто увидел в нём за всё время. Он её увидел и не стал трогать. Тронешь — и старик уйдёт по тросу, и разговора не будет ещё год."},{"kind":"p","line":212,"text":"— Ты знаешь, куда она делась, — сказал Никто."},{"kind":"p","line":214,"text":"— Нет."},{"kind":"p","line":216,"text":"— Ты можешь узнать."},{"kind":"p","line":218,"text":"— Могу."},{"kind":"p","line":220,"text":"— И не станешь."},{"kind":"p","line":222,"text":"— Не стану, — сказал Каэл. — И не потому, что мне жалко денег. Я тебе один раз найду человека, и ты решишь, что людей можно находить. Это самое дорогое, чему я мог бы тебя научить, и цену за него платят не мне."},{"kind":"p","line":224,"text":"Никто медленно выдохнул через нос."},{"kind":"p","line":226,"text":"— Сюжет номер шестьдесят один, — сказал он. — Старик, который бесплатно объясняет, почему всё бесплатно."},{"kind":"p","line":228,"text":"— Уже лучше, — сказал Каэл."},{"kind":"p","line":230,"text":"Он поднялся. Стоял на коньке, где ширина в две ладони, и стоял так, будто под ним пол."},{"kind":"p","line":232,"text":"— Ты хочешь, чтобы я перестал, — сказал Никто."},{"kind":"p","line":234,"text":"— Мне всё равно, перестанешь ты или нет. Мне нужно, чтобы ты вошёл в дом и посмотрел вторую сторону. — Каэл смотал трос в петлю и накинул на плечо. — Если она тебе понадобится — она тебя найдёт сама. Люди с таким ремеслом не прячутся, они переезжают. Ты просто не там смотрел."},{"kind":"p","line":236,"text":"— Ты сказал, что не знаешь, где она."},{"kind":"p","line":238,"text":"— Я и не знаю. Я знаю, где ты искал. — Старик шагнул к краю. — В Столице."},{"kind":"p","line":240,"text":"И ушёл вниз, и трос за ним не скрипнул."},{"kind":"p","line":242,"text":"Никто просидел на колокольне до серого."},{"kind":"p","line":244,"text":"Утром взял два контракта по нормальной цене. Через неделю снова начал болтать, и болтовня работала, потому что была не про него. Спать стал шесть часов. В дом входил с двух сторон."},{"kind":"p","line":246,"text":"Про Ошерск он подумал в тот же месяц. Речной узел, вниз по течению, три дня баржей, туда уходят те, кому надо исчезнуть из Столицы и не выпасть из мира. Он подумал об этом ясно и отчётливо и никуда не поехал."},{"kind":"p","line":248,"text":"Ему было двадцать два, и он умел не делать то, что решил не делать."},{"kind":"p","line":250,"text":"Он просто оставил её у себя."},{"kind":"p","line":252,"text":"Не имя даже — имя было ничего, четыре звука. Спирт на пальцах. Прядь у виска. Ладони на боках кружки, и старик, переставший дёргаться. То, как она сказала «наша» и поправилась."},{"kind":"p","line":254,"text":"Он носил в себе три чужих имени, которых не произносил вслух, потому что произнести — значит отпустить. Он положил её туда же, к ним, и закрыл."},{"kind":"p","line":256,"text":"И два года не открывал."},{"kind":"h","text":"Часть III. Ошерск, 1023. Заказ"},{"kind":"h","text":"Заказ"},{"kind":"p","line":262,"text":"В «Черпаке» пахло рыбой, которую не успели засолить, и это был честный запах: в Порту Теней врали все, кроме воздуха."},{"kind":"p","line":264,"text":"Посредника звали Плешь, и он был плохим посредником. Хороший не смотрит на руки клиента. Плешь смотрел — на пальцы без отпечатков, гладкие, как оплавленный воск, — и делал вид, что не смотрит, и от этого выходило только хуже."},{"kind":"p","line":266,"text":"— Ошерск, — сказал он. — Приречье. Ремм Каволь, приказчик по баржам у альдермана Крайма. Ведает погрузкой. Нужно, чтобы рассказал, что уходит вниз по реке помимо вина и зерна. Куда. Через кого. И где это записано."},{"kind":"p","line":268,"text":"— За-пи-са-но, — по слогам протянул Никто. — Слушай, вот это слово. Вот ты его сказал, а оно ведь тяжёлое. «Записано» говорит человек, который бумагу видел. Который её в руках держал. И, я бы даже сказал, потерял. В сундуке, например. Скажем, в Приречье. Хотя что я, откуда мне."},{"kind":"p","line":270,"text":"Плешь моргнул. Один раз, но не вовремя."},{"kind":"p","line":272,"text":"— Сюжет номер тридцать, — сказал Никто с удовольствием. — Человек, узнавший о себе новость."},{"kind":"p","line":274,"text":"— Я передаю условия."},{"kind":"p","line":276,"text":"— Ты передаёшь условия, я передаю привет. Сорок?"},{"kind":"p","line":278,"text":"— Сорок. Десять вперёд."},{"kind":"p","line":280,"text":"— Мимо конторы. То есть задатка на хранении нет, защиты нет, а если я утону в реке, ты про меня отродясь не слыхал и вообще ты бочкодел."},{"kind":"p","line":282,"text":"— Если ты утонешь в реке, я про тебя не слышал, — согласился Плешь."},{"kind":"p","line":284,"text":"— Красиво живём."},{"kind":"p","line":286,"text":"Никто взял десять кордов."},{"kind":"h","text":"Дорога"},{"kind":"p","line":290,"text":"Три дня берегом и вверх по реке, на попутной барже с бочкоделом, который всю дорогу рассказывал про сына."},{"kind":"p","line":292,"text":"Никто слушал. Кивал в нужных местах, вставлял «да ну» и «а он что», и бочкодел сошёл в Приречье с ощущением, что поговорил с хорошим парнем. Это стоило Никто ничего и дало ему три дня без вопросов и половину имён на пристани."},{"kind":"p","line":294,"text":"Ошерск встал из-за поворота серым и мокрым: мосты, пошлинные будки, лес мачт и рей, дым из труб ложится на воду и не поднимается. Мостов было столько, что город казался сшитым."},{"kind":"p","line":296,"text":"Он сошёл в Приречье, снял угол в общей комнате за два гроша и три вечера ходил смотреть."},{"kind":"p","line":298,"text":"Смотреть он умел."},{"kind":"p","line":300,"text":"Каволь оказался мелким, лысеющим, лет сорока, в хорошем сукне и стоптанных сапогах — человек, у которого есть деньги, но нет времени. Работал он много и допоздна. С утра — весовая, днём — контора Крайма на Мокром спуске, вечером — четвёртый причал, где грузили в темноте, и грузили не то, что днём. Никто считал бочки два вечера подряд и оба раза получил разное с накладной, которую весовщик читал вслух за грош."},{"kind":"p","line":302,"text":"Охрана была. Двое при погрузке, оба здоровые, оба медленные, оба смотрели на реку, а не на берег."},{"kind":"p","line":304,"text":"На третий вечер Каволь остался один. Отпустил грузчиков, задержался в конторке на причале — свет в окне, тень над столом, скрип пера. Сводил."},{"kind":"p","line":306,"text":"Никто стоял в проулке между сараями, прикидывал углы и понимал, что всё складывается слишком хорошо."},{"kind":"p","line":308,"text":"Он это отметил. Он даже подумал ту самую мысль — «слишком хорошо». Но до конца навигации оставалось десять дней, и он вошёл."},{"kind":"h","text":"Четвёртый причал"},{"kind":"p","line":312,"text":"Дверь была на щеколде изнутри. Он снял её ножом через щель за восемь секунд и вошёл на девятой."},{"kind":"p","line":314,"text":"— Не вставай, — сказал он и сел на угол стола, боком, чтобы дверь была в поле зрения. — Руки на столешницу. Обе. Умница. Ты не поверишь, сколько людей на этом месте начинает махать. Машут, я нервничаю, все в накладе."},{"kind":"p","line":316,"text":"Каволь поднял голову от бумаг и не закричал. Никто записал молчание в свою пользу."},{"kind":"p","line":318,"text":"Это была первая ошибка."},{"kind":"p","line":320,"text":"— Денег тут нет. Касса в конторе, на спуске."},{"kind":"p","line":322,"text":"— Касса. — Никто изобразил оскорбление. — Ты меня за грабителя держишь? Я, между прочим, ревизор. Крайм нанял. Говорит: Никто, съезди в Приречье, у меня там приказчик, я его люблю как сына, но чую — ворует. И я поехал. И сижу вот."},{"kind":"p","line":324,"text":"— Ты не от Крайма."},{"kind":"p","line":326,"text":"— Не от Крайма, — согласился Никто. — Но красиво же было?"},{"kind":"p","line":328,"text":"Каволь смотрел на него."},{"kind":"p","line":330,"text":"— Второй канал, — сказал Никто."},{"kind":"p","line":332,"text":"Приказчик моргнул."},{"kind":"p","line":334,"text":"Вот тут — Никто увидел это отчётливо и разобрал на части — человек должен был испугаться. Испуг был. Но под ним, на полсекунды раньше, прошло другое, и лицо на эту долю секунды стало не испуганным, а усталым. Как у того, кто долго ждал и наконец дождался."},{"kind":"p","line":336,"text":"Никто отметил и не понял. Понял он через двадцать минут."},{"kind":"p","line":338,"text":"Дальше пошло обычное, только с музыкой."},{"kind":"p","line":340,"text":"— Я погрузкой занимаюсь. Больше ничем."},{"kind":"p","line":342,"text":"— Погрузкой. Хорошее слово, честное. Знаешь, у меня дядя тоже занимался погрузкой. Всю жизнь. Двадцать лет грузил, потом однажды разгрузил — и всё, поминай как звали. Мораль тут какая? Морали нет, у меня дядя выдуманный. Так что идёт в двойном днище?"},{"kind":"p","line":344,"text":"— В каком двойном днище."},{"kind":"p","line":346,"text":"— Вот и я думаю, в каком. Вроде обычная баржа. А по накладной на ней двадцать две бочки, а я, дурак, считал глазами и насчитал двадцать шесть. И вот сижу третий вечер и мучаюсь: то ли я считать не умею, то ли ты писать."},{"kind":"p","line":348,"text":"Он не бил по-настоящему. Работал болью, а не увечьем — так, чтобы к утру человек был цел и мог врать своим, что напали и обчистили. Живой Каволь стоил дороже мёртвого: мёртвого хватятся сразу, обворованного — со стыдом и не сразу."},{"kind":"p","line":350,"text":"И болтал. Не переставая. Про дядю, про цех карманников, про то, как в Порту Теней хоронят по описи, про рыбу — потому что человек, которому больно и которому вдобавок безостановочно говорят чушь, теряет счёт времени и перестаёт понимать, где он держался, а где уже нет."},{"kind":"p","line":352,"text":"К третьему часу приказчик начал крошиться."},{"kind":"p","line":354,"text":"— Раз в две недели, — сказал он в стол. — Не в бочках. Бочки для весовой. Двойное днище, «Серая Мари» и «Пятая». Вниз, до Морского, там перегружают на что-то, что идёт дальше. Куда дальше — не знаю и знать не хочу."},{"kind":"p","line":356,"text":"— Что идёт?"},{"kind":"p","line":358,"text":"— Всякое."},{"kind":"p","line":360,"text":"— «Всякое» — это не товар, это диагноз."},{"kind":"p","line":362,"text":"— Соль. Без пошлины. И ящики, которые я не вскрывал."},{"kind":"p","line":364,"text":"— Кто принимает в Морском?"},{"kind":"p","line":366,"text":"Молчание."},{"kind":"p","line":368,"text":"— Кто принимает в Морском."},{"kind":"p","line":370,"text":"— Ты меня убьёшь, — сказал Каволь, — а он убьёт мою жену."},{"kind":"p","line":372,"text":"Никто помолчал. Впервые за три часа."},{"kind":"p","line":374,"text":"— Не убью, — сказал он уже без голоса. — Уйду до рассвета. Скажешь Крайму, что обчистили и попинали. Кошель заберу, чтоб складывалось."},{"kind":"p","line":376,"text":"Каволь поднял глаза."},{"kind":"p","line":378,"text":"И Никто во второй раз увидел ту же усталость, теперь чистую, без страха сверху. Человек смотрел на него и решал про себя что-то окончательное."},{"kind":"p","line":380,"text":"Тогда он и понял."},{"kind":"p","line":382,"text":"Приказчик, который третий год ведает контрабандой, молчит не потому, что боится Крайма. Он молчит, потому что он и есть точка отказа — единственный, кто знает всю цепочку, и на этом месте его для того и держат. Такой знает, что будет, если он расскажет. Не с ним. После него. И у такого давно заготовлено, что делать, когда придут."},{"kind":"p","line":384,"text":"Никто открыл рот, чтобы сказать «стой»."},{"kind":"p","line":386,"text":"Не успел."},{"kind":"p","line":388,"text":"Каволь дёрнулся назад вместе со стулом — не к двери, не в сторону, а спиной, всем весом, к стене. За спиной у него на стене висели багры и разделочный нож на гвозде, и Никто их видел, и просчитал, и держал приказчика на расстоянии больше вытянутой руки от них."},{"kind":"p","line":390,"text":"Расстояние он посчитал правильно."},{"kind":"p","line":392,"text":"Он не посчитал, что человек может не тянуться к ножу, а наткнуться на него."},{"kind":"p","line":394,"text":"Стул с грохотом ударил в стену, гвоздь вышел из доски, и Каволь вместе со стулом рухнул на бок, и когда Никто перевернул его — рукоять торчала под ключицей слева, глубоко, и вошло не туда, куда целил приказчик, а хуже."},{"kind":"p","line":396,"text":"— Ах ты ж, — сказал Никто."},{"kind":"p","line":398,"text":"Кровь пошла толчками. Не струёй — толчками, в ритм, и это было плохое слово, и он знал, какое именно."},{"kind":"p","line":400,"text":"Каволь смотрел в потолок и улыбался. Некрасиво, но улыбался."},{"kind":"p","line":402,"text":"— Не выйдет, — сказал он."},{"kind":"p","line":404,"text":"— Заткнись."},{"kind":"p","line":406,"text":"— Не выйдет у тебя."},{"kind":"p","line":408,"text":"Никто зажал рану ладонью и почувствовал, как её выдавливает изнутри при каждом ударе. Он не стал тратить время на злость. Злость он отложил на потом и стал думать быстро и по порядку."},{"kind":"p","line":410,"text":"Мёртвый Каволь — это ноль. Тридцать кордов не будет, десять придётся вернуть, а Плешь расскажет в Порту, что метатель завалил простую работу. И это ещё лучший исход."},{"kind":"p","line":412,"text":"Живой Каволь — это имя в Морском."},{"kind":"p","line":414,"text":"Он сорвал с приказчика шарф, скрутил в ком, вдавил в рану и подтянул ремнём через плечо — грязно, но давление держало. Взял бумаги со стола, все, не глядя. Задул лампу."},{"kind":"p","line":416,"text":"Взвалил на плечо. Каволь был лёгкий и мокрый."},{"kind":"p","line":418,"text":"На улице шёл мелкий дождь, и это было единственное хорошее за ночь: в дождь никто не смотрит по сторонам."},{"kind":"h","text":"Часть IV. Синий двор. Вторая встреча"},{"kind":"h","text":"Врач"},{"kind":"p","line":424,"text":"Он не знал этого города."},{"kind":"p","line":426,"text":"Три улицы он нёс его молча, потом свернул к воде и положил под перевёрнутую лодку, потому что ходить с телом на плече по мостам — это гарантированная встреча со стражей."},{"kind":"p","line":428,"text":"Дальше пошло то, что он умел."},{"kind":"p","line":430,"text":"В Ошерске в третьем часу ночи открыты две вещи: кабаки и бордель. Никто выбрал бордель, потому что там знают, кто зашивает без вопросов, — это единственное место в любом городе, где такое знание рабочее, а не любопытное."},{"kind":"p","line":432,"text":"Вышибала на дверях не хотел говорить. Никто дал ему полмарки и сказал, что через час придёт снова, и вышибала посмотрел на его лицо и решил, что придёт."},{"kind":"p","line":434,"text":"— Цирюльник на Скотном, — сказал он. — Косой Мик."},{"kind":"p","line":436,"text":"— Мне не цирюльник. Мне тот, кто вытаскивает."},{"kind":"p","line":438,"text":"Вышибала помолчал."},{"kind":"p","line":440,"text":"Из-за его плеча, из тёплого и красного, сказала женщина:"},{"kind":"p","line":442,"text":"— Синий двор."},{"kind":"p","line":444,"text":"— Что?"},{"kind":"p","line":446,"text":"— За красильней. Через Гончарный мост, вниз, к воде, там камни синие, не спутаешь. — Она куталась в шаль и смотрела на его руки, а не на лицо. — Иголка."},{"kind":"p","line":448,"text":"— Кто?"},{"kind":"p","line":450,"text":"— Иголка, — повторила она. — Баба. Она нашу Кальку вытащила летом, а Кальке живот вспороли. Все сказали — не жилец."},{"kind":"p","line":452,"text":"— Возьмёт ночью?"},{"kind":"p","line":454,"text":"— Она всегда берёт, — сказала женщина. — Дура."},{"kind":"p","line":456,"text":"Никто вернулся к лодке. Каволь был ещё тёплый и ещё дышал — часто и мелко."},{"kind":"p","line":458,"text":"Гончарный мост, вниз, к воде."},{"kind":"p","line":460,"text":"Он шёл двадцать минут, и по дороге у него сложилась мысль, которую он потом вспоминал долго: у альдермана Крайма есть свои люди, а у людей есть свой врач, и в маленьком городе это один и тот же человек. Он тащит человека Крайма к тому, кто штопает людей Крайма."},{"kind":"p","line":462,"text":"Мысль была верная. Она просто была не та."},{"kind":"p","line":464,"text":"Двор нашёлся сразу — камни под ногами были синие даже в темноте, вымощенные фиолетовым, как синяк. Пахло старой мочой и рекой. Наверху, под самой крышей, в северных окнах горел свет."},{"kind":"p","line":466,"text":"Он ударил ногой в дверь, потому что руки были заняты."},{"kind":"p","line":468,"text":"Внутри что-то упало. Голос — женский, сонный и злой — сказал через дверь:"},{"kind":"p","line":470,"text":"— Кровь?"},{"kind":"p","line":472,"text":"— Много."},{"kind":"p","line":474,"text":"— Клади на стол, у окна, не на пол. Дункан, огня!"},{"kind":"p","line":476,"text":"Щеколда пошла."},{"kind":"p","line":478,"text":"Никто вошёл боком, вываливая тело со спины на длинный стол под высокими окнами, и вместе с ним в комнату вошёл запах спирта и чего-то травяного и сладковатого поверх."},{"kind":"p","line":480,"text":"Он знал этот запах."},{"kind":"p","line":482,"text":"Он поднял голову."},{"kind":"p","line":484,"text":"Она стояла с той стороны стола, босая, в наспех запахнутом колете, с волосами, стянутыми на затылке кое-как, и уже смотрела не на него, а на рану — руки шли к ремню и шарфу раньше, чем голова успела что-либо решить."},{"kind":"p","line":486,"text":"Потом она подняла глаза."},{"kind":"p","line":488,"text":"И увидела шрам."},{"kind":"p","line":490,"text":"Она увидела шрам и не остановилась."},{"kind":"p","line":492,"text":"Руки продолжали — ремень вон, ком тряпья прочь, ладонь на рану, вторая под лопатку, — и всё это заняло секунды три. На четвёртой она сказала:"},{"kind":"p","line":494,"text":"— Ремм."},{"kind":"p","line":496,"text":"Не вопросительно. Никто услышал и понял, что мысль его была верная и не та."},{"kind":"p","line":498,"text":"— Ты его знаешь."},{"kind":"p","line":500,"text":"— Знаю. — Она наклонилась ниже, приподняла край шарфа, посмотрела и опустила. — Дункан, воду. И спирт, оба кувшина."},{"kind":"p","line":502,"text":"Мальчишка лет четырнадцати, бледный, в одной рубахе, загремел чем-то у печи."},{"kind":"p","line":504,"text":"Она наконец подняла на Никто глаза. Долго. Секунды две."},{"kind":"p","line":506,"text":"— Ты, — сказала она."},{"kind":"p","line":508,"text":"— Я."},{"kind":"p","line":510,"text":"— Иди к двери и не мешай."},{"kind":"p","line":512,"text":"Он не пошёл."},{"kind":"p","line":514,"text":"— Он мне нужен живым."},{"kind":"p","line":516,"text":"— Ты его так живым и делал?"},{"kind":"p","line":518,"text":"— Он сам."},{"kind":"p","line":520,"text":"Она хмыкнула — коротко, без веселья, — и потянулась за нитями."},{"kind":"p","line":522,"text":"— Тогда встань, где я скажу, и держи, где я скажу. Руки мыл?"},{"kind":"h","text":"Микстура"},{"kind":"p","line":526,"text":"Руки он вымыл."},{"kind":"p","line":528,"text":"Стоял у бочки, лил спирт на ладони — дорогая дрянь, её пьют, а он лил, — и смотрел, как она работает, и в голове было слишком много всего сразу."},{"kind":"p","line":530,"text":"Каволь на столе под окнами. Каволь — это сорок кордов и имя в Морском. Каволь — это ещё часы, может быть до утра, и если он умрёт, всё, что было в конторке, стало ничем."},{"kind":"p","line":532,"text":"И вот она, через два года и три дня пути, стоит над этим Каволем в наспех запахнутом колете, и у неё прядь у виска, та же самая."},{"kind":"p","line":534,"text":"— Держи здесь. — Она поставила его руку сама, взяв за запястье, и он от этого дёрнулся, а она не заметила. — Давишь. Сильнее. Не жалей его, он всё равно не чувствует."},{"kind":"p","line":536,"text":"— Он у тебя тут не первый раз."},{"kind":"p","line":538,"text":"— Третий."},{"kind":"p","line":540,"text":"— Он мне нужен..."},{"kind":"p","line":542,"text":"— Живым, ты сказал. Я слышала. — Она обмакнула нити в кипяток. — Я всё равно буду делать то же самое, хочешь ты этого или нет, так что можешь не повторять."},{"kind":"p","line":544,"text":"— Сюжет номер, — начал он и остановился."},{"kind":"p","line":546,"text":"Она подняла глаза на секунду."},{"kind":"p","line":548,"text":"— Что?"},{"kind":"p","line":550,"text":"— Ничего."},{"kind":"p","line":552,"text":"Дункан принёс второй кувшин и встал у стены, бледный до зелени."},{"kind":"p","line":554,"text":"Работала она долго. Никто стоял, где сказано, давил, где сказано, и разглядывал её сверху вниз, потому что она была ниже и потому что она не смотрела в ответ. Спирт. Мелкие порезы на пальцах. Ожог на внутренней стороне левого запястья — вот его два года назад не было. Он посмотрел на ожог и сложил всё за две секунды: рисунок ложевой кислоты, тот же самый, что у него на черепе, только не облитый, а брызнувший."},{"kind":"p","line":556,"text":"— Тебя выгнали, — сказал он."},{"kind":"p","line":558,"text":"— Я ушла раньше."},{"kind":"p","line":560,"text":"— В среду я пришёл. Двор был пустой."},{"kind":"p","line":562,"text":"Она не ответила. Она в этот момент вела нить и не могла отвечать, и он это понимал, и всё равно сказал:"},{"kind":"p","line":564,"text":"— Я тебя два месяца искал."},{"kind":"p","line":566,"text":"Игла не остановилась. Но вторая рука, свободная, чуть сжалась и разжалась — он увидел."},{"kind":"p","line":568,"text":"— Зачем?"},{"kind":"p","line":570,"text":"— Не знаю."},{"kind":"p","line":572,"text":"— Ответ хуже вопроса, — сказала она и завязала узел."},{"kind":"p","line":574,"text":"Потом выпрямилась, вытерла лоб тыльной стороной запястья и посмотрела на Каволя, а не на Никто."},{"kind":"p","line":576,"text":"— Слушай сюда, — сказала она. — Он не жилец без микстуры. Кровь я не восстановлю, кровь никто не восстанавливает. Дырка заткнута, но он потерял столько, что мне бы надо влить обратно, а вливать нечем. У тебя есть часы. Может, до полудня. Может, меньше."},{"kind":"p","line":578,"text":"— Достань микстуру."},{"kind":"p","line":580,"text":"— За флакон полтора-два конца цены и три дня ждать. У меня в городе один посредник, и он спит."},{"kind":"p","line":582,"text":"— Разбуди."},{"kind":"p","line":584,"text":"— Разбудить-то можно. — Она наконец подняла на него глаза, и глаза были совершенно спокойные. — Дальше вопрос простой. У тебя есть тридцать кордов?"},{"kind":"p","line":586,"text":"Никто молчал."},{"kind":"p","line":588,"text":"У него было девять с половиной."},{"kind":"p","line":590,"text":"Она кивнула, как если бы он ответил вслух."},{"kind":"p","line":592,"text":"— Я могу взять флакон в долг, — сказала она. — Не деньгами — одолжением. Одолжение мне отдадут, потому что я половине этого города должна больше, чем они мне, но одолжение конечное, и я его трачу на тебя. — Она подняла палец. — Не на него. Он мне никто, он приказчик, я его штопаю третий раз и в четвёртый заштопаю. На тебя."},{"kind":"p","line":594,"text":"— И что взамен."},{"kind":"p","line":596,"text":"— Серая плеть и волчья желчь."},{"kind":"p","line":598,"text":"Она села на табурет у стены, дав рукам минуту отдыха."},{"kind":"p","line":600,"text":"— Серая плеть — это гриб. Нитчатый, растёт на корнях мёртвых деревьев, свисает с пня седыми космами, издалека похоже на волосы. Он и есть то, что заставляет мясо расти быстрее, чем оно должно. Оттуда же вся дрянь — лихорадка, органы. Собирать надо в тряпке на лице, споры дают сыпь, и сыпь эта потом сходит месяц."},{"kind":"p","line":602,"text":"— А желчь?"},{"kind":"p","line":604,"text":"— Желчный пузырь лесного волка. Катализатор. Без него плеть просто варит человека изнутри. — Она посмотрела на него. — И тут условие простое: сначала волка надо убить."},{"kind":"p","line":606,"text":"— Сколько."},{"kind":"p","line":608,"text":"— Плети — сколько унесёшь, она лёгкая. Пузырей — хотя бы три, лучше пять. Вынимать сразу и класть в спирт, я дам склянки. Через день после смерти он уже ничего не стоит."},{"kind":"p","line":610,"text":"Никто помолчал."},{"kind":"p","line":612,"text":"— Волки в Гнилом Лесу ходят по двадцать голов."},{"kind":"p","line":614,"text":"— Ходят."},{"kind":"p","line":616,"text":"— И охотятся молча."},{"kind":"p","line":618,"text":"— Молча, — согласилась она. — Я тебе честно всё говорю, чтобы ты потом не думал, будто я тебя обманула. И ещё одно скажу, хотя могла бы не говорить: лес по договору с Ложей держит Кесс. Плеть с той делянки идёт ему, и он это знает. Жетона у тебя, судя по всему, нет, а без жетона он тебя грабит."},{"kind":"p","line":620,"text":"— У меня нет жетона."},{"kind":"p","line":622,"text":"— Я так и подумала."},{"kind":"p","line":624,"text":"Он усмехнулся."},{"kind":"p","line":626,"text":"— То есть ты мне продаёшь жизнь человека, который тебе никто, за поход туда, где меня съедят волки, а если не съедят, то оберёт разбойник."},{"kind":"p","line":628,"text":"— Это не милосердие, это арифметика, — сказала она. — Мне нужны те, кто ходит туда, куда не хожу я. Я это говорю вслух, чтобы ты не считал меня доброй."},{"kind":"p","line":630,"text":"— А ты добрая?"},{"kind":"p","line":632,"text":"— Иногда, — сказала Элоуэн. — Но не сейчас. Сейчас я торгуюсь."},{"kind":"p","line":634,"text":"Дункан отошёл к двери — идти к посреднику, — и, пока Элоуэн вытирала руки, между ними осталось несколько минут тишины. Она поставила две кружки, налила из чайника, который, видимо, грелся тут же на печи всю ночь, и одну протянула ему. Кружка была щербатая, вторая, целая, осталась у неё."},{"kind":"p","line":636,"text":"— Чай, — сказала она. — Южный, настоящий. Пей, пока горячий, второй раз не налью."},{"kind":"p","line":638,"text":"— Ты правда меня искал? — спросила она, садясь на табурет."},{"kind":"p","line":640,"text":"— Два месяца."},{"kind":"p","line":642,"text":"— Зачем?"},{"kind":"p","line":644,"text":"— Я не знаю."},{"kind":"p","line":646,"text":"— Ты второй раз это говоришь."},{"kind":"p","line":648,"text":"— Потому что второй раз правда. — Он повертел кружку. — Я тебе нож под ребро совал. Тебе полагалось быть тем, кого я ищу. А ты грела руки о кружку, прежде чем трогать старика."},{"kind":"p","line":650,"text":"Она посмотрела на него сбоку."},{"kind":"p","line":652,"text":"— И что?"},{"kind":"p","line":654,"text":"— И ничего. — Он пожал плечами. — Просто те, кто это делал, ладони не грели."},{"kind":"p","line":656,"text":"Она долго молчала. Потом отпила из своей."},{"kind":"p","line":658,"text":"— Меня искали в то же время, — сказала она. — Только не ты."},{"kind":"p","line":660,"text":"— Я понял. По запястью."},{"kind":"p","line":662,"text":"— Три недели в подполе у знакомого пивовара, потом баржей вниз. Всё, что было, — сундук и руки. — Она хмыкнула. — Я думала, ты из них. Тогда, в Нижнем. Решила — вот, пришли, и почему-то с ножом и без разговоров."},{"kind":"p","line":664,"text":"— А потом?"},{"kind":"p","line":666,"text":"— А потом ты меня отпустил, и я всю ночь не спала. — Она посмотрела в кружку. — Не от страха. От того, что ты сказал «Никто», и я поняла, что это правда. Что у тебя правда нет имени. Я такого раньше не видела."},{"kind":"p","line":668,"text":"Никто не ответил."},{"kind":"p","line":670,"text":"— Я тебя вспоминала, — сказала она просто. — Не каждый день. Но чаще, чем следовало."},{"kind":"p","line":672,"text":"Он сидел и держал кружку, и кружка была горячая, и это оказалось непропорционально важно."},{"kind":"p","line":674,"text":"Два года он носил в себе три имени и не произносил их вслух, и с ними лежало четвёртое, которое он туда положил сам. И вот оно сидит в двух шагах, босое, с бурыми пятнами на фартуке, и говорит, что тоже помнило."},{"kind":"p","line":676,"text":"Он мог сказать сейчас очень много. Он не сказал ничего."},{"kind":"h","text":"Согласие"},{"kind":"p","line":680,"text":"— Согласен, — сказал он."},{"kind":"p","line":682,"text":"Она остановилась."},{"kind":"p","line":684,"text":"— Быстро."},{"kind":"p","line":686,"text":"— А чего тянуть."},{"kind":"p","line":688,"text":"— Люди тянут. Говорят «дай подумать», потом торгуются, потом соглашаются на три пузыря вместо пяти. — Она смотрела внимательно. — Ты даже не спросил, сколько времени у тебя есть."},{"kind":"p","line":690,"text":"— Сколько?"},{"kind":"p","line":692,"text":"— До весны. Зимой в лесу они голодные и потому наглые, зато шкура и желчь лучше. Ходить будет хуже, брать — легче."},{"kind":"p","line":694,"text":"— Годится."},{"kind":"p","line":696,"text":"Он сказал это, и только потом начал думать, почему сказал."},{"kind":"p","line":698,"text":"Считать он умел. Считать он умел лучше всего на свете: расстояния, углы, секунды до броска, сколько людей в комнате и кто из них встанет первым. И сейчас счёт не сошёлся — потому что в графе «зачем» стояло пусто, а он всё равно уже согласился."},{"kind":"p","line":700,"text":"Тик не пошёл. Он открыл рот, обнаружил, что ему просто хорошо и от этого неловко, как в чужой одежде, и закрыл рот обратно."},{"kind":"p","line":702,"text":"— Ты что-то хотел сказать, — заметила она."},{"kind":"p","line":704,"text":"— Нет."},{"kind":"p","line":706,"text":"— Ты второй раз рот открываешь и закрываешь."},{"kind":"p","line":708,"text":"— Считаю до десяти. Полезно."},{"kind":"p","line":710,"text":"Она покачала головой и наклонилась над Каволем — приподняла веко, послушала."},{"kind":"p","line":712,"text":"— Тогда так. Я иду к посреднику сейчас, Дункан со мной, он знает дорогу. Марта сядет здесь. Ты..."},{"kind":"p","line":714,"text":"— Я уйду."},{"kind":"p","line":716,"text":"— Ты уйдёшь, — согласилась она. — И вернёшься к вечеру. Если микстуру дадут, платить одолжением буду я, и объясняться, за кого, тоже я. Мне надо знать, что ты не в реке."},{"kind":"p","line":718,"text":"— Я не в реке."},{"kind":"p","line":720,"text":"— Ты пока не в реке. — Она выпрямилась. — И оставь мне что-нибудь."},{"kind":"p","line":722,"text":"— Что?"},{"kind":"p","line":724,"text":"— Что угодно. Вещь. Люди, которые ушли и не вернулись, вещей не оставляют. Мне так спокойнее считать."},{"kind":"p","line":726,"text":"Он вынул из бандальеры нож — не лучший, но и не худший, тяжёлый, с обмотанной рукоятью — и положил на край стола рукоятью к ней."},{"kind":"p","line":728,"text":"— Это много, — сказала она."},{"kind":"p","line":730,"text":"— Это один из двенадцати."},{"kind":"p","line":732,"text":"— Всё равно много. — Она взвесила его в ладони и положила на полку рядом со склянками, где ему было совершенно не место. — Иди."},{"kind":"p","line":734,"text":"Он дошёл до двери, взялся за щеколду."},{"kind":"p","line":736,"text":"— Элоуэн."},{"kind":"p","line":738,"text":"— Что."},{"kind":"p","line":740,"text":"— В среду я приходил, — сказал он в дверь. — Я уже говорил. Просто хотел ещё раз."},{"kind":"p","line":742,"text":"Он вышел во двор, где камни были синие даже под дождём, и пошёл искать место, откуда видно причал, потому что до вечера надо было чем-то заняться, а думать о том, о чём он думал, было решительно нельзя."},{"kind":"p","line":744,"text":"Получалось плохо."},{"kind":"h","text":"Часть V. День. Ночь. Заказ выполнен"},{"kind":"h","text":"День"},{"kind":"p","line":750,"text":"Он пересидел его на крыше сарая напротив четвёртого причала, потому что ничего умнее не придумал."},{"kind":"p","line":752,"text":"Внизу шла обычная жизнь. Грузчики таскали, весовщик орал, кто-то уронил в воду мешок и получил в ухо. К полудню в конторку пришли двое от Крайма — Никто узнал одного из тех медленных, что сторожили ночную погрузку. Пробыли внутри недолго. Вышли, постояли, поговорили. Один махнул рукой в сторону города."},{"kind":"p","line":754,"text":"Значит, кровь на полу нашли. Значит, Каволя ищут."},{"kind":"p","line":756,"text":"Никто прикинул, сколько времени нужно, чтобы обойти в Приречье всех, кто зашивает, и получил — до вечера, если не спешить, и полдня, если спешить."},{"kind":"p","line":758,"text":"Это было плохо и это было не его дело до тех пор, пока он не понял, что это её дом."},{"kind":"p","line":760,"text":"Он спустился и пошёл шататься по мостам, потому что сидеть стало нельзя."},{"kind":"p","line":762,"text":"Купил у лоточника пирог с рыбой, откусил, выбросил. Постоял на Гончарном, глядя вниз на баржи. Отсчитал у пивнушки, сколько выходов в переулок — два и один через крышу. Заглянул в лавку за спиртом, купил склянку, сам не зная зачем, потом сообразил, что она даст свои."},{"kind":"p","line":764,"text":"К четвёртому часу поймал себя на том, что стоит в двух улицах от Синего двора и разглядывает вывеску шорника, которая ему совершенно не нужна."},{"kind":"p","line":766,"text":"Сюжет номер сорок четыре, подумал он с отвращением. Человек, который умеет ждать, и всё-таки."},{"kind":"h","text":"Вечер"},{"kind":"p","line":770,"text":"Дверь открыла женщина лет сорока пяти, с мокрыми по локоть руками, и посмотрела на него, как смотрят на грязь, которую сейчас принесут в дом."},{"kind":"p","line":772,"text":"— Ноги вытри."},{"kind":"p","line":774,"text":"— Марта?"},{"kind":"p","line":776,"text":"— Вытри ноги."},{"kind":"p","line":778,"text":"Он вытер."},{"kind":"p","line":780,"text":"Внутри пахло по-другому — жжёной серой и полынью поверх спирта. Запах был тяжёлый и незнакомый, и Никто понял, что это она и есть."},{"kind":"p","line":782,"text":"Элоуэн сидела на табурете у стола, локти на коленях, и выглядела как человек, который сегодня не спал совсем и вчера тоже. На столе под шерстяным одеялом лежал Каволь. Лицо у Каволя было мокрое, красное и живое."},{"kind":"p","line":784,"text":"— Дали, — сказала она вместо приветствия."},{"kind":"p","line":786,"text":"— Сколько?"},{"kind":"p","line":788,"text":"— Не спрашивай. — Она потёрла лицо ладонями. — Дали за так, в долг, потому что человек, который дал, лечился у меня в позапрошлом году бесплатно. Я это одолжение держала три года на чёрный день. Вот и чёрный день."},{"kind":"p","line":790,"text":"Никто посмотрел на Каволя."},{"kind":"p","line":792,"text":"Того трясло. Мелко, непрерывно, зубы стучали о зубы, и одеяло ходило волнами."},{"kind":"p","line":794,"text":"— Это нормально?"},{"kind":"p","line":796,"text":"— Это лихорадка. Под сорок. Так и должно быть, значит, работает. — Она наклонилась, поправила тряпку у него на лбу. — Часов шесть-восемь он никакой. Потом придёт в себя, и три дня будет как тряпка. Кровь я ему не вернула, кровь никто не возвращает, так что вставать он начнёт не раньше чем через неделю."},{"kind":"p","line":798,"text":"— Он будет жить?"},{"kind":"p","line":800,"text":"— Будет, — сказала Элоуэн. — Ты его не убил. Поздравляю."},{"kind":"p","line":802,"text":"Она сказала это без злости, и от этого вышло хуже."},{"kind":"p","line":804,"text":"Никто сел на пол у стены, там же, где сидел утром. Марта загремела котлом и ушла во двор, и стало слышно, как за окнами идёт река."},{"kind":"p","line":806,"text":"— Его ищут, — сказал он. — Двое от Крайма были в конторке днём. Кровь на полу нашли."},{"kind":"p","line":808,"text":"— Знаю. Ко мне приходили в третьем часу."},{"kind":"p","line":810,"text":"Он поднял голову."},{"kind":"p","line":812,"text":"— И?"},{"kind":"p","line":814,"text":"— И я сказала, что ко мне ночью принесли человека с ножом в груди и что это Ремм. — Она пожала плечами. — А ты что думал? Я на земле Крайма живу. Он мне крышу даёт за то, что я его людей штопаю без вопросов. «Без вопросов» — это про то, откуда дырка, а не про то, есть ли у меня в доме его приказчик."},{"kind":"p","line":816,"text":"— Ты меня сдала?"},{"kind":"p","line":818,"text":"— Я сказала, что принёс мужик, лица не разглядела, темно было. — Она посмотрела на него ровно. — Это первое враньё за четыре года, которое я им сказала. Заметь."},{"kind":"p","line":820,"text":"Никто молчал."},{"kind":"p","line":822,"text":"— Он очнётся, — сказала она. — Может, сегодня ночью, может, завтра. И скажет, кто это был, и как ты выглядел, и что тебе было нужно. Он не будет тебя покрывать, ему незачем."},{"kind":"p","line":824,"text":"— Знаю."},{"kind":"p","line":826,"text":"— Тогда почему ты сидишь у меня на полу?"},{"kind":"p","line":828,"text":"Он не ответил."},{"kind":"p","line":830,"text":"Он сидел, потому что у него в кармане были бумаги, в которых не было нужного, потому что заказ сдох, потому что через сутки в Приречье будут искать человека со шрамом через череп, и потому что в комнате пахло серой и полынью и было тепло."},{"kind":"p","line":832,"text":"— Он проговорится и про меня, — сказал наконец Никто. — Что его сюда принесли. Что тебя разбудили ночью."},{"kind":"p","line":834,"text":"— Он про меня и так расскажет, я его лечила. Это не новость."},{"kind":"p","line":836,"text":"— Он расскажет, что мужик со шрамом сидел у тебя до вечера и ты его не выгнала."},{"kind":"p","line":838,"text":"Элоуэн помолчала."},{"kind":"p","line":840,"text":"— Да, — сказала она. — Это он расскажет."},{"kind":"p","line":842,"text":"Они посидели."},{"kind":"p","line":844,"text":"— Значит, мне уходить, — сказал Никто."},{"kind":"p","line":846,"text":"— Значит, уходить."},{"kind":"p","line":848,"text":"— Сейчас."},{"kind":"p","line":850,"text":"— Сейчас, — согласилась она и не двинулась с места."},{"kind":"p","line":852,"text":"Каволя на столе трясло. За окном темнело, свет из северных окон уходил, и Марта во дворе била чем-то по бочке."},{"kind":"p","line":854,"text":"— Склянки, — сказал Никто."},{"kind":"p","line":856,"text":"— Что?"},{"kind":"p","line":858,"text":"— Ты обещала склянки. Под желчь."},{"kind":"p","line":860,"text":"Элоуэн посмотрела на него — секунду или две — и встала, и пошла к полке."},{"kind":"h","text":"Разговор с Каволем"},{"kind":"p","line":864,"text":"Рассвело в пятом часу, и свет пошёл через северные окна ровный и серый."},{"kind":"p","line":866,"text":"Никто сидел на полу у стены, под антресолью, и в третий раз разбирал черновик при сальной свече. Колонки, числа, значки. Черта. Две черты. Круг. Круг с точкой. Против одной строки — три черты, и эта строка была длиннее всех."},{"kind":"p","line":868,"text":"Он смотрел на них до рези и понимал одно: это не шифр. Шифр надо придумывать, а придумывать Каволь не умел. Это привычка. Человек двадцать лет писал накладные и однажды стал вместо имён ставить закорючку, потому что так быстрее, и закорючка что-то ему напоминала."},{"kind":"p","line":870,"text":"За столом зашуршало."},{"kind":"p","line":872,"text":"— Пить, — сказал Каволь."},{"kind":"p","line":874,"text":"Марта задремала у печи. Элоуэн спала на антресоли, и Никто слышал, как она там дышит, — ровно, глубоко, как спят люди, которые падают в сон."},{"kind":"p","line":876,"text":"Он встал, зачерпнул воды и подошёл."},{"kind":"p","line":878,"text":"Приказчик смотрел в потолок мутно. Лицо мокрое, губы белые. Никто приподнял ему голову и дал напиться, и только когда тот напился, тот повернул глаза и увидел, кто держит кружку."},{"kind":"p","line":880,"text":"Дёрнулся. Слабо, как рыба на песке."},{"kind":"p","line":882,"text":"— Тише, тише, тише. — Никто придержал его за плечо, легко, одной ладонью. — Ты швы порвёшь, а она их два часа клала. Она меня убьёт, у неё вон нож на полке, мой же."},{"kind":"p","line":884,"text":"Каволь дышал часто."},{"kind":"p","line":886,"text":"— Ты..."},{"kind":"p","line":888,"text":"— Я, — согласился Никто. — Слушай, я тебе честно скажу: я на тебя злой. Ты меня знаешь? Нет. А я тебя третьи сутки таскаю. Я тебя нёс на горбу через полгорода, а ты, между прочим, не пушинка. Я за тебя тридцать кордов должен — вернее, не я, но всё равно. — Он сел на табурет и поставил кружку на пол. — Ты когда себе в ключицу-то воткнул, я минуты полторы стоял и думал, что делать. Красиво, кстати, воткнул. Многие метят красиво, а попадают в стену. Я вот однажды видел, как человек с крыши прыгнул мимо канала. Мимо. Канала. Он шириной в четыре сажени."},{"kind":"p","line":890,"text":"Каволь молчал. Смотрел."},{"kind":"p","line":892,"text":"— Ты меня добивать пришёл."},{"kind":"p","line":894,"text":"— Если бы я тебя добивать пришёл, я бы тебя оставил в конторке, — сказал Никто. — Это, знаешь, самый дешёвый способ добить: ничего не делать. Я вместо этого разбудил бабу среди ночи, которая, между прочим, страшная, когда её будят."},{"kind":"p","line":896,"text":"Что-то в углу рта у Каволя дрогнуло."},{"kind":"p","line":898,"text":"— Она страшная."},{"kind":"p","line":900,"text":"— Она мне велела руки мыть. Спиртом. Я говорю: женщина, спирт пьют. Она говорит: не в моём доме."},{"kind":"p","line":902,"text":"Приказчик закрыл глаза. Полежал."},{"kind":"p","line":904,"text":"— Зачем ты меня притащил, — сказал он тише."},{"kind":"p","line":906,"text":"— А ты как думаешь?"},{"kind":"p","line":908,"text":"— Тебе от меня надо."},{"kind":"p","line":910,"text":"— Мне от тебя надо, — легко согласился Никто. — Мне и в конторке от тебя надо было, и сейчас надо, я же не притворяюсь. Просто теперь на тебе повязка и ты живой, и это, по-моему, выгодная перемена. Хочешь послушать, что я тебе скажу?"},{"kind":"p","line":912,"text":"— Нет."},{"kind":"p","line":914,"text":"— Слушай. — Никто наклонился, локти на колени. — Ты вчера решил, что тебя пришли колоть, и сделал то, что заготовил. Я это уважаю, правда, я такое второй раз в жизни вижу. Но ты промазал и остался жив, и теперь всё сломалось. Тебя нашли в конторке в крови. Твои сюда приходили днём. И вот сейчас, пока ты тут потеешь, где-то сидит Крайм и думает: а чего это на моего приказчика вышли? Кто ему в ухо дул? Не приказчик ли сам?"},{"kind":"p","line":916,"text":"Каволь открыл глаза."},{"kind":"p","line":918,"text":"— Я ему ничего..."},{"kind":"p","line":920,"text":"— Я знаю, что ничего. Я тебя три часа мучил и ничего не получил, я это лучше всех знаю. — Никто развёл руками. — А он не знает. Он знает, что ты дырявый и что вокруг тебя кто-то ходил."},{"kind":"p","line":922,"text":"Тишина. Только Марта посапывала у печи."},{"kind":"p","line":924,"text":"— И что."},{"kind":"p","line":926,"text":"— И то, что ты теперь сам себе не нужен. — Никто вынул из-за пазухи листы, положил на одеяло, разгладил ладонью черновик. — Смотри. Тут я ничего не понимаю. Тут вместо людей палочки. И я тебе так скажу: если я это отнесу тому, кто мне платит, он тоже ничего не поймёт, разозлится и придёт к тебе. Не я. Я-то ухожу, я, знаешь, лёгкий на подъём."},{"kind":"p","line":928,"text":"Каволь смотрел на бумагу."},{"kind":"p","line":930,"text":"— Ты их взял."},{"kind":"p","line":932,"text":"— Со стола. У тебя там всё лежало навалом, между прочим, безобразие для приказчика."},{"kind":"p","line":934,"text":"— Верни."},{"kind":"p","line":936,"text":"— Верну, — сказал Никто. — Половину верну прямо сейчас, вот, накладные, реестр, забирай, оправдаешься перед Краймом. А черновик оставлю себе, потому что мне за него платят, и не спорь, ты сейчас слабый."},{"kind":"p","line":938,"text":"Приказчик молчал долго."},{"kind":"p","line":940,"text":"— Три черты, — сказал Никто буднично, глядя не на него, а на лист. — Тут почти везде круг, а вот здесь три черты, и строка длинная. Три черты — это самое частое? Или самое большое?"},{"kind":"p","line":942,"text":"— Не скажу."},{"kind":"p","line":944,"text":"— Да я и не спрашиваю, я думаю вслух. — Он поскрёб щёку. — Три черты. Три. Знаешь, у меня был знакомый, который вёл счета трактира, так он всех должников рисовал рожицами. Приходишь, а там страница рож. И вот один был с тремя волосинами на башке — я говорю, это кто? А он: лысый, три волосины, три и рисую. Дурак дураком, а система работала двадцать лет."},{"kind":"p","line":946,"text":"Каволь молчал. Но глаза у него были уже не мутные."},{"kind":"p","line":948,"text":"— Так что это не шифр, — сказал Никто. — Это тебе что-то напоминает. Черта — что-то одно. Две черты — что-то другое. А три... — Он повернул лист к свету. — Три ровные, одинаковой длины. Не палочки. Мачты?"},{"kind":"p","line":950,"text":"Тишина."},{"kind":"p","line":952,"text":"Никто поднял голову и посмотрел на него."},{"kind":"p","line":954,"text":"— Мачты, — сказал он."},{"kind":"p","line":956,"text":"— Отдай бумагу."},{"kind":"p","line":958,"text":"— Трёхмачтовик, — сказал Никто ласково. — В Морском. Круг — это, надо думать, бочка, черта — тюк, а три мачты — это не груз, это судно, потому что в одну строку ты записываешь то, что уходит дальше. И оно там одно такое, потому что в Морском сорок человек и один причал, и трёхмачтовик там как собор в деревне."},{"kind":"p","line":960,"text":"Каволь закрыл глаза."},{"kind":"p","line":962,"text":"Он не сказал ни слова. Ни имени, ни названия. Он просто перестал спорить, и это было последнее, чего Никто ждал, чтобы убедиться."},{"kind":"p","line":964,"text":"— Спасибо, — сказал Никто и убрал черновик за пазуху. — Ты, кстати, молодец. Ты ничего не сказал. Реально ничего. Захочешь — так и скажешь Крайму, и это будет чистая правда."},{"kind":"p","line":966,"text":"— Пошёл вон."},{"kind":"p","line":968,"text":"— Уже."},{"kind":"p","line":970,"text":"Он поднялся и пошёл к двери, а на пороге обернулся:"},{"kind":"p","line":972,"text":"— Воду тебе на табурет поставил. И не дёргайся, швы хорошие, но это швы."},{"kind":"h","text":"Часть VI. Прощание"},{"kind":"p","line":976,"text":"Элоуэн стояла у бочки во дворе, босая, и умывалась. Свет был серый, предутренний, камни под ногами — синие."},{"kind":"p","line":978,"text":"Она выпрямилась, отёрла лицо рукавом."},{"kind":"p","line":980,"text":"— Он очнулся."},{"kind":"p","line":982,"text":"— Очнулся. Обещал никогда меня не забыть."},{"kind":"p","line":984,"text":"— Ты получил, что хотел."},{"kind":"p","line":986,"text":"— Получил."},{"kind":"p","line":988,"text":"Она кивнула. Не спросила, что именно и как. Это Никто отметил отдельно и надолго."},{"kind":"p","line":990,"text":"Она сходила в дом и вынесла свёрток: четыре толстостенные склянки в тряпках, пробки залиты воском."},{"kind":"p","line":992,"text":"— Пузырь целиком, не режь. Сразу в спирт, спирт наливаю по горло, чтоб не болталось. Плеть в холстину, не в кожу, она задохнётся. И тряпку на лицо, я серьёзно, я тебя сыпью потом лечить не буду."},{"kind":"p","line":994,"text":"— Будешь."},{"kind":"p","line":996,"text":"— Буду, — согласилась она. — Но дорого."},{"kind":"p","line":998,"text":"Он взял свёрток. Постоял."},{"kind":"p","line":1000,"text":"— До весны, — сказала Элоуэн."},{"kind":"p","line":1002,"text":"— До весны."},{"kind":"p","line":1004,"text":"Он мог уйти на этом. Развернуться и уйти, и это было бы правильно, и Каэл бы одобрил."},{"kind":"p","line":1006,"text":"— Эли, — сказал он."},{"kind":"p","line":1008,"text":"Она моргнула."},{"kind":"p","line":1010,"text":"— Как?"},{"kind":"p","line":1012,"text":"— Эли. — Он пожал плечами. — Длинно у тебя имя. Пока выговоришь, тебя уже зарежут."},{"kind":"p","line":1014,"text":"— Меня так никто не звал."},{"kind":"p","line":1016,"text":"— Значит, я первый. Люблю быть первым, это дёшево и приятно."},{"kind":"p","line":1018,"text":"Она смотрела на него, и он не мог понять, что у неё на лице, и это было ново, потому что лица он читал хорошо."},{"kind":"p","line":1020,"text":"— Я принесу, — сказал он. — Не потому, что должен. Хотя должен."},{"kind":"p","line":1022,"text":"— А почему?"},{"kind":"p","line":1024,"text":"— Догадайся, — сказал Никто и вышел со двора, пока она не успела ответить."},{"kind":"p","line":1026,"text":"Нож остался лежать на полке между склянками."},{"kind":"p","line":1028,"text":"Он про него не забыл. Он просто не стал забирать."},{"kind":"h","text":"Часть VII. Развязки"},{"kind":"h","text":"Порт Теней, четыре дня спустя"},{"kind":"p","line":1034,"text":"— Трёхмачтовик, — повторил Плешь."},{"kind":"p","line":1036,"text":"— Трёхмачтовик. В Морском. Раз в две недели, двойное днище на «Серой Мари» и «Пятой», перегрузка на берегу, дальше на юг. Соль без пошлины и ящики, которые он не вскрывал. — Никто выложил черновик на стол. — И вот бумага, где это его рукой. Значки объяснить могу, но не буду, объяснение стоит отдельно."},{"kind":"p","line":1038,"text":"Плешь читал долго, шевеля губами."},{"kind":"p","line":1040,"text":"— Приказчик жив?"},{"kind":"p","line":1042,"text":"— Жив."},{"kind":"p","line":1044,"text":"— Заказчик просил, чтоб тихо."},{"kind":"p","line":1046,"text":"— Тише не бывает. Он никому ничего не сказал. Он вообще, — Никто улыбнулся, — мне ни слова не сказал, я всё сам придумал. Он подтвердит."},{"kind":"p","line":1048,"text":"Плешь отсчитал тридцать кордов и подвинул через стол."},{"kind":"p","line":1050,"text":"— Заказчик спросит, почему живой."},{"kind":"p","line":1052,"text":"— А ты ответь, что мёртвый приказчик — это дознание, вдова, поминки и альдерман на ушах. А живой приказчик, который лежит и потеет, — это тишина. — Никто ссыпал монеты в кошель. — Скажешь, что я подумал о его удобстве. Он расчувствуется."},{"kind":"p","line":1054,"text":"Он вышел на улицу, в туман, где человека теряют в трёх шагах, и постоял, привыкая."},{"kind":"p","line":1056,"text":"Тридцать кордов. Четыре месяца жизни."},{"kind":"p","line":1058,"text":"Он подумал, что на них можно перезимовать в Порту нормально, в комнате, а не в общей. Потом подумал, что до весны надо в лес. Потом поймал себя на том, что уже прикидывает дорогу и в какую сторону от Ручейного идут стаи."},{"kind":"p","line":1060,"text":"Сюжет номер восемьдесят один, подумал он."},{"kind":"p","line":1062,"text":"Названия не придумалось."},{"kind":"h","text":"Синий двор, тем же утром"},{"kind":"p","line":1066,"text":"Она домыла руки, вылила таз в жёлоб и вернулась в дом."},{"kind":"p","line":1068,"text":"Каволь спал. Марта скребла котёл. Дункан ещё не встал."},{"kind":"p","line":1070,"text":"Элоуэн поднялась на антресоль, села на топчан и некоторое время просто сидела."},{"kind":"p","line":1072,"text":"Потом посчитала."},{"kind":"p","line":1074,"text":"Одолжение, которое она держала три года, потрачено. Взамен — обещание принести плеть и желчь от человека, который ей ничего не должен по бумаге, а по бумаге ей вообще ничего никто не должен. Люди с такими обещаниями не возвращаются. Она это знала лучше, чем что-либо другое: к ней приходят, когда истекают кровью, и уходят, когда перестают."},{"kind":"p","line":1076,"text":"Плохая сделка. Она сама её предложила и сама понимала, что плохая, ещё когда предлагала."},{"kind":"p","line":1078,"text":"Она спустилась и подошла к полке."},{"kind":"p","line":1080,"text":"Нож лежал между склянкой с дурманом и склянкой с живицей, и лежать ему там было решительно негде. Тяжёлый, рукоять обмотана кожей, кожа протёрта под пальцами до блеска в двух местах. Человек, который двенадцать лет берёт одну и ту же вещь одной и той же хваткой."},{"kind":"p","line":1082,"text":"Он его не забрал."},{"kind":"p","line":1084,"text":"Она стояла и смотрела на нож дольше, чем следовало, и понимала, что смотрит на него как на расписку, а расписка — это не вещь. Расписку оставляют те, кто собирается прийти."},{"kind":"p","line":1086,"text":"«Догадайся», сказал он."},{"kind":"p","line":1088,"text":"— Дура, — сказала Элоуэн вслух."},{"kind":"p","line":1090,"text":"Марта у печи подняла голову:"},{"kind":"p","line":1092,"text":"— Чего?"},{"kind":"p","line":1094,"text":"— Ничего. Воду грей, он проснётся — обмывать надо."},{"kind":"p","line":1096,"text":"Она пошла к столу и по дороге не удержалась: тронула пальцем рукоять, только чтобы проверить, тёплая ли."},{"kind":"p","line":1098,"text":"Тёплая не была."},{"kind":"h","text":"Мокрый спуск"},{"kind":"p","line":1102,"text":"— Так, — сказал Крайм Руфус. — Ещё раз, и медленно."},{"kind":"p","line":1104,"text":"Комната была тесная, тёплая и заставленная бочонками с образцами. Альдерман Приречья сидел без камзола, в рубахе, и выглядел как человек, которого подняли рано и который этого не простил."},{"kind":"p","line":1106,"text":"Напротив стоял старший из тех двоих."},{"kind":"p","line":1108,"text":"— Иголка говорит: принесли ночью, во втором часу. Мужик. Свалил на стол и стоял, пока она шила. Лица не разглядела, темно, свеча одна."},{"kind":"p","line":1110,"text":"— Одна свеча, — повторил Крайм."},{"kind":"p","line":1112,"text":"— Она так сказала."},{"kind":"p","line":1114,"text":"— Она у себя ночью с одной свечой шьёт."},{"kind":"p","line":1116,"text":"— Она сказала, у неё окна на север и ночью всё едино темно."},{"kind":"p","line":1118,"text":"Крайм побарабанил пальцами."},{"kind":"p","line":1120,"text":"— Ладно. Ремм что?"},{"kind":"p","line":1122,"text":"— Ремм плох, но живой. Она его микстурой подняла, настоящей. Говорить может, но мало."},{"kind":"p","line":1124,"text":"— И что говорит?"},{"kind":"p","line":1126,"text":"— Говорит, пришли ночью в конторку. Спрашивали про второй канал."},{"kind":"p","line":1128,"text":"Крайм перестал барабанить."},{"kind":"p","line":1130,"text":"— Так и сказал? Второй канал?"},{"kind":"p","line":1132,"text":"— Так и сказал."},{"kind":"p","line":1134,"text":"Молчание было долгое."},{"kind":"p","line":1136,"text":"— А кто спрашивал?"},{"kind":"p","line":1138,"text":"— Говорит, не знает. Со шрамом, говорит, через всю башку. Говорит, три часа его мучил и ничего не получил."},{"kind":"p","line":1140,"text":"— Ничего не получил, — медленно сказал Крайм. — И зачем-то потом отнёс его к лекарке. Через полгорода. На спине."},{"kind":"p","line":1142,"text":"— Так."},{"kind":"p","line":1144,"text":"Крайм встал и подошёл к окну."},{"kind":"p","line":1146,"text":"Внизу шла река, серая и широкая, и на ней стояли его четыре баржи, и до конца навигации оставалось восемь дней."},{"kind":"p","line":1148,"text":"— Кто-то в Порту, — сказал он не оборачиваясь. — Или в Столице. Кто-то, кто знает слово «второй канал», а этого слова не знает никто, кроме меня, Ремма и двух человек на том конце."},{"kind":"p","line":1150,"text":"— Найти?"},{"kind":"p","line":1152,"text":"— Найдёшь ты, как же. — Крайм поморщился. — Ремма ко мне, как встанет. И пусть встаёт быстрее."},{"kind":"p","line":1154,"text":"— А с лекаркой что?"},{"kind":"p","line":1156,"text":"Крайм обернулся."},{"kind":"p","line":1158,"text":"— А что с лекаркой?"},{"kind":"p","line":1160,"text":"— Ну... она его вытащила."},{"kind":"p","line":1162,"text":"— Она его вытащила, — согласился Крайм. — Она мне за четыре года вытащила семерых, и я ей за это плачу тем, что её никто не трогает. Она врач, Тевис. Ей несут — она шьёт. Ей завтра принесут того, кто резал Ремма, она и его зашьёт и денег возьмёт."},{"kind":"p","line":1164,"text":"Он сел обратно."},{"kind":"p","line":1166,"text":"— Пошли ей две марки за ночь и мешок муки. И скажи, чтобы дальше молчала, как молчала."},{"kind":"p","line":1168,"text":"— Она и так молчит."},{"kind":"p","line":1170,"text":"— Вот и хорошо, — сказал Крайм. — С ней проще всех."},{"kind":"break"},{"kind":"p","line":1174,"text":"**Конец арки.**"}],"schemes":[],"ver":"8a26d24138"},{"id":"Никто_и_Элоуэн_две_встречи~разбор","tab":"Разбор","style":"doc","file":"Канон/15_Две_встречи_к_вычитке_2026-11-10.md","title":"К вычитке","status":"","blocks":[{"kind":"p","line":6,"text":"10.11.2026. Рабочий документ, не канон. Текст твой, я положил его как прислан. Исходник целиком лежит в Архив/Источники_Прозы/. Поменял одно место, остальное — заметки, решать тебе. Пометки в тексте ставь как обычно.","tag":"p","fmt":[[104,126,"code"]]},{"kind":"p","line":8,"text":"Что поменял","tag":"h2"},{"kind":"p","line":10,"text":"стр. 280 «Мимо конторы. То есть задатка на хранении нет, защиты нет». Было «Мимо Гильдии. То есть депозита нет». Гильдии нет с 13.09, задаток лежит у Сайдена, и в каноне это называется «задаток на хранении».","tag":"p","fmt":[[0,69,"b"]]},{"kind":"p","line":12,"text":"С каноном сходится","tag":"h2"},{"kind":"p","line":14,"text":"Почти всё. Пересказ этой арки давно стоит в записи 47 и в хронологии, и текст ему не противоречит: дубильня и «в среду», колокольня, Ремм Каволь, тридцать кордов за микстуру и девять с половиной в кармане, плеть и желчь до весны, нож на полке, «Эли», две марки и мешок муки от Крайма. Никто двадцать два, Дункану около четырнадцати, Элоуэн около двадцати пяти, всё как в каноне. Секунды есть только в авторском тексте, не в репликах, так можно.","tag":"p"},{"kind":"p","line":16,"text":"Что посмотреть","tag":"h2"},{"kind":"p","line":18,"text":"1. Крайм: «за четыре года вытащила семерых» (стр. 1162). В Ошерске она с ~1021-го, к 1023-му это два года. Её собственное «первое враньё за четыре года» (стр. 818) сходится: правило не врать, кто был на столе, она взяла в 1019-м, ещё в Столице. А у Крайма, наверное, «за два года».","tag":"p","fmt":[[0,43,"b"]]},{"kind":"p","line":20,"text":"2. «Три дня берегом и вверх по реке» (стр. 290), из Порта Теней в Ошерск. По трактам в справочнике это дальше: до Столицы лесом четыре дня верхом, оттуда рекой ещё два. Можно оставить как есть, если он плыл морем и потом рекой, или написать «неделю».","tag":"p","fmt":[[0,36,"b"]]},{"kind":"p","line":22,"text":"3. «Сюжет номер восемьдесят один» (стр. 1060) уже был в «Деле Дюра» (весна 1025): «Люди, которые приехали отдыхать». Здесь 1023-й и «названия не придумалось». Если номера у него идут подряд через всю жизнь, один из двух надо сменить.","tag":"p","fmt":[[0,33,"b"]]}]}];
+if (!Array.isArray(DOCS)) DOCS = [DOCS];
+(function () {
+  var TYPES = { dislike: 'Не нравится', question: 'Вопрос', note: 'Заметка' };
+  // настройки (размер, тема) — общие на всю читалку, под ключом основного текста;
+  // пометки и место чтения — у каждой вкладки свои (у основной — прежние ключи, старые пометки целы)
+  var KEY = 'kordim-reader:' + DOCS[0].id;
+  var DOC = DOCS[0], cur = 0;
+  function dkey(d, k) { return 'kordim-reader:' + d.id + ':' + k; }
+  var root = document.documentElement;
+
+  // хранилище: в приватном окне или при запрете может не работать — тогда предупреждаем
+  var storageOk = true;
+  function loadRaw(key, def) {
+    try { var v = localStorage.getItem(key); return v == null ? def : JSON.parse(v); }
+    catch (e) { storageOk = false; return def; }
+  }
+  function saveRaw(key, v) {
+    try { localStorage.setItem(key, JSON.stringify(v)); }
+    catch (e) { storageOk = false; showWarn(); }
+  }
+  function load(k, def) { return loadRaw(KEY + ':' + k, def); }
+  function save(k, v) { saveRaw(KEY + ':' + k, v); }
+  function saveNotes() { saveRaw(dkey(DOC, 'notes'), notes); }
+  function showWarn() {
+    if (!storageOk) document.getElementById('warn').textContent =
+      'Браузер не даёт сохранять заметки — скопируй их перед закрытием вкладки.';
+  }
+
+  // текст: абзацы склеены через \n, у каждого — смещение начала в общей строке
+  var paras, full, starts;
+  function prep(d) {
+    var ps = d.blocks.filter(function (b) { return b.kind === 'p'; });
+    var f = '', st = [];
+    ps.forEach(function (p, i) { if (i) f += '\n'; st.push(f.length); f += p.text; });
+    // в разборе «стр. N» и «стр. N–M» — ссылки на строки рассказа
+    if (d.style === 'doc' && DOCS[0] !== d) ps.forEach(function (p) {
+      if (p.refs) return;
+      p.refs = [];
+      var re = /стр\.\s*(\d+)(?:\s*[–-]\s*(\d+))?/g, m;
+      while ((m = re.exec(p.text))) p.refs.push([m.index, m.index + m[0].length, +m[1], +(m[2] || m[1])]);
+      // заголовок заметки (Н1. / В12. / З2–З3. … целиком жирный) — тап по нему ведёт к первой ссылке
+      var fm = p.fmt || [];
+      p.jump = p.refs.length && /^[А-ЯЁ]{1,2}\d/.test(p.text) && fm.some(function (f) { return f[2] === 'b' && f[0] === 0; }) ? p.refs[0] : null;
+    });
+    return { paras: ps, full: f, starts: st };
+  }
+
+  function paraAt(off) {
+    var lo = 0, hi = starts.length - 1;
+    while (lo < hi) { var mid = (lo + hi + 1) >> 1; if (starts[mid] <= off) lo = mid; else hi = mid - 1; }
+    return lo;
+  }
+
+  var notes = [];
+  var filter = 'all';
+
+  // текст мог поменяться после правки файла — ищем цитату заново, ближайшее вхождение к старому месту
+  function reanchor(notes, full) {
+    notes.forEach(function (n) {
+      if (full.slice(n.start, n.end) === n.quote) { n.lost = false; return; }
+      var best = -1, from = 0, idx;
+      while ((idx = full.indexOf(n.quote, from)) !== -1) {
+        if (best < 0 || Math.abs(idx - n.start) < Math.abs(best - n.start)) best = idx;
+        from = idx + 1;
+      }
+      if (best >= 0) { n.start = best; n.end = best + n.quote.length; n.lost = false; }
+      else n.lost = true;
+    });
+  }
+
+  function lineIn(t, off) {
+    var lo = 0, hi = t.starts.length - 1;
+    while (lo < hi) { var mid = (lo + hi + 1) >> 1; if (t.starts[mid] <= off) lo = mid; else hi = mid - 1; }
+    return t.paras[lo].line;
+  }
+  function whereIn(t, n) {
+    var a = lineIn(t, n.start), b = lineIn(t, Math.max(n.start, n.end - 1));
+    return a === b ? 'стр. ' + a : 'стр. ' + a + '–' + b;
+  }
+  function whereOf(n) { return whereIn({ paras: paras, starts: starts }, n); }
+
+  function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  // разметка
+  var article = document.getElementById('text');
+  var pEls = [];
+  function build() {
+    var isDoc = DOC.style === 'doc';
+    document.title = DOCS[0].title + (cur ? ' — ' + DOC.tab.toLowerCase() : '');
+    document.getElementById('title').textContent = DOC.title;
+    document.getElementById('kicker').textContent = isDoc ? 'Кордим · ' + DOCS[0].title : 'Кордим · проза';
+    var words = full.split(/\s+/).filter(Boolean).length;
+    var mins = Math.round(words / 180);
+    document.getElementById('meta').innerHTML =
+      (DOC.status ? '<span class="draft">' + esc(DOC.status) + '</span> · ' : '') +
+      (isDoc ? esc(DOC.file) + ' · ' : '') +
+      words.toLocaleString('ru-RU') + ' слов · около ' + mins + ' мин чтения';
+    article.innerHTML = '';
+    article.className = isDoc ? 'doc' : '';
+    pEls = [];
+    var pi = 0, afterBreak = true;
+    DOC.blocks.forEach(function (b) {
+      if (b.kind === 'break') { var d = document.createElement('div'); d.className = 'break'; d.textContent = '✦ ✦ ✦'; article.appendChild(d); afterBreak = true; return; }
+      if (b.kind === 'h') { var h = document.createElement('h2'); h.textContent = b.text; article.appendChild(h); afterBreak = true; return; }
+      var p = document.createElement('p');
+      p.dataset.i = pi++;
+      if (isDoc) {
+        p.className = 'tag-' + (b.tag || 'p') + (b.depth ? ' d' + Math.min(b.depth, 2) : '');
+        if (b.marker) p.dataset.m = b.marker;
+      } else if (afterBreak && /^[^—–-]/.test(b.text)) p.className = 'first';
+      afterBreak = false;
+      article.appendChild(p);
+      pEls.push(p);
+    });
+  }
+
+  function paint() {
+    pEls.forEach(function (p, i) {
+      var s0 = starts[i], s1 = s0 + paras[i].text.length;
+      var cuts = [0, paras[i].text.length], live = [], fmt = paras[i].fmt || [];
+      fmt.forEach(function (f) { cuts.push(f[0], f[1]); });
+      var refs = paras[i].refs || [];
+      refs.forEach(function (r) { cuts.push(r[0], r[1]); });
+      var ins = paras[i].ins || [], dels = paras[i].del || [];
+      ins.forEach(function (r) { cuts.push(r[0], r[1]); });
+      dels.forEach(function (d) { cuts.push(d[0]); });
+      notes.forEach(function (n) {
+        if (n.lost || n.end <= s0 || n.start >= s1) return;
+        var a = Math.max(n.start, s0) - s0, b = Math.min(n.end, s1) - s0;
+        live.push({ n: n, a: a, b: b }); cuts.push(a, b);
+      });
+      cuts = cuts.filter(function (v, k, arr) { return arr.indexOf(v) === k; }).sort(function (x, y) { return x - y; });
+      var html = '<span class="ln" title="Заметка на весь абзац">' + paras[i].line + '</span>';
+      function delAt(pos) {
+        var out = '';
+        dels.forEach(function (d, di) { if (d[0] === pos) out += '<span class="del" data-p="' + i + '" data-d="' + di + '" title="Убрано — показать"></span>'; });
+        return out;
+      }
+      for (var k = 0; k < cuts.length - 1; k++) {
+        var a = cuts[k], b = cuts[k + 1], seg = esc(paras[i].text.slice(a, b));
+        html += delAt(a);
+        ins.forEach(function (r) { if (r[0] <= a && r[1] >= b) seg = '<ins>' + seg + '</ins>'; });
+        fmt.forEach(function (f) { if (f[0] <= a && f[1] >= b) seg = '<' + f[2] + '>' + seg + '</' + f[2] + '>'; });
+        refs.forEach(function (r) { if (r[0] <= a && r[1] >= b) seg = '<span class="ref" data-a="' + r[2] + '" data-b="' + r[3] + '" title="Открыть в рассказе">' + seg + '</span>'; });
+        var cover = live.filter(function (x) { return x.a <= a && x.b >= b; });
+        if (!cover.length) { html += seg; continue; }
+        var top = cover[cover.length - 1].n;
+        html += '<mark class="t-' + top.type + '" data-ids="' + cover.map(function (x) { return x.n.id; }).join(',') + '">' + seg + '</mark>';
+      }
+      html += delAt(paras[i].text.length);
+      p.innerHTML = html;
+      p.classList.toggle('chg', !!paras[i].chg);
+      p.classList.toggle('has-note', live.length > 0);
+      if (paras[i].jump) { p.classList.add('jumphead'); p.dataset.a = paras[i].jump[2]; p.dataset.b = paras[i].jump[3]; }
+    });
+    document.getElementById('count').textContent = totalNotes();
+    renderTabs();
+    renderList();
+  }
+
+  // выделение → смещения в общей строке
+  var pending = null;
+  function pointOffset(node, off) {
+    var el = node.nodeType === 1 ? node : node.parentNode;
+    var p = el.closest && el.closest('article p');
+    if (!p) return null;
+    var r = document.createRange();
+    r.setStart(p, 0);
+    r.setEnd(node, off);
+    var text = r.toString();
+    var ln = p.querySelector('.ln');
+    if (ln && r.intersectsNode(ln)) text = text.slice(ln.textContent.length);
+    return starts[+p.dataset.i] + text.length;
+  }
+  function readSelection() {
+    var sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.rangeCount) return null;
+    var r = sel.getRangeAt(0);
+    if (!article.contains(r.commonAncestorContainer)) return null;
+    var a = pointOffset(r.startContainer, r.startOffset);
+    var b = pointOffset(r.endContainer, r.endOffset);
+    if (a == null || b == null) {
+      // край выделения на разделителе сцены — подтягиваем к ближайшему абзацу
+      var ps = pEls.filter(function (p) { return r.intersectsNode(p); });
+      if (!ps.length) return null;
+      if (a == null) a = starts[+ps[0].dataset.i];
+      if (b == null) { var last = +ps[ps.length - 1].dataset.i; b = starts[last] + paras[last].text.length; }
+    }
+    while (a < b && /\s/.test(full[a])) a++;
+    while (b > a && /\s/.test(full[b - 1])) b--;
+    // недовыделенное слово добираем целиком
+    var letter = /[0-9A-Za-zА-Яа-яЁё]/;
+    while (a > 0 && letter.test(full[a - 1]) && letter.test(full[a])) a--;
+    while (b < full.length && letter.test(full[b]) && letter.test(full[b - 1])) b++;
+    if (b <= a) return null;
+    return { start: a, end: b };
+  }
+
+  var selbar = document.getElementById('selbar');
+  var selTimer;
+  document.addEventListener('selectionchange', function () {
+    clearTimeout(selTimer);
+    selTimer = setTimeout(function () {
+      if (editorOpen) return;
+      var got = readSelection();
+      if (!got && pending && Date.now() - selbarTouch < 800) return;
+      pending = got;
+      wholePara = false;
+      showSel();
+    }, 120);
+  });
+  var wholePara = false;
+  function showSel() {
+    selbar.classList.toggle('on', !!pending);
+    document.body.classList.toggle('selecting', !!pending);
+    document.getElementById('selPara').setAttribute('aria-pressed', wholePara);
+    if (pending) document.getElementById('selq').textContent = '«' + full.slice(pending.start, pending.end).replace(/\n/g, ' ') + '»';
+  }
+  // растянуть выделенное до границ абзацев (на телефоне номеров строк не видно — это вместо них)
+  document.getElementById('selPara').addEventListener('click', function () {
+    if (!pending) return;
+    if (!wholePara) {
+      pending.raw = { start: pending.start, end: pending.end };
+      var a = paraAt(pending.start), b = paraAt(pending.end - 1);
+      pending.start = starts[a]; pending.end = starts[b] + paras[b].text.length;
+      wholePara = true;
+    } else if (pending.raw) {
+      pending.start = pending.raw.start; pending.end = pending.raw.end; wholePara = false;
+    }
+    showSel();
+  });
+  selbar.addEventListener('mousedown', function (e) { e.preventDefault(); });
+  // на телефоне тап по панели может снять выделение — заметку всё равно ставим на то, что было выделено
+  var selbarTouch = 0;
+  selbar.addEventListener('pointerdown', function () { selbarTouch = Date.now(); });
+  selbar.querySelectorAll('.tbtn[data-type]').forEach(function (b) {
+    b.addEventListener('click', function () { if (pending) openEditor({ start: pending.start, end: pending.end, type: b.dataset.type }); });
+  });
+
+  // редактор
+  var editor = document.getElementById('editor'), edText = document.getElementById('edText');
+  var editorOpen = false, editing = null, edType = 'note';
+  function setType(t) {
+    edType = t;
+    document.querySelectorAll('#edTypes .tbtn').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.type === t); });
+  }
+  document.querySelectorAll('#edTypes .tbtn').forEach(function (b) { b.addEventListener('click', function () { setType(b.dataset.type); }); });
+  function openEditor(n) {
+    editing = n;
+    editorOpen = true;
+    setType(n.type);
+    var q = n.quote || full.slice(n.start, n.end);
+    document.getElementById('edQuote').textContent = q;
+    document.getElementById('edWhere').textContent = whereOf(n) + (n.id ? '' : ' · новая');
+    document.getElementById('edDelete').style.visibility = n.id ? 'visible' : 'hidden';
+    edText.value = n.comment || '';
+    selbar.classList.remove('on');
+    document.body.classList.remove('selecting');
+    editor.classList.add('on');
+    setTimeout(function () { edText.focus(); }, 30);
+  }
+  function closeEditor() { editor.classList.remove('on'); editorOpen = false; editing = null; }
+  function commit() {
+    if (!editing) return;
+    if (editing.id) {
+      editing.type = edType; editing.comment = edText.value.trim();
+    } else {
+      notes.push({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        type: edType, start: editing.start, end: editing.end,
+        quote: full.slice(editing.start, editing.end), comment: edText.value.trim(), at: new Date().toISOString(), v: DOCS[0].ver
+      });
+      window.getSelection().removeAllRanges();
+    }
+    notes.sort(function (x, y) { return x.start - y.start; });
+    saveNotes();
+    closeEditor();
+    paint();
+  }
+  document.getElementById('edSave').addEventListener('click', commit);
+  document.getElementById('edCancel').addEventListener('click', closeEditor);
+  document.getElementById('edDelete').addEventListener('click', function () {
+    if (!editing || !editing.id) return;
+    notes = notes.filter(function (n) { return n !== editing; });
+    saveNotes(); closeEditor(); paint();
+  });
+  editor.addEventListener('mousedown', function (e) { if (e.target === editor) closeEditor(); });
+  edText.addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); commit(); } });
+
+  // щелчок по выделенному месту или по номеру строки
+  article.addEventListener('click', function (e) {
+    var ln = e.target.closest('.ln');
+    if (ln) {
+      var i = +ln.parentNode.dataset.i;
+      openEditor({ start: starts[i], end: starts[i] + paras[i].text.length, type: 'note' });
+      return;
+    }
+    var collapsed = window.getSelection().isCollapsed;
+    var dl = e.target.closest('.del');
+    if (dl) { showDel(paras[+dl.dataset.p].del[+dl.dataset.d][1]); return; }
+    var ref = e.target.closest('.ref');
+    if (ref && collapsed) { jumpTo(+ref.dataset.a, +ref.dataset.b); return; }
+    var m = e.target.closest('mark');
+    var jh = e.target.closest('p.jumphead');
+    if (jh && collapsed && !m) { jumpTo(+jh.dataset.a, +jh.dataset.b); return; }
+    if (m && collapsed) {
+      var ids = m.dataset.ids.split(',');
+      var n = notes.filter(function (x) { return x.id === ids[ids.length - 1]; })[0];
+      if (n) openEditor(n);
+    }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { if (editorOpen) closeEditor(); else drawer.classList.remove('on'); return; }
+    if (editorOpen || e.ctrlKey || e.metaKey || e.altKey) return;
+    var t = { '1': 'dislike', '2': 'question', '3': 'note' }[e.key];
+    if (t && pending) { e.preventDefault(); openEditor({ start: pending.start, end: pending.end, type: t }); }
+  });
+
+  // список заметок
+  var drawer = document.getElementById('drawer');
+  document.getElementById('notesBtn').addEventListener('click', function () { drawer.classList.toggle('on'); });
+  document.getElementById('closeDrawer').addEventListener('click', function () { drawer.classList.remove('on'); });
+  document.querySelectorAll('#filters .tbtn').forEach(function (b) {
+    b.addEventListener('click', function () {
+      filter = b.dataset.f;
+      document.querySelectorAll('#filters .tbtn').forEach(function (x) { x.setAttribute('aria-pressed', x === b); });
+      renderList();
+    });
+  });
+  // список: пометки всех вкладок разом, по группам; у чужой вкладки место считается по её тексту
+  function isOld(n) { return !!DOCS[0].ver && n.v !== DOCS[0].ver; }
+  function allNotes() {
+    var out = [];
+    DOCS.forEach(function (d, i) {
+      var ns = docNotes(d), t = d === DOC ? { paras: paras, starts: starts } : prep(d);
+      if (d !== DOC) reanchor(ns, t.full);
+      ns.forEach(function (n) { out.push({ n: n, i: i, d: d, t: t }); });
+    });
+    return out;
+  }
+  function renderList() {
+    var list = document.getElementById('list');
+    var all = allNotes();
+    var shown = all.filter(function (x) { return filter === 'all' || x.n.type === filter; });
+    var old = all.filter(function (x) { return isOld(x.n); }).length;
+    document.getElementById('oldBox').classList.toggle('on', old > 0);
+    document.getElementById('oldText').textContent = old
+      ? 'Пометок с прошлого круга: ' + old + ' (бледные). Если ты их уже отправил и правки внесены — убери, чтобы не ушли второй раз.' : '';
+    if (!all.length) { list.innerHTML = '<div class="empty">Пока пусто. Выдели в тексте то, что царапает, и выбери, что это.</div>'; return; }
+    if (!shown.length) { list.innerHTML = '<div class="empty">В этом фильтре заметок нет.</div>'; return; }
+    list.innerHTML = '';
+    var lastTab = -1;
+    shown.forEach(function (x) {
+      var n = x.n;
+      if (DOCS.length > 1 && x.i !== lastTab) {
+        lastTab = x.i;
+        var g = document.createElement('div');
+        g.className = 'grp';
+        g.textContent = x.d.tab + ' · ' + docNotes(x.d).length;
+        list.appendChild(g);
+      }
+      var d = document.createElement('div');
+      d.className = 'item' + (n.lost ? ' lost' : '') + (isOld(n) ? ' old-round' : '');
+      var q = n.quote.length > 220 ? n.quote.slice(0, 220) + '…' : n.quote;
+      d.innerHTML = '<div class="h"><span class="dot t-' + n.type + '"></span><b>' + TYPES[n.type] + '</b>' +
+        (n.lost ? 'место не найдено после правки' : whereIn(x.t, n)) + '<button class="lbtn ed-it" title="Изменить">✎</button></div>' +
+        '<div class="qq">«' + esc(q) + '»</div>' + (n.comment ? '<div class="c">' + esc(n.comment) + '</div>' : '');
+      d.addEventListener('click', function (e) { goNote(x.i, n.id, !!e.target.closest('.ed-it')); });
+      d.addEventListener('dblclick', function () { goNote(x.i, n.id, true); });
+      list.appendChild(d);
+    });
+  }
+  // пометка с другой вкладки: сначала открыть ту вкладку, потом искать
+  function goNote(i, id, edit) {
+    if (i !== cur) setDoc(i, true);
+    var n = notes.filter(function (x) { return x.id === id; })[0];
+    if (!n) return;
+    if (edit) openEditor(n); else jump(n);
+  }
+  function jump(n) {
+    if (n.lost) { openEditor(n); return; }
+    var m = article.querySelector('mark[data-ids*="' + n.id + '"]');
+    if (!m) return;
+    if (window.innerWidth < 760) drawer.classList.remove('on');
+    m.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    var all = article.querySelectorAll('mark[data-ids*="' + n.id + '"]');
+    all.forEach(function (x) { x.classList.add('flash'); });
+    setTimeout(function () { all.forEach(function (x) { x.classList.remove('flash'); }); }, 1600);
+  }
+
+  // выгрузка
+  // все вкладки в одну выгрузку: у каждой свой файл и свои номера строк
+  function docNotes(d) { return d === DOC ? notes : loadRaw(dkey(d, 'notes'), []); }
+  function totalNotes() { return DOCS.reduce(function (s, d) { return s + docNotes(d).length; }, 0); }
+  function exportDoc(d, multi) {
+    var ns = docNotes(d);
+    var t = d === DOC ? { paras: paras, starts: starts } : prep(d);
+    if (d !== DOC) reanchor(ns, t.full);
+    var head = multi ? '# ' + d.tab + '\n' : '';
+    var out = head + (d.style === 'doc' ? DOCS[0].title + ' — ' + d.tab.toLowerCase() : d.title) +
+      ' — заметки к вычитке (' + ns.length + ')\nФайл: ' + d.file + '\n';
+    ['dislike', 'question', 'note'].forEach(function (tp) {
+      var part = ns.filter(function (n) { return n.type === tp; });
+      if (!part.length) return;
+      out += '\n## ' + { dislike: 'Не нравится', question: 'Вопросы', note: 'Заметки' }[tp] + '\n';
+      part.forEach(function (n, k) {
+        out += '\n' + (k + 1) + '. ' + (n.lost ? 'место не найдено' : whereIn(t, n)) + ': «' + n.quote.replace(/\n/g, ' / ') + '»\n';
+        if (n.comment) out += '   → ' + n.comment.replace(/\n/g, '\n     ') + '\n';
+      });
+    });
+    return out;
+  }
+  function exportText() {
+    var withNotes = DOCS.filter(function (d) { return docNotes(d).length; });
+    var multi = DOCS.length > 1;
+    return withNotes.map(function (d) { return exportDoc(d, multi); }).join('\n');
+  }
+  function flashMsg(s) { var c = document.getElementById('copied'); c.textContent = s; setTimeout(function () { c.textContent = ''; }, 2600); }
+  document.getElementById('copyAll').addEventListener('click', function () {
+    if (!totalNotes()) { flashMsg('Заметок пока нет.'); return; }
+    var text = exportText();
+    var fallback = function () {
+      var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); flashMsg('Скопировано — вставь в чат.'); } catch (e) { flashMsg('Не вышло скопировать — сохрани файлом.'); }
+      ta.remove();
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText)
+      navigator.clipboard.writeText(text).then(function () { flashMsg('Скопировано — вставь в чат.'); }, fallback);
+    else fallback();
+  });
+  document.getElementById('download').addEventListener('click', function () {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([exportText()], { type: 'text/markdown;charset=utf-8' }));
+    a.download = DOCS[0].title.replace(/\s+/g, '_') + '_заметки.md';
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+  document.getElementById('clearAll').addEventListener('click', function () {
+    var total = totalNotes();
+    var what = DOCS.length > 1 ? ' — и к рассказу, и к разбору' : '';
+    if (!total || !confirm('Удалить все заметки' + what + ' (' + total + ')? Сначала лучше скопировать.')) return;
+    DOCS.forEach(function (d) { saveRaw(dkey(d, 'notes'), []); });
+    notes = []; paint();
+  });
+
+  document.getElementById('oldClear').addEventListener('click', function () {
+    DOCS.forEach(function (d) {
+      var ns = docNotes(d).filter(function (n) { return !isOld(n); });
+      if (d === DOC) notes = ns;
+      saveRaw(dkey(d, 'notes'), ns);
+    });
+    paint();
+  });
+
+  // чтение: размер, тема, прогресс, место
+  var size = load('size', window.innerWidth < 760 ? 18 : 20);
+  function applySize() { root.style.setProperty('--size', size + 'px'); }
+  document.getElementById('smaller').addEventListener('click', function () { size = Math.max(15, size - 1); applySize(); save('size', size); });
+  document.getElementById('bigger').addEventListener('click', function () { size = Math.min(28, size + 1); applySize(); save('size', size); });
+  var theme = load('theme', window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  function applyTheme() {
+    root.dataset.theme = theme; document.getElementById('theme').textContent = theme === 'dark' ? '☀' : '☾';
+    document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#161411' : '#f5efe3';
+  }
+  document.getElementById('theme').addEventListener('click', function () { theme = theme === 'dark' ? 'light' : 'dark'; applyTheme(); save('theme', theme); });
+
+  var bar = document.getElementById('progress'), saveTimer;
+  window.addEventListener('scroll', function () {
+    var h = document.documentElement.scrollHeight - innerHeight;
+    bar.style.width = (h > 0 ? scrollY / h * 100 : 0) + '%';
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () { saveRaw(posKey(), scrollY / Math.max(1, document.documentElement.scrollHeight)); }, 300);
+  }, { passive: true });
+
+  // правки и схемы — у основного текста
+  var delpop = document.getElementById('delpop');
+  function showDel(t) { document.getElementById('delText').textContent = t; delpop.classList.add('on'); }
+  document.getElementById('delClose').addEventListener('click', function () { delpop.classList.remove('on'); });
+  var showChg = load('chg', true);
+  function applyChg() {
+    var has = !!(DOC.diffFrom && DOC.changed);
+    document.body.classList.toggle('show-chg', has && showChg);
+    document.body.classList.toggle('has-chg', has);
+    var b = document.getElementById('chgBtn');
+    if (b) b.setAttribute('aria-pressed', showChg);
+  }
+  function renderExtras() {
+    var box = document.getElementById('extras'), d0 = DOCS[0];
+    box.innerHTML = '';
+    if (cur === 0 && d0.diffFrom && d0.changed) {
+      var b = document.createElement('button');
+      b.id = 'chgBtn';
+      b.innerHTML = '<span class="sw"></span>Правки: ' + d0.changed + ' абз.';
+      b.title = 'Подсветить, что изменилось с прошлой версии (' + d0.diffFrom + ')';
+      b.addEventListener('click', function () { showChg = !showChg; save('chg', showChg); applyChg(); });
+      box.appendChild(b);
+    }
+    (d0.schemes || []).forEach(function (sc) {
+      var a = document.createElement('a');
+      a.href = sc.href; a.textContent = '▶ ' + sc.title;
+      box.appendChild(a);
+    });
+    applyChg();
+  }
+  document.getElementById('nextChg').addEventListener('click', function () {
+    var ps = article.querySelectorAll('p.chg'), y = innerHeight * .35;
+    for (var k = 0; k < ps.length; k++) {
+      if (ps[k].getBoundingClientRect().top > y + 4) {
+        var r = ps[k].getBoundingClientRect();
+        scrollTo(0, scrollY + r.top - y);
+        return;
+      }
+    }
+    if (ps.length) scrollTo(0, scrollY + ps[0].getBoundingClientRect().top - y);
+  });
+
+  // вкладки
+  function posKey() { return cur ? dkey(DOC, 'pos') : KEY + ':pos'; }
+  var here = {}; // точное место на вкладке, пока страница открыта (между переключениями)
+  var tabsEl = document.getElementById('tabs');
+  function renderTabs() {
+    if (DOCS.length < 2) return;
+    tabsEl.classList.add('on');
+    tabsEl.innerHTML = '';
+    DOCS.forEach(function (d, i) {
+      var b = document.createElement('button');
+      b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', i === cur);
+      var c = docNotes(d).length;
+      b.innerHTML = esc(d.tab) + (c ? '<b>' + c + '</b>' : '');
+      b.addEventListener('click', function () { if (i !== cur) { setDoc(i, true); } });
+      tabsEl.appendChild(b);
+    });
+    var other = DOCS[cur ? 0 : 1], swap = document.getElementById('swap');
+    swap.hidden = false;
+    swap.textContent = '⇄ ' + other.tab;
+    document.getElementById('tabnote').textContent =
+      'Здесь пометки и к рассказу, и к разбору. «Скопировать для Claude» берёт всё сразу — копировать один раз, с любой вкладки.';
+  }
+  // из разбора — к строкам рассказа: открыть вкладку и подсветить абзацы.
+  // Место в разборе запоминается, «⇄ Разбор» вернёт туда же.
+  function jumpTo(a, b) { setDoc(0, true, { a: a, b: b || a }); }
+  function showTarget(t) {
+    var hit = [];
+    pEls.forEach(function (p, i) { var l = paras[i].line; if (l >= t.a && l <= t.b) hit.push(p); });
+    if (!hit.length) {
+      // строка указала не на абзац (пустая, разрыв) — берём ближайший следующий
+      var k = 0; while (k < paras.length - 1 && paras[k].line < t.a) k++;
+      hit = [pEls[k]];
+    }
+    hit.forEach(function (p) { p.classList.add('target', 'pulse'); });
+    requestAnimationFrame(function () {
+      var r = hit[0].getBoundingClientRect();
+      var y = scrollY + r.top - Math.max(90, (innerHeight - Math.min(r.height * hit.length, innerHeight * .6)) / 2);
+      scrollTo(0, Math.max(0, y));
+    });
+  }
+  function setDoc(i, user, target) {
+    if (user) { saveRaw(posKey(), scrollY / Math.max(1, document.documentElement.scrollHeight)); here[cur] = scrollY; }
+    clearTimeout(saveTimer);
+    cur = i; DOC = DOCS[i];
+    var t = prep(DOC); paras = t.paras; full = t.full; starts = t.starts;
+    notes = loadRaw(dkey(DOC, 'notes'), []);
+    pending = null; selbar.classList.remove('on'); document.body.classList.remove('selecting');
+    build(); reanchor(notes, full); paint(); showWarn(); renderExtras();
+    if (DOCS.length > 1) {
+      save('tab', i);
+      try { history.replaceState(null, '', i ? '#' + encodeURIComponent(DOC.tab.toLowerCase()) : location.pathname + location.search); } catch (e) {}
+    }
+    if (target) { showTarget(target); return; }
+    var pos = loadRaw(posKey(), 0), exact = here[i];
+    requestAnimationFrame(function () { scrollTo(0, exact != null ? exact : pos ? pos * document.documentElement.scrollHeight : 0); });
+  }
+
+  document.getElementById('swap').addEventListener('click', function () { setDoc(cur ? 0 : 1, true); });
+
+  applySize(); applyTheme();
+  var start = 0, hash = decodeURIComponent(location.hash.slice(1)).toLowerCase();
+  // #стр-116 или #стр-110-118 — сразу к строкам рассказа (ссылки со схем)
+  var lm = hash.match(/^стр-(\d+)(?:-(\d+))?$/);
+  if (lm) { setDoc(0, false, { a: +lm[1], b: +(lm[2] || lm[1]) }); return; }
+  if (hash) DOCS.forEach(function (d, i) { if (d.tab.toLowerCase() === hash) start = i; });
+  else start = Math.min(load('tab', 0) || 0, DOCS.length - 1);
+  setDoc(start, false);
+})();
+</script>
+</body>
+</html>
