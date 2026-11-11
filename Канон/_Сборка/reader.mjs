@@ -214,7 +214,14 @@ function wordDiff(oldT, newT) {
 }
 function diffProse(oldText, blocks) {
   const oldP = parasOf(oldText);
-  const newB = blocks.filter(b => b.kind === 'p');
+  // Глава (## …), которой в прошлой версии не было, — новая целиком: её не подсвечиваем,
+  // зелёным остаются только правки в уже читанном тексте (просьба автора 11.11).
+  const oldHeads = new Set(oldText.replace(/\r\n/g, '\n').split('\n').filter(l => /^#{1,6}\s/.test(l)).map(l => l.replace(/^#+\s+/, '').trim()));
+  let fresh = false;
+  const newB = blocks.filter(b => {
+    if (b.kind === 'h') { fresh = !oldHeads.has(b.text.trim()); return false; }
+    return b.kind === 'p' && !fresh;
+  });
   const pairs = lcs(oldP, newB.map(b => b.text), (x, y) => x === y);
   let changed = 0;
   const mark = (b, d) => { if (d.ins.length) b.ins = d.ins; if (d.del.length) b.del = d.del; if (d.ins.length || d.del.length) { b.chg = 1; changed++; } };
