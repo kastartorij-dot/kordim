@@ -770,6 +770,11 @@ select { background: var(--смола); color: var(--бумага); border: 1px 
   .город-полотно .карта-метка { display: none; }
   #место { display: flex; flex-direction: column; gap: 10px; }
   #scene { flex: none; height: clamp(170px, 30vh, 300px); }
+  /* 12.11: без собеседника картинка места — узкая полоса, остальное отдано панели с действиями;
+     с портретом — повыше; открытое «Что ты знаешь» раздвигает сцену, чтобы список не жался. */
+  #scene:has(#portrait:empty) { height: clamp(96px, 15vh, 150px); }
+  #scene:has(#portrait:not(:empty)) { height: clamp(140px, 22vh, 220px); }
+  #scene:has(#известное[open]) { height: clamp(240px, 45vh, 420px); }
   #portrait:has(.портрет-буквы), #portrait:not(.sprite):not(:has(.портрет-буквы)) { width: auto; height: 92%; right: 4%; }
   #plate { flex: 1; min-height: 0; padding: 16px; overflow: auto; }
   #say { flex: none; min-height: 0; overflow: visible; }
