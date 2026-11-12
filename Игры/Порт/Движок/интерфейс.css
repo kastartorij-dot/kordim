@@ -914,3 +914,46 @@ html[data-движение="меньше"] .з-кадр { opacity: 1; }
 .живая-поле .пс-кн { min-height: 42px; padding: 8px 18px; border: 1px solid var(--линия-ярко); border-radius: 2px; background: rgba(231, 178, 99, .08); font: inherit; font-size: 17px; color: var(--бумага); cursor: pointer; }
 .живая-поле .пс-кн:hover { background: rgba(231, 178, 99, .18); border-color: var(--свеча); }
 .живая-поле .пс-кн small { display: block; color: var(--тихо); font-size: 13px; }
+
+/* ── Пролог (Движок/пролог.js, 12.11): кадр 16:9 по центру, субтитры в чёрной полосе под ним ── */
+.пролог { position: fixed; inset: 0; z-index: 90; background: #030506; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(10px, 2.4vh, 26px); padding: 12px 16px; cursor: pointer; user-select: none; -webkit-user-select: none; animation: затемнение .6s ease both; transition: opacity .45s ease; }
+.пролог.уходит { opacity: 0; }
+.пролог-пропуск { position: absolute; top: max(12px, env(safe-area-inset-top)); right: 16px; z-index: 3; background: none; border: 1px solid rgba(239, 227, 201, .22); color: var(--бумага-2); font: 500 14px/1 var(--шрифт-метка); letter-spacing: .06em; padding: 9px 14px; border-radius: 2px; cursor: pointer; opacity: .7; }
+.пролог-пропуск:hover, .пролог-пропуск:focus-visible { opacity: 1; border-color: var(--свеча); color: var(--бумага); }
+.пролог-кадр { position: relative; width: min(100%, calc((100dvh - 190px) * 16 / 9), 1500px); aspect-ratio: 16 / 9; overflow: hidden; background: #000; transition: opacity 1s ease, filter 1.6s ease; }
+.пролог[data-сцена="тьма"] .пролог-кадр { opacity: 0; }
+/* Слой 16:9 с роликом, фото и канатом: в кадре 16:9 совпадает с ним, в квадрате — выступает по бокам,
+   и его точка 42 % стоит на 42 % кадра (герой слева остаётся виден). Всё внутри слоя совпадает по геометрии. */
+.пролог-слой { position: absolute; top: 0; height: 100%; aspect-ratio: 16 / 9; left: 42%; transform: translateX(-42%); }
+.пролог-видео, .пролог-фото { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; background: center / 100% 100% no-repeat; }
+.пролог-фото { opacity: 0; transition: opacity 1.2s ease, transform 9s ease-out, filter 1.6s ease; }
+.пролог[data-сцена="бросок"] .пролог-фото, .пролог[data-сцена="разговор"] .пролог-фото, .пролог[data-сцена="удар"] .пролог-фото { opacity: 1; }
+.пролог[data-сцена="ролик"] .пролог-фото[style] { opacity: 1; }
+/* Разговор: камера подходит ближе к причалу, кадр темнеет; на «схоронили» — ещё темнее и тише. */
+.пролог[data-сцена="разговор"] .пролог-фото { transform: scale(1.18) translate(-4%, 2%); filter: brightness(.62) saturate(.85); }
+.пролог.тишина .пролог-фото { filter: brightness(.38) saturate(.5); }
+.пролог[data-сцена="удар"] .пролог-кадр { opacity: 0; transition-duration: 1.4s; }
+/* Бросок: дуга каната рисуется от баржи к тумбе; мимо — обрывается и падает в воду. */
+.пролог-бросок { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.пролог-бросок path { fill: none; stroke: #a5814f; stroke-width: 8; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; filter: drop-shadow(0 3px 2px rgba(0, 0, 0, .6)); }
+.пролог-бросок.летит path { transition: stroke-dashoffset .8s cubic-bezier(.3, .1, .4, 1); stroke-dashoffset: 0; }
+.пролог[data-бросок="мимо"] .пролог-бросок.летит path { stroke-dashoffset: 36; transform: translateY(150px); opacity: .55; transition: stroke-dashoffset .7s ease, transform .8s .55s ease-in, opacity .8s .55s ease-in; }
+.пролог-метр { position: absolute; left: 50%; bottom: 7%; transform: translateX(-50%); width: min(62%, 440px); height: 16px; border: 1px solid rgba(239, 227, 201, .55); background: rgba(5, 8, 10, .62); border-radius: 2px; }
+.пролог-зона { position: absolute; left: 36%; width: 28%; top: 0; bottom: 0; background: rgba(231, 178, 99, .32); border-left: 1px solid var(--свеча); border-right: 1px solid var(--свеча); }
+.пролог-метка { position: absolute; top: -6px; bottom: -6px; width: 4px; margin-left: -2px; background: var(--бумага); box-shadow: 0 0 10px rgba(239, 227, 201, .8); }
+/* Субтитры: одна строка за раз, крупно; реплика другого — тёплым, рассказ — курсивом, «удар» — посреди тьмы. */
+.пролог-титры { min-height: 3.4em; width: min(100%, 900px); display: flex; align-items: flex-start; justify-content: center; text-align: center; }
+.пролог-титры p { margin: 0; font: 400 clamp(19px, 2.3vw, 28px)/1.35 var(--шрифт-текст); color: var(--бумага); animation: проявиться .7s ease both; text-wrap: balance; }
+.пролог-титры p.он { color: #f0c98a; }
+.пролог-титры p.рассказ { font-style: italic; color: var(--бумага-2); }
+.пролог-титры p.подсказка { font: 500 clamp(14px, 1.5vw, 17px)/1.3 var(--шрифт-метка); letter-spacing: .05em; color: var(--бумага-2); }
+.пролог-титры p.удар { font: 500 clamp(30px, 4.2vw, 52px)/1.1 var(--шрифт-титул); color: var(--бумага); letter-spacing: .02em; animation-duration: 1.6s; }
+.пролог[data-сцена="тьма"] .пролог-титры, .пролог[data-сцена="удар"] .пролог-титры { position: absolute; inset: 0; align-items: center; margin: auto; }
+.пролог-дальше { position: absolute; bottom: max(14px, env(safe-area-inset-bottom)); font: 13px var(--шрифт-метка); letter-spacing: .08em; color: rgba(239, 227, 201, .45); animation: проявиться 1s 1.2s ease both; }
+.пролог-дальше[hidden] { display: none; }
+@media (max-aspect-ratio: 3 / 4) {
+  .пролог-кадр { aspect-ratio: 1 / 1; width: min(100%, calc(100dvh - 260px)); }
+  .пролог-титры { min-height: 5em; }
+}
+[data-движение="меньше"] .пролог-фото { transition: opacity .3s ease; transform: none !important; }
+.вступление-цель { font-family: var(--шрифт-метка); letter-spacing: .03em; color: var(--свеча) !important; }
