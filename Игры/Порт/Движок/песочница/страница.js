@@ -112,6 +112,21 @@ function показатьИтог(модуль, р, id) {
   итог.querySelector('[data-д="ещё"]').focus({ preventScroll: true });
 }
 
+// На весь экран (для телефона): поле во весь экран и, где можно, поворот в альбомную.
+// Если браузер не даёт полноэкранный режим — то же самое классом, выход кнопкой ✕.
+const место2 = document.querySelector('.пс-место');
+function весьЭкран(да) {
+  место2.classList.toggle('пс-весь', да);
+  if (да) {
+    место2.requestFullscreen?.().then(() => screen.orientation?.lock?.('landscape')).catch(() => {});
+  } else if (document.fullscreenElement) {
+    document.exitFullscreen?.().catch(() => {});
+  }
+}
+document.querySelector('.пс-кн-экран').addEventListener('click', () => весьЭкран(true));
+document.querySelector('.пс-выйти-экран').addEventListener('click', () => весьЭкран(false));
+document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) место2.classList.remove('пс-весь'); });
+
 window.песочница = { пуск, сост };
 отметить();
 пуск(сост.игра);

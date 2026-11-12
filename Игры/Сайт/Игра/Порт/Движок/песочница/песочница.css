@@ -75,3 +75,64 @@ button:focus-visible { outline: 2px solid var(--свеча); outline-offset: 2px
 .пс-итог-смысл { color: var(--бумага); margin: 0 0 6px; font-size: 18px; }
 .пс-итог-очки { color: var(--тихо); font-size: 14px; margin: 0 0 16px; }
 @keyframes пс-всплыть { from { transform: scale(.85); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* Телефон (12.11): одна колонка, игры — лентой сверху, поле на всю ширину. */
+@media (max-width: 820px) {
+  .пс-страница { grid-template-columns: minmax(0, 1fr); align-content: start; gap: 8px; padding: 8px; }
+  .пс-бок, .пс-главная { min-width: 0; }
+  .пс-главная::before { content: 'Удобнее боком: «⛶ на весь экран».'; color: var(--тихо); font-size: 13px; order: 1; }
+  .пс-место { order: 2; }
+  .пс-бок h1 { font-size: 22px; display: inline; margin-right: 8px; }
+  .пс-бок .пс-под { display: inline; font-size: 13px; }
+  .пс-бок .пс-заметка, .пс-список .пс-раздел small { display: none; }
+  .пс-список { flex-direction: row; overflow-x: auto; gap: 6px; padding: 8px 0 4px; scrollbar-width: none; }
+  .пс-список::-webkit-scrollbar { display: none; }
+  .пс-пункт { flex: 0 0 auto; padding: 6px 10px; }
+  .пс-пункт small { display: none; }
+  .пс-список .пс-раздел { flex: 0 0 auto; margin: 0; padding: 10px 4px 0 10px; border-top: 0; border-left: 1px solid var(--линия); }
+  .пс-верх { gap: 8px; }
+  .пс-верх .пс-клавиши { display: none; }
+  .пс-место { width: 100%; }
+  .пс-подсказка { font-size: 14px; padding: 4px 8px; }
+}
+/* Телефон боком: всё лишнее убрать, поле — по высоте экрана. */
+@media (max-height: 520px) and (orientation: landscape) {
+  .пс-бок, .пс-главная { min-width: 0; }
+  .пс-страница { grid-template-columns: minmax(0, 1fr); align-content: start; gap: 4px; padding: 4px 8px; }
+  .пс-бок h1, .пс-бок .пс-под, .пс-бок .пс-заметка, .пс-список .пс-раздел small { display: none; }
+  .пс-список { flex-direction: row; overflow-x: auto; gap: 6px; scrollbar-width: none; }
+  .пс-пункт { flex: 0 0 auto; padding: 3px 10px; }
+  .пс-пункт small { display: none; }
+  .пс-список .пс-раздел { flex: 0 0 auto; margin: 0; padding: 4px 4px 0 10px; border-top: 0; border-left: 1px solid var(--линия); }
+  .пс-верх .пс-клавиши { display: none; }
+  .пс-место { width: min(100%, calc((100vh - 120px) * 16 / 9)); margin: 0 auto; }
+  .пс-подсказка { font-size: 13px; padding: 2px 8px; min-height: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
+/* Узкое поле: заставка и итог не должны вылезать за рамку. */
+@media (max-width: 820px), (max-height: 520px) {
+  .пс-слой { overflow: auto; place-items: start center; }
+  .пс-старт, .пс-итог-панель { padding: 10px 12px; margin: 6px; max-width: calc(100% - 12px); }
+  .пс-старт h2 { font-size: 24px; margin-bottom: 4px; }
+  .пс-старт p { font-size: 14px; margin-bottom: 8px; }
+  .пс-кн { min-height: 36px; padding: 5px 10px; font-size: 15px; }
+  .пс-кн small { font-size: 12px; }
+  .пс-итог { top: 0; }
+  .пс-итог-панель { min-width: 0; }
+  .пс-итог-слово { font-size: 40px; margin-bottom: 4px; }
+  .пс-итог-смысл { font-size: 15px; }
+}
+
+/* На весь экран: поле по высоте, подсказка в одну строку, кнопка выхода в углу. */
+.пс-кн-экран { border: 1px solid var(--линия); background: none; padding: 5px 12px; font-size: 15px; border-radius: 2px; color: var(--бумага-2); }
+.пс-выйти-экран { display: none; }
+.пс-место.пс-весь {
+  position: fixed; inset: 0; z-index: 50; width: 100vw; height: 100vh; height: 100dvh; margin: 0;
+  background: var(--ночь); display: flex; align-items: center; justify-content: center; padding: 2px;
+}
+.пс-место.пс-весь #игра { width: min(100%, calc((100dvh - 34px) * 16 / 9)); }
+.пс-место.пс-весь .пс-подсказка { font-size: 13px; padding: 2px 8px; min-height: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 44px; }
+.пс-место.пс-весь .пс-итог { top: 0; }
+.пс-место.пс-весь .пс-выйти-экран {
+  display: block; position: absolute; top: 4px; right: 6px; z-index: 2; width: 34px; height: 30px;
+  border: 1px solid var(--линия-ярко); background: rgba(10, 16, 19, .85); color: var(--бумага); border-radius: 2px;
+}
