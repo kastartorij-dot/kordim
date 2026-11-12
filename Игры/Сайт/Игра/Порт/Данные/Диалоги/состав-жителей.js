@@ -78,7 +78,7 @@ export function дополнитьСостав(places){
  // кадр siniy_chas_ren — женщина, а Рен в доме мужчина; ждёт решения автора (доска, разбор 12.11).
  for(const [id,файл] of Object.entries({svanna:'siniy_chas_svanna.jpg',betta:'siniy_chas_betta.jpg',mira:'siniy_chas_mira.jpg',
    tali:'siniy_chas_tali.jpg',fila:'siniy_chas_fila.jpg',liv:'siniy_chas_liv.jpg',kim:'siniy_chas_kim.jpg',
-   servant:'siniy_chas_sluga.jpg',cleaner:'siniy_chas_uborshitsa.png'})) if(home.ЛЮДИ[id]&&!home.ЛЮДИ[id].портрет) home.ЛЮДИ[id].портрет=файл;
+   servant:'siniy_chas_sluga.jpg',cleaner:'siniy_chas_uborshitsa.webp'})) if(home.ЛЮДИ[id]&&!home.ЛЮДИ[id].портрет) home.ЛЮДИ[id].портрет=файл;
  // Выбранные жители торгового квартала.
  const market=get('рынок');
  const extra=[
@@ -94,7 +94,7 @@ export function дополнитьСостав(places){
   беседа(id,'встреча','Продолжить разговор','Как дела после нашей встречи?',result,[],{если:{факт:'помощь'}});
   беседа(id,'осень','Планы на зиму','Что дальше?',late,[],{если:S=>S.мир.день>=25});
  }
- market.ЛЮДИ.tava.портрет='port_tava_renn.png'; market.ЛЮДИ.leya.портрет='port_leya_arden.png'; // кадр у лотка с пряностями, Источники_Арта/Люди/тава-ренн-кандидатка.png
+ market.ЛЮДИ.tava.портрет='port_tava_renn.webp'; market.ЛЮДИ.leya.портрет='port_leya_arden.webp'; // кадр у лотка с пряностями, Источники_Арта/Люди/тава-ренн-кандидатка.png
  // Подряд и проверка у мастеров — один человек в разные дни, одна память marna.
  const pier=get('причал-грузчиков');
  const room=Object.keys(pier.КОМНАТЫ).find(k=>pier.КОМНАТЫ[k].люди.includes('gruzchik'));

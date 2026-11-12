@@ -191,8 +191,8 @@ function безДублей(S, где) {
   const { задник } = await import('../Движок/задник.js');
   const ждать = мс => new Promise(r => setTimeout(r, мс));
   задник('доки.webp'); await ждать(40);
-  задник('торговый.png'); await ждать(1100);
-  assert.deepEqual(кадры.map(к => к.style.backgroundImage), ['url("торговый.png")'], 'остаётся последний кадр, а не пустота');
+  задник('торговый.webp'); await ждать(1100);
+  assert.deepEqual(кадры.map(к => к.style.backgroundImage), ['url("торговый.webp")'], 'остаётся последний кадр, а не пустота');
   globalThis.document = былDocument;
 }
 
