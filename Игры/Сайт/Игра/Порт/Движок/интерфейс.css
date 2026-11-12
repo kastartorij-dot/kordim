@@ -711,6 +711,9 @@ select { background: var(--смола); color: var(--бумага); border: 1px 
 /* ── конец дня: ночь опускается на город ── */
 .ов.ночь-дня { bottom: var(--panel-height); background: radial-gradient(ellipse at 50% 40%, rgba(16, 26, 48, .55), rgba(3, 5, 8, .92)); }
 .ов.ночь-дня .овбокс { width: min(620px, 100%); text-align: center; padding: 34px 36px 30px; }
+/* Ночь с кадром ночлега (Данные/фоны-комнат.js): комнату видно по краям окна итога. */
+.ов.ночь-дня.с-кадром { background: radial-gradient(ellipse at 50% 45%, rgba(3, 5, 8, .7), rgba(3, 5, 8, .15) 75%); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.ов.ночь-дня.с-кадром .ночь-звёзды { display: none; }
 .ночь-звёзды { position: absolute; inset: 0; pointer-events: none; background-image: radial-gradient(1px 1px at 12% 18%, #fff8, transparent), radial-gradient(1px 1px at 28% 8%, #fff6, transparent), radial-gradient(1.5px 1.5px at 66% 14%, #fffa, transparent), radial-gradient(1px 1px at 82% 26%, #fff7, transparent), radial-gradient(1px 1px at 44% 22%, #fff5, transparent), radial-gradient(1px 1px at 90% 8%, #fff8, transparent), radial-gradient(1px 1px at 6% 34%, #fff5, transparent); animation: мерцание 5s ease-in-out infinite alternate; }
 @keyframes мерцание { to { opacity: .5; } }
 .ночь-дня .зн.луна { font-size: 40px; color: #e9dcb2; filter: drop-shadow(0 0 14px rgba(233, 220, 178, .5)); }
