@@ -762,7 +762,7 @@ select { background: var(--смола); color: var(--бумага); border: 1px 
   #тело-макета { margin-top: 0; }
   #экран { padding: 6px 12px 12px; }
   .район-экран, .город, .старт-выбор { grid-template-columns: 1fr; }
-  .район-экран { gap: 14px; min-height: 0; }
+  .район-экран { gap: 14px; min-height: 0; align-self: flex-start; }
   .район-сцена { min-height: 24vh; flex: none; }
   .район-название h1 { font-size: 48px; }
   .район-действия { overflow: visible; max-height: none; padding: 18px 16px; }
@@ -796,7 +796,8 @@ html[data-движение="меньше"] .з-кадр { opacity: 1; }
 #hud.спрятан > * { visibility: hidden; }
 .начало-ремесло .зн { font-size: 13px; vertical-align: -1px; margin-right: 4px; }
 .ов.меню:has(.вступление) { -webkit-backdrop-filter: none; backdrop-filter: none; }
-.район-действия { overflow-x: hidden; }
+/* clip, а не hidden: hidden превращает overflow-y: visible телефона в auto, и список ходов сжимался в окошко (12.11). */
+.район-действия { overflow-x: clip; }
 .действие-мета .когда { font-style: italic; color: var(--тихо); }
 .пан-бокс { overflow-x: hidden; }
 .строка-тела .полоска { flex-basis: 270px; }
