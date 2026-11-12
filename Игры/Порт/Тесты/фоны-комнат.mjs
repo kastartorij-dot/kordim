@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { МЕСТА } from '../Данные/места.js';
-import { ФОНЫ_КОМНАТ, путиФона } from '../Данные/фоны-комнат.js';
+import { ФОНЫ_КОМНАТ, путиФона, подНебом } from '../Данные/фоны-комнат.js';
 
 const РЕС = fileURLToPath(new URL('../Ресурсы/', import.meta.url));
 const есть = п => fs.existsSync(РЕС + п);
@@ -25,6 +25,10 @@ for (const м of МЕСТА) for (const id of Object.keys(м.модуль.КОМ
   if (пути.indexOf(найден) < пути.length - (ФОНЫ_КОМНАТ[м.id] && (ФОНЫ_КОМНАТ[м.id][id] ?? ФОНЫ_КОМНАТ[м.id]['*']) ? 1 : 0)) своих++; else изТаблицы++;
 }
 assert.ok(своих + изТаблицы >= 40, `фон есть у ${своих + изТаблицы} комнат из ${всего}, ждали не меньше 40`);
+// Дождь только под открытым небом: площадь да, часовня и Синий час внутри — нет.
+assert.ok(подНебом('Места/торговая-площадь.png') && подНебом('Синий_Час/Фоны/krylco.jpg'));
+assert.ok(!подНебом('Места/порт-часовня-внутри.png') && !подНебом('Синий_Час/Фоны/zal.jpg'));
+
 // Портрет, названный у жителя, находится в одной из папок лиц его места (.jpg ищется и как .png/.webp).
 for (const м of МЕСТА) for (const [id, ч] of Object.entries(м.модуль.ЛЮДИ)) {
   if (!ч.портрет) continue;

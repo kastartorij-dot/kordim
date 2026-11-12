@@ -874,6 +874,13 @@ html[data-движение="меньше"] .з-кадр { opacity: 1; }
 .живая-шапка { display: flex; align-items: center; gap: 14px; margin: 0 0 8px; }
 .живая-шапка h2 { font: 600 28px/1.1 var(--шрифт-титул); color: var(--свеча); margin: 0; flex: 1; text-align: left; }
 .живая-шапка .b small { color: var(--тихо); font-size: 13px; margin-left: 6px; }
+.живая-шапка .живая-кн-экран { padding: 6px 12px; font-size: 18px; line-height: 1; }
+/* На весь экран: окно без полей, поле по высоте экрана, шапка в одну тонкую строку. */
+.ов.живая.живая-весь { padding: 0; background: var(--ночь); }
+.ов.живая.живая-весь .живая-бокс { width: min(100vw, calc((100dvh - 56px) * 16 / 9)); max-width: none; max-height: 100dvh; padding: 2px 6px 4px; border: 0; box-shadow: none; }
+.ов.живая.живая-весь .живая-шапка { margin: 0 0 2px; }
+.ов.живая.живая-весь .живая-шапка h2 { font-size: 18px; }
+.ов.живая.живая-весь .живая-поле .пс-подсказка { font-size: 13px; min-height: 0; padding: 2px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .живая-слой { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(5, 8, 10, .5); z-index: 3; }
 .живая-слой[hidden] { display: none; }
 .живая-панель { background: rgba(10, 16, 19, .94); border: 1px solid var(--линия-ярко); padding: 22px 30px 20px; max-width: 560px; text-align: center; box-shadow: 0 20px 60px rgba(0, 0, 0, .6); }

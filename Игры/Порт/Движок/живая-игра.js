@@ -27,6 +27,7 @@ export function открытьЖивую(живая) {
     ов.className = 'ов живая';
     ов.innerHTML = `<div class="овбокс живая-бокс">
       <header class="живая-шапка"><h2>${экр(живая.заголовок)}</h2>
+        <button class="b живая-кн-экран" data-экран title="На весь экран" aria-label="На весь экран">⛶</button>
         <button class="b" data-закрыть>Бросить <small>Esc</small></button></header>
       <div class="живая-поле"></div>
       <div class="живая-слой" hidden></div></div>`;
@@ -40,9 +41,24 @@ export function открытьЖивую(живая) {
     const тихо = !(уровень > 0);
     музыка(null); // музыка места стихает; вернёт её перерисовка экрана после хода (или отказ ниже)
 
+    // На весь экран (для телефона, разбор 12.11 п. 4): окно игры во весь экран и, где можно, поворот в альбомную.
+    // Если браузер полноэкранный режим не даёт — то же самое классом. Вторая кнопка ⛶ возвращает окно.
+    const кнЭкран = ов.querySelector('[data-экран]');
+    const весьЭкран = да => {
+      ов.classList.toggle('живая-весь', да);
+      if (да) ов.requestFullscreen?.().then(() => screen.orientation?.lock?.('landscape')).catch(() => {});
+      else if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+    };
+    кнЭкран.onclick = () => весьЭкран(!ов.classList.contains('живая-весь'));
+    // Телефон боком: в обычном окне поле с ладонь — сразу разворачиваем классом (без полноэкранного режима браузера).
+    if (matchMedia?.('(max-height: 520px)').matches) ов.classList.add('живая-весь');
+    const приВыходеИзЭкрана = () => { if (!document.fullscreenElement) ов.classList.remove('живая-весь'); };
+    document.addEventListener('fullscreenchange', приВыходеИзЭкрана, { signal: сигнал.signal });
+
     const выйти = итог => {
       if (кончено) return;
       кончено = true;
+      if (document.fullscreenElement === ов) document.exitFullscreen?.().catch(() => {});
       сигнал.abort();
       закрытьОкно(ов);
       открыто = null;
