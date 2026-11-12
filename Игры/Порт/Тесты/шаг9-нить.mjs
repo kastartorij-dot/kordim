@@ -13,6 +13,8 @@ const жми=(S,re)=>{const а=действияСцены(S).find(a=>re.test(a.�
 {
  const S=новая();S.мир.свидетельства=['brenn_office_entry'];
  assert.equal(условиеБренна(S,'сопоставить'),false);
+ assert.equal(условиеБренна(S,'копия-веса'),false,'PR004-07: без разговора с Брасом выписки нет');
+ S.мир.свидетельства.push('brenn_bras_word');
  assert.equal(применитьБренна(S,'копия-веса'),true);assert.equal(применитьБренна(S,'копия-веса'),false);
  S.мир.свидетельства=[...записи,'brenn_alt_weight'];
  assert.equal(выводБренна(S).узлов,9);assert.equal(применитьБренна(S,'сопоставить'),true);

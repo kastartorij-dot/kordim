@@ -28,7 +28,7 @@ export function открытьЖивую(живая) {
     ов.innerHTML = `<div class="овбокс живая-бокс">
       <header class="живая-шапка"><h2>${экр(живая.заголовок)}</h2>
         <button class="b живая-кн-экран" data-экран title="На весь экран" aria-label="На весь экран">⛶</button>
-        <button class="b" data-закрыть>Бросить <small>Esc</small></button></header>
+        <button class="b" data-закрыть>Не сейчас <small>Esc</small></button></header>
       <div class="живая-поле"></div>
       <div class="живая-слой" hidden></div></div>`;
     document.body.appendChild(ов);
@@ -77,6 +77,16 @@ export function открытьЖивую(живая) {
       слой.querySelector('[data-д="назад"]').focus({ preventScroll: true });
     };
     кнЗакрыть.onclick = () => (кнЗакрыть.dataset.итог ? null : спросить());
+    // До «Начать» закрыть можно даром — кнопка так и говорит; партия пошла — «Бросить» (разбор 12.11 п. 5).
+    let былаЗаставка = false;
+    const надпись = new MutationObserver(() => {
+      if (наЗаставке()) { былаЗаставка = true; return; }
+      if (кончено || кнЗакрыть.dataset.итог || !былаЗаставка) return;
+      кнЗакрыть.innerHTML = 'Бросить <small>Esc</small>';
+      надпись.disconnect();
+    });
+    надпись.observe(поле, { childList: true, subtree: true });
+    сигнал.signal.addEventListener('abort', () => надпись.disconnect());
     показатьОкно(ов, () => (кнЗакрыть.dataset.итог ? кнЗакрыть.click() : спросить()));
 
     Promise.all([import(`./песочница/${живая.игра}.js`), import('./песочница/общее.js')])
