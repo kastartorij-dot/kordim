@@ -12,6 +12,7 @@ h1{font-size:26px;margin:8px 0 4px}.lead{color:var(--mute);margin:0 0 16px}
 .ref ol{margin:6px 0 0;padding-left:20px}.ref li{margin:2px 0}
 .prog{margin:12px 0 18px;color:var(--mute)}
 .grp{grid-column:1/-1;margin:14px 0 0;font-size:20px;color:var(--acc)}
+.var{display:flex;flex-direction:column;gap:6px}.var .btn.main{flex:none;width:100%}.vlab{margin:6px 0 0;font-weight:bold;font-size:15px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
 .card.is-done{opacity:.55}
@@ -38,6 +39,7 @@ textarea{width:100%;font:13px/1.4 ui-monospace,Menlo,monospace;background:var(--
 <ol><li>Скачай фото человека (или «Копировать фото» и вставь в чат).</li>
 <li>Если модель берёт две картинки — приложи вторым образец Мэсти. С него берётся только техника — мелкая ровная пиксельная сетка и мягко прорисованное лицо. Цвета лица, волос и одежды — с фото, а свет и общий тон — свои у каждого места: у всех из Синего часа один, у таверны другой, у рынка третий.</li>
 <li>«Копировать промт» → вставь → отправь. Лучше ChatGPT: он умеет прозрачный фон и держит пиксельную сетку. Gemini прозрачность не делает — тогда фон будет пурпурный, его вырезать.</li>
+<li>Кто-то может и сидеть, и стоять — у таких два промта. Сидящий портрет делается по пояс, без стула в кадре, поэтому вырезается так же чисто. Готовое сидящее называй <code>…_art_sit.png</code>.</li>
 <li>Готовое сохрани как <code>port_&lt;имя&gt;_art.png</code> (обязательно PNG, не JPG — иначе пропадёт прозрачность) и отметь галочкой.</li></ol></div></div>
 <p class="prog" id="prog"></p>
 <div class="grid">
@@ -58,7 +60,7 @@ prog();
 async function copyText(t){try{await navigator.clipboard.writeText(t);return true}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();const ok=document.execCommand('copy');a.remove();return ok}}
 document.addEventListener('click',async ev=>{
  const b=ev.target.closest('[data-copy]');
- if(b){const t=b.closest('.card').querySelector('textarea').value;if(await copyText(t)){b.classList.add('ok');toast('Промт скопирован')}else toast('Не вышло — выдели текст вручную');return}
+ if(b){const t=b.closest('.var').querySelector('textarea').value;if(await copyText(t)){b.classList.add('ok');toast('Промт скопирован')}else toast('Не вышло — выдели текст вручную');return}
  const ci=ev.target.closest('[data-copyimg]');
  if(ci){const url=ci.dataset.copyimg;
   const png=fetch(url).then(r=>r.blob()).then(bl=>createImageBitmap(bl)).then(bm=>{const c=document.createElement('canvas');c.width=bm.width;c.height=bm.height;c.getContext('2d').drawImage(bm,0,0);return new Promise(res=>c.toBlob(res,'image/png'))});
