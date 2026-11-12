@@ -128,8 +128,8 @@ COMMON='''Перерисуй человека с первой картинки �
 — корпус к зрителю прямо или в лёгкие три четверти, голова прямо, взгляд на зрителя или чуть мимо;
 {frame}
 — фон ПРОЗРАЧНЫЙ (PNG с альфа-каналом), никакого окружения, пола и тени на полу; край фигуры чёткий, по пиксельной сетке, без полупрозрачного ореола;
-— если прозрачный фон сделать нельзя — сплошной чистый пурпурный цвет #FF00FF без градиента, теней и отсвета на фигуре (его потом вырежем);
-— освещение фигуры всё равно по палитре места: человек должен выглядеть так, будто стоит в этом месте.
+— если прозрачный фон сделать нельзя — сплошной чистый пурпурный цвет #FF00FF без градиента, теней и отсвета на фигуре (его потом вырежем); на краю фигуры, особенно у волос, не должно быть ни одного розового или фиолетового пикселя — контур волос и одежды из своих тёмных цветов;
+— освещение фигуры всё равно по палитре места: человек должен выглядеть так, будто стоит в этом месте. Свет не ровный студийный: источник сбоку, одна сторона лица и тела заметно в тени, тени глубокие; фигура не светлее и не контрастнее самого места.
 
 Вертикальный кадр 3:4. Магии нет. На картинке нет текста, букв, надписей, рамок и подписей.'''
 import subprocess
@@ -138,9 +138,16 @@ have={x['id'] for x in people if x['портрет']}
 none=[];seen=set()
 for x in people:
   if not x['портрет'] and x['id'] not in seen and x['id'] not in have: seen.add(x['id']);none.append((x['имя'],x['место']))
+SITE=os.path.join(HERE,'..','..','Сайт')
+def fix(src):
+  if os.path.exists(os.path.join(SITE,R+src)): return src
+  base=src[:src.rfind('.')]
+  for ext in ('.webp','.png','.jpg'):
+    if os.path.exists(os.path.join(SITE,R+base+ext)): return base+ext
+  raise SystemExit('нет файла: '+src)
 cards=[];last=None
 for i,(id,name,where,src,who,bg) in enumerate(P,1):
-  pk=PLACE.get(id,'sch');pl,pv=PAL[pk]
+  src=fix(src);pk=PLACE.get(id,'sch');pl,pv=PAL[pk]
   vs=VAR.get(id) or [('Стоит','стоя',POSE.get(id,DEF))]
   fn=f"{i:02d}_{id}"+src[src.rfind('.'):]
   grp=pl.split(',')[0]
@@ -156,6 +163,6 @@ for i,(id,name,where,src,who,bg) in enumerate(P,1):
 <div class="btns"><a class="btn" href="{R+src}" download="{fn}">Скачать фото</a><button class="btn" data-copyimg="{R+src}">Копировать фото</button></div>
 {vh}</div></article>''')
 nonehtml=''.join(f'<li>{html.escape(a)} <span>— {html.escape(b)}</span></li>' for a,b in none)
-page=open(os.path.join(HERE,'portrety_page.tpl.html')).read().replace('{{CARDS}}','\n'.join(cards)).replace('{{NONE}}',nonehtml).replace('{{N}}',str(len(P))).replace('{{NN}}',str(len(none))).replace('{{MESTI}}',R+'Лица/port_masti_vol_pixel.png')
+page=open(os.path.join(HERE,'portrety_page.tpl.html')).read().replace('{{CARDS}}','\n'.join(cards)).replace('{{NONE}}',nonehtml).replace('{{N}}',str(len(P))).replace('{{NN}}',str(len(none))).replace('{{MESTI}}',R+fix('Лица/port_masti_vol_pixel.png'))
 open(OUT,'w').write(page)
 print(len(P),len(none))
