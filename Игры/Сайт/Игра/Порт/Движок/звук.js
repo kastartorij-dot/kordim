@@ -93,6 +93,38 @@ export function звук(имя) {
   try { ЗВУКИ[имя]?.(); } catch {}
 }
 
+// Шум моря для пролога (Движок/пролог.js): прибой — шум через низкий фильтр, громкость «дышит» волнами;
+// поверх изредка плеск у свай. Громкость — от ползунка «Звуки событий». Включить/выключить плавно.
+let море = null;
+export function фонМоря(вкл) {
+  const уровень = настройкиИнтерфейса().звуки;
+  if (!разрешено || уровень <= 0) { if (!вкл && море) фонМоря._стоп?.(); return; }
+  try {
+    const к = контекст();
+    if (вкл && !море) {
+      const буфер = к.createBuffer(1, к.sampleRate * 3, к.sampleRate), д = буфер.getChannelData(0);
+      let последний = 0;
+      for (let i = 0; i < д.length; i++) { последний = последний * 0.97 + (Math.random() * 2 - 1) * 0.03; д[i] = последний * 9; } // бурый шум
+      const и = к.createBufferSource(); и.buffer = буфер; и.loop = true;
+      const ф = к.createBiquadFilter(); ф.type = 'lowpass'; ф.frequency.value = 520;
+      const г = к.createGain(); г.gain.value = 0;
+      const волна = к.createOscillator(), глубина = к.createGain(); волна.frequency.value = 0.11; глубина.gain.value = 0.05 * множительЗвуков(уровень);
+      волна.connect(глубина).connect(г.gain);
+      и.connect(ф).connect(г).connect(к.destination);
+      и.start(); волна.start();
+      г.gain.linearRampToValueAtTime(0.09 * множительЗвуков(уровень), к.currentTime + 2.5);
+      const плеск = setInterval(() => { сила = множительЗвуков(настройкиИнтерфейса().звуки) * 0.5; try { шорох(0.4 + Math.random() * 0.3, 0.12, 900, 300); } catch {} }, 3800);
+      море = { и, г, волна, плеск };
+      фонМоря._стоп = () => {
+        const м = море; if (!м) return; море = null; clearInterval(м.плеск);
+        м.г.gain.cancelScheduledValues(к.currentTime); м.г.gain.setValueAtTime(м.г.gain.value, к.currentTime);
+        м.г.gain.linearRampToValueAtTime(0, к.currentTime + 1.2);
+        setTimeout(() => { try { м.и.stop(); м.волна.stop(); } catch {} }, 1400);
+      };
+    } else if (!вкл && море) фонМоря._стоп();
+  } catch {}
+}
+
 // Первое нажатие открывает звук. Кнопки сами по себе не щёлкают (решение автора 23.10):
 // звучат только события — монета, страница журнала, шаги, утро.
 document.addEventListener('pointerdown', () => {

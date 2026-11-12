@@ -915,45 +915,56 @@ html[data-движение="меньше"] .з-кадр { opacity: 1; }
 .живая-поле .пс-кн:hover { background: rgba(231, 178, 99, .18); border-color: var(--свеча); }
 .живая-поле .пс-кн small { display: block; color: var(--тихо); font-size: 13px; }
 
-/* ── Пролог (Движок/пролог.js, 12.11): кадр 16:9 по центру, субтитры в чёрной полосе под ним ── */
-.пролог { position: fixed; inset: 0; z-index: 90; background: #030506; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(10px, 2.4vh, 26px); padding: 12px 16px; cursor: pointer; user-select: none; -webkit-user-select: none; animation: затемнение .6s ease both; transition: opacity .45s ease; }
+/* ── Пролог (Движок/пролог.js, монтаж 12.11): широкий кадр 2,2 : 1, внутри слой 16 : 9 «камера»;
+   экран и канат рисуются в низком разрешении и растягиваются крупным пикселем. Субтитры — под кадром. ── */
+.пролог { position: fixed; inset: 0; z-index: 90; background: #020304; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(12px, 2.6vh, 28px); padding: 12px 16px; cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: none; animation: затемнение .6s ease both; transition: opacity .5s ease; }
 .пролог.уходит { opacity: 0; }
-.пролог-пропуск { position: absolute; top: max(12px, env(safe-area-inset-top)); right: 16px; z-index: 3; background: none; border: 1px solid rgba(239, 227, 201, .22); color: var(--бумага-2); font: 500 14px/1 var(--шрифт-метка); letter-spacing: .06em; padding: 9px 14px; border-radius: 2px; cursor: pointer; opacity: .7; }
+.пролог-пропуск { position: absolute; top: max(12px, env(safe-area-inset-top)); right: 16px; z-index: 5; background: none; border: 1px solid rgba(239, 227, 201, .2); color: var(--бумага-2); font: 500 14px/1 var(--шрифт-метка); letter-spacing: .06em; padding: 9px 14px; border-radius: 2px; cursor: pointer; opacity: .6; }
 .пролог-пропуск:hover, .пролог-пропуск:focus-visible { opacity: 1; border-color: var(--свеча); color: var(--бумага); }
-.пролог-кадр { position: relative; width: min(100%, calc((100dvh - 190px) * 16 / 9), 1500px); aspect-ratio: 16 / 9; overflow: hidden; background: #000; transition: opacity 1s ease, filter 1.6s ease; }
-.пролог[data-сцена="тьма"] .пролог-кадр { opacity: 0; }
-/* Слой 16:9 с роликом, фото и канатом: в кадре 16:9 совпадает с ним, в квадрате — выступает по бокам,
-   и его точка 42 % стоит на 42 % кадра (герой слева остаётся виден). Всё внутри слоя совпадает по геометрии. */
-.пролог-слой { position: absolute; top: 0; height: 100%; aspect-ratio: 16 / 9; left: 42%; transform: translateX(-42%); }
-.пролог-видео, .пролог-фото { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; background: center / 100% 100% no-repeat; }
-.пролог-фото { opacity: 0; transition: opacity 1.2s ease, transform 9s ease-out, filter 1.6s ease; }
-.пролог[data-сцена="бросок"] .пролог-фото, .пролог[data-сцена="разговор"] .пролог-фото, .пролог[data-сцена="удар"] .пролог-фото { opacity: 1; }
-.пролог[data-сцена="ролик"] .пролог-фото[style] { opacity: 1; }
-/* Разговор: камера подходит ближе к причалу, кадр темнеет; на «схоронили» — ещё темнее и тише. */
-.пролог[data-сцена="разговор"] .пролог-фото { transform: scale(1.18) translate(-4%, 2%); filter: brightness(.62) saturate(.85); }
-.пролог.тишина .пролог-фото { filter: brightness(.38) saturate(.5); }
-.пролог[data-сцена="удар"] .пролог-кадр { opacity: 0; transition-duration: 1.4s; }
-/* Бросок: дуга каната рисуется от баржи к тумбе; мимо — обрывается и падает в воду. */
-.пролог-бросок { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-.пролог-бросок path { fill: none; stroke: #a5814f; stroke-width: 8; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; filter: drop-shadow(0 3px 2px rgba(0, 0, 0, .6)); }
-.пролог-бросок.летит path { transition: stroke-dashoffset .8s cubic-bezier(.3, .1, .4, 1); stroke-dashoffset: 0; }
-.пролог[data-бросок="мимо"] .пролог-бросок.летит path { stroke-dashoffset: 36; transform: translateY(150px); opacity: .55; transition: stroke-dashoffset .7s ease, transform .8s .55s ease-in, opacity .8s .55s ease-in; }
-.пролог-метр { position: absolute; left: 50%; bottom: 7%; transform: translateX(-50%); width: min(62%, 440px); height: 16px; border: 1px solid rgba(239, 227, 201, .55); background: rgba(5, 8, 10, .62); border-radius: 2px; }
-.пролог-зона { position: absolute; left: 36%; width: 28%; top: 0; bottom: 0; background: rgba(231, 178, 99, .32); border-left: 1px solid var(--свеча); border-right: 1px solid var(--свеча); }
-.пролог-метка { position: absolute; top: -6px; bottom: -6px; width: 4px; margin-left: -2px; background: var(--бумага); box-shadow: 0 0 10px rgba(239, 227, 201, .8); }
-/* Субтитры: одна строка за раз, крупно; реплика другого — тёплым, рассказ — курсивом, «удар» — посреди тьмы. */
+.пролог-кадр { position: relative; width: min(100%, calc((100dvh - 200px) * 2.2), 1700px); aspect-ratio: 2.2 / 1; overflow: hidden; background: #000; container-type: size; }
+/* слой 16 : 9 накрывает кадр любой формы (как cover); точка 42 % слоя стоит на 42 % кадра — герой слева в кадре */
+.пролог-слой { position: absolute; left: 42%; top: 50%; width: max(100cqw, 177.78cqh); aspect-ratio: 16 / 9; transform: translate(-42%, -50%); }
+.пролог-камера { position: absolute; inset: 0; transform-origin: 50% 55%; will-change: transform; }
+.пролог-экран, .пролог-канат { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; }
+.пролог-экран { filter: contrast(1.06) saturate(.9); transition: filter 1.6s ease; }
+.пролог[data-сцена="разговор"] .пролог-экран { filter: contrast(1.08) saturate(.7) brightness(.66); transition-duration: 6s; }
+.пролог.тишина .пролог-экран { filter: contrast(1.1) saturate(.35) brightness(.4); transition-duration: 2.5s; }
+/* плёнка: зерно (шум, перескакивает по кадрам), виньетка, шторка для склеек через затемнение */
+.пролог-зерно { position: absolute; inset: -20%; pointer-events: none; opacity: .13; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation: пролог-зерно .5s steps(5) infinite; }
+@keyframes пролог-зерно { 0% { transform: translate(0, 0); } 20% { transform: translate(-4%, 3%); } 40% { transform: translate(3%, -2%); } 60% { transform: translate(-2%, -4%); } 80% { transform: translate(4%, 2%); } 100% { transform: translate(0, 0); } }
+.пролог-виньетка { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(0, 0, 0, .55) 100%); }
+.пролог-шторка { position: absolute; inset: 0; background: #020304; opacity: 0; pointer-events: none; transition: opacity .32s ease; }
+.пролог-шторка.темно { opacity: 1; }
+/* титр игры поверх пролёта над городом */
+.пролог-титр { position: absolute; left: 0; right: 0; bottom: 13%; text-align: center; pointer-events: none; text-shadow: 0 2px 18px rgba(0, 0, 0, .85), 0 0 2px rgba(0, 0, 0, .9); }
+.пролог-титр[hidden] { display: none; }
+.пролог-титр-имя { font: 600 clamp(34px, 6.4vw, 92px)/1 var(--шрифт-титул); color: #f3e2bd; letter-spacing: .14em; text-transform: uppercase; animation: пролог-титр 3.2s cubic-bezier(.2,.6,.2,1) both; }
+.пролог-титр-ниже { margin-top: .6em; font: 500 clamp(12px, 1.4vw, 18px)/1 var(--шрифт-метка); letter-spacing: .32em; color: var(--свеча); animation: проявиться 1.6s 1.4s ease both; }
+@keyframes пролог-титр { from { opacity: 0; letter-spacing: .5em; filter: blur(6px); } to { opacity: 1; letter-spacing: .14em; filter: none; } }
+/* замах: вертикальная шкала у героя, светлая полоса — где петля сядет на тумбу */
+.пролог-замах { position: absolute; left: 36%; top: 30%; height: 38%; width: 12px; border: 1px solid rgba(239, 227, 201, .6); background: rgba(5, 8, 10, .55); box-shadow: 0 0 0 1px rgba(0,0,0,.5); }
+.пролог-замах[hidden] { display: none; }
+.пролог-замах-зона { position: absolute; left: 0; right: 0; bottom: 37%; height: 26%; background: rgba(231, 178, 99, .38); border-top: 1px solid var(--свеча); border-bottom: 1px solid var(--свеча); }
+.пролог-замах-сила { position: absolute; left: 1px; right: 1px; bottom: 0; height: 0; background: var(--бумага); box-shadow: 0 0 8px rgba(239, 227, 201, .7); }
+.пролог-замах:not(.идёт) { animation: пролог-мигание 1.4s ease-in-out infinite; }
+@keyframes пролог-мигание { 50% { border-color: var(--свеча); } }
+/* субтитры: одна строка за раз; реплика другого — тёплым, рассказ — курсивом, «удар» — посреди тьмы */
 .пролог-титры { min-height: 3.4em; width: min(100%, 900px); display: flex; align-items: flex-start; justify-content: center; text-align: center; }
-.пролог-титры p { margin: 0; font: 400 clamp(19px, 2.3vw, 28px)/1.35 var(--шрифт-текст); color: var(--бумага); animation: проявиться .7s ease both; text-wrap: balance; }
+.пролог-титры p { margin: 0; font: 400 clamp(19px, 2.2vw, 27px)/1.35 var(--шрифт-текст); color: var(--бумага); animation: проявиться .7s ease both; text-wrap: balance; }
 .пролог-титры p.он { color: #f0c98a; }
 .пролог-титры p.рассказ { font-style: italic; color: var(--бумага-2); }
 .пролог-титры p.подсказка { font: 500 clamp(14px, 1.5vw, 17px)/1.3 var(--шрифт-метка); letter-spacing: .05em; color: var(--бумага-2); }
 .пролог-титры p.удар { font: 500 clamp(30px, 4.2vw, 52px)/1.1 var(--шрифт-титул); color: var(--бумага); letter-spacing: .02em; animation-duration: 1.6s; }
-.пролог[data-сцена="тьма"] .пролог-титры, .пролог[data-сцена="удар"] .пролог-титры { position: absolute; inset: 0; align-items: center; margin: auto; }
-.пролог-дальше { position: absolute; bottom: max(14px, env(safe-area-inset-bottom)); font: 13px var(--шрифт-метка); letter-spacing: .08em; color: rgba(239, 227, 201, .45); animation: проявиться 1s 1.2s ease both; }
+.пролог[data-сцена="тьма"] .пролог-титры, .пролог[data-сцена="удар"] .пролог-титры { position: absolute; inset: 0; align-items: center; margin: auto; z-index: 2; }
+.пролог-дальше { position: absolute; bottom: max(14px, env(safe-area-inset-bottom)); font: 13px var(--шрифт-метка); letter-spacing: .08em; color: rgba(239, 227, 201, .42); animation: проявиться 1s 1.2s ease both; }
 .пролог-дальше[hidden] { display: none; }
 @media (max-aspect-ratio: 3 / 4) {
   .пролог-кадр { aspect-ratio: 1 / 1; width: min(100%, calc(100dvh - 260px)); }
+  .пролог-слой { left: 34%; transform: translate(-34%, -50%); }
+  .пролог-замах { left: 30%; }
   .пролог-титры { min-height: 5em; }
 }
-[data-движение="меньше"] .пролог-фото { transition: opacity .3s ease; transform: none !important; }
+[data-движение="меньше"] .пролог-зерно { animation: none; }
 .вступление-цель { font-family: var(--шрифт-метка); letter-spacing: .03em; color: var(--свеча) !important; }
