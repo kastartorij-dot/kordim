@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Портреты в рисунок</title>
+<style>
+:root{--bg:#f4efe6;--card:#fffaf2;--ink:#2a2118;--mute:#7a6a58;--line:#e2d6c3;--acc:#9a3b1e;--acc-ink:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#191512;--card:#231d18;--ink:#eee3d3;--mute:#a8957e;--line:#3a3028;--acc:#d0683f;--acc-ink:#1a120c}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 Georgia,serif}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+h1{font-size:26px;margin:8px 0 4px}.lead{color:var(--mute);margin:0 0 16px}
+.ref{display:flex;gap:16px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
+.ref img{width:110px;height:140px;object-fit:cover;border-radius:8px}
+.ref ol{margin:6px 0 0;padding-left:20px}.ref li{margin:2px 0}
+.prog{margin:12px 0 18px;color:var(--mute)}
+.grp{grid-column:1/-1;margin:14px 0 0;font-size:20px;color:var(--acc)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.card.is-done{opacity:.55}
+.pic{aspect-ratio:3/4;max-height:55vh;background:#000;display:flex;justify-content:center}.pic img{height:100%;max-width:100%;object-fit:cover;display:block}
+.body{padding:12px;display:flex;flex-direction:column;gap:10px}
+.head{display:flex;gap:10px;align-items:flex-start}.n{font-weight:bold;color:var(--acc);font-size:20px}
+h2{font-size:19px;margin:0}.where{margin:0;color:var(--mute);font-size:14px}
+.done{margin-left:auto;font-size:14px;color:var(--mute);white-space:nowrap;display:flex;gap:4px;align-items:center}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.btn{font:inherit;font-size:15px;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink);text-decoration:none;cursor:pointer}
+.btn.main{background:var(--acc);color:var(--acc-ink);border-color:var(--acc);flex:1}
+.btn.ok{outline:2px solid var(--acc)}
+textarea{width:100%;font:13px/1.4 ui-monospace,Menlo,monospace;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px;resize:vertical}
+.none{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-top:24px}
+.none ul{columns:2;column-gap:24px;padding-left:18px}.none span{color:var(--mute);font-size:14px}
+@media (max-width:600px){.none ul{columns:1}.ref{flex-direction:column;align-items:flex-start}}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none}
+#toast.on{opacity:1}
+</style></head><body><div class="wrap">
+<h1>Портреты в рисунок, как Мэсти</h1>
+<p class="lead">Все {{N}} портретов, которые сейчас стоят в игре «Порт». У каждого свой готовый промт.</p>
+<div class="ref"><img src="{{MESTI}}" alt="Мэсти Вол — образец стиля"><div>
+<b>Образец стиля: Мэсти Вол.</b> <a class="btn" href="{{MESTI}}" download="00_образец_Мэсти.png">Скачать образец</a>
+<ol><li>Скачай фото человека (или «Копировать фото» и вставь в чат).</li>
+<li>Если модель берёт две картинки — приложи вторым образец Мэсти. С него берётся только манера рисунка. Цвета лица, волос и одежды — с фото, а свет и общий тон — свои у каждого места: у всех из Синего часа один, у таверны другой, у рынка третий.</li>
+<li>«Копировать промт» → вставь → отправь. Сначала Gemini, если лицо поплыло — ChatGPT.</li>
+<li>Готовое сохрани как <code>port_&lt;имя&gt;_art.png</code> и отметь галочкой.</li></ol></div></div>
+<p class="prog" id="prog"></p>
+<div class="grid">
+{{CARDS}}
+</div>
+<section class="none"><h2>Без портрета совсем ({{NN}})</h2>
+<p class="where">Этих переводить не из чего — им нужны новые портреты с нуля. Промты под них — отдельно.</p>
+<ul>{{NONE}}</ul></section>
+</div><div id="toast"></div>
+<script>
+const toast=t=>{const e=document.getElementById('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),1600)};
+const KEY='portrety-art-done';let done={};try{done=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+const cards=[...document.querySelectorAll('.card')];
+function prog(){const n=cards.filter(c=>c.classList.contains('is-done')).length;document.getElementById('prog').textContent=`Готово ${n} из ${cards.length}`}
+cards.forEach(c=>{const cb=c.querySelector('.done input');cb.checked=!!done[c.dataset.id];c.classList.toggle('is-done',cb.checked);
+ cb.onchange=()=>{done[c.dataset.id]=cb.checked;c.classList.toggle('is-done',cb.checked);try{localStorage.setItem(KEY,JSON.stringify(done))}catch(e){}prog()}});
+prog();
+async function copyText(t){try{await navigator.clipboard.writeText(t);return true}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();const ok=document.execCommand('copy');a.remove();return ok}}
+document.addEventListener('click',async ev=>{
+ const b=ev.target.closest('[data-copy]');
+ if(b){const t=b.closest('.card').querySelector('textarea').value;if(await copyText(t)){b.classList.add('ok');toast('Промт скопирован')}else toast('Не вышло — выдели текст вручную');return}
+ const ci=ev.target.closest('[data-copyimg]');
+ if(ci){const url=ci.dataset.copyimg;
+  const png=fetch(url).then(r=>r.blob()).then(bl=>createImageBitmap(bl)).then(bm=>{const c=document.createElement('canvas');c.width=bm.width;c.height=bm.height;c.getContext('2d').drawImage(bm,0,0);return new Promise(res=>c.toBlob(res,'image/png'))});
+  try{await navigator.clipboard.write([new ClipboardItem({'image/png':png})]);ci.classList.add('ok');toast('Фото скопировано')}catch(e){toast('Телефон не дал скопировать — жми «Скачать фото»')}}
+});
+</script></body></html>
