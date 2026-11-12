@@ -204,6 +204,10 @@ small { color: var(--тихо); }
 .отрезок.прошёл { color: rgba(239, 227, 201, .52); }
 .отрезок.сейчас { color: var(--свеча); border-bottom-color: var(--свеча); text-shadow: 0 0 14px var(--свеча-тень); }
 .отрезок.сейчас .зн { filter: drop-shadow(0 0 6px rgba(231, 178, 99, .6)); }
+.деления-дня { display: inline-flex; gap: 2px; margin-left: 5px; vertical-align: middle; }
+.деления-дня i { width: 6px; height: 6px; transform: rotate(45deg); border: 1px solid currentColor; opacity: .55; }
+.деления-дня i.прошло { background: currentColor; opacity: .45; }
+.деления-дня i.сейчас { background: var(--свеча); border-color: var(--свеча); opacity: 1; }
 #hud-тело { display: flex; gap: 6px; }
 .мерило { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 4px 6px; color: #d9c79f; position: relative; }
 .мерило .зн { font-size: 20px; }
@@ -382,6 +386,7 @@ ul.журнал li::marker { color: var(--свеча); }
 .pip { width: 11px; height: 11px; transform: rotate(45deg) scale(.75); border: 1px solid rgba(226, 198, 146, .4); background: transparent; }
 .pip.on { background: rgba(226, 198, 146, .35); border-color: transparent; }
 .pip.now { background: var(--свеча); border-color: var(--свеча); box-shadow: 0 0 8px var(--свеча); }
+.pip.shut { border-style: dashed; opacity: .35; }
 #дом { font: italic 400 15px/1 var(--шрифт-текст) !important; color: var(--море) !important; }
 #долг { font: 400 14px/1 var(--шрифт-текст) !important; }
 #назад, #карта { min-height: 34px !important; padding: 4px 12px !important; font: 500 15px/1 var(--шрифт-метка) !important; letter-spacing: .1em; text-transform: lowercase; }

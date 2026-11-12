@@ -21,6 +21,8 @@ const сценарии={
     p.visit('ночлежка');
     assert.equal(p.S.мир.день,30);assert.equal(p.S.мир.итогСезона,undefined);
     p.leave();
+    assert.equal(p.S.мир.день,30,'ночной визит не закрывает сутки (Р19)');
+    p.wait(); // не спать до утра
     assert.equal(p.S.мир.день,31);assert.ok(p.S.мир.конецДня.финал);
     assert.equal(p.S.мир.итогСезона.исход,'отказ-от-цели');
   },
