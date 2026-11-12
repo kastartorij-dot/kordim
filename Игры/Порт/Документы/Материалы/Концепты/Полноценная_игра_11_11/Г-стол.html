@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="UTF-8"><title>Г · Стол игрока</title>
+<link rel="stylesheet" href="общее.css">
+<style>
+  .карта { position: absolute; left: -40px; top: 34px; width: 1180px; height: 664px; background: url('../../../../Ресурсы/карта.webp') center/cover; filter: saturate(.9) brightness(.92); }
+  .тинт { background: linear-gradient(90deg, transparent 62%, rgba(6, 10, 12, .96) 82%), linear-gradient(180deg, transparent 62%, rgba(6, 10, 12, .97) 84%); }
+  svg.пути { position: absolute; inset: 0; z-index: 3; }
+  /* узлы-места */
+  .узел { position: absolute; z-index: 8; transform: translate(-50%, -50%); text-align: center; }
+  .узел .гнездо { width: 54px; height: 54px; margin: 0 auto; border-radius: 50%; border: 2px dashed rgba(239, 227, 201, .7); background: rgba(8, 12, 14, .55); display: grid; place-items: center; font: 600 13px var(--метка); color: var(--бумага-2); }
+  .узел.тут .гнездо { border: 2px solid var(--свеча); box-shadow: 0 0 0 5px rgba(231, 178, 99, .18), 0 0 22px rgba(231, 178, 99, .5); }
+  .узел.цель .гнездо { border: 2px solid var(--море); box-shadow: 0 0 0 5px rgba(147, 199, 194, .16); }
+  .узел b { display: inline-block; margin-top: 6px; padding: 2px 10px 3px; background: rgba(8, 12, 14, .88); border: 1px solid var(--линия-ярко); font: 500 14px var(--метка); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+  .узел small { display: block; font: italic 400 12.5px var(--текст); color: var(--бумага); text-shadow: 0 1px 3px #000, 0 0 8px #000; white-space: nowrap; margin-top: 2px; }
+  .узел .кто { display: flex; justify-content: center; gap: 0; margin-bottom: 5px; height: 30px; }
+  .узел .кто img { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #0a1013; margin: 0 -4px; object-fit: cover; }
+  .жетон { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font: 700 11px var(--метка); letter-spacing: .06em; text-transform: uppercase; color: var(--чернила);
+    background: radial-gradient(circle at 35% 30%, #f6d79a, #d59a45 70%, #a8742c); box-shadow: inset 0 0 0 3px rgba(60, 36, 8, .45), 0 3px 0 #6b4a1c, 0 6px 12px rgba(0, 0, 0, .6); }
+  .жетон.вечер { background: radial-gradient(circle at 35% 30%, #e7b6a0, #b7654a 70%, #7a3d2c); box-shadow: inset 0 0 0 3px rgba(50, 16, 8, .45), 0 3px 0 #50261a, 0 6px 12px rgba(0, 0, 0, .6); }
+  .жетон.ночь { background: radial-gradient(circle at 35% 30%, #a9c0d8, #56719a 70%, #33486a); color: #0c1524; box-shadow: inset 0 0 0 3px rgba(10, 20, 40, .45), 0 3px 0 #22324c, 0 6px 12px rgba(0, 0, 0, .6); }
+  .жетон.потрачен { filter: grayscale(.9) brightness(.55); }
+  .фишка { position: absolute; z-index: 12; left: 498px; top: 372px; width: 30px; }
+  /* жетон в полёте */
+  .полёт { position: absolute; left: 706px; top: 330px; z-index: 20; transform: rotate(-8deg) scale(1.15); }
+  .курсор { position: absolute; left: 734px; top: 360px; z-index: 40; width: 22px; height: 30px; }
+  /* правая колонка: часы города */
+  .часы-города { position: absolute; right: 22px; top: 90px; width: 262px; z-index: 30; display: grid; gap: 10px; }
+  .часы { display: flex; gap: 14px; align-items: center; padding: 10px 14px; }
+  .часы svg { flex: none; width: 54px; height: 54px; }
+  .часы b { display: block; font: 600 17px/1.15 var(--титул); }
+  .часы small { font-size: 13px; color: var(--бумага-2); font-style: italic; line-height: 1.25; display: block; margin-top: 2px; }
+  /* проверка кубиками */
+  .проверка { position: absolute; left: 800px; top: 206px; z-index: 30; padding: 12px 16px 14px; width: 274px; }
+  .проверка .кубы { display: flex; gap: 8px; align-items: center; margin: 8px 0 6px; font: 600 20px var(--титул); }
+  .куб { width: 38px; height: 38px; border-radius: 6px; background: #efe3c9; display: grid; grid-template: repeat(3, 1fr) / repeat(3, 1fr); padding: 6px; gap: 2px; box-shadow: 0 3px 0 #a79a7c, 0 5px 10px rgba(0, 0, 0, .5); }
+  .куб i { border-radius: 50%; }
+  .куб i.о { background: #1a1309; }
+  .проверка p { margin: 0; font-size: 14.5px; color: var(--бумага-2); line-height: 1.35; }
+  .проверка p b { color: var(--трава); font-weight: 500; }
+  /* низ: рука */
+  .рука { position: absolute; left: 0; right: 0; bottom: 0; height: 176px; z-index: 30; display: flex; align-items: flex-end; gap: 14px; padding: 0 22px 14px; }
+  .день-жетоны { width: 250px; padding: 10px 14px 12px; align-self: flex-end; }
+  .день-жетоны .ряд { display: flex; gap: 10px; margin-top: 10px; }
+  .день-жетоны .ряд div { text-align: center; font-size: 11.5px; color: var(--бумага-2); line-height: 1.2; }
+  .день-жетоны .пусто { width: 46px; height: 46px; border-radius: 50%; border: 2px dashed var(--линия-ярко); }
+  .карточка { width: 148px; height: 158px; flex: none; background: #1a2124; border: 1px solid var(--линия-ярко); border-radius: 6px; position: relative; overflow: hidden; box-shadow: 0 6px 14px rgba(0, 0, 0, .6); }
+  .карточка .верх { height: 74px; background-size: cover; background-position: center 20%; }
+  .карточка .тип { position: absolute; left: 8px; top: 8px; font: 700 10px var(--метка); letter-spacing: .12em; text-transform: uppercase; background: rgba(8, 12, 14, .85); padding: 1px 7px 2px; color: var(--свеча); }
+  .карточка b { display: block; font: 600 16px/1.1 var(--титул); padding: 7px 10px 0; }
+  .карточка small { display: block; font-size: 12px; line-height: 1.25; color: var(--бумага-2); padding: 3px 10px 0; }
+  .карточка .ромбы { position: absolute; left: 10px; bottom: 7px; color: var(--свеча); letter-spacing: .15em; font-size: 12px; }
+  .карточка.дело { background: #211c14; }
+  .карточка.дело .верх { height: 34px; background: linear-gradient(180deg, #3a2f1c, #211c14); }
+  .карточка.дело .срок { position: absolute; right: 8px; bottom: 7px; font: 600 12px var(--метка); color: var(--ржа); letter-spacing: .06em; }
+  .карточка.поднята { transform: translateY(-22px) rotate(-2deg); border-color: var(--свеча); box-shadow: 0 0 0 1px var(--свеча), 0 14px 24px rgba(0, 0, 0, .7); }
+  .подсказка { margin-left: auto; align-self: flex-end; font-size: 14px; color: var(--бумага-2); max-width: 220px; line-height: 1.35; padding-bottom: 6px; text-align: right; }
+</style></head>
+<body>
+<div class="карта"></div>
+<div class="слой тинт" style="z-index:2"></div>
+
+<svg class="пути" viewBox="0 0 1366 768" fill="none" stroke="rgba(239,227,201,.55)" stroke-width="2.5" stroke-dasharray="2 9" stroke-linecap="round">
+  <path d="M130 196 C 250 250, 360 330, 470 400"/>
+  <path d="M510 398 C 590 380, 650 372, 715 372"/>
+  <path d="M770 384 C 830 410, 890 440, 935 470"/>
+  <path d="M462 428 C 400 450, 340 470, 292 484"/>
+  <path d="M748 334 C 760 260, 780 200, 800 180 S 930 140, 972 138"/>
+  <path d="M516 424 C 590 450, 650 470, 690 486"/>
+</svg>
+
+<div class="узел" style="left:112px; top:188px"><div class="гнездо">1</div><b>Маяк и скалы</b><small>часовня · убежище 1 гр.</small></div>
+<div class="узел тут" style="left:486px; top:402px"><div class="кто"><img src="Фигуры/лицо-hozyain.webp"><img src="Фигуры/лицо-moryak.webp"><img src="Фигуры/лицо-nora.webp"></div><div class="гнездо" style="margin-top:44px"></div><b>Доки</b><small>ты здесь · таверна, причал, контора</small></div>
+<div class="узел цель" style="left:738px; top:360px"><div class="кто"><img src="Фигуры/лицо-sibilla.webp"><img src="Фигуры/лицо-leya.webp"></div><div class="гнездо">1</div><b>Торговый квартал</b><small>рынок · аптека · «Синий час»</small></div>
+<div class="узел" style="left:958px; top:498px"><div class="кто"><img src="Фигуры/лицо-dana.webp"></div><div class="гнездо">2</div><b>Трущобы</b><small>баня · двор Горма</small></div>
+<div class="узел" style="left:262px; top:508px"><div class="гнездо">2</div><b>Рыбацкий берег</b><small>лачуга Локи</small></div>
+<div class="узел" style="left:1000px; top:150px"><div class="гнездо">2</div><b>Управный двор</b><small>нотариус · закрыто вечером</small></div>
+<div class="узел" style="left:712px; top:514px"><div class="гнездо">1</div><b>Жилые улицы</b><small>ночлежка · лекарь Ворн</small></div>
+
+<!-- фишка героя -->
+<svg class="фишка" viewBox="0 0 30 44"><ellipse cx="15" cy="40" rx="12" ry="4" fill="rgba(0,0,0,.5)"/><path d="M15 2 a7 7 0 1 1 0 14 a7 7 0 1 1 0 -14 M6 38 C6 24 9 18 15 18 C21 18 24 24 24 38 Z" fill="#e7b263" stroke="#3a2608" stroke-width="2"/></svg>
+<div class="жетон вечер полёт">вечер</div>
+<svg class="курсор" viewBox="0 0 22 30"><path d="M2 2 L2 23 L8 18 L12 28 L16 26 L12 17 L20 17 Z" fill="#efe3c9" stroke="#0a1013" stroke-width="2" stroke-linejoin="round"/></svg>
+
+<div class="проверка рамка"><span class="метка">Проверка · уговорить Сибиллу</span>
+  <div class="кубы"><div class="куб"><i class="о"></i><i></i><i></i><i></i><i class="о"></i><i></i><i></i><i></i><i class="о"></i></div><div class="куб"><i class="о"></i><i></i><i class="о"></i><i></i><i class="о"></i><i></i><i class="о"></i><i></i><i class="о"></i></div>
+    <span>+ 2 <small style="font:italic 400 13px var(--текст);color:var(--бумага-2)">Мера</small> = 10</span></div>
+  <p>Порог 8, «средне». <b>Получится.</b> Жетон вечера уйдёт сюда, разговор займёт один ход.</p>
+</div>
+
+<div class="часы-города">
+  <div class="метка" style="padding-left:2px">Часы города</div>
+  <div class="часы рамка"><svg viewBox="0 0 54 54"><circle cx="27" cy="27" r="24" fill="#0c1215" stroke="#e7b263" stroke-width="2"/><path d="M27 27 L27 3 A24 24 0 0 1 49.8 34.4 Z" fill="#e7b263"/><g stroke="#0c1215" stroke-width="2"><path d="M27 3V51M3 27H51M10 10L44 44M44 10L10 44"/></g></svg>
+    <div><b>Зима идёт</b><small>день 12 из 30 · после 20-го холод бьёт каждую ночь</small></div></div>
+  <div class="часы рамка"><svg viewBox="0 0 54 54"><circle cx="27" cy="27" r="24" fill="#0c1215" stroke="#e07f62" stroke-width="2"/><path d="M27 27 L27 3 A24 24 0 1 1 6.2 39 Z" fill="#e07f62"/><g stroke="#0c1215" stroke-width="2"><path d="M27 3V51M6.2 15L47.8 39M47.8 15L6.2 39"/></g></svg>
+    <div><b>Долг ростовщику</b><small>4 из 6 · осталось два дня, потом придут за залогом</small></div></div>
+  <div class="часы рамка"><svg viewBox="0 0 54 54"><circle cx="27" cy="27" r="24" fill="#0c1215" stroke="#93c7c2" stroke-width="2"/><path d="M27 27 L27 3 A24 24 0 0 1 49.8 19.6 L27 27 Z M27 27 L49.8 19.6 A24 24 0 0 1 41.1 46.4 Z" fill="#93c7c2"/><g stroke="#0c1215" stroke-width="2"><path d="M27 27V3M27 27L49.8 19.6M27 27L41.1 46.4M27 27L12.9 46.4M27 27L4.2 19.6"/></g></svg>
+    <div><b>Журнал Бренна</b><small>2 улики из 5 · отцовские весы и кто их правил</small></div></div>
+  <div class="часы рамка"><svg viewBox="0 0 54 54"><circle cx="27" cy="27" r="24" fill="#0c1215" stroke="#aac98b" stroke-width="2"/><path d="M27 27 L27 3 A24 24 0 0 1 51 27 Z" fill="#aac98b"/><g stroke="#0c1215" stroke-width="2"><path d="M27 3V51M3 27H51"/></g></svg>
+    <div><b>Свой угол</b><small>25 из 100 гр. · комната у вдовы на зиму</small></div></div>
+</div>
+
+<div class="рука">
+  <div class="день-жетоны рамка"><span class="метка">День 12 · твои отрезки</span>
+    <div class="ряд">
+      <div><div class="жетон потрачен">утро</div>разгрузка<br>+12 гр.</div>
+      <div><div class="жетон потрачен">день</div>рынок<br>торг</div>
+      <div><div class="пусто"></div>вечер<br>в руке</div>
+      <div><div class="жетон ночь">ночь</div>сон или<br>дело</div>
+    </div>
+  </div>
+  <div class="карточка дело"><div class="верх"></div><span class="тип">дело</span><b>Ящик не по описи</b><small>Взять в таверне, сдать человеку у меняльной лавки.</small><span class="срок">до дня 13</span></div>
+  <div class="карточка дело поднята"><div class="верх"></div><span class="тип">дело</span><b>Правда о Кладбище китов</b><small>Сибилла платит за сведение. Нужен вечер в аптеке.</small><span class="срок" style="color:var(--трава)">без срока</span></div>
+  <div class="карточка"><div class="верх" style="background-image:url('Фигуры/лицо-nora.webp')"></div><span class="тип">человек</span><b>Нора Линн</b><small>Поёт в таверне по вечерам.</small><span class="ромбы">◆◆◇◇◇</span></div>
+  <div class="карточка"><div class="верх" style="background-image:url('Фигуры/лицо-dana.webp')"></div><span class="тип">человек</span><b>Дана Крей</b><small>Баня. Завтра утром свободна.</small><span class="ромбы">◆◇◇◇◇</span></div>
+  <div class="карточка" style="background:#16201f"><div class="верх" style="height:34px;background:linear-gradient(180deg,#1f3a38,#16201f)"></div><span class="тип" style="color:var(--море)">слух</span><b>Гири у весов легче</b><small>Слышал от моряка. Не проверено. Знают трое.</small><span class="ромбы" style="color:var(--море)">цена ◆◆◆</span></div>
+  <div class="подсказка">Перетащи жетон отрезка на место. Карта в руке, сыгранная вместе с жетоном, решает, что именно ты там делаешь.</div>
+</div>
+<div class="вариант" style="bottom:auto; top:80px">Вариант Г · стол игрока</div>
+<script type="module">
+import { шапка } from './общее.js';
+шапка({ день: 12, отрезок: 'вечер', где: 'Доки', погода: 'туман с моря', кошель: 25 });
+</script>
+</body></html>

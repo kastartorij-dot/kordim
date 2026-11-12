@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="UTF-8"><title>Б1 · Прогулка по докам</title>
+<link rel="stylesheet" href="общее.css">
+<style>
+  .даль { position: absolute; left: 0; top: 0; width: 1366px; height: 610px; background: url('../../../../Ресурсы/Районы/доки.webp') -520px 0 / auto 610px no-repeat; image-rendering: pixelated; filter: brightness(.95); }
+  #перед { position: absolute; left: 0; top: 0; width: 1368px; height: 768px; z-index: 4; }
+  .свет { position: absolute; z-index: 9; border-radius: 50%; pointer-events: none; mix-blend-mode: screen; }
+  .т { position: absolute; transform: translate(-50%, -100%); white-space: nowrap; z-index: 20; font: 500 14px/1.15 var(--текст); background: rgba(8, 12, 14, .84); border: 1px solid var(--линия); padding: 2px 9px 3px; text-align: center; }
+  .т small { display: block; font: italic 400 12px var(--текст); color: var(--бумага-2); }
+  .т.я { border-color: var(--свеча); color: var(--свеча); }
+  .действие { position: absolute; transform: translate(-50%, -100%); z-index: 24; white-space: nowrap; background: #2a2113; border: 1px solid var(--свеча); padding: 4px 12px 5px 8px; font: 500 15px var(--текст); color: var(--бумага); box-shadow: 0 0 18px rgba(231, 178, 99, .35); }
+  .пузырь { position: absolute; z-index: 22; background: #efe3c9; color: #1a1309; font: 500 16px/1.3 var(--текст); padding: 8px 14px 9px; border-radius: 3px; width: 268px; box-shadow: 0 4px 0 rgba(0, 0, 0, .35); }
+  .пузырь::after { content: ''; position: absolute; left: 40px; bottom: -9px; border: 9px solid transparent; border-top-color: #efe3c9; border-bottom: 0; }
+  .район { position: absolute; left: 372px; top: 92px; z-index: 30; }
+  .район b { display: block; font: 600 40px/1 var(--титул); text-shadow: 0 2px 12px #000; }
+  .вход { position: absolute; z-index: 21; transform: translate(-50%, 0); font: 700 12px var(--метка); letter-spacing: .12em; text-transform: uppercase; color: var(--свеча); text-shadow: 0 1px 4px #000, 0 0 10px #000; white-space: nowrap; text-align: center; }
+  .вход small { display: block; font: italic 400 12.5px var(--текст); letter-spacing: 0; text-transform: none; color: var(--бумага); }
+  /* нижняя лента района */
+  .лента { position: absolute; left: 0; right: 0; bottom: 0; height: 58px; z-index: 30; background: linear-gradient(180deg, transparent, rgba(6, 10, 12, .92) 40%); display: flex; align-items: flex-end; padding: 0 22px 10px; gap: 18px; font: 500 12px var(--метка); letter-spacing: .1em; text-transform: uppercase; color: var(--бумага-2); }
+  .лента .путь { flex: 1; position: relative; height: 30px; }
+  .лента .путь::before { content: ''; position: absolute; left: 0; right: 0; top: 7px; border-top: 2px dotted var(--линия-ярко); }
+  .лента .путь span { position: absolute; top: 0; transform: translateX(-50%); text-align: center; padding-top: 16px; white-space: nowrap; }
+  .лента .путь span::before { content: ''; position: absolute; left: 50%; top: 2px; width: 10px; height: 10px; margin-left: -5px; background: var(--смола); border: 2px solid var(--бумага-2); transform: rotate(45deg); }
+  .лента .путь span.тут { color: var(--свеча); }
+  .лента .путь span.тут::before { background: var(--свеча); border-color: var(--свеча); }
+  .лента .путь i { position: absolute; top: -9px; width: 0; height: 0; border: 7px solid transparent; border-top: 10px solid var(--свеча); margin-left: -7px; }
+  .управление { position: absolute; right: 22px; top: 86px; z-index: 30; font-size: 14px; color: var(--бумага); text-align: right; line-height: 1.9; background: rgba(8, 12, 14, .72); padding: 6px 14px 8px; border: 1px solid var(--линия); }
+</style></head>
+<body>
+<div class="даль"></div>
+<canvas id="перед" class="пикс" width="342" height="192"></canvas>
+
+<div class="район"><span class="метка">Север · Мокрые ножи · утро</span><b>Доки</b></div>
+<div class="управление"><span class="клавиша">←</span><span class="клавиша">→</span> идти &nbsp; <span class="клавиша">E</span> говорить, входить<br><span class="клавиша">Tab</span> вещи и журнал &nbsp; <span class="клавиша">M</span> карта города</div>
+
+<div class="вход" style="left:220px; top:300px">Портовая таверна<small>открыто · кружка 3 гр.</small></div>
+<div class="вход" style="left:478px; top:392px">Доска<small>нужна грамота</small></div>
+<div class="вход" style="left:1296px; top:402px">Причал грузчиков →<small>смена до полудня · 12 гр.</small></div>
+
+<div class="пузырь" style="left:806px; top:300px">Сын Скарре? Встань-ка к весам. Глянем, чему тебя учили на баржах.</div>
+<div class="действие" style="left:622px; top:522px"><span class="клавиша">E</span>Встать к весам <span style="color:var(--бумага-2);font-style:italic;font-size:13px">· игра «Вес» · 1 отрезок</span></div>
+
+<div class="лента">
+  <span>← Торговый квартал</span>
+  <div class="путь"><span style="left:9%">Таверна</span><span style="left:27%">Доска</span><span class="тут" style="left:52%">Весы</span><span style="left:74%">Причал грузчиков</span><span style="left:93%">Контора Дорров</span><i style="left:48%"></i></div>
+  <span>Маяк и скалы →</span>
+</div>
+<div class="вариант" style="bottom:auto; top:164px; left:374px">Вариант Б · прогулка</div>
+
+<script type="module">
+import { шапка, поставить, ЛЮДИ } from './общее.js';
+шапка({ день: 2, отрезок: 'утро', где: 'Доки', погода: 'сыро, ветер с моря', кошель: 57, тело: [3, 3, 2, 4] });
+
+// Передний план рисуется в 342×192 и растягивается вчетверо: один «пиксель» = 4 экранных.
+const c = document.getElementById('перед'), x = c.getContext('2d');
+let зерно = 7; const сл = () => (зерно = (зерно * 16807) % 2147483647) / 2147483647;
+const R = (a, b, w, h, цвет) => { x.fillStyle = цвет; x.fillRect(a, b, w, h); };
+const УЛ = 140; // верх мостовой
+
+// дальний бортик набережной и причальные тумбы
+R(0, УЛ - 3, 342, 3, '#39434b'); R(0, УЛ - 4, 342, 1, '#56626b');
+for (const t of [104, 176, 262, 286, 332]) { R(t, УЛ - 13, 5, 10, '#1b1512'); R(t - 1, УЛ - 14, 7, 2, '#2b221c'); R(t, УЛ - 13, 1, 10, '#3a2e25'); }
+// канат между тумбами
+x.strokeStyle = '#14100d'; x.lineWidth = 1; x.beginPath(); x.moveTo(266, УЛ - 10); x.quadraticCurveTo(276, УЛ - 3, 287, УЛ - 10); x.stroke();
+
+// мостовая: мокрый камень
+R(0, УЛ, 342, 52, '#222a30');
+for (let ряд = 0; ряд < 13; ряд++) {
+  const y = УЛ + ряд * 4, сдвиг = (ряд % 2) * 4;
+  for (let i = -1; i < 44; i++) {
+    const k = сл(), a = i * 8 + сдвиг;
+    R(a, y, 7, 3, k < .25 ? '#2b343b' : k < .5 ? '#262e35' : k < .8 ? '#1f262c' : '#30393f');
+    if (k > .55) R(a, y, 7, 1, ряд < 5 ? '#3d4850' : '#333d44');
+  }
+}
+// отражения фонарей и двери на мокром камне
+const блик = (a, w, цвет) => { for (let j = 0; j < 30; j += 2) { x.globalAlpha = .34 * (1 - j / 30); R(a - w / 2 + (сл() * 3 | 0), УЛ + 2 + j, w, 1, цвет); } x.globalAlpha = 1; };
+блик(56, 16, '#e7a24f'); блик(150, 8, '#e7a24f'); блик(300, 8, '#e7a24f');
+// ближний край: тень
+for (let j = 0; j < 14; j++) { x.globalAlpha = j / 15; R(0, 178 + j, 342, 1, '#070a0c'); } x.globalAlpha = 1;
+
+// угол таверны слева
+R(0, 34, 86, 106, '#2c2823');                      // стена
+R(0, 118, 86, 22, '#30373c'); for (let i = 0; i < 9; i++) for (let j = 0; j < 4; j++) R(i * 10 + (j % 2) * 5 - 3, 119 + j * 5, 9, 4, сл() < .5 ? '#3a4248' : '#2a3136'); // каменный цоколь
+for (const b of [0, 28, 60, 83]) R(b, 34, 3, 84, '#15100c');                                      // стойки фахверка
+R(0, 70, 86, 3, '#15100c'); R(0, 34, 86, 3, '#15100c'); R(0, 115, 86, 3, '#15100c');
+x.strokeStyle = '#15100c'; x.lineWidth = 2; x.beginPath(); x.moveTo(4, 72); x.lineTo(27, 114); x.moveTo(62, 36); x.lineTo(82, 68); x.stroke();
+R(0, 26, 94, 9, '#1a2026'); R(0, 24, 96, 3, '#262e36'); for (let i = 0; i < 12; i++) R(i * 8 + 2, 28, 1, 6, '#10151a'); // свес крыши
+// окно без стекла: ставни и тёплый свет
+R(8, 82, 16, 22, '#15100c'); R(10, 84, 12, 18, '#e3a04a'); R(10, 84, 12, 6, '#f2c477'); R(15, 84, 1, 18, '#3a2410'); R(10, 92, 12, 1, '#3a2410');
+R(4, 82, 4, 22, '#3a2a1c'); R(24, 82, 4, 22, '#3a2a1c');
+// дверь: открыта, внутри свет
+R(38, 86, 22, 54, '#15100c'); R(41, 89, 16, 51, '#d9963f'); R(41, 89, 16, 14, '#f0bd6e'); R(41, 120, 16, 20, '#b7742a');
+R(53, 89, 4, 51, '#3a2a1c'); R(36, 138, 26, 2, '#4a545c');                                           // створка и порог
+// вывеска на кронштейне: кружка
+R(64, 62, 20, 2, '#15100c'); R(80, 64, 1, 6, '#15100c'); R(70, 64, 1, 6, '#15100c'); R(66, 70, 18, 14, '#3a2a1c'); R(67, 71, 16, 12, '#4a3624');
+R(72, 74, 6, 7, '#e7b263'); R(78, 75, 2, 4, '#e7b263'); R(72, 73, 6, 1, '#efe3c9');
+// бочки у стены
+const бочка = (a, b) => { R(a, b - 14, 10, 14, '#3a2a1c'); R(a + 1, b - 14, 8, 1, '#5a4430'); R(a, b - 11, 10, 1, '#1a1410'); R(a, b - 4, 10, 1, '#1a1410'); R(a + 7, b - 14, 3, 14, '#2a1e14'); };
+бочка(90, 143); бочка(99, 146);
+
+// доска объявлений
+R(112, 108, 2, 34, '#1b1512'); R(128, 108, 2, 34, '#1b1512'); R(110, 104, 22, 18, '#3a2a1c'); R(111, 105, 20, 16, '#4a3624');
+R(113, 107, 6, 7, '#d8cdb0'); R(121, 108, 7, 5, '#c9bd9e'); R(116, 115, 8, 5, '#d8cdb0'); R(109, 102, 24, 2, '#1b1512');
+
+// фонарные столбы
+const фонарь = a => { R(a, 96, 2, 46, '#15100c'); R(a - 3, 94, 8, 2, '#15100c'); R(a - 2, 86, 6, 8, '#1b1512'); R(a - 1, 87, 4, 6, '#f2c477'); R(a, 88, 2, 4, '#fff0c0'); R(a - 3, 84, 8, 2, '#15100c'); R(a - 1, 141, 4, 2, '#15100c'); };
+фонарь(149); фонарь(299);
+
+// весы: рама, коромысло, две чаши
+R(196, 92, 3, 50, '#1b1512'); R(232, 92, 3, 50, '#1b1512'); R(194, 90, 43, 3, '#2b221c'); R(194, 140, 7, 2, '#15100c'); R(230, 140, 7, 2, '#15100c');
+R(215, 93, 1, 6, '#15100c'); R(203, 99, 25, 2, '#5a4a36'); R(203, 99, 25, 1, '#8a7653');
+x.strokeStyle = '#0f0c0a'; x.lineWidth = 1;
+for (const [a, низ] of [[205, 124], [226, 118]]) { x.beginPath(); x.moveTo(a, 101); x.lineTo(a - 5, низ); x.moveTo(a, 101); x.lineTo(a + 5, низ); x.stroke(); R(a - 6, низ, 13, 2, '#5a4a36'); R(a - 6, низ, 13, 1, '#8a7653'); }
+R(200, 116, 10, 8, '#7a6a4c'); R(201, 115, 8, 1, '#8f7e5d'); R(207, 116, 3, 8, '#5f5239');           // мешок на чаше
+R(223, 114, 3, 4, '#2a2e33'); R(227, 113, 4, 5, '#2a2e33'); R(228, 111, 2, 2, '#2a2e33');            // гири
+// мешки и ящики рядом
+const мешок = (a, b) => { R(a, b - 8, 12, 8, '#7a6a4c'); R(a + 1, b - 9, 10, 1, '#8f7e5d'); R(a + 8, b - 8, 4, 8, '#5f5239'); R(a + 4, b - 11, 3, 2, '#5f5239'); };
+const ящик = (a, b, w = 14, h = 12) => { R(a, b - h, w, h, '#3d2e20'); R(a, b - h, w, 1, '#5a4530'); R(a, b - h, 1, h, '#5a4530'); R(a + w - 2, b - h, 2, h, '#261b12'); R(a + 3, b - h + 3, w - 6, 1, '#261b12'); R(a + 3, b - 4, w - 6, 1, '#261b12'); };
+мешок(240, 144); мешок(250, 146); мешок(245, 137); ящик(264, 143); ящик(266, 131, 12, 12); ящик(279, 145, 16, 14);
+
+// сходни к причалу у правого края
+R(318, 136, 24, 4, '#3a2a1c'); R(318, 136, 24, 1, '#5a4430'); for (let i = 0; i < 6; i++) R(320 + i * 4, 137, 1, 3, '#1b1512');
+R(318, 118, 2, 20, '#1b1512'); R(338, 114, 2, 24, '#1b1512'); R(318, 122, 22, 1, '#15100c');
+
+// самый близкий план — тёмные силуэты для глубины
+R(0, 172, 30, 20, '#080b0d'); R(2, 168, 26, 4, '#080b0d'); R(30, 182, 16, 10, '#080b0d'); R(312, 176, 30, 16, '#080b0d'); R(322, 160, 2, 16, '#080b0d'); R(306, 184, 8, 8, '#080b0d');
+
+// люди
+const B = document.body, M = 4;
+const люди = [
+  ['моряк', 318, 634, 'Моряк', 'с чужого корабля', false],
+  ['мальчик', 566, 664, 'посыльный', '', false],
+  ['одвин', 700, 650, 'Одвин', '', false, 'я'],
+  ['весовщик', 838, 636, 'Доковый весовщик', '', true],
+  ['грузчик', 1010, 660, 'грузчик', '', true],
+  ['грузчик2', 1106, 640, 'Тобб', 'пошлинная книга', true],
+  ['стражник', 1232, 646, 'человек Ножей', 'смотрит, кто пришёл', true],
+];
+for (const [кто, a, b, имя, под, зер, кл] of люди) {
+  поставить(B, ЛЮДИ[кто], a, b, кто === 'мальчик' ? 3 : M, зер);
+  if (кл === 'я' ) continue;
+  const t = document.createElement('div'); t.className = 'т'; t.style.left = a + 'px'; t.style.top = (b - (кто === 'мальчик' ? 3 : M) * 28 - 10) + 'px';
+  t.innerHTML = имя + (под ? `<small>${под}</small>` : ''); B.appendChild(t);
+}
+// тёплый свет поверх
+for (const [a, b, r, сила] of [[224, 440, 210, .5], [598, 360, 150, .42], [1198, 360, 150, .42], [70, 372, 90, .4]]) {
+  const d = document.createElement('div'); d.className = 'свет';
+  d.style.cssText = `left:${a - r}px;top:${b - r}px;width:${2 * r}px;height:${2 * r}px;background:radial-gradient(circle, rgba(255,190,100,${сила}) 0%, rgba(231,150,70,${сила * .35}) 40%, transparent 70%)`;
+  B.appendChild(d);
+}
+</script>
+</body></html>

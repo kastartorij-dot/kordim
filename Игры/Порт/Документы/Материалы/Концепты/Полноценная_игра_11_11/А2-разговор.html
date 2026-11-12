@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="UTF-8"><title>А2 · Разговор крупным планом</title>
+<link rel="stylesheet" href="общее.css">
+<style>
+  .фон { background: url('../../../../Ресурсы/Места/zal.webp') 30% 40%/135%; filter: blur(3px) brightness(.62); transform: scale(1.03); }
+  .тинт { background: linear-gradient(180deg, rgba(4, 6, 8, .2) 30%, rgba(4, 6, 8, .9) 92%); }
+  .фигура { position: absolute; left: 96px; top: 96px; height: 760px; z-index: 5; filter: brightness(.95) sepia(.12) drop-shadow(0 10px 30px rgba(0, 0, 0, .7)); }
+  .второй { position: absolute; right: 60px; top: 250px; height: 300px; z-index: 4; filter: brightness(.5) saturate(.6) blur(1px); }
+  .речь { position: absolute; left: 560px; right: 64px; bottom: 40px; z-index: 30; padding: 22px 30px 20px; }
+  .речь h3 { margin: 0 0 8px; font: 700 15px var(--метка); letter-spacing: .16em; text-transform: uppercase; color: var(--свеча); }
+  .речь h3 small { font: italic 400 14px var(--текст); letter-spacing: 0; text-transform: none; color: var(--бумага-2); margin-left: 10px; }
+  .речь p { margin: 0 0 10px; font-size: 19px; line-height: 1.5; }
+  .речь p.её { font-weight: 500; }
+  .голос { border-left: 3px solid var(--море); padding: 2px 0 2px 14px; margin: 12px 0 14px; font-size: 16px; color: var(--бумага-2); }
+  .голос b { font: 700 13px var(--метка); letter-spacing: .14em; color: var(--море); margin-right: 8px; }
+  .ответы { border-top: 1px solid var(--линия); padding-top: 10px; display: grid; gap: 2px; }
+  .ответы div { display: flex; gap: 12px; padding: 5px 10px; font-size: 18px; }
+  .ответы div i { font-style: normal; color: var(--свеча); width: 14px; }
+  .ответы div small { margin-left: auto; color: var(--бумага-2); font-style: italic; font-size: 14px; white-space: nowrap; }
+  .ответы .на { background: rgba(231, 178, 99, .12); outline: 1px solid var(--свеча-тень); }
+  .связь { position: absolute; left: 60px; bottom: 44px; z-index: 30; padding: 12px 18px; width: 300px; }
+  .связь b { font: 600 22px var(--титул); display: block; }
+  .связь .ряд { display: flex; justify-content: space-between; font-size: 14px; color: var(--бумага-2); margin-top: 6px; }
+  .связь .ряд span:last-child { color: var(--свеча); letter-spacing: .2em; }
+  .песня { position: absolute; left: 560px; top: 120px; z-index: 30; padding: 10px 18px; font-size: 15px; color: var(--бумага-2); }
+  .песня b { color: var(--свеча); font-weight: 500; }
+</style></head>
+<body>
+<div class="слой фон"></div>
+<img class="второй" src="Фигуры/moryak.webp">
+<img class="фигура" src="Фигуры/nora.webp">
+<div class="слой тинт" style="z-index:6"></div>
+
+<div class="песня рамка">Открылась мини-игра: <b>«Мотив»</b> — подпеть Норе, когда попросит</div>
+<div class="связь рамка"><span class="метка">Портовая таверна · у стены</span><b>Нора Линн</b>
+  <div class="ряд"><span>расположение</span><span>◆◆◇◇◇</span></div>
+  <div class="ряд"><span>знает о тебе</span><span style="letter-spacing:0;color:var(--бумага)">сын весовщика</span></div>
+</div>
+
+<div class="речь рамка">
+  <h3>Нора Линн <small>замолкает на полуслове и кивает на край лавки</small></h3>
+  <p class="её">— Ты ведь Скарре? У тебя отцовская привычка: стоишь и взвешиваешь, прежде чем сесть.</p>
+  <p>Она не ждёт ответа, подтягивает струну и слушает её дольше, чем нужно.</p>
+  <div class="голос"><b>Мера</b>Струна в порядке. Она тянет время: хочет, чтобы спросил ты.</div>
+  <div class="ответы">
+    <div class="на"><i>1</i>«Ты его знала?»<small>1 ход</small></div>
+    <div><i>2</i>«Взвешиваю. Здесь не всякая лавка выдержит.»<small>проверка · Молва</small></div>
+    <div><i>3</i>Сесть молча и дослушать песню.<small>1 ход · расположение</small></div>
+    <div><i>4</i>«В другой раз.»<small>отойти</small></div>
+  </div>
+</div>
+<div class="вариант">Вариант А · разговор крупным планом</div>
+<script type="module">
+import { шапка } from './общее.js';
+шапка({ день: 6, отрезок: 'вечер', где: 'Портовая таверна', погода: 'Доки · дождь', кошель: 43 });
+</script>
+</body></html>

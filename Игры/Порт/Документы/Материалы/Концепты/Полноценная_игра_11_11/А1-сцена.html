@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="UTF-8"><title>А1 · Сцена с людьми</title>
+<link rel="stylesheet" href="общее.css">
+<style>
+  .фон { background: url('../../../../Ресурсы/Места/zal.webp') center/cover; }
+  .тинт { background: radial-gradient(ellipse at 40% 45%, transparent 30%, rgba(4, 6, 8, .55) 100%); }
+  .фигура { position: absolute; z-index: 5; filter: brightness(.86) saturate(.9) sepia(.18) drop-shadow(0 6px 14px rgba(0, 0, 0, .65)); }
+  .стол-перед { position: absolute; left: 0; top: 0; width: 1366px; height: 768px; z-index: 6; background: url('../../../../Ресурсы/Места/zal.webp') center/cover;
+    clip-path: polygon(0 520px, 250px 500px, 525px 462px, 532px 520px, 640px 560px, 460px 768px, 0 768px); }
+  .выбран { filter: brightness(1.02) saturate(1) drop-shadow(0 0 2px #e7b263) drop-shadow(0 0 14px rgba(231, 178, 99, .6)); }
+  /* круг действий у выбранного человека */
+  .круг { position: absolute; left: 470px; top: 392px; z-index: 30; display: flex; flex-direction: column; gap: 6px; }
+  .круг button { all: unset; display: flex; align-items: baseline; gap: 12px; padding: 7px 16px 8px; min-width: 268px; background: rgba(8, 12, 14, .92); border: 1px solid var(--линия-ярко); font: 500 17px var(--текст); }
+  .круг button small { margin-left: auto; color: var(--бумага-2); font-size: 14px; font-style: italic; }
+  .круг button.на { background: #2a2113; border-color: var(--свеча); color: var(--свеча); }
+  .курсор { position: absolute; left: 650px; top: 448px; z-index: 40; width: 22px; height: 30px; }
+  /* нижняя полоса рассказа */
+  .рассказ { position: absolute; left: 150px; right: 150px; bottom: 26px; z-index: 30; padding: 14px 26px 16px; display: flex; gap: 26px; align-items: center; }
+  .рассказ p { margin: 0; font-size: 18px; line-height: 1.45; }
+  .рассказ .ходы { flex: none; text-align: center; border-left: 1px solid var(--линия); padding-left: 24px; }
+  .рассказ .ходы b { display: block; font: 600 20px var(--титул); letter-spacing: .12em; color: var(--свеча); }
+  .выход { position: absolute; left: 0; top: 404px; z-index: 30; padding: 10px 16px 10px 12px; background: rgba(8, 12, 14, .85); border: 1px solid var(--линия-ярко); border-left: 0; font: 500 13px var(--метка); letter-spacing: .1em; text-transform: uppercase; }
+  .выход small { display: block; font: italic 400 13px var(--текст); letter-spacing: 0; text-transform: none; color: var(--бумага-2); }
+</style></head>
+<body>
+<div class="слой фон"></div>
+<!-- хозяин за стойкой -->
+<img class="фигура" src="Фигуры/hozyain.webp" style="left:690px; top:192px; height:196px; clip-path: inset(0 0 9% 0)">
+<!-- моряк за длинным столом: стол перекрывает его снизу -->
+<img class="фигура выбран" src="Фигуры/moryak.webp" style="left:214px; top:262px; height:262px">
+<div class="стол-перед"></div>
+<!-- Нора у стены -->
+<img class="фигура" src="Фигуры/nora.webp" style="left:1050px; top:246px; height:560px">
+<div class="слой тинт" style="z-index:7; pointer-events:none"></div>
+
+<div class="плашка" style="left:780px; top:176px">Хозяин таверны<small>за стойкой · берёт деньгами</small></div>
+<div class="плашка я" style="left:338px; top:250px">Моряк с чужого корабля<small>за длинным столом</small></div>
+<div class="плашка" style="left:1200px; top:236px">Нора Линн<small>у стены · проверяет голос</small></div>
+
+<div class="точка глаз" style="left:120px; top:262px"></div><div class="подпись-точки" style="left:120px; top:284px">Доска у двери<small>нужна грамота</small></div>
+<div class="точка глаз" style="left:590px; top:330px"></div><div class="подпись-точки" style="left:590px; top:288px">Стойка</div>
+<div class="точка глаз" style="left:918px; top:470px"></div><div class="подпись-точки" style="left:918px; top:492px">Человек с одной кружкой<small>третий час не слушает</small></div>
+<div class="выход">← В доки<small>выйти · даром</small></div>
+
+<div class="круг">
+  <button>Подсесть и поговорить <small>1 ход</small></button>
+  <button class="на">Сыграть в кости <small>ставка 2 гр. · 1 ход</small></button>
+  <button>Поставить ему кружку <small>3 гр.</small></button>
+  <button>Присмотреться <small>даром</small></button>
+</div>
+<svg class="курсор" viewBox="0 0 22 30"><path d="M2 2 L2 23 L8 18 L12 28 L16 26 L12 17 L20 17 Z" fill="#efe3c9" stroke="#0a1013" stroke-width="2" stroke-linejoin="round"/></svg>
+
+<div class="рассказ рамка">
+  <p>Низкий зал, пол посыпан опилками, которые меняют реже, чем стоило бы. Пахнет рыбой, смолой и табачным дымом. Моряк сдвигается на лавке, освобождая тебе край — не из вежливости, просто так делают все, кто долго жил в тесноте.</p>
+  <div class="ходы"><span class="метка">вечер</span><b>◆◆◇◇◇◇</b><span style="font-size:13px;color:var(--бумага-2)">ход 3 из 6</span></div>
+</div>
+<div class="вариант">Вариант А · сцена с людьми</div>
+<script type="module">
+import { шапка } from './общее.js';
+шапка({ день: 6, отрезок: 'вечер', где: 'Портовая таверна', погода: 'Доки · дождь', кошель: 43 });
+</script>
+</body></html>

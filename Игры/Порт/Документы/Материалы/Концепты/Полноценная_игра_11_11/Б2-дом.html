@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="UTF-8"><title>Б2 · Дом в разрезе</title>
+<link rel="stylesheet" href="общее.css">
+<style>
+  body { background: linear-gradient(180deg, #0b1220 0%, #101a2a 55%, #0a0f14 100%); }
+  .звёзды { background-image: radial-gradient(1px 1px at 8% 22%, #9fb3d6 50%, transparent 51%), radial-gradient(1px 1px at 16% 34%, #7f93b6 50%, transparent 51%), radial-gradient(2px 2px at 21% 18%, #b9c9e6 50%, transparent 51%), radial-gradient(1px 1px at 4% 41%, #7f93b6 50%, transparent 51%), radial-gradient(1px 1px at 12% 14%, #9fb3d6 50%, transparent 51%); }
+  .дом { position: absolute; left: 356px; top: 112px; width: 966px; height: 574px; background: #17110c; box-shadow: 0 0 0 3px #0a0705, 0 20px 50px rgba(0, 0, 0, .7); }
+  .крыша { position: absolute; left: 330px; top: 78px; width: 1018px; height: 40px; z-index: 3; clip-path: polygon(3% 0, 97% 0, 100% 100%, 0 100%);
+    background: repeating-linear-gradient(90deg, #232a31 0 22px, #1b2127 22px 24px), #232a31; box-shadow: inset 0 -6px 0 #14191e; }
+  .земля { position: absolute; left: 0; right: 0; top: 672px; height: 96px; background: repeating-linear-gradient(90deg, #171c20 0 46px, #12171a 46px 48px); border-top: 4px solid #232b30; }
+  .комната { position: absolute; background-size: cover; background-position: center 60%; image-rendering: pixelated; overflow: visible; box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .6), inset 0 0 50px rgba(0, 0, 0, .55); }
+  .комната .имя { position: absolute; left: 10px; top: 8px; font: 700 12px var(--метка); letter-spacing: .14em; text-transform: uppercase; color: var(--бумага); background: rgba(8, 12, 14, .8); padding: 2px 9px 3px; z-index: 12; }
+  .комната .имя small { font: italic 400 12px var(--текст); letter-spacing: 0; text-transform: none; color: var(--бумага-2); margin-left: 6px; }
+  .комната.тут { outline: 2px solid var(--свеча); outline-offset: -2px; box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .6), inset 0 0 40px rgba(0, 0, 0, .35), 0 0 26px rgba(231, 178, 99, .35); z-index: 5; }
+  .комната.закрыта { filter: brightness(.34) saturate(.5); }
+  .замок { position: absolute; z-index: 14; text-align: center; font-size: 15px; line-height: 1.3; color: var(--бумага-2); width: 280px; }
+  .замок b { display: block; font: 600 20px var(--титул); color: var(--бумага); }
+  .пол { position: absolute; left: 0; right: 0; bottom: 0; height: 12px; background: linear-gradient(180deg, #3a2a1c, #1d140d); border-top: 2px solid #4a3624; z-index: 8; }
+  .т { position: absolute; transform: translate(-50%, -100%); white-space: nowrap; z-index: 20; font: 500 13px/1.15 var(--текст); background: rgba(8, 12, 14, .82); border: 1px solid var(--линия); padding: 1px 8px 2px; text-align: center; }
+  .т.я { border-color: var(--свеча); color: var(--свеча); }
+  .т.выбор { border-color: var(--свеча); background: #2a2113; }
+  .пузырь { position: absolute; z-index: 22; background: #efe3c9; color: #1a1309; font: 500 15px/1.25 var(--текст); padding: 6px 12px 7px; border-radius: 3px; max-width: 230px; box-shadow: 0 4px 0 rgba(0, 0, 0, .35); }
+  .пузырь::after { content: ''; position: absolute; left: 26px; bottom: -8px; border: 8px solid transparent; border-top-color: #efe3c9; border-bottom: 0; }
+  .вывеска { position: absolute; left: 150px; top: 250px; z-index: 6; text-align: center; font: 600 24px var(--титул); color: #b9d0f0; text-shadow: 0 0 14px rgba(110, 160, 255, .8); }
+  .вывеска small { display: block; font: 500 11px var(--метка); letter-spacing: .16em; text-transform: uppercase; color: var(--бумага-2); text-shadow: none; }
+  .низ { position: absolute; left: 22px; right: 22px; bottom: 14px; height: 56px; z-index: 30; display: flex; align-items: center; gap: 26px; padding: 0 22px; font-size: 15.5px; }
+  .низ .ходы { font: 600 19px var(--титул); letter-spacing: .12em; color: var(--свеча); }
+  .низ span.с { color: var(--бумага-2); }
+  .низ .кн { margin-left: auto; border: 1px solid var(--линия-ярко); padding: 5px 16px 6px; font: 500 13px var(--метка); letter-spacing: .1em; text-transform: uppercase; }
+  .лестница { position: absolute; z-index: 9; left: 38px; top: 148px; width: 190px; height: 112px; opacity: .0; }
+</style></head>
+<body>
+<div class="слой звёзды"></div>
+<div class="земля"></div>
+<div class="вывеска">«Синий час»<small>дом Ярны · торговый квартал</small></div>
+
+<!-- крыльцо снаружи -->
+<div class="комната" id="крыльцо" style="left:44px; top:400px; width:312px; height:272px; background-image:url('../../../../Ресурсы/Синий_Час/Фоны/krylco_pixel.png'); background-position: 38% 70%; background-size: 190%;">
+  <span class="имя">Крыльцо <small>вход 20 гр.</small></span><div class="пол" style="background:linear-gradient(180deg,#27323a,#12181c);border-color:#3a4a55"></div></div>
+
+<div class="крыша"></div>
+<div class="дом">
+  <!-- второй этаж -->
+  <div class="комната" id="лестница" style="left:12px; top:12px; width:248px; height:262px; background-image:url('../../../../Ресурсы/Синий_Час/Фоны/lestnica_pixel.png'); background-size: 190%; background-position: 20% 60%; filter: brightness(1.5)">
+    <span class="имя">Лестница</span><div class="пол"></div></div>
+  <div class="комната" id="фрея" style="left:272px; top:12px; width:336px; height:262px; background-image:url('../../../../Ресурсы/Синий_Час/Фоны/komnata_frei_pixel.png'); background-position: 20% 55%; background-size: 150%;">
+    <span class="имя">Комната Фреи <small>2 хода</small></span><div class="пол"></div></div>
+  <div class="комната закрыта" id="ния" style="left:620px; top:12px; width:334px; height:262px; background-image:url('../../../../Ресурсы/Синий_Час/Фоны/komnata_nii_pixel.png'); background-size: 150%;">
+    <div class="пол"></div></div>
+  <!-- первый этаж -->
+  <div class="комната тут" id="зал" style="left:12px; top:288px; width:556px; height:272px; background-image:url('../../../../Ресурсы/Синий_Час/Фоны/zal_pixel.png'); background-position: 60% 62%; background-size: 118%; filter: brightness(1.25)">
+    <span class="имя">Зал <small>ты здесь</small></span><div class="пол"></div></div>
+  <div class="комната" id="кухня" style="left:580px; top:288px; width:374px; height:272px; background-image:url('../../../../Ресурсы/Синий_Час/Фоны/kuhnya_pixel.png'); background-position: 30% 70%; background-size: 135%;">
+    <span class="имя">Кухня <small>горячее — 4 гр.</small></span><div class="пол"></div></div>
+</div>
+<div class="замок" style="left:1004px; top:214px"><b>Комната Нии</b>закрыто · у неё гость до ночи</div>
+
+<div class="пузырь" style="left:742px; top:462px">Гляди, ласточка. Сванна говорит, крыло кривое.</div>
+
+<div class="низ рамка">
+  <span class="метка">Вечер в доме</span><span class="ходы">◆◆◇◇◇◇</span><span class="с">ход 3 из 6</span>
+  <span class="с">Переход между комнатами — даром · разговор — 1 ход · комната наверху — 2</span>
+  <span class="кн">Уйти в город</span>
+</div>
+<div class="вариант" style="bottom:auto; top:80px">Вариант Б · дом в разрезе</div>
+<script type="module">
+import { шапка, поставить, ЛЮДИ } from './общее.js';
+шапка({ день: 6, отрезок: 'вечер', где: '«Синий час»', погода: 'Торговый квартал · ясно', кошель: 61 });
+const B = document.body, M = 3;
+const люди = [
+  // [кто, x, y подошв, имя, подпись, зеркало, класс]
+  ['гость', 128, 662, 'гость', '', false],
+  ['сиб', 232, 662, 'Сиб', 'у двери', true],
+  ['одвин', 440, 662, 'Одвин', '', false, 'я'],
+  ['сванна', 548, 662, 'Сванна', '', false],
+  ['бетта', 628, 662, 'Бетта', '', true],
+  ['ола', 760, 662, 'Ола', 'поговорить · 1 ход', true, 'выбор'],
+  ['слуга', 868, 662, 'слуга', '', true],
+  ['повариха', 1090, 662, 'Повариха', '', false],
+  ['торговка', 1226, 662, 'уборщица', '', true],
+  ['ярна', 520, 388, 'Ярна', 'хозяйка', false],
+  ['фрея', 800, 388, 'Фрея', 'у окна', true],
+];
+for (const [кто, x, y, имя, под, зер, кл] of люди) {
+  поставить(B, ЛЮДИ[кто], x, y - 12, M, зер);
+  const t = document.createElement('div'); t.className = 'т ' + (кл ?? ''); t.style.left = x + 'px'; t.style.top = (y - 12 - 28 * M - 8) + 'px';
+  t.innerHTML = имя + (под ? ` <span style="color:var(--бумага-2);font-style:italic">· ${под}</span>` : ''); B.appendChild(t);
+}
+</script>
+</body></html>

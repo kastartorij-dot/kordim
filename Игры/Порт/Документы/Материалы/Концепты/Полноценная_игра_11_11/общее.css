@@ -1,0 +1,60 @@
+/* Макеты «Порт как полноценная игра», 11.11.2026. Не игра: неподвижные картинки-концепты.
+   Цвета и шрифты взяты из Движок/интерфейс.css, чтобы макеты выглядели как продолжение игры. */
+@import url('https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,500;0,700;1,400&family=Alegreya+SC:wght@500;700&family=Cormorant:wght@500;600;700&display=swap');
+:root {
+  --ночь: #0a1013; --смола: #10181b; --панель: rgba(13, 19, 22, .88); --панель-плотно: #121a1d;
+  --линия: rgba(226, 198, 146, .17); --линия-ярко: rgba(226, 198, 146, .45);
+  --бумага: #efe3c9; --бумага-2: #cbbd9e; --тихо: #8f978f; --свеча: #e7b263; --свеча-тень: rgba(231, 178, 99, .28);
+  --море: #93c7c2; --ржа: #e07f62; --трава: #aac98b; --чернила: #1a1309;
+  --текст: 'Alegreya', Georgia, serif; --метка: 'Alegreya SC', Georgia, serif; --титул: 'Cormorant', 'Alegreya', Georgia, serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { width: 1366px; height: 768px; overflow: hidden; position: relative; background: var(--ночь); color: var(--бумага);
+  font: 400 18px/1.45 var(--текст); -webkit-font-smoothing: antialiased; }
+.пикс { image-rendering: pixelated; }
+.слой { position: absolute; inset: 0; }
+
+/* шапка — как в игре */
+.hud { position: absolute; left: 0; right: 0; top: 0; height: 72px; display: flex; align-items: center; gap: 26px; padding: 0 26px; z-index: 50;
+  background: linear-gradient(180deg, rgba(6, 10, 12, .92), rgba(6, 10, 12, .55) 70%, transparent); }
+.hud .бренд { font: 600 25px/1 var(--титул); }
+.hud .бренд small { display: block; font: 500 11px/1 var(--метка); letter-spacing: .14em; color: var(--свеча); margin-top: 6px; text-transform: uppercase; }
+.hud .день { font: 600 20px var(--титул); margin-left: auto; }
+.hud .сутки { display: flex; gap: 4px; }
+.hud .сутки span { font: 500 11px var(--метка); letter-spacing: .1em; text-transform: uppercase; color: var(--тихо); padding: 5px 9px; border-bottom: 2px solid var(--линия); }
+.hud .сутки .тут { color: var(--свеча); border-color: var(--свеча); }
+.hud .сутки .было { color: #5d655f; text-decoration: line-through; }
+.hud .тело { display: flex; gap: 12px; }
+.hud .тело i { font-style: normal; font: 500 11px var(--метка); letter-spacing: .06em; color: var(--бумага-2); display: flex; flex-direction: column; align-items: center; gap: 4px; text-transform: uppercase; }
+.hud .тело i b { display: flex; gap: 2px; }
+.hud .тело i b u { width: 7px; height: 7px; background: var(--трава); display: block; }
+.hud .тело i b u.нет { background: rgba(170, 201, 139, .2); }
+.hud .где { font-size: 15px; line-height: 1.2; }
+.hud .где small { display: block; color: var(--тихо); font-size: 13px; }
+.hud .кошель { font: 600 21px var(--титул); color: var(--бумага); margin-right: auto; }
+.hud .кошель::before { content: ''; display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: var(--свеча); box-shadow: inset 0 0 0 3px #b4803a; margin-right: 8px; vertical-align: -1px; }
+.hud .кошель small { color: var(--тихо); font: 400 15px var(--текст); }
+
+/* панели и плашки */
+.рамка { background: var(--панель); border: 1px solid var(--линия); position: relative; backdrop-filter: blur(3px); }
+.рамка::before, .рамка::after { content: ''; position: absolute; width: 9px; height: 9px; border: 1px solid var(--свеча); }
+.рамка::before { left: -1px; top: -1px; border-right: 0; border-bottom: 0; }
+.рамка::after { right: -1px; bottom: -1px; border-left: 0; border-top: 0; }
+.метка { font: 500 12px var(--метка); letter-spacing: .14em; text-transform: uppercase; color: var(--свеча); }
+.плашка { position: absolute; transform: translate(-50%, -100%); white-space: nowrap; text-align: center; z-index: 20;
+  background: rgba(8, 12, 14, .86); border: 1px solid var(--линия-ярко); padding: 3px 11px 4px; font: 500 15px/1.2 var(--текст); }
+.плашка small { display: block; font: 400 12px/1.2 var(--текст); color: var(--бумага-2); font-style: italic; }
+.плашка::after { content: ''; position: absolute; left: 50%; bottom: -6px; width: 9px; height: 9px; background: rgba(8, 12, 14, .86);
+  border-right: 1px solid var(--линия-ярко); border-bottom: 1px solid var(--линия-ярко); transform: translateX(-50%) rotate(45deg); margin-bottom: 1px; }
+.плашка.я { border-color: var(--свеча); color: var(--свеча); }
+.точка { position: absolute; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; border: 2px solid var(--свеча); z-index: 15;
+  background: rgba(231, 178, 99, .16); box-shadow: 0 0 0 5px rgba(231, 178, 99, .1), 0 0 18px rgba(231, 178, 99, .45); }
+.точка::after { content: ''; position: absolute; inset: 9px; border-radius: 50%; background: var(--свеча); }
+.точка.глаз { border-color: var(--море); background: rgba(147, 199, 194, .14); box-shadow: 0 0 0 5px rgba(147, 199, 194, .08), 0 0 16px rgba(147, 199, 194, .35); }
+.точка.глаз::after { background: var(--море); }
+.подпись-точки { position: absolute; transform: translate(-50%, 0); font: 500 13px var(--метка); letter-spacing: .08em; text-transform: uppercase; color: var(--бумага);
+  text-shadow: 0 1px 3px #000, 0 0 10px #000; white-space: nowrap; z-index: 15; }
+.подпись-точки small { display: block; text-align: center; font: italic 400 12px var(--текст); letter-spacing: 0; text-transform: none; color: var(--бумага-2); }
+.клавиша { display: inline-block; min-width: 22px; padding: 0 6px; border: 1px solid var(--линия-ярко); border-bottom-width: 3px; border-radius: 4px; font: 700 13px/18px var(--метка); text-align: center; color: var(--свеча); background: #0c1215; margin-right: 6px; }
+.вариант { position: absolute; left: 14px; bottom: 12px; z-index: 60; font: 500 12px var(--метка); letter-spacing: .14em; text-transform: uppercase; color: rgba(239, 227, 201, .55); }
