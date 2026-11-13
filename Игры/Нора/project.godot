@@ -4,11 +4,11 @@ config_version=5
 [application]
 config/name="Нора"
 config/description="Охотничий сруб Арна, лес, ручей. Ранняя осень 1026."
-run/main_scene="res://Сцены/нора.tscn"
+run/main_scene="res://scenes/nora.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 
 [autoload]
-Снимок="*res://Скрипты/снимок.gd"
+Shot="*res://scripts/shot.gd"
 
 [display]
 window/size/viewport_width=1280

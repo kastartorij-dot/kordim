@@ -24,7 +24,7 @@ func _ready() -> void:
 	_снаружи()
 	_лес()
 	var игрок := CharacterBody3D.new()
-	игрок.set_script(load("res://Скрипты/игрок.gd"))
+	игрок.set_script(load("res://scripts/player.gd"))
 	add_child(игрок)
 	if "--inside" in OS.get_cmdline_user_args():
 		игрок.position = Vector3(2.5, 0.05, 2.2)
