@@ -1,0 +1,54 @@
+[gd_scene load_steps=7 format=3]
+
+[sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
+sky_top_color = Color(0.38, 0.5, 0.68, 1)
+sky_horizon_color = Color(0.85, 0.72, 0.55, 1)
+ground_horizon_color = Color(0.85, 0.72, 0.55, 1)
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_mat")
+
+[sub_resource type="Environment" id="env"]
+background_mode = 2
+sky = SubResource("sky")
+tonemap_mode = 3
+ssao_enabled = true
+sdfgi_enabled = true
+fog_enabled = true
+fog_light_color = Color(0.75, 0.68, 0.58, 1)
+fog_density = 0.008
+volumetric_fog_density = 0.0
+
+[sub_resource type="PlaneMesh" id="ground"]
+size = Vector2(80, 80)
+
+[sub_resource type="StandardMaterial3D" id="ground_mat"]
+albedo_color = Color(0.22, 0.27, 0.14, 1)
+
+[sub_resource type="BoxMesh" id="house"]
+size = Vector3(7, 2.6, 9)
+
+[sub_resource type="StandardMaterial3D" id="house_mat"]
+albedo_color = Color(0.3, 0.2, 0.12, 1)
+
+[node name="Нора" type="Node3D"]
+
+[node name="Окружение" type="WorldEnvironment" parent="."]
+environment = SubResource("env")
+
+[node name="Солнце" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 0, 10, 0)
+light_color = Color(1, 0.85, 0.65, 1)
+shadow_enabled = true
+
+[node name="Земля" type="MeshInstance3D" parent="."]
+mesh = SubResource("ground")
+surface_material_override/0 = SubResource("ground_mat")
+
+[node name="Сруб_заглушка" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3, 0)
+mesh = SubResource("house")
+surface_material_override/0 = SubResource("house_mat")
+
+[node name="Камера" type="Camera3D" parent="."]
+transform = Transform3D(0.94, 0.1, -0.33, 0, 0.96, 0.29, 0.34, -0.28, 0.9, -7, 4, 14)
