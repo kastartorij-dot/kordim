@@ -1,0 +1,9 @@
+# Страницы с промтами меняются часто — браузер каждый раз сверяется с сервером, а не берёт из кэша.
+/portrety
+  Cache-Control: no-cache
+/portrety.html
+  Cache-Control: no-cache
+/fony
+  Cache-Control: no-cache
+/fony.html
+  Cache-Control: no-cache
