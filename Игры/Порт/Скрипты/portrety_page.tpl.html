@@ -33,12 +33,15 @@ textarea{width:100%;font:13px/1.4 ui-monospace,Menlo,monospace;background:var(--
 #toast.on{opacity:1}
 .tabs{display:flex;gap:8px;margin:4px 0 12px}.tabs a{font:inherit;font-size:15px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);color:var(--ink);text-decoration:none}.tabs a.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
 .done.lock{color:var(--acc);font-weight:bold}
-</style></head><body><div class="wrap">
+.btn.all{background:transparent;border:2px solid var(--acc);color:var(--acc);font-weight:bold}
+.fast{background:var(--bg);border-left:3px solid var(--acc);padding:8px 10px;margin:8px 0;border-radius:6px}
+</style></head><body data-ref="{{MESTI}}"><div class="wrap">
 <nav class="tabs"><a href="portrety.html" class="on">Портреты</a><a href="fony.html">Фоны мест</a></nav>
 <h1>Портреты в живописный пиксель, как Мэсти</h1>
 <p class="lead">Все {{N}} портретов, которые сейчас стоят в игре «Порт». У каждого свой готовый промт. Фоны мест — <a href="fony.html">на соседней странице</a>.</p>
 <div class="ref"><img src="{{MESTI}}" alt="Мэсти Вол — образец стиля"><div>
 <b>Образец стиля: Мэсти Вол.</b> <a class="btn" href="{{MESTI}}" download="00_образец_Мэсти.png">Скачать образец</a>
+<p class="fast"><b>Быстро, в 1–2 вставки:</b> «Всё сразу» → новый чат Gemini → Ctrl+V → отправить. В буфере одна картинка (слева человека, справа образец) и промт. Если вставилась только картинка — нажми ещё «Копировать промт» и вставь текст. Если Gemini рисует обе половины — делай по шагам ниже, как раньше.</p>
 <ol><li>Скачай фото человека (или «Копировать фото» и вставь в чат).</li>
 <li>Если модель берёт две картинки — приложи вторым образец Мэсти. С него берётся только техника — мелкая ровная пиксельная сетка и мягко прорисованное лицо. Цвета лица, волос и одежды — с фото, а свет и общий тон — свои у каждого места: у всех из Синего часа один, у таверны другой, у рынка третий.</li>
 <li>«Копировать промт» → вставь → отправь. Все портреты — в Gemini, чтобы стиль был один. Каждый портрет — в НОВОМ чате, не правь картинку повторно в том же. Бери картинку прямо из чата (копировать или сохранить из превью), НЕ «в полном размере»: полный размер у Gemini — это отдельное увеличение, и оно иногда возвращает кусок исходного фона. Размера из чата (~765×1024) для пиксельного портрета хватает.</li>
@@ -69,5 +72,28 @@ document.addEventListener('click',async ev=>{
  if(ci){const url=ci.dataset.copyimg;
   const png=fetch(url).then(r=>r.blob()).then(bl=>createImageBitmap(bl)).then(bm=>{const c=document.createElement('canvas');c.width=bm.width;c.height=bm.height;c.getContext('2d').drawImage(bm,0,0);return new Promise(res=>c.toBlob(res,'image/png'))});
   try{await navigator.clipboard.write([new ClipboardItem({'image/png':png})]);ci.classList.add('ok');toast('Фото скопировано')}catch(e){toast('Телефон не дал скопировать — жми «Скачать фото»')}}
+});
+
+// Склейка «фото + образец» в одну картинку: в Gemini вставляется одним движением, без выбора файла образца.
+const REF=document.body.dataset.ref;
+function loadImg(u){return fetch(u).then(r=>r.blob()).then(b=>createImageBitmap(b))}
+function pairPng(url){return Promise.all([loadImg(url),loadImg(REF)]).then(([a,b])=>{
+  const H=Math.min(1024,a.height),wa=Math.round(a.width*H/a.height),wb=Math.round(b.width*H/b.height),gap=24;
+  const c=document.createElement('canvas');c.width=wa+gap+wb;c.height=H;const x=c.getContext('2d');
+  x.fillStyle='#808080';x.fillRect(0,0,c.width,H);x.imageSmoothingQuality='high';
+  x.drawImage(a,0,0,wa,H);x.drawImage(b,wa+gap,0,wb,H);
+  return new Promise(res=>c.toBlob(res,'image/png'))})}
+document.querySelectorAll('.card').forEach(c=>{
+  const ci=c.querySelector('[data-copyimg]');if(!ci||!REF)return;
+  const p=document.createElement('button');p.className='btn';p.dataset.pair=ci.dataset.copyimg;p.textContent='Картинка + образец';ci.after(p);
+  c.querySelectorAll('.var').forEach(v=>{const b=document.createElement('button');b.className='btn all';b.dataset.all=ci.dataset.copyimg;
+    const m=v.querySelector('[data-copy]');b.textContent='Всё сразу'+(m.textContent.includes(':')?m.textContent.slice(m.textContent.indexOf(':')):'');v.insertBefore(b,m)})});
+document.addEventListener('click',async ev=>{
+  const p=ev.target.closest('[data-pair]');
+  if(p){try{await navigator.clipboard.write([new ClipboardItem({'image/png':pairPng(p.dataset.pair)})]);p.classList.add('ok');toast('Картинка + образец скопированы')}catch(e){toast('Браузер не дал скопировать картинку')}return}
+  const a=ev.target.closest('[data-all]');
+  if(a){const t=a.closest('.var').querySelector('textarea').value;
+    try{await navigator.clipboard.write([new ClipboardItem({'image/png':pairPng(a.dataset.all),'text/plain':new Blob([t],{type:'text/plain'})})]);a.classList.add('ok');toast('Скопировано всё: вставь в Gemini одним Ctrl+V')}
+    catch(e){toast('Браузер не дал — жми по шагам')}}
 });
 </script></body></html>
