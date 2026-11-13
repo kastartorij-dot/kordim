@@ -43,7 +43,7 @@ textarea{width:100%;font:13px/1.4 ui-monospace,Menlo,monospace;background:var(--
 <p class="lead">{{N}} фонов игры «Порт», которые выбиваются из общего стиля. У каждого свой готовый промт. Портреты — <a href="portrety.html">на соседней странице</a>.</p>
 <div class="ref"><img src="{{ETALON}}" alt="Комната вдовы — образец стиля"><div>
 <b>Образец стиля: комната вдовы</b> (выбран автором 13.11, один на все фоны). <a class="btn" href="{{ETALON}}" download="00_образец_вдова.webp">Скачать образец</a>
-<p class="fast"><b>Быстрее:</b> «Всё сразу» кладёт в буфер фото и промт — новый чат Gemini → Ctrl+V. Если вставилась только картинка, нажми ещё «Копировать промт». Образец на ПК всегда в углу справа внизу — перетащи его мышкой прямо в окно Gemini, фото человека тоже можно просто перетащить.</p>
+<p class="fast"><b>Быстрее всего на ПК:</b> страница и Gemini рядом. «Копировать промт» → Ctrl+V в Gemini, потом мышкой перетащи в окно Gemini фото человека с карточки и образец из правого нижнего угла → отправить. Каждый — в новом чате.</p>
 <ol><li>Скачай фон (или «Копировать фон» и вставь в чат).</li>
 <li>Вторым приложи образец — комнату вдовы. С него берётся только техника: ровная пиксельная сетка, спокойный цвет плоскими пятнами. Свет и тон — по палитре места, она уже в промте и та же, что у портретов этого места.</li>
 <li>«Копировать промт» → вставь → отправь. Все фоны — в Gemini, каждый в НОВОМ чате, чтобы стиль не плыл от картинки к картинке.</li>
@@ -73,16 +73,4 @@ document.addEventListener('click',async ev=>{
   try{await navigator.clipboard.write([new ClipboardItem({'image/png':png})]);ci.classList.add('ok');toast('Фон скопирован')}catch(e){toast('Телефон не дал скопировать — жми «Скачать фон»')}}
 });
 
-// «Всё сразу»: фото и промт одним копированием (образец — отдельно, файлом).
-function photoPng(u){return fetch(u).then(r=>r.blob()).then(bl=>createImageBitmap(bl)).then(bm=>{const c=document.createElement('canvas');c.width=bm.width;c.height=bm.height;c.getContext('2d').drawImage(bm,0,0);return new Promise(res=>c.toBlob(res,'image/png'))})}
-document.querySelectorAll('.card').forEach(c=>{
-  const ci=c.querySelector('[data-copyimg]');if(!ci)return;
-  c.querySelectorAll('.var').forEach(v=>{const b=document.createElement('button');b.className='btn all';b.dataset.all=ci.dataset.copyimg;
-    const m=v.querySelector('[data-copy]');b.textContent='Всё сразу'+(m.textContent.includes(':')?m.textContent.slice(m.textContent.indexOf(':')):'');v.insertBefore(b,m)})});
-document.addEventListener('click',async ev=>{
-  const a=ev.target.closest('[data-all]');if(!a)return;
-  const t=a.closest('.var').querySelector('textarea').value;
-  try{await navigator.clipboard.write([new ClipboardItem({'image/png':photoPng(a.dataset.all),'text/plain':new Blob([t],{type:'text/plain'})})]);a.classList.add('ok');toast('Фото и промт скопированы — Ctrl+V в Gemini')}
-  catch(e){toast('Браузер не дал — жми по шагам')}
-});
 </script></body></html>
