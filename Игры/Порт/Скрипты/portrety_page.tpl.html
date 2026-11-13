@@ -50,6 +50,7 @@ textarea{width:100%;font:13px/1.4 ui-monospace,Menlo,monospace;background:var(--
 <li>Сходство с лицом плавает: на каждого 2–3 попытки в новых чатах, выбирай самую похожую. Помогает обрезать фото до головы и плеч перед отправкой.</li>
 <li>Кто-то может и сидеть, и стоять — у таких два промта. Сидящий портрет делается по пояс, без стула в кадре, поэтому вырезается так же чисто. Готовое сидящее называй <code>…_art_sit.png</code>.</li>
 <li>Готовое сохрани как <code>port_&lt;имя&gt;_art.png</code> — в PNG, не JPG: в JPG пропадает прозрачность, а пурпурный фон по краю мажется и вырезается хуже и отметь галочкой.</li></ol></div></div>
+<p class="tabs" id="model">Промты для: <a href="#" data-m="gem" class="on">Gemini</a><a href="#" data-m="gpt">ChatGPT</a></p>
 <p class="prog" id="prog"></p>
 <div class="grid">
 {{CARDS}}
@@ -76,4 +77,10 @@ document.addEventListener('click',async ev=>{
   try{await navigator.clipboard.write([new ClipboardItem({'image/png':png})]);ci.classList.add('ok');toast('Фото скопировано')}catch(e){toast('Телефон не дал скопировать — жми «Скачать фото»')}}
 });
 
+
+// Переключатель Gemini / ChatGPT: у ChatGPT свой промт (жёстче про плоские тона и сходство лица).
+function setModel(m){document.querySelectorAll('textarea[data-gem]').forEach(a=>a.value=a.dataset[m]);
+ document.querySelectorAll('#model a').forEach(a=>a.classList.toggle('on',a.dataset.m===m));try{localStorage.setItem('portrety-model',m)}catch(e){}}
+document.querySelectorAll('#model a').forEach(a=>a.onclick=e=>{e.preventDefault();setModel(a.dataset.m)});
+try{const m=localStorage.getItem('portrety-model');if(m==='gpt')setModel('gpt')}catch(e){}
 </script></body></html>
