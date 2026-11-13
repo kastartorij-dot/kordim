@@ -135,6 +135,7 @@ def fix(src):
   for ext in ('.webp','.png','.jpg'):
     if os.path.exists(os.path.join(SITE,R+base+ext)): return base+ext
   raise SystemExit('нет файла: '+src)
+DONE=set(json.load(open(os.path.join(HERE,'готово.json')))['portrety'])
 cards=[];last=None
 for i,(id,name,where,src,who,bg) in enumerate(P,1):
   src=fix(src);pk=PLACE.get(id,'sch');pl,pv=PAL[pk]
@@ -146,10 +147,13 @@ for i,(id,name,where,src,who,bg) in enumerate(P,1):
   for lab,kind,pose in vs:
     pr=COMMON.format(who=WHO.get(id,who),pose=pose,place=pl,pal=pv,frame=FRAME[kind])
     vh+=f'<div class="var">'+(f'<p class="vlab">{html.escape(lab)}</p>' if len(vs)>1 else '')+f'<button class="btn main" data-copy>Копировать промт{": "+html.escape(lab.split(" — ")[0].lower()) if len(vs)>1 else ""}</button><textarea readonly rows="6">{html.escape(pr)}</textarea></div>'
-  cards.append(f'''<article class="card" data-id="{id}">
+  isd=(id in DONE) or os.path.exists(os.path.join(SITE,R+src[:src.rfind('.')]+'_art.webp'))
+  dc=' is-done' if isd else ''
+  dl='<label class="done lock"><input type="checkbox" checked disabled> в игре</label>' if isd else '<label class="done"><input type="checkbox"> готово</label>'
+  cards.append(f'''<article class="card{dc}" data-id="{id}">
 <div class="pic"><img loading="lazy" src="{R+src}" alt="{html.escape(name)}"></div>
 <div class="body"><div class="head"><span class="n">{i:02d}</span><div><h2>{html.escape(name)}</h2><p class="where">{html.escape(where)}</p></div>
-<label class="done"><input type="checkbox"> готово</label></div>
+{dl}</div>
 <div class="btns"><a class="btn" href="{R+src}" download="{fn}">Скачать фото</a><button class="btn" data-copyimg="{R+src}">Копировать фото</button></div>
 {vh}</div></article>''')
 nonehtml=''.join(f'<li>{html.escape(a)} <span>— {html.escape(b)}</span></li>' for a,b in none)

@@ -31,7 +31,10 @@ textarea{width:100%;font:13px/1.4 ui-monospace,Menlo,monospace;background:var(--
 @media (max-width:600px){.none ul{columns:1}.ref{flex-direction:column;align-items:flex-start}}
 #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none}
 #toast.on{opacity:1}
+.tabs{display:flex;gap:8px;margin:4px 0 12px}.tabs a{font:inherit;font-size:15px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);color:var(--ink);text-decoration:none}.tabs a.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.done.lock{color:var(--acc);font-weight:bold}
 </style></head><body><div class="wrap">
+<nav class="tabs"><a href="portrety.html" class="on">Портреты</a><a href="fony.html">Фоны мест</a></nav>
 <h1>Портреты в живописный пиксель, как Мэсти</h1>
 <p class="lead">Все 26 портретов, которые сейчас стоят в игре «Порт». У каждого свой готовый промт. Фоны мест — <a href="fony.html">на соседней странице</a>.</p>
 <div class="ref"><img src="Игра/Порт/Ресурсы/Лица/port_masti_vol_pixel.webp" alt="Мэсти Вол — образец стиля"><div>
@@ -45,10 +48,10 @@ textarea{width:100%;font:13px/1.4 ui-monospace,Menlo,monospace;background:var(--
 <p class="prog" id="prog"></p>
 <div class="grid">
 <h3 class="grp">Синий час</h3>
-<article class="card" data-id="sib">
+<article class="card is-done" data-id="sib">
 <div class="pic"><img loading="lazy" src="Игра/Порт/Ресурсы/Синий_Час/siniy_chas_sib.jpg" alt="Сиб"></div>
 <div class="body"><div class="head"><span class="n">01</span><div><h2>Сиб</h2><p class="where">Синий час, у двери</p></div>
-<label class="done"><input type="checkbox"> готово</label></div>
+<label class="done lock"><input type="checkbox" checked disabled> в игре</label></div>
 <div class="btns"><a class="btn" href="Игра/Порт/Ресурсы/Синий_Час/siniy_chas_sib.jpg" download="01_sib.jpg">Скачать фото</a><button class="btn" data-copyimg="Игра/Порт/Ресурсы/Синий_Час/siniy_chas_sib.jpg">Копировать фото</button></div>
 <div class="var"><button class="btn main" data-copy>Копировать промт</button><textarea readonly rows="6">Перерисуй человека с первой картинки в «живописный пиксель» (hi-bit pixel art): это живопись, но собранная на мелкой ровной пиксельной сетке — как будто картинка нарисована шириной около 280 пикселей и увеличена без сглаживания. Сетка мелкая и одного шага по всему кадру; волосы, ткань и фон ложатся заметными ступеньками пикселей, а лицо внутри той же сетки прорисовано тщательно и мягко — глаза, губы, нос, веснушки читаются чисто, без грубых блоков. Не фото, без фотографической зернистости, без размытой «мозаики» с квадратами разного размера.
 
@@ -71,10 +74,10 @@ textarea{width:100%;font:13px/1.4 ui-monospace,Menlo,monospace;background:var(--
 — освещение фигуры всё равно по палитре места: человек должен выглядеть так, будто стоит в этом месте. Свет не ровный студийный: источник сбоку, одна сторона лица и тела заметно в тени, тени глубокие; фигура не светлее и не контрастнее самого места.
 
 Вертикальный кадр 3:4. Магии нет. На картинке нет текста, букв, надписей, рамок и подписей.</textarea></div></div></article>
-<article class="card" data-id="starshaya">
+<article class="card is-done" data-id="starshaya">
 <div class="pic"><img loading="lazy" src="Игра/Порт/Ресурсы/Синий_Час/siniy_chas_starshaya.jpg" alt="Старшая работница"></div>
 <div class="body"><div class="head"><span class="n">02</span><div><h2>Старшая работница</h2><p class="where">Синий час, в зале</p></div>
-<label class="done"><input type="checkbox"> готово</label></div>
+<label class="done lock"><input type="checkbox" checked disabled> в игре</label></div>
 <div class="btns"><a class="btn" href="Игра/Порт/Ресурсы/Синий_Час/siniy_chas_starshaya.jpg" download="02_starshaya.jpg">Скачать фото</a><button class="btn" data-copyimg="Игра/Порт/Ресурсы/Синий_Час/siniy_chas_starshaya.jpg">Копировать фото</button></div>
 <div class="var"><p class="vlab">Сидит — основной (по сюжету ждёт, пока ты сядешь напротив)</p><button class="btn main" data-copy>Копировать промт: сидит</button><textarea readonly rows="6">Перерисуй человека с первой картинки в «живописный пиксель» (hi-bit pixel art): это живопись, но собранная на мелкой ровной пиксельной сетке — как будто картинка нарисована шириной около 280 пикселей и увеличена без сглаживания. Сетка мелкая и одного шага по всему кадру; волосы, ткань и фон ложатся заметными ступеньками пикселей, а лицо внутри той же сетки прорисовано тщательно и мягко — глаза, губы, нос, веснушки читаются чисто, без грубых блоков. Не фото, без фотографической зернистости, без размытой «мозаики» с квадратами разного размера.
 
@@ -143,10 +146,10 @@ textarea{width:100%;font:13px/1.4 ui-monospace,Menlo,monospace;background:var(--
 — освещение фигуры всё равно по палитре места: человек должен выглядеть так, будто стоит в этом месте. Свет не ровный студийный: источник сбоку, одна сторона лица и тела заметно в тени, тени глубокие; фигура не светлее и не контрастнее самого места.
 
 Вертикальный кадр 3:4. Магии нет. На картинке нет текста, букв, надписей, рамок и подписей.</textarea></div></div></article>
-<article class="card" data-id="niya">
+<article class="card is-done" data-id="niya">
 <div class="pic"><img loading="lazy" src="Игра/Порт/Ресурсы/Синий_Час/siniy_chas_niya.jpg" alt="Ния"></div>
 <div class="body"><div class="head"><span class="n">04</span><div><h2>Ния</h2><p class="where">Синий час, у себя</p></div>
-<label class="done"><input type="checkbox"> готово</label></div>
+<label class="done lock"><input type="checkbox" checked disabled> в игре</label></div>
 <div class="btns"><a class="btn" href="Игра/Порт/Ресурсы/Синий_Час/siniy_chas_niya.jpg" download="04_niya.jpg">Скачать фото</a><button class="btn" data-copyimg="Игра/Порт/Ресурсы/Синий_Час/siniy_chas_niya.jpg">Копировать фото</button></div>
 <div class="var"><button class="btn main" data-copy>Копировать промт</button><textarea readonly rows="6">Перерисуй человека с первой картинки в «живописный пиксель» (hi-bit pixel art): это живопись, но собранная на мелкой ровной пиксельной сетке — как будто картинка нарисована шириной около 280 пикселей и увеличена без сглаживания. Сетка мелкая и одного шага по всему кадру; волосы, ткань и фон ложатся заметными ступеньками пикселей, а лицо внутри той же сетки прорисовано тщательно и мягко — глаза, губы, нос, веснушки читаются чисто, без грубых блоков. Не фото, без фотографической зернистости, без размытой «мозаики» с квадратами разного размера.
 
@@ -661,10 +664,10 @@ textarea{width:100%;font:13px/1.4 ui-monospace,Menlo,monospace;background:var(--
 — освещение фигуры всё равно по палитре места: человек должен выглядеть так, будто стоит в этом месте. Свет не ровный студийный: источник сбоку, одна сторона лица и тела заметно в тени, тени глубокие; фигура не светлее и не контрастнее самого места.
 
 Вертикальный кадр 3:4. Магии нет. На картинке нет текста, букв, надписей, рамок и подписей.</textarea></div></div></article>
-<article class="card" data-id="nora">
+<article class="card is-done" data-id="nora">
 <div class="pic"><img loading="lazy" src="Игра/Порт/Ресурсы/Лица/port_nora_linn.webp" alt="Нора Линн"></div>
 <div class="body"><div class="head"><span class="n">20</span><div><h2>Нора Линн</h2><p class="where">Портовая таверна</p></div>
-<label class="done"><input type="checkbox"> готово</label></div>
+<label class="done lock"><input type="checkbox" checked disabled> в игре</label></div>
 <div class="btns"><a class="btn" href="Игра/Порт/Ресурсы/Лица/port_nora_linn.webp" download="20_nora.webp">Скачать фото</a><button class="btn" data-copyimg="Игра/Порт/Ресурсы/Лица/port_nora_linn.webp">Копировать фото</button></div>
 <div class="var"><p class="vlab">Стоит — основной (поёт у стены)</p><button class="btn main" data-copy>Копировать промт: стоит</button><textarea readonly rows="6">Перерисуй человека с первой картинки в «живописный пиксель» (hi-bit pixel art): это живопись, но собранная на мелкой ровной пиксельной сетке — как будто картинка нарисована шириной около 280 пикселей и увеличена без сглаживания. Сетка мелкая и одного шага по всему кадру; волосы, ткань и фон ложатся заметными ступеньками пикселей, а лицо внутри той же сетки прорисовано тщательно и мягко — глаза, губы, нос, веснушки читаются чисто, без грубых блоков. Не фото, без фотографической зернистости, без размытой «мозаики» с квадратами разного размера.
 
@@ -916,7 +919,7 @@ const toast=t=>{const e=document.getElementById('toast');e.textContent=t;e.class
 const KEY='portrety-art-done';let done={};try{done=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
 const cards=[...document.querySelectorAll('.card')];
 function prog(){const n=cards.filter(c=>c.classList.contains('is-done')).length;document.getElementById('prog').textContent=`Готово ${n} из ${cards.length}`}
-cards.forEach(c=>{const cb=c.querySelector('.done input');cb.checked=!!done[c.dataset.id];c.classList.toggle('is-done',cb.checked);
+cards.forEach(c=>{const cb=c.querySelector('.done input');if(cb.disabled)return;cb.checked=!!done[c.dataset.id];c.classList.toggle('is-done',cb.checked);
  cb.onchange=()=>{done[c.dataset.id]=cb.checked;c.classList.toggle('is-done',cb.checked);try{localStorage.setItem(KEY,JSON.stringify(done))}catch(e){}prog()}});
 prog();
 async function copyText(t){try{await navigator.clipboard.writeText(t);return true}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();const ok=document.execCommand('copy');a.remove();return ok}}

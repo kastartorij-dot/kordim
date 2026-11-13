@@ -31,7 +31,10 @@ textarea{width:100%;font:13px/1.4 ui-monospace,Menlo,monospace;background:var(--
 @media (max-width:600px){.none ul{columns:1}.ref{flex-direction:column;align-items:flex-start}}
 #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none}
 #toast.on{opacity:1}
+.tabs{display:flex;gap:8px;margin:4px 0 12px}.tabs a{font:inherit;font-size:15px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);color:var(--ink);text-decoration:none}.tabs a.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.done.lock{color:var(--acc);font-weight:bold}
 </style></head><body><div class="wrap">
+<nav class="tabs"><a href="portrety.html">Портреты</a><a href="fony.html" class="on">Фоны мест</a></nav>
 <h1>Фоны мест в спокойный пиксель</h1>
 <p class="lead">{{N}} фонов игры «Порт», которые выбиваются из общего стиля. У каждого свой готовый промт. Портреты — <a href="portrety.html">на соседней странице</a>.</p>
 <div class="ref"><img src="{{ETALON}}" alt="Комната вдовы — образец стиля"><div>
@@ -52,7 +55,7 @@ const toast=t=>{const e=document.getElementById('toast');e.textContent=t;e.class
 const KEY='fony-art-done';let done={};try{done=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
 const cards=[...document.querySelectorAll('.card')];
 function prog(){const n=cards.filter(c=>c.classList.contains('is-done')).length;document.getElementById('prog').textContent=`Готово ${n} из ${cards.length}`}
-cards.forEach(c=>{const cb=c.querySelector('.done input');cb.checked=!!done[c.dataset.id];c.classList.toggle('is-done',cb.checked);
+cards.forEach(c=>{const cb=c.querySelector('.done input');if(cb.disabled)return;cb.checked=!!done[c.dataset.id];c.classList.toggle('is-done',cb.checked);
  cb.onchange=()=>{done[c.dataset.id]=cb.checked;c.classList.toggle('is-done',cb.checked);try{localStorage.setItem(KEY,JSON.stringify(done))}catch(e){}prog()}});
 prog();
 async function copyText(t){try{await navigator.clipboard.writeText(t);return true}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();const ok=document.execCommand('copy');a.remove();return ok}}

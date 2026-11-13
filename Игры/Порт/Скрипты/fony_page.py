@@ -221,6 +221,7 @@ def grp(f,pk):
   if rs: return rs[0]['место']
   return next(g for p,g in GROUPS if f.startswith(p))
 
+DONE=set(json.load(open(os.path.join(HERE,'готово.json')))['fony'])
 cards=[];last=None
 for i,(f,name,pk,kind,what,fix) in enumerate(P,1):
   if not os.path.exists(os.path.join(SITE,R+f)): raise SystemExit('нет файла: '+f)
@@ -232,10 +233,13 @@ for i,(f,name,pk,kind,what,fix) in enumerate(P,1):
   pr=COMMON.format(name=name,what=what,pal=PAL[pk][1],fix=fix,kind=KIND[kind],aspect=aspect)
   base=f[f.rfind('/')+1:f.rfind('.')]
   fn=f"{i:02d}_{base}{f[f.rfind('.'):]}"
-  cards.append(f'''<article class="card" data-id="{html.escape(f)}">
+  isd=(f in DONE)
+  dc=' is-done' if isd else ''
+  dl='<label class="done lock"><input type="checkbox" checked disabled> в игре</label>' if isd else '<label class="done"><input type="checkbox"> готово</label>'
+  cards.append(f'''<article class="card{dc}" data-id="{html.escape(f)}">
 <div class="pic"><img loading="lazy" src="{R+f}" alt="{html.escape(name)}"></div>
 <div class="body"><div class="head"><span class="n">{i:02d}</span><div><h2>{html.escape(name)}</h2><p class="where">{html.escape(where(f))}</p><p class="where file">{html.escape(f)} → сохранить как <b>{html.escape(base)}_art.png</b></p></div>
-<label class="done"><input type="checkbox"> готово</label></div>
+{dl}</div>
 <div class="btns"><a class="btn" href="{R+f}" download="{fn}">Скачать фон</a><button class="btn" data-copyimg="{R+f}">Копировать фон</button></div>
 <div class="var"><button class="btn main" data-copy>Копировать промт</button><textarea readonly rows="6">{html.escape(pr)}</textarea></div></div></article>''')
 

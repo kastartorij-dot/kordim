@@ -31,7 +31,10 @@ textarea{width:100%;font:13px/1.4 ui-monospace,Menlo,monospace;background:var(--
 @media (max-width:600px){.none ul{columns:1}.ref{flex-direction:column;align-items:flex-start}}
 #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none}
 #toast.on{opacity:1}
+.tabs{display:flex;gap:8px;margin:4px 0 12px}.tabs a{font:inherit;font-size:15px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);color:var(--ink);text-decoration:none}.tabs a.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.done.lock{color:var(--acc);font-weight:bold}
 </style></head><body><div class="wrap">
+<nav class="tabs"><a href="portrety.html">Портреты</a><a href="fony.html" class="on">Фоны мест</a></nav>
 <h1>Фоны мест в спокойный пиксель</h1>
 <p class="lead">48 фонов игры «Порт», которые выбиваются из общего стиля. У каждого свой готовый промт. Портреты — <a href="portrety.html">на соседней странице</a>.</p>
 <div class="ref"><img src="Игра/Порт/Ресурсы/Быт/вдова.webp" alt="Комната вдовы — образец стиля"><div>
@@ -44,10 +47,10 @@ textarea{width:100%;font:13px/1.4 ui-monospace,Menlo,monospace;background:var(--
 <p class="prog" id="prog"></p>
 <div class="grid">
 <h3 class="grp">Синий час</h3>
-<article class="card" data-id="Синий_Час/Фоны/krylco.webp">
+<article class="card is-done" data-id="Синий_Час/Фоны/krylco.webp">
 <div class="pic"><img loading="lazy" src="Игра/Порт/Ресурсы/Синий_Час/Фоны/krylco.webp" alt="Крыльцо"></div>
 <div class="body"><div class="head"><span class="n">01</span><div><h2>Крыльцо</h2><p class="where">Синий час: Крыльцо</p><p class="where file">Синий_Час/Фоны/krylco.webp → сохранить как <b>krylco_art.png</b></p></div>
-<label class="done"><input type="checkbox"> готово</label></div>
+<label class="done lock"><input type="checkbox" checked disabled> в игре</label></div>
 <div class="btns"><a class="btn" href="Игра/Порт/Ресурсы/Синий_Час/Фоны/krylco.webp" download="01_krylco.webp">Скачать фон</a><button class="btn" data-copyimg="Игра/Порт/Ресурсы/Синий_Час/Фоны/krylco.webp">Копировать фон</button></div>
 <div class="var"><button class="btn main" data-copy>Копировать промт</button><textarea readonly rows="6">Перерисуй картинку с первого изображения — это фон игры, место «Крыльцо» — в «спокойный пиксель» (hi-bit pixel art): живописная картинка, собранная на мелкой ровной пиксельной сетке, как будто нарисована шириной около 400 пикселей и увеличена без сглаживания. Сетка одного шага по всему кадру; края предметов, дерево, камень и ткань ложатся заметными ступеньками пикселей; цвет — спокойными плоскими пятнами с небольшим числом оттенков. Без шума, без шахматной ряби (дизеринга), без размытия, без фотографической фактуры и без гладкой цифровой живописи; дым, пар и туман — плоские полупрозрачные пятна в 2–3 оттенка.
 
@@ -67,10 +70,10 @@ textarea{width:100%;font:13px/1.4 ui-monospace,Menlo,monospace;background:var(--
 — на телефоне кадр обрезается сверху и снизу — главное держи в средней по высоте полосе.
 
 Горизонтальный кадр 16:9. Эпоха около 1026 года, без современных вещей. Магии нет. На картинке нет текста, букв, надписей, рамок и подписей.</textarea></div></div></article>
-<article class="card" data-id="Синий_Час/Фоны/zal.webp">
+<article class="card is-done" data-id="Синий_Час/Фоны/zal.webp">
 <div class="pic"><img loading="lazy" src="Игра/Порт/Ресурсы/Синий_Час/Фоны/zal.webp" alt="Общий зал"></div>
 <div class="body"><div class="head"><span class="n">02</span><div><h2>Общий зал</h2><p class="where">Синий час: Общий зал</p><p class="where file">Синий_Час/Фоны/zal.webp → сохранить как <b>zal_art.png</b></p></div>
-<label class="done"><input type="checkbox"> готово</label></div>
+<label class="done lock"><input type="checkbox" checked disabled> в игре</label></div>
 <div class="btns"><a class="btn" href="Игра/Порт/Ресурсы/Синий_Час/Фоны/zal.webp" download="02_zal.webp">Скачать фон</a><button class="btn" data-copyimg="Игра/Порт/Ресурсы/Синий_Час/Фоны/zal.webp">Копировать фон</button></div>
 <div class="var"><button class="btn main" data-copy>Копировать промт</button><textarea readonly rows="6">Перерисуй картинку с первого изображения — это фон игры, место «Общий зал» — в «спокойный пиксель» (hi-bit pixel art): живописная картинка, собранная на мелкой ровной пиксельной сетке, как будто нарисована шириной около 400 пикселей и увеличена без сглаживания. Сетка одного шага по всему кадру; края предметов, дерево, камень и ткань ложатся заметными ступеньками пикселей; цвет — спокойными плоскими пятнами с небольшим числом оттенков. Без шума, без шахматной ряби (дизеринга), без размытия, без фотографической фактуры и без гладкой цифровой живописи; дым, пар и туман — плоские полупрозрачные пятна в 2–3 оттенка.
 
@@ -90,10 +93,10 @@ textarea{width:100%;font:13px/1.4 ui-monospace,Menlo,monospace;background:var(--
 — на телефоне кадр обрезается сверху и снизу — главное держи в средней по высоте полосе.
 
 Горизонтальный кадр 16:9. Эпоха около 1026 года, без современных вещей. Магии нет. На картинке нет текста, букв, надписей, рамок и подписей.</textarea></div></div></article>
-<article class="card" data-id="Синий_Час/Фоны/lestnica.webp">
+<article class="card is-done" data-id="Синий_Час/Фоны/lestnica.webp">
 <div class="pic"><img loading="lazy" src="Игра/Порт/Ресурсы/Синий_Час/Фоны/lestnica.webp" alt="Лестница и коридор"></div>
 <div class="body"><div class="head"><span class="n">03</span><div><h2>Лестница и коридор</h2><p class="where">Синий час: Лестница и коридор, Площадка у окна</p><p class="where file">Синий_Час/Фоны/lestnica.webp → сохранить как <b>lestnica_art.png</b></p></div>
-<label class="done"><input type="checkbox"> готово</label></div>
+<label class="done lock"><input type="checkbox" checked disabled> в игре</label></div>
 <div class="btns"><a class="btn" href="Игра/Порт/Ресурсы/Синий_Час/Фоны/lestnica.webp" download="03_lestnica.webp">Скачать фон</a><button class="btn" data-copyimg="Игра/Порт/Ресурсы/Синий_Час/Фоны/lestnica.webp">Копировать фон</button></div>
 <div class="var"><button class="btn main" data-copy>Копировать промт</button><textarea readonly rows="6">Перерисуй картинку с первого изображения — это фон игры, место «Лестница и коридор» — в «спокойный пиксель» (hi-bit pixel art): живописная картинка, собранная на мелкой ровной пиксельной сетке, как будто нарисована шириной около 400 пикселей и увеличена без сглаживания. Сетка одного шага по всему кадру; края предметов, дерево, камень и ткань ложатся заметными ступеньками пикселей; цвет — спокойными плоскими пятнами с небольшим числом оттенков. Без шума, без шахматной ряби (дизеринга), без размытия, без фотографической фактуры и без гладкой цифровой живописи; дым, пар и туман — плоские полупрозрачные пятна в 2–3 оттенка.
 
@@ -113,10 +116,10 @@ textarea{width:100%;font:13px/1.4 ui-monospace,Menlo,monospace;background:var(--
 — на телефоне кадр обрезается сверху и снизу — главное держи в средней по высоте полосе.
 
 Горизонтальный кадр 16:9. Эпоха около 1026 года, без современных вещей. Магии нет. На картинке нет текста, букв, надписей, рамок и подписей.</textarea></div></div></article>
-<article class="card" data-id="Синий_Час/Фоны/komnata_nii.webp">
+<article class="card is-done" data-id="Синий_Час/Фоны/komnata_nii.webp">
 <div class="pic"><img loading="lazy" src="Игра/Порт/Ресурсы/Синий_Час/Фоны/komnata_nii.webp" alt="Комната Нии"></div>
 <div class="body"><div class="head"><span class="n">04</span><div><h2>Комната Нии</h2><p class="where">Синий час: Комната Нии</p><p class="where file">Синий_Час/Фоны/komnata_nii.webp → сохранить как <b>komnata_nii_art.png</b></p></div>
-<label class="done"><input type="checkbox"> готово</label></div>
+<label class="done lock"><input type="checkbox" checked disabled> в игре</label></div>
 <div class="btns"><a class="btn" href="Игра/Порт/Ресурсы/Синий_Час/Фоны/komnata_nii.webp" download="04_komnata_nii.webp">Скачать фон</a><button class="btn" data-copyimg="Игра/Порт/Ресурсы/Синий_Час/Фоны/komnata_nii.webp">Копировать фон</button></div>
 <div class="var"><button class="btn main" data-copy>Копировать промт</button><textarea readonly rows="6">Перерисуй картинку с первого изображения — это фон игры, место «Комната Нии» — в «спокойный пиксель» (hi-bit pixel art): живописная картинка, собранная на мелкой ровной пиксельной сетке, как будто нарисована шириной около 400 пикселей и увеличена без сглаживания. Сетка одного шага по всему кадру; края предметов, дерево, камень и ткань ложатся заметными ступеньками пикселей; цвет — спокойными плоскими пятнами с небольшим числом оттенков. Без шума, без шахматной ряби (дизеринга), без размытия, без фотографической фактуры и без гладкой цифровой живописи; дым, пар и туман — плоские полупрозрачные пятна в 2–3 оттенка.
 
@@ -136,10 +139,10 @@ textarea{width:100%;font:13px/1.4 ui-monospace,Menlo,monospace;background:var(--
 — на телефоне кадр обрезается сверху и снизу — главное держи в средней по высоте полосе.
 
 Горизонтальный кадр 16:9. Эпоха около 1026 года, без современных вещей. Магии нет. На картинке нет текста, букв, надписей, рамок и подписей.</textarea></div></div></article>
-<article class="card" data-id="Синий_Час/Фоны/komnata_frei.webp">
+<article class="card is-done" data-id="Синий_Час/Фоны/komnata_frei.webp">
 <div class="pic"><img loading="lazy" src="Игра/Порт/Ресурсы/Синий_Час/Фоны/komnata_frei.webp" alt="Комната Фреи"></div>
 <div class="body"><div class="head"><span class="n">05</span><div><h2>Комната Фреи</h2><p class="where">Синий час: Комната Фреи</p><p class="where file">Синий_Час/Фоны/komnata_frei.webp → сохранить как <b>komnata_frei_art.png</b></p></div>
-<label class="done"><input type="checkbox"> готово</label></div>
+<label class="done lock"><input type="checkbox" checked disabled> в игре</label></div>
 <div class="btns"><a class="btn" href="Игра/Порт/Ресурсы/Синий_Час/Фоны/komnata_frei.webp" download="05_komnata_frei.webp">Скачать фон</a><button class="btn" data-copyimg="Игра/Порт/Ресурсы/Синий_Час/Фоны/komnata_frei.webp">Копировать фон</button></div>
 <div class="var"><button class="btn main" data-copy>Копировать промт</button><textarea readonly rows="6">Перерисуй картинку с первого изображения — это фон игры, место «Комната Фреи» — в «спокойный пиксель» (hi-bit pixel art): живописная картинка, собранная на мелкой ровной пиксельной сетке, как будто нарисована шириной около 400 пикселей и увеличена без сглаживания. Сетка одного шага по всему кадру; края предметов, дерево, камень и ткань ложатся заметными ступеньками пикселей; цвет — спокойными плоскими пятнами с небольшим числом оттенков. Без шума, без шахматной ряби (дизеринга), без размытия, без фотографической фактуры и без гладкой цифровой живописи; дым, пар и туман — плоские полупрозрачные пятна в 2–3 оттенка.
 
@@ -159,10 +162,10 @@ textarea{width:100%;font:13px/1.4 ui-monospace,Menlo,monospace;background:var(--
 — на телефоне кадр обрезается сверху и снизу — главное держи в средней по высоте полосе.
 
 Горизонтальный кадр 16:9. Эпоха около 1026 года, без современных вещей. Магии нет. На картинке нет текста, букв, надписей, рамок и подписей.</textarea></div></div></article>
-<article class="card" data-id="Синий_Час/Фоны/kuhnya.webp">
+<article class="card is-done" data-id="Синий_Час/Фоны/kuhnya.webp">
 <div class="pic"><img loading="lazy" src="Игра/Порт/Ресурсы/Синий_Час/Фоны/kuhnya.webp" alt="Кухня"></div>
 <div class="body"><div class="head"><span class="n">06</span><div><h2>Кухня</h2><p class="where">Синий час: Кухня</p><p class="where file">Синий_Час/Фоны/kuhnya.webp → сохранить как <b>kuhnya_art.png</b></p></div>
-<label class="done"><input type="checkbox"> готово</label></div>
+<label class="done lock"><input type="checkbox" checked disabled> в игре</label></div>
 <div class="btns"><a class="btn" href="Игра/Порт/Ресурсы/Синий_Час/Фоны/kuhnya.webp" download="06_kuhnya.webp">Скачать фон</a><button class="btn" data-copyimg="Игра/Порт/Ресурсы/Синий_Час/Фоны/kuhnya.webp">Копировать фон</button></div>
 <div class="var"><button class="btn main" data-copy>Копировать промт</button><textarea readonly rows="6">Перерисуй картинку с первого изображения — это фон игры, место «Кухня» — в «спокойный пиксель» (hi-bit pixel art): живописная картинка, собранная на мелкой ровной пиксельной сетке, как будто нарисована шириной около 400 пикселей и увеличена без сглаживания. Сетка одного шага по всему кадру; края предметов, дерево, камень и ткань ложатся заметными ступеньками пикселей; цвет — спокойными плоскими пятнами с небольшим числом оттенков. Без шума, без шахматной ряби (дизеринга), без размытия, без фотографической фактуры и без гладкой цифровой живописи; дым, пар и туман — плоские полупрозрачные пятна в 2–3 оттенка.
 
@@ -182,10 +185,10 @@ textarea{width:100%;font:13px/1.4 ui-monospace,Menlo,monospace;background:var(--
 — на телефоне кадр обрезается сверху и снизу — главное держи в средней по высоте полосе.
 
 Горизонтальный кадр 16:9. Эпоха около 1026 года, без современных вещей. Магии нет. На картинке нет текста, букв, надписей, рамок и подписей.</textarea></div></div></article>
-<article class="card" data-id="Места/порт-кабинет-тёмный.webp">
+<article class="card is-done" data-id="Места/порт-кабинет-тёмный.webp">
 <div class="pic"><img loading="lazy" src="Игра/Порт/Ресурсы/Места/порт-кабинет-тёмный.webp" alt="Кабинет Ярны"></div>
 <div class="body"><div class="head"><span class="n">07</span><div><h2>Кабинет Ярны</h2><p class="where">Синий час: Кабинет Ярны</p><p class="where file">Места/порт-кабинет-тёмный.webp → сохранить как <b>порт-кабинет-тёмный_art.png</b></p></div>
-<label class="done"><input type="checkbox"> готово</label></div>
+<label class="done lock"><input type="checkbox" checked disabled> в игре</label></div>
 <div class="btns"><a class="btn" href="Игра/Порт/Ресурсы/Места/порт-кабинет-тёмный.webp" download="07_порт-кабинет-тёмный.webp">Скачать фон</a><button class="btn" data-copyimg="Игра/Порт/Ресурсы/Места/порт-кабинет-тёмный.webp">Копировать фон</button></div>
 <div class="var"><button class="btn main" data-copy>Копировать промт</button><textarea readonly rows="6">Перерисуй картинку с первого изображения — это фон игры, место «Кабинет Ярны» — в «спокойный пиксель» (hi-bit pixel art): живописная картинка, собранная на мелкой ровной пиксельной сетке, как будто нарисована шириной около 400 пикселей и увеличена без сглаживания. Сетка одного шага по всему кадру; края предметов, дерево, камень и ткань ложатся заметными ступеньками пикселей; цвет — спокойными плоскими пятнами с небольшим числом оттенков. Без шума, без шахматной ряби (дизеринга), без размытия, без фотографической фактуры и без гладкой цифровой живописи; дым, пар и туман — плоские полупрозрачные пятна в 2–3 оттенка.
 
@@ -206,10 +209,10 @@ textarea{width:100%;font:13px/1.4 ui-monospace,Menlo,monospace;background:var(--
 
 Горизонтальный кадр 16:9. Эпоха около 1026 года, без современных вещей. Магии нет. На картинке нет текста, букв, надписей, рамок и подписей.</textarea></div></div></article>
 <h3 class="grp">Аптека Сибиллы Рейн</h3>
-<article class="card" data-id="Места/lavka.webp">
+<article class="card is-done" data-id="Места/lavka.webp">
 <div class="pic"><img loading="lazy" src="Игра/Порт/Ресурсы/Места/lavka.webp" alt="Аптека Сибиллы Рейн"></div>
 <div class="body"><div class="head"><span class="n">08</span><div><h2>Аптека Сибиллы Рейн</h2><p class="where">Аптека Сибиллы Рейн</p><p class="where file">Места/lavka.webp → сохранить как <b>lavka_art.png</b></p></div>
-<label class="done"><input type="checkbox"> готово</label></div>
+<label class="done lock"><input type="checkbox" checked disabled> в игре</label></div>
 <div class="btns"><a class="btn" href="Игра/Порт/Ресурсы/Места/lavka.webp" download="08_lavka.webp">Скачать фон</a><button class="btn" data-copyimg="Игра/Порт/Ресурсы/Места/lavka.webp">Копировать фон</button></div>
 <div class="var"><button class="btn main" data-copy>Копировать промт</button><textarea readonly rows="6">Перерисуй картинку с первого изображения — это фон игры, место «Аптека Сибиллы Рейн» — в «спокойный пиксель» (hi-bit pixel art): живописная картинка, собранная на мелкой ровной пиксельной сетке, как будто нарисована шириной около 400 пикселей и увеличена без сглаживания. Сетка одного шага по всему кадру; края предметов, дерево, камень и ткань ложатся заметными ступеньками пикселей; цвет — спокойными плоскими пятнами с небольшим числом оттенков. Без шума, без шахматной ряби (дизеринга), без размытия, без фотографической фактуры и без гладкой цифровой живописи; дым, пар и туман — плоские полупрозрачные пятна в 2–3 оттенка.
 
@@ -230,10 +233,10 @@ textarea{width:100%;font:13px/1.4 ui-monospace,Menlo,monospace;background:var(--
 
 Горизонтальный кадр 16:9. Эпоха около 1026 года, без современных вещей. Магии нет. На картинке нет текста, букв, надписей, рамок и подписей.</textarea></div></div></article>
 <h3 class="grp">Портовая таверна</h3>
-<article class="card" data-id="Места/zal.webp">
+<article class="card is-done" data-id="Места/zal.webp">
 <div class="pic"><img loading="lazy" src="Игра/Порт/Ресурсы/Места/zal.webp" alt="Портовая таверна"></div>
 <div class="body"><div class="head"><span class="n">09</span><div><h2>Портовая таверна</h2><p class="where">Портовая таверна</p><p class="where file">Места/zal.webp → сохранить как <b>zal_art.png</b></p></div>
-<label class="done"><input type="checkbox"> готово</label></div>
+<label class="done lock"><input type="checkbox" checked disabled> в игре</label></div>
 <div class="btns"><a class="btn" href="Игра/Порт/Ресурсы/Места/zal.webp" download="09_zal.webp">Скачать фон</a><button class="btn" data-copyimg="Игра/Порт/Ресурсы/Места/zal.webp">Копировать фон</button></div>
 <div class="var"><button class="btn main" data-copy>Копировать промт</button><textarea readonly rows="6">Перерисуй картинку с первого изображения — это фон игры, место «Портовая таверна» — в «спокойный пиксель» (hi-bit pixel art): живописная картинка, собранная на мелкой ровной пиксельной сетке, как будто нарисована шириной около 400 пикселей и увеличена без сглаживания. Сетка одного шага по всему кадру; края предметов, дерево, камень и ткань ложатся заметными ступеньками пикселей; цвет — спокойными плоскими пятнами с небольшим числом оттенков. Без шума, без шахматной ряби (дизеринга), без размытия, без фотографической фактуры и без гладкой цифровой живописи; дым, пар и туман — плоские полупрозрачные пятна в 2–3 оттенка.
 
@@ -254,10 +257,10 @@ textarea{width:100%;font:13px/1.4 ui-monospace,Menlo,monospace;background:var(--
 
 Горизонтальный кадр 16:9. Эпоха около 1026 года, без современных вещей. Магии нет. На картинке нет текста, букв, надписей, рамок и подписей.</textarea></div></div></article>
 <h3 class="grp">Баня</h3>
-<article class="card" data-id="Места/parilka.webp">
+<article class="card is-done" data-id="Места/parilka.webp">
 <div class="pic"><img loading="lazy" src="Игра/Порт/Ресурсы/Места/parilka.webp" alt="Баня"></div>
 <div class="body"><div class="head"><span class="n">10</span><div><h2>Баня</h2><p class="where">Баня</p><p class="where file">Места/parilka.webp → сохранить как <b>parilka_art.png</b></p></div>
-<label class="done"><input type="checkbox"> готово</label></div>
+<label class="done lock"><input type="checkbox" checked disabled> в игре</label></div>
 <div class="btns"><a class="btn" href="Игра/Порт/Ресурсы/Места/parilka.webp" download="10_parilka.webp">Скачать фон</a><button class="btn" data-copyimg="Игра/Порт/Ресурсы/Места/parilka.webp">Копировать фон</button></div>
 <div class="var"><button class="btn main" data-copy>Копировать промт</button><textarea readonly rows="6">Перерисуй картинку с первого изображения — это фон игры, место «Баня» — в «спокойный пиксель» (hi-bit pixel art): живописная картинка, собранная на мелкой ровной пиксельной сетке, как будто нарисована шириной около 400 пикселей и увеличена без сглаживания. Сетка одного шага по всему кадру; края предметов, дерево, камень и ткань ложатся заметными ступеньками пикселей; цвет — спокойными плоскими пятнами с небольшим числом оттенков. Без шума, без шахматной ряби (дизеринга), без размытия, без фотографической фактуры и без гладкой цифровой живописи; дым, пар и туман — плоские полупрозрачные пятна в 2–3 оттенка.
 
@@ -1115,7 +1118,7 @@ const toast=t=>{const e=document.getElementById('toast');e.textContent=t;e.class
 const KEY='fony-art-done';let done={};try{done=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
 const cards=[...document.querySelectorAll('.card')];
 function prog(){const n=cards.filter(c=>c.classList.contains('is-done')).length;document.getElementById('prog').textContent=`Готово ${n} из ${cards.length}`}
-cards.forEach(c=>{const cb=c.querySelector('.done input');cb.checked=!!done[c.dataset.id];c.classList.toggle('is-done',cb.checked);
+cards.forEach(c=>{const cb=c.querySelector('.done input');if(cb.disabled)return;cb.checked=!!done[c.dataset.id];c.classList.toggle('is-done',cb.checked);
  cb.onchange=()=>{done[c.dataset.id]=cb.checked;c.classList.toggle('is-done',cb.checked);try{localStorage.setItem(KEY,JSON.stringify(done))}catch(e){}prog()}});
 prog();
 async function copyText(t){try{await navigator.clipboard.writeText(t);return true}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();const ok=document.execCommand('copy');a.remove();return ok}}
