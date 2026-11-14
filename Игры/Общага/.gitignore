@@ -10,3 +10,4 @@
 /models/общага_*.png
 # кэш Python
 __pycache__/
+/builds/
