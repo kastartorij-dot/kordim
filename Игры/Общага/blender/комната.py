@@ -73,10 +73,10 @@ def mat_ring():
     if "m" not in _ring: _ring["m"] = flat_mat("кольца", (0.85, 0.85, 0.83), 0.3, 0.6)
     return _ring["m"]
 
-def fabric_mat(name, color):
+def fabric_mat(name, color, sheen=0.35):
     m = flat_mat(name, color, 0.8)
     b = m.node_tree.nodes["Principled BSDF"]
-    b.inputs["Sheen Weight"].default_value = 0.35
+    b.inputs["Sheen Weight"].default_value = sheen
     b.inputs["Sheen Tint"].default_value = (*[min(1, c * 2 + 0.15) for c in color], 1)
     nt = m.node_tree
     nz = nt.nodes.new("ShaderNodeTexNoise"); nz.inputs["Scale"].default_value = 400
@@ -183,8 +183,8 @@ def build():
     M["кирпич"] = flat_mat("кирпич", (0.55, 0.28, 0.16), 0.9)
     M["панелька"] = flat_mat("панелька", (0.82, 0.8, 0.76), 0.9)
     M["земля"] = flat_mat("двор", (0.35, 0.34, 0.32), 0.9)
-    M["куртка"] = fabric_mat("куртка", (0.05, 0.06, 0.09))
-    M["куртка_хаки"] = fabric_mat("куртка_хаки", (0.22, 0.22, 0.13))
+    M["куртка"] = fabric_mat("куртка", (0.025, 0.03, 0.05), 0.05)
+    M["куртка_хаки"] = fabric_mat("куртка_хаки", (0.12, 0.12, 0.07), 0.05)
     M["пуховик"] = puffer_mat("пуховик", (0.03, 0.03, 0.035))
     M["кроссовки_белые"] = flat_mat("кроссовки_белые", (0.85, 0.85, 0.85), 0.6)
     M["кроссовки_чёрные"] = flat_mat("кроссовки_чёрные", (0.03, 0.03, 0.035), 0.6)
