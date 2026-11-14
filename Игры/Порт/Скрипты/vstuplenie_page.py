@@ -110,7 +110,7 @@ for n, (id, name, why, refs, prompt, fn, fmt) in enumerate(P, 1):
 </div></article>''')
 
 body = f'''<body><div class="wrap">
-<nav class="tabs"><a href="portrety.html">Портреты</a><a href="fony.html">Фоны мест</a><a href="vstuplenie.html" class="on">Вступление</a></nav>
+<nav class="tabs"><a href="portrety.html">Портреты</a><a href="portrety_novye.html">Новые лица</a><a href="fony.html">Фоны мест</a><a href="vstuplenie.html" class="on">Вступление</a></nav>
 <h1>Вступление: что нарисовать</h1>
 <p class="lead">Десять картинок для нового вступления: лицо и фигура Одвина, грузчик и шесть кадров. Вступление станет графической новеллой: кадры не «оживляются» по пикселям — двигаются только камера, вода, огни, дым и чайки, текст идёт облаками с головой говорящего.</p>
 <section class="canon"><h2>Одвин — внешность (канон с 13.11)</h2><p>{html.escape(ODVIN)}</p><p class="where">Записано в ГДД игры, §2 «Внешность Одвина». Если картинка спорит с описанием — права запись.</p></section>
