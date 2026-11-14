@@ -256,14 +256,14 @@ def свет(режим="день", ночник=False):
         # лента по верху щита кровати 1: тонкий светильник вдоль щита
         bpy.ops.object.light_add(type="AREA", location=(L - 1.045, 0.04, 1.03))
         l = bpy.context.object; l.data.shape = "RECTANGLE"; l.data.size = 2.0; l.data.size_y = 0.02
-        l.data.energy = 30; l.data.color = (1.0, 0.1, 0.25); l.rotation_euler = (math.radians(-90), 0, 0)
+        l.data.energy = 10; l.data.color = (1.0, 0.1, 0.25); l.rotation_euler = (math.radians(-90), 0, 0)
     if ночник:
         pink = flat_mat("ночник_горит", (1.0, 0.6, 0.95), 0.4, emit=(1.0, 0.3, 0.85))
         for ob in bpy.data.objects:
             if ob.name.startswith("абажур"):
                 ob.data.materials.clear(); ob.data.materials.append(pink)
         bpy.ops.object.light_add(type="POINT", location=(L - 0.2, 1.375, 0.72))
-        l = bpy.context.object; l.data.energy = 25; l.data.shadow_soft_size = 0.07; l.data.color = (1.0, 0.35, 0.85)
+        l = bpy.context.object; l.data.energy = 45; l.data.shadow_soft_size = 0.07; l.data.color = (1.0, 0.35, 0.85)
 
 CAMS = {
     # фото 1: сидя на кровати 2 у окна, смотрю на стол, дверь и шкаф
