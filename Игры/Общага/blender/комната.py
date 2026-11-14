@@ -76,8 +76,8 @@ def mat_ring():
 def fabric_mat(name, color):
     m = flat_mat(name, color, 0.8)
     b = m.node_tree.nodes["Principled BSDF"]
-    b.inputs["Sheen Weight"].default_value = 0.6
-    b.inputs["Sheen Tint"].default_value = (1, 1, 1, 1)
+    b.inputs["Sheen Weight"].default_value = 0.35
+    b.inputs["Sheen Tint"].default_value = (*[min(1, c * 2 + 0.15) for c in color], 1)
     nt = m.node_tree
     nz = nt.nodes.new("ShaderNodeTexNoise"); nz.inputs["Scale"].default_value = 400
     bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.08
@@ -96,25 +96,78 @@ def puffer_mat(name, color):
     nt.links.new(wv.outputs["Fac"], bp.inputs["Height"]); nt.links.new(bp.outputs["Normal"], b.inputs["Normal"])
     return m
 
-def куртка(name, x, y, mat, капюшон=False, длина=0.75, z_hook=1.6):
-    """Куртка на крючке у стены y=0: силуэт с плечами и полами (вытянут по y), рукава вниз вдоль боков,
-    по желанию капюшон сзади. Всё мягкое — скругление и сглаживание."""
-    zt = z_hook - 0.02
-    zb = zt - длина
-    sh = 0.2   # полуширина плеч
-    pts = [(x - 0.05, zt), (x + 0.05, zt), (x + sh, zt - 0.09), (x + sh + 0.03, zt - 0.27),
-           (x + sh + 0.05, zb + 0.05), (x + sh + 0.03, zb), (x - sh - 0.03, zb), (x - sh - 0.05, zb + 0.05),
-           (x - sh - 0.03, zt - 0.27), (x - sh, zt - 0.09)]
-    body = extrude2d(name, pts, "xz", y, y + 0.11, mat, None, None, 0.0)
-    soft(body, 2, 0.04)
+def loft(name, rings, mat, cap=True, smooth=2, parent=None):
+    """Тело по ряду замкнутых сечений (у всех одинаковое число точек): рукава, куртки, обувь."""
+    bm = bmesh.new()
+    vr = [[bm.verts.new(p) for p in r] for r in rings]
+    n = len(rings[0])
+    for j in range(len(vr) - 1):
+        for i in range(n):
+            bm.faces.new((vr[j][i], vr[j][(i+1) % n], vr[j+1][(i+1) % n], vr[j+1][i]))
+    if cap:
+        bm.faces.new(vr[0][::-1]); bm.faces.new(vr[-1])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
+    ob = bpy.data.objects.new(name, me); bpy.context.collection.objects.link(ob)
+    ob.data.materials.append(mat)
+    if smooth:
+        sd = ob.modifiers.new("гладко", "SUBSURF"); sd.levels = 1; sd.render_levels = smooth
+    for p in ob.data.polygons: p.use_smooth = True
+    if parent: ob.parent = parent
+    return ob
+
+def ring_h(cx, cy, z, a, b, n=20, e=2.6):
+    """Горизонтальное сечение-суперэллипс (полуоси a по x, b по y)."""
+    pts = []
+    for i in range(n):
+        t = 2 * math.pi * i / n
+        c, s_ = math.cos(t), math.sin(t)
+        pts.append((cx + a * math.copysign(abs(c) ** (2/e), c), cy + b * math.copysign(abs(s_) ** (2/e), s_), z))
+    return pts
+
+def куртка(name, x, y, mat, капюшон=False, длина=0.75, z_hook=1.6, seed=0):
+    """Куртка на крючке у стены y=0: собранный у крючка воротник, плечи, грудь, подол — в объёме;
+    рукава вдоль боков сужаются к манжетам; у пуховика капюшон сзади."""
+    rnd = random.Random(seed)
+    zt = z_hook - 0.01
+    prof = [(0.00, 0.035, 0.03), (0.04, 0.09, 0.05), (0.09, 0.18, 0.08), (0.2, 0.2, 0.1),
+            (0.45, 0.205, 0.11), (0.75, 0.215, 0.115), (1.0, 0.22, 0.1)]
+    rings = []
+    for f, a, b in prof:
+        z = zt - f * длина
+        sway = rnd.uniform(-0.01, 0.01) * f
+        rings.append(ring_h(x + sway, y + b + 0.005, z, a, b))
+    body = loft(name, rings, mat)
     for sx in (-1, 1):
-        sl = tube(name + "_рукав", [(x + sx*(sh + 0.01), y + 0.06, zt - 0.08), (x + sx*(sh + 0.05), y + 0.07, zt - 0.3),
-                                    (x + sx*(sh + 0.06), y + 0.075, zb + 0.12)], 0.05, mat, None, 0.08)
-        sl.scale = (0.85, 1.1, 1)
+        path = [(x + sx*0.19, y + 0.1, zt - 0.1), (x + sx*0.22, y + 0.11, zt - 0.3),
+                (x + sx*0.23, y + 0.12, zt - 0.55), (x + sx*0.225, y + 0.12, zt - min(длина, 0.72))]
+        sl = [ring_h(px, py, pz, r, r * 1.1, 14) for (px, py, pz), r in zip(path, (0.055, 0.055, 0.05, 0.045))]
+        loft(name + "_рукав", sl, mat)
     if капюшон:
-        h = cyl(name + "_капюшон", 0.12, zt - 0.12, zt + 0.06, x, y + 0.03, mat, 24)
-        h.scale = (1.0, 0.55, 1.0); soft(h, 2, 0.05)
+        hr = [ring_h(x, y + 0.06, zt - 0.02 - 0.2 * k, 0.11 * math.sin(math.pi * (0.15 + 0.7 * k)), 0.06 * math.sin(math.pi * (0.15 + 0.7 * k)) + 0.01, 16) for k in (0, 0.25, 0.5, 0.75, 1.0)]
+        loft(name + "_капюшон", hr, mat)
     return body
+
+def кроссовок(x, y, z, верх, низ, длина=0.28, тапок=False, rot=0.0):
+    """Кроссовок или шлёпанец носком в +y; сечения поперёк длины."""
+    rings = []
+    n = 16
+    for k in range(9):
+        f = k / 8                                   # 0 — пятка, 1 — носок
+        w = 0.045 * (0.75 + 0.35 * math.sin(math.pi * min(1, f * 1.2)))
+        h = (0.03 if тапок else (0.1 - 0.06 * f)) * (0.6 if f in (0, 1) else 1)
+        yy = y - длина/2 + длина * f
+        ring = []
+        for i in range(n):
+            t = 2 * math.pi * i / n
+            ring.append((x + w * math.cos(t), yy, z + 0.02 + h/2 + h/2 * math.sin(t)))
+        rings.append(ring)
+    if тапок:
+        o = loft("шлёпанец", [[(p[0], p[1], z + (p[2] - z) * 0.3) for p in r] for r in rings], низ)
+        b = box("перемычка", x - 0.05, y + 0.0, z + 0.015, x + 0.05, y + 0.07, z + 0.05, верх, 0.01, None)
+        return
+    loft("верх", rings, верх)
+    box("подошва", x - 0.048, y - длина/2 - 0.005, z, x + 0.048, y + длина/2 + 0.005, z + 0.025, низ, 0.012, None)
 
 def build():
     clean()
@@ -236,15 +289,15 @@ def build():
     box("обувная_полка", -1.15, 0.0, 0.3, -0.15, 0.3, 0.32, M["дуб"], 0.003, "x")
     for k, x in enumerate((-1.0, -0.74, -0.48, -0.25)):
         cyl("крючок", 0.007, 0, 0.06, 0, 0, M["хром"], 12, None, "y").location = (x, 0.05, 1.6)
-    куртка("куртка_пуховик", -1.0, 0.03, M["пуховик"], капюшон=True, длина=0.78)
-    куртка("куртка_тёмная", -0.74, 0.08, M["куртка"], длина=0.7)
-    куртка("куртка_хаки", -0.48, 0.12, M["куртка_хаки"], длина=0.62)
+    куртка("куртка_пуховик", -1.0, 0.02, M["пуховик"], капюшон=True, длина=0.78, seed=1)
+    куртка("куртка_тёмная", -0.72, 0.06, M["куртка"], длина=0.7, seed=2)
+    куртка("куртка_хаки", -0.45, 0.1, M["куртка_хаки"], длина=0.62, seed=3)
     kp = box("кепка", -0.6, 0.08, 1.77, -0.4, 0.26, 1.83, M["куртка_хаки"], 0, None)
     soft(kp, 2, 0.03)
-    for (x, y, z, c) in ((-0.95, 0.18, 0.32, "кроссовки_белые"), (-0.62, 0.18, 0.32, "кроссовки_чёрные"), (-1.6, 0.35, 0.0, "кроссовки_чёрные"), (-1.25, 0.75, 0.0, "тапки")):
+    for (x, y, z, верх, тапок) in ((-0.95, 0.16, 0.32, "кроссовки_белые", False), (-0.62, 0.16, 0.32, "кроссовки_чёрные", False),
+                                    (-1.6, 0.35, 0.0, "кроссовки_чёрные", False), (-1.25, 0.75, 0.0, "тапки", True)):
         for dx in (-0.06, 0.06):
-            sh = box("обувь", x + dx - 0.045, y - 0.14, z, x + dx + 0.045, y + 0.14, z + (0.03 if c == "тапки" else 0.1), M[c], 0, None)
-            soft(sh, 2, 0.02 if c == "тапки" else 0.04)
+            кроссовок(x + dx, y, z, M[верх], M["кроссовки_белые"] if not тапок else M["тапки"], тапок=тапок)
     d = box("дверь_су", -0.95, 1.2, 0.0, -0.91, 1.9, 2.0, M["ольха"], 0.003, "z")    # открыта в коридор
     # санузел: плитка на полу и стенах, душ, унитаз, раковина с зеркалом, стояк
     box("пол_су", -2.3, 1.25, -0.02, -0.12, 2.6, 0.005, M["плитка_су"], 0, None)
