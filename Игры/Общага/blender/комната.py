@@ -26,18 +26,31 @@ def wallpaper():
     nt.links.new(nz.outputs["Fac"], bp.inputs["Height"]); nt.links.new(bp.outputs["Normal"], b.inputs["Normal"])
     return m
 
-def curtain(name, y1, y2, x, z1, z2, mat, folds=7, depth=0.06):
-    """Штора: полотно с вертикальными складками от y1 до y2, висит в плоскости x."""
+def curtain(name, y1, y2, x, z1, z2, mat, folds=7, depth=0.06, seed=1, lean=0.0):
+    """Штора с живыми складками: глубина и шаг складок неровные, вверху полотно собрано на кольцах
+    плотнее, книзу складки расходятся и становятся глубже, низ чуть неровный; lean — насколько низ
+    уведён в сторону (штору отодвинули). Висит в плоскости x, от y1 до y2."""
+    rnd = random.Random(seed)
+    harm = [(rnd.uniform(0.6, 1.4), rnd.uniform(0, 6.28)) for _ in range(3)]
+    nu, nv = 90, 40
     bm = bmesh.new()
-    nu, nv = 60, 12
     grid = []
+    width = y2 - y1
     for j in range(nv + 1):
-        z = z1 + (z2 - z1) * j / nv
+        t = j / nv                       # 0 — низ, 1 — верх
+        z = z1 + (z2 - z1) * t
+        spread = 1.0 + 0.10 * (1 - t)    # книзу шире
+        amp = depth * (0.55 + 0.6 * (1 - t))
         row = []
         for i in range(nu + 1):
-            y = y1 + (y2 - y1) * i / nu
-            d = depth * (0.5 + 0.5 * math.sin(i / nu * folds * 2 * math.pi)) * (0.8 + 0.2 * j / nv)
-            row.append(bm.verts.new((x - d, y, z)))
+            u = i / nu
+            ph = u * folds * 2 * math.pi + sum(0.35 * math.sin(f * u * 6.28 + p0) for f, p0 in harm)
+            d = amp * (0.5 + 0.5 * math.sin(ph)) ** 1.4 * (0.75 + 0.25 * math.sin(u * 9 + seed))
+            y = y1 + width * (0.5 + (u - 0.5) * spread) + lean * (1 - t) ** 1.5
+            zz = z
+            if j == 0:                   # неровный подшив: где складка глубже — край выше
+                zz = z + 0.025 * (0.5 + 0.5 * math.sin(ph)) + rnd.uniform(-0.004, 0.004)
+            row.append(bm.verts.new((x - d, y, zz)))
         grid.append(row)
     for j in range(nv):
         for i in range(nu):
@@ -45,9 +58,31 @@ def curtain(name, y1, y2, x, z1, z2, mat, folds=7, depth=0.06):
     me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
     ob = bpy.data.objects.new(name, me); bpy.context.collection.objects.link(ob)
     ob.data.materials.append(mat)
-    so = ob.modifiers.new("толщина", "SOLIDIFY"); so.thickness = 0.004
+    so = ob.modifiers.new("толщина", "SOLIDIFY"); so.thickness = 0.003
+    sd = ob.modifiers.new("гладко", "SUBSURF"); sd.levels = 1; sd.render_levels = 2
     for p in ob.data.polygons: p.use_smooth = True
+    # кольца на карнизе — по одному на каждый «гребень» складки вверху
+    for k in range(folds * 2 + 1):
+        yk = y1 + width * k / (folds * 2)
+        r = cyl("кольцо", 0.014, 0, 0.004, x - 0.015, yk, mat_ring(), 16, None, "y")
+        r.location = (x - 0.01, yk, z2 + 0.02)
     return ob
+
+_ring = {}
+def mat_ring():
+    if "m" not in _ring: _ring["m"] = flat_mat("кольца", (0.85, 0.85, 0.83), 0.3, 0.6)
+    return _ring["m"]
+
+def fabric_mat(name, color):
+    m = flat_mat(name, color, 0.8)
+    b = m.node_tree.nodes["Principled BSDF"]
+    b.inputs["Sheen Weight"].default_value = 0.6
+    b.inputs["Sheen Tint"].default_value = (1, 1, 1, 1)
+    nt = m.node_tree
+    nz = nt.nodes.new("ShaderNodeTexNoise"); nz.inputs["Scale"].default_value = 400
+    bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.08
+    nt.links.new(nz.outputs["Fac"], bp.inputs["Height"]); nt.links.new(bp.outputs["Normal"], b.inputs["Normal"])
+    return m
 
 def build():
     clean()
@@ -59,7 +94,7 @@ def build():
     M["плитка_лоджии"] = flat_mat("плитка_лоджии", (0.13, 0.13, 0.14), 0.6)
     M["плитка_розовая"] = flat_mat("плитка_розовая", (0.85, 0.74, 0.7), 0.25)
     M["стена_лоджии"] = flat_mat("стена_лоджии", (0.9, 0.88, 0.72), 0.9)
-    M["шторы"] = flat_mat("шторы", (0.22, 0.36, 0.34), 0.85, bump=0.1)
+    M["шторы"] = fabric_mat("шторы", (0.22, 0.36, 0.34))
     M["кирпич"] = flat_mat("кирпич", (0.55, 0.28, 0.16), 0.9)
     M["панелька"] = flat_mat("панелька", (0.82, 0.8, 0.76), 0.9)
     M["земля"] = flat_mat("двор", (0.35, 0.34, 0.32), 0.9)
@@ -143,15 +178,13 @@ def build():
     place(стул(M), 2.0, 0.85, 0)
     place(стул(M), 1.15, 2.3, 180)
     place(дверь_комнаты(M, открыта=80), 0.0, 0.55, 90)
-    # мелочь на столе 1: бутыль воды, кружка
-    bt = cyl("бутыль", 0.1, 0.75, 1.02, 2.33, 0.42, M["бутыль"], 32)
-    cyl("горлышко", 0.035, 1.02, 1.08, 2.33, 0.42, M["бутыль"], 24)
-    cyl("крышка_бутыли", 0.025, 1.08, 1.1, 2.33, 0.42, M["крышка"], 20)
+    # мелочь на столе 1: кружка (бутыль воды убрана до пачки мелочей)
     cyl("кружка", 0.04, 0.75, 0.85, 1.45, 0.45, M["кружка"], 24)
     # шторы, раздвинуты: у стены со столом и у балконной двери
     box("карниз", L - 0.12, 0.0, 2.5, L - 0.1, W, 2.53, M["пвх"], 0.002, None)
-    curtain("штора_1", 0.0, 0.75, L - 0.12, 0.05, 2.5, M["шторы"], 6, 0.08)
-    curtain("штора_2", 2.55, W, L - 0.12, 0.05, 2.5, M["шторы"], 6, 0.08)
+    _ring.clear()
+    curtain("штора_1", 0.0, 0.72, L - 0.12, 0.03, 2.48, M["шторы"], 6, 0.09, seed=2, lean=-0.06)
+    curtain("штора_2", 2.5, W, L - 0.12, 0.03, 2.48, M["шторы"], 6, 0.09, seed=5, lean=0.05)
 
     # ---------- коридор и санузел за стеной с дверью
     wall_box("перегородка_су", -2.3, 1.15, 0, -0.95, 1.25, H, M["обои"])
