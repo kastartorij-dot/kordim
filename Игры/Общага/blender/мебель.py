@@ -63,7 +63,31 @@ def materials():
     M["наклейка"] = flat_mat("наклейка", (0.95, 0.35, 0.5), 0.6)
     M["лента"] = flat_mat("лента", (1.0, 0.1, 0.25), 0.5, emit=(1.0, 0.08, 0.2))
     M["вешалка"] = flat_mat("вешалка_рубашка", (0.92, 0.92, 0.9), 0.85, bump=0.2)
+    M["хром"] = flat_mat("хром", (0.9, 0.9, 0.92), 0.12, 1.0)
+    M["фанера"] = wood_mat("фанера", "дуб_diff.jpg", "oak_veneer_01_rough.jpg", "oak_veneer_01_nor.jpg", 0.6)
+    M["серебро"] = flat_mat("серебристый_металл", (0.62, 0.63, 0.65), 0.35, 0.8)
+    M["пластик_белый"] = flat_mat("пластик_белый", (0.9, 0.9, 0.88), 0.4)
+    M["пластик_чёрный"] = flat_mat("пластик_чёрный", (0.025, 0.025, 0.028), 0.45)
+    M["экран"] = flat_mat("экран", (0.01, 0.01, 0.012), 0.08)
+    M["стекло_тёмное"] = flat_mat("стекло_тёмное", (0.03, 0.03, 0.03), 0.05)
+    M["столешница_чёрная"] = flat_mat("столешница_чёрная", (0.03, 0.028, 0.026), 0.35)
+    M["стекло_матовое"] = glass_mat("стекло_матовое", (0.78, 0.86, 0.8), 0.35)
+    M["стекло"] = glass_mat("стекло", (0.95, 0.97, 0.96), 0.0)
+    M["ночник"] = flat_mat("ночник", (0.95, 0.95, 0.95), 0.4)
+    M["ночник_розовый"] = flat_mat("ночник_розовый", (1.0, 0.5, 0.9), 0.4, emit=(1.0, 0.25, 0.85))
+    for i, c in enumerate([(0.9, 0.75, 0.1), (0.85, 0.15, 0.1), (0.15, 0.45, 0.85), (0.2, 0.7, 0.3), (0.95, 0.95, 0.9)]):
+        M[f"магнит_{i}"] = flat_mat(f"магнит_{i}", c, 0.4)
     return M
+
+def glass_mat(name, color, rough):
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    b = m.node_tree.nodes["Principled BSDF"]
+    b.inputs["Base Color"].default_value = (*color, 1)
+    b.inputs["Roughness"].default_value = rough
+    b.inputs["Transmission Weight"].default_value = 1.0
+    b.inputs["IOR"].default_value = 1.45
+    return m
 
 # ---------------------------------------------------------------- геометрия
 
@@ -111,6 +135,7 @@ def cyl(name, r, z1, z2, x, y, mat, verts=24, parent=None, axis="z", bevel=0.0):
     bpy.ops.mesh.primitive_cylinder_add(vertices=verts, radius=r, depth=h, location=(x, y, (z1+z2)/2))
     ob = bpy.context.object; ob.name = name
     if axis == "x": ob.rotation_euler = (0, math.pi/2, 0)
+    if axis == "y": ob.rotation_euler = (math.pi/2, 0, 0)
     ob = finish(ob, mat, bevel, "z", parent)
     for p in ob.data.polygons: p.use_smooth = True
     return ob
@@ -150,6 +175,76 @@ def profile_x(name, pts_yz, x1, x2, mat, parent=None):
     me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
     ob = bpy.data.objects.new(name, me); bpy.context.collection.objects.link(ob)
     return finish(ob, mat, 0.002, "y", parent)
+
+def extrude2d(name, pts, plane, a1, a2, mat, parent=None, grain=None, bevel=0.002):
+    """Контур pts в плоскости plane ('yz' — тянем по x, 'xz' — по y, 'xy' — по z) от a1 до a2."""
+    bm = bmesh.new()
+    def P(u, v, w):
+        return {"yz": (w, u, v), "xz": (u, w, v), "xy": (u, v, w)}[plane]
+    vb = [bm.verts.new(P(u, v, a1)) for u, v in pts]
+    face = bm.faces.new(vb)
+    ext = bmesh.ops.extrude_face_region(bm, geom=[face])
+    k = {"yz": 0, "xz": 1, "xy": 2}[plane]
+    for v in [e for e in ext["geom"] if isinstance(e, bmesh.types.BMVert)]:
+        v.co[k] = a2
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
+    ob = bpy.data.objects.new(name, me); bpy.context.collection.objects.link(ob)
+    return finish(ob, mat, bevel, grain, parent)
+
+def arch_pts(x1, x2, z1, z2, rise, segs=16):
+    """Контур филёнки с арочным верхом (стрелка дуги rise) в плоскости xz."""
+    pts = [(x1, z1), (x2, z1), (x2, z2 - rise)]
+    w = (x2 - x1) / 2; c = (x1 + x2) / 2
+    R_ = (w*w + rise*rise) / (2*rise); cz = z2 - R_
+    a0 = math.asin(w / R_)
+    for i in range(1, segs):
+        a = a0 - 2*a0*i/segs
+        pts.append((c + R_*math.sin(a), cz + R_*math.cos(a)))
+    pts.append((x1, z2 - rise))
+    return pts
+
+def thick_line(pts, t):
+    """Полоса толщиной t вокруг ломаной pts (2D) — для гнутой фанеры."""
+    import itertools
+    left, right = [], []
+    n = len(pts)
+    for i in range(n):
+        p0 = Vector(pts[max(i-1, 0)]); p1 = Vector(pts[min(i+1, n-1)])
+        d = (p1 - p0).normalized(); nrm = Vector((-d.y, d.x))
+        p = Vector(pts[i])
+        left.append(tuple(p + nrm*t/2)); right.append(tuple(p - nrm*t/2))
+    return left + right[::-1]
+
+def round_corners(pts, r=0.04, steps=6):
+    """Скругляет углы ломаной (3D точки) квадратичной кривой — для гнутых трубок."""
+    P = [Vector(p) for p in pts]
+    out = [P[0]]
+    for i in range(1, len(P) - 1):
+        a, b, c = P[i-1], P[i], P[i+1]
+        rr = min(r, (b-a).length/2, (c-b).length/2)
+        s0 = b + (a-b).normalized()*rr; s1 = b + (c-b).normalized()*rr
+        for k in range(steps + 1):
+            t = k/steps
+            out.append((1-t)**2*s0 + 2*(1-t)*t*b + t*t*s1)
+    out.append(P[-1])
+    return out
+
+def tube(name, pts, r, mat, parent=None, rr=0.05):
+    """Трубка радиуса r по ломаной pts со скруглёнными углами."""
+    cu = bpy.data.curves.new(name, "CURVE"); cu.dimensions = "3D"
+    sp = cu.splines.new("POLY")
+    P = round_corners(pts, rr)
+    sp.points.add(len(P) - 1)
+    for i, p in enumerate(P): sp.points[i].co = (p.x, p.y, p.z, 1)
+    cu.bevel_depth = r; cu.bevel_resolution = 3; cu.use_fill_caps = True
+    ob = bpy.data.objects.new(name, cu); bpy.context.collection.objects.link(ob)
+    bpy.context.view_layer.objects.active = ob; ob.select_set(True)
+    bpy.ops.object.convert(target="MESH"); ob.select_set(False)
+    ob.data.materials.append(mat)
+    for p in ob.data.polygons: p.use_smooth = True
+    if parent: ob.parent = parent
+    return ob
 
 def rounded_rect_yz(y1, y2, z1, z2, r, segs=10):
     """Прямоугольник со скруглёнными верхними углами (радиус r) — контур в yz."""
@@ -296,20 +391,21 @@ def полка(M):
     """Навесная полка над столом: короб 0,9 с 3 ячейками в 2 яруса и скруглёнными полками по краям.
     Низ на 1,30, ярусы по 0,31, глубина 0,25."""
     root = empty("Полка")
-    W, D = 0.9, 0.25
+    W, D = 1.05, 0.25
     x0, x1 = -W/2, W/2
     t = 0.018
-    levels = [1.30, 1.61, 1.92]
+    levels = [1.30, 1.63, 1.96]
     for i, z in enumerate(levels):
         box(f"доска_{i}", x0, 0.0, z, x1, -D, z + t, M["ольха"], 0.0015, "x", root)
-    for x in (x0, -0.15, 0.15, x1 - t):
+    for x in (x0, -W/6 - t/2, W/6 - t/2, x1 - t):
         box("стойка", x, 0.0, levels[0] + t, x + t, -D, levels[2], M["ольха"], 0.0015, "z", root)
     # скруглённые концы: сектор 90° на каждом уровне, гнутая стенка на верхнем ярусе
     R = 0.24
     for side, (cx, a1, a2) in {"лев": (x0, 180, 270), "прав": (x1, 270, 360)}.items():
         for i, z in enumerate(levels):
             arc_solid(f"угол_{side}_{i}", cx, 0.0, 0.0, R, a1, a2, z, z + t, M["ольха"], 20, root)
-        arc_solid(f"гнутая_{side}", cx, 0.0, R - 0.008, R, a1, a2, levels[1] + t, levels[2], M["ольха"], 24, root)
+        if side == "лев":   # на фото 2 гнутая стенка у полки одна — на левом конце, верхний ярус
+            arc_solid(f"гнутая_{side}", cx, 0.0, R - 0.008, R, a1, a2, levels[1] + t, levels[2], M["ольха"], 24, root)
     return root
 
 def шкаф(M, открыт=0.0):
@@ -335,15 +431,212 @@ def шкаф(M, открыт=0.0):
     # направляющие сверху и снизу
     box("направляющая_верх", x0 + t, -D + 0.07, H - 0.06, x1 - t, -D - 0.005, H - t, M["алюминий"], 0.001, "x", root)
     box("направляющая_низ", x0 + t, -D + 0.07, 0.06, x1 - t, -D - 0.005, 0.075, M["алюминий"], 0.001, "x", root)
+    box("фриз", x0, -D + 0.07, H - 0.075, x1, -D - 0.035, H, M["дуб"], 0.002, "x", root)
     # двери: два трека, перекрытие 3 см; вертикальные профили по краям
     dw = W/2 + 0.015
     for name, xa, yb, shift in (("дверь_левая", x0 + 0.005, -D - 0.0, открыт), ("дверь_правая", x1 - 0.005 - dw, -D + 0.03, 0.0)):
         d = empty(name); d.parent = root; d.location = (shift, 0, 0)
-        box("полотно", xa, yb, 0.08, xa + dw, yb - 0.018, H - 0.07, M["дуб"], 0.0015, "z", d)
+        box("полотно", xa, yb, 0.08, xa + dw, yb - 0.018, H - 0.08, M["дуб"], 0.0015, "z", d)
         for px in (xa - 0.004, xa + dw - 0.016):
-            box("профиль", px, yb + 0.002, 0.075, px + 0.02, yb - 0.028, H - 0.065, M["алюминий"], 0.002, "z", d)
+            box("профиль", px, yb + 0.002, 0.075, px + 0.02, yb - 0.028, H - 0.078, M["алюминий"], 0.002, "z", d)
         if name == "дверь_правая":
             box("наклейка", xa + 0.12, yb - 0.018, H - 0.36, xa + 0.17, yb - 0.0195, H - 0.33, M["наклейка"], 0, None, d)
+    return root
+
+
+def корпус(root, W, D, H, mat, t=0.018, plinth=0.05):
+    """Корпус тумбы: бока, крышка, дно, задник. Возвращает внутренние границы."""
+    x0, x1 = -W/2, W/2
+    box("бок_л", x0, 0.0, 0.0, x0 + t, -D, H - t, mat, 0.0015, "z", root)
+    box("бок_п", x1 - t, 0.0, 0.0, x1, -D, H - t, mat, 0.0015, "z", root)
+    box("крышка", x0 - 0.005, 0.0, H - t, x1 + 0.005, -D - 0.01, H, mat, 0.003, "x", root)
+    box("дно", x0 + t, 0.0, plinth, x1 - t, -D + 0.02, plinth + t, mat, 0.0015, "x", root)
+    box("цоколь", x0 + t, -D + 0.03, 0.0, x1 - t, -D + 0.05, plinth, mat, 0.0015, "x", root)
+    box("задник", x0 + t, -0.004, plinth, x1 - t, -0.008, H - t, mat, 0.0, "z", root)
+    return x0 + t, x1 - t, plinth + t, H - t
+
+def ящик(name, root, xa, xb, za, zb, D, mat, knob, gap=0.003):
+    dr = empty(name); dr.parent = root
+    box("фасад", xa + gap, -D + 0.018, za + gap, xb - gap, -D, zb - gap, mat, 0.003, "x", dr)
+    cx, cz = (xa + xb)/2, (za + zb)/2
+    box("ручка", cx - 0.015, -D, cz - 0.015, cx + 0.015, -D - 0.02, cz + 0.015, knob, 0.003, None, dr)
+    box("короб", xa + 0.02, -0.03, za + 0.02, xb - 0.02, -D + 0.018, zb - 0.03, mat, 0.001, "y", dr)
+    return dr
+
+def дверца(name, root, xa, xb, za, zb, D, mat, knob, hinge="л", gap=0.003):
+    """Распашная дверца: узел стоит на петле, вращение вокруг z."""
+    hx = xa + gap if hinge == "л" else xb - gap
+    dn = empty(name, (hx, -D, 0)); dn.parent = root
+    w = (xb - xa) - 2*gap
+    sx = 1 if hinge == "л" else -1
+    a, b = (0, w) if sx > 0 else (-w, 0)
+    box("полотно", a, 0.018, za + gap, b, 0.0, zb - gap, mat, 0.003, "z", dn)
+    kx = (w - 0.04) * sx
+    box("ручка", kx - 0.012, 0.0, zb - 0.09, kx + 0.012, -0.02, zb - 0.06, knob, 0.003, None, dn)
+    return dn
+
+def тумба_свч(M):
+    """Тумба 0,5 × 0,5 × 0,8 в углу у стены с дверью: ящик сверху, дверца снизу; на ней СВЧ и чайник."""
+    root = empty("Тумба_СВЧ")
+    D = 0.5
+    xa, xb, za, zb = корпус(root, 0.5, D, 0.8, M["ольха"])
+    ящик("ящик", root, xa, xb, zb - 0.16, zb, D, M["ольха"], M["латунь"])
+    дверца("дверца", root, xa, xb, za, zb - 0.16, D, M["ольха"], M["латунь"], "л")
+    # микроволновка
+    mw = empty("микроволновка"); mw.parent = root
+    box("корпус", -0.23, -0.03, 0.8, 0.23, -0.39, 1.07, M["пластик_белый"], 0.006, None, mw)
+    box("окно", -0.21, -0.39, 0.83, 0.08, -0.395, 1.04, M["стекло_тёмное"], 0.003, None, mw)
+    box("панель", 0.1, -0.39, 0.83, 0.21, -0.394, 1.04, M["пластик_белый"], 0.002, None, mw)
+    cyl("ручка_вкл", 0.015, -0.4, -0.39, 0.155, 0, M["пластик_чёрный"], 16, mw, "y").location = (0.155, -0.4, 0.9)
+    # чайник
+    kt = empty("чайник"); kt.parent = root
+    cyl("подставка", 0.085, 1.07, 1.085, 0.16, -0.12, M["пластик_чёрный"], 24, kt)
+    k = cyl("колба", 0.08, 1.085, 1.29, 0.16, -0.12, M["серебро"], 28, kt)
+    tube("ручка", [(0.24, -0.12, 1.12), (0.27, -0.12, 1.14), (0.27, -0.12, 1.25), (0.235, -0.12, 1.28)], 0.012, M["пластик_чёрный"], kt, 0.02)
+    cyl("крышка", 0.07, 1.29, 1.3, 0.16, -0.12, M["пластик_чёрный"], 24, kt)
+    return root
+
+def тумбочка(M, mat="ольха", ночник=None):
+    """Тумбочка 0,45 × 0,4 × 0,6: открытая ниша под крышкой, ниже два ящика. ночник: None / 'выкл' / 'розовый'."""
+    root = empty("Тумбочка")
+    D = 0.4
+    xa, xb, za, zb = корпус(root, 0.45, D, 0.6, M[mat])
+    box("полка_ниши", xa, 0.0, zb - 0.17, xb, -D + 0.01, zb - 0.152, M[mat], 0.0015, "x", root)
+    h = (zb - 0.17 - za) / 2
+    ящик("ящик_1", root, xa, xb, za + h, zb - 0.17, D, M[mat], M["латунь"])
+    ящик("ящик_2", root, xa, xb, za, za + h, D, M[mat], M["латунь"])
+    if ночник:
+        lm = empty("ночник"); lm.parent = root
+        cyl("плафон", 0.068, 0.605, 0.80, 0.05, -0.2, M["ночник_розовый" if ночник == "розовый" else "ночник"], 32, lm)
+        cyl("основание", 0.06, 0.6, 0.607, 0.05, -0.2, M["пластик_белый"], 32, lm)
+    return root
+
+def столик(M):
+    """Столик у холодильника: чёрная столешница 1,2 × 0,6 на хромированных ножках, на нём второй монитор."""
+    root = empty("Столик")
+    W, D, H = 1.2, 0.6, 0.75
+    box("столешница", -W/2, 0.0, H - 0.025, W/2, -D, H, M["столешница_чёрная"], 0.004, "x", root)
+    for x in (-W/2 + 0.04, W/2 - 0.04):
+        for y in (-0.04, -D + 0.04):
+            cyl("ножка", 0.016, 0.0, H - 0.025, x, y, M["хром"], 20, root)
+    for y in (-0.04, -D + 0.04):
+        tube("царга", [(-W/2 + 0.04, y, H - 0.06), (W/2 - 0.04, y, H - 0.06)], 0.01, M["хром"], root)
+    монитор(M, root, 0.0, -0.18, H, 0.52)
+    return root
+
+def монитор(M, parent, x, y, z, w=0.53):
+    m = empty("монитор"); m.parent = parent
+    h = w * 9/16 + 0.03
+    box("рамка", x - w/2, y, z + 0.1, x + w/2, y - 0.022, z + 0.1 + h, M["пластик_чёрный"], 0.004, None, m)
+    box("экран", x - w/2 + 0.01, y - 0.022, z + 0.12, x + w/2 - 0.01, y - 0.0225, z + 0.1 + h - 0.01, M["экран"], 0.0, None, m)
+    box("ножка", x - 0.02, y + 0.03, z, x + 0.02, y + 0.005, z + 0.12, M["пластик_чёрный"], 0.004, None, m)
+    box("подставка", x - 0.11, y + 0.09, z, x + 0.11, y - 0.06, z + 0.012, M["пластик_чёрный"], 0.004, None, m)
+    return m
+
+def техника_на_стол(M, parent):
+    """На стол 1: монитор, колонки, клавиатура, мышь, роутер; под столом системный блок."""
+    монитор(M, parent, -0.2, -0.12, 0.75, 0.53)
+    for sx in (-0.58, 0.18):
+        box("колонка", sx, -0.05, 0.75, sx + 0.1, -0.17, 0.92, M["пластик_чёрный"], 0.004, None, parent)
+        cyl("динамик", 0.035, -0.172, -0.17, sx + 0.05, 0, M["серебро"], 20, parent, "y").location = (sx + 0.05, -0.175, 0.82)
+    box("клавиатура", -0.42, -0.3, 0.75, 0.02, -0.44, 0.775, M["пластик_чёрный"], 0.004, None, parent)
+    box("подсветка", -0.415, -0.305, 0.775, 0.015, -0.435, 0.777, M["лента"], 0.0, None, parent)
+    box("мышь", 0.08, -0.33, 0.75, 0.14, -0.43, 0.785, M["пластик_чёрный"], 0.012, None, parent)
+    r = empty("роутер"); r.parent = parent
+    box("корпус", 0.3, -0.05, 0.75, 0.52, -0.2, 0.78, M["пластик_белый"], 0.006, None, r)
+    for i, ax in enumerate((0.32, 0.41, 0.5)):
+        cyl("антенна", 0.007, 0.78, 0.96, ax, -0.04, M["пластик_белый"], 12, r)
+    box("системный_блок", -0.5, -0.06, 0.0, -0.31, -0.5, 0.42, M["пластик_чёрный"], 0.004, None, parent)
+
+def холодильник(M):
+    """Холодильник 0,55 × 0,6 × 1,45, двухкамерный, серебристый, в магнитах. Петли справа (+x).
+    Двери — узлы на петле: «дверь_морозилка», «дверь_холодильник», вращение вокруг z."""
+    import random
+    rnd = random.Random(7)
+    root = empty("Холодильник")
+    W, D, H = 0.55, 0.58, 1.45
+    x0, x1 = -W/2, W/2
+    t = 0.035
+    box("бок_л", x0, 0.0, 0.03, x0 + t, -D, H, M["серебро"], 0.004, "z", root)
+    box("бок_п", x1 - t, 0.0, 0.03, x1, -D, H, M["серебро"], 0.004, "z", root)
+    box("верх", x0, 0.0, H - t, x1, -D, H, M["серебро"], 0.004, "x", root)
+    box("низ", x0, 0.0, 0.03, x1, -D, 0.03 + t, M["серебро"], 0.004, "x", root)
+    box("зад", x0, 0.0, 0.03, x1, -0.04, H, M["серебро"], 0.0, "z", root)
+    zm = 1.0
+    box("перегородка", x0 + t, -0.04, zm - 0.03, x1 - t, -D, zm + 0.02, M["пластик_белый"], 0.003, "x", root)
+    for z1, z2 in ((0.03 + t, zm - 0.03), (zm + 0.02, H - t)):
+        box("стенка_внутри", x0 + t, -0.04, z1, x1 - t, -0.045, z2, M["пластик_белый"], 0.0, "z", root)
+    for z in (0.35, 0.62):
+        box("полка_стекло", x0 + t, -0.05, z, x1 - t, -D + 0.06, z + 0.006, M["стекло"], 0.001, "x", root)
+    box("ящик_овощи", x0 + t + 0.01, -0.06, 0.07, x1 - t - 0.01, -D + 0.07, 0.24, M["стекло"], 0.003, None, root)
+    box("ножки", x0 + 0.03, -0.05, 0.0, x1 - 0.03, -D + 0.05, 0.03, M["пластик_чёрный"], 0.002, None, root)
+    box("миска", -0.12, -0.15, H, 0.12, -0.42, H + 0.08, M["пластик_белый"], 0.03, None, root)
+    for name, z1, z2 in (("дверь_холодильник", 0.03, zm - 0.004), ("дверь_морозилка", zm + 0.004, H)):
+        d = empty(name, (x1, -D, 0)); d.parent = root
+        box("полотно", -W, 0.0, z1, 0.0, -0.05, z2, M["серебро"], 0.006, "z", d)
+        box("уплотнитель", -W + 0.02, 0.0, z1 + 0.02, -0.02, 0.012, z2 - 0.02, M["пластик_белый"], 0.004, None, d)
+        box("ручка", -W + 0.015, -0.05, z1 + 0.05 if name == "дверь_морозилка" else z2 - 0.32, -W + 0.035, -0.07,
+            z1 + 0.25 if name == "дверь_морозилка" else z2 - 0.05, M["пластик_чёрный"], 0.006, None, d)
+        for i in range(10 if name == "дверь_холодильник" else 5):   # магниты
+            r = rnd.uniform(0.025, 0.045)
+            mx = rnd.uniform(-W + 0.08, -0.06); mz = rnd.uniform(z1 + 0.08, z2 - 0.06)
+            mg = cyl("магнит", r, 0, 0.004, 0, 0, M[f"магнит_{rnd.randrange(5)}"], 20, d, "y")
+            mg.location = (mx, -0.052, mz)
+    return root
+
+def стул(M):
+    """Стул: гнутая фанера (сиденье и спинка одним листом) на хромированной трубе с подлокотниками.
+    Смотрит в -y (сидящий лицом к -y)."""
+    root = empty("Стул")
+    W = 0.46
+    # средняя линия листа фанеры в профиль (y, z): от переднего края сиденья к верху спинки
+    line = [(-0.47, 0.425), (-0.45, 0.445)]
+    for i in range(1, 9):
+        line.append((-0.45 + 0.4*i/8, 0.45 - 0.01*math.sin(math.pi*i/8)))
+    for i in range(1, 7):
+        a = math.radians(90*i/6)
+        line.append((-0.05 + 0.08*math.sin(a), 0.45 + 0.08*(1 - math.cos(a))))
+    line += [(0.04, 0.6), (0.06, 0.75), (0.07, 0.86)]
+    extrude2d("фанера", thick_line(line, 0.012), "yz", -W/2, W/2, M["фанера"], root, "y", 0.003)
+    for sx in (-1, 1):
+        x = sx * (W/2 + 0.02)
+        tube("рама", [(x, -0.44, 0.0), (x, -0.44, 0.64), (x, 0.0, 0.64), (x, 0.05, 0.47), (x, 0.17, 0.0)], 0.011, M["хром"], root, 0.05)
+        tube("под_сиденье", [(x, -0.44, 0.40), (x, 0.03, 0.43)], 0.009, M["хром"], root)
+        box("подлокотник", x - 0.025, -0.42, 0.648, x + 0.025, -0.1, 0.672, M["фанера"], 0.008, "y", root)
+    tube("перемычка", [(-W/2 - 0.02, -0.2, 0.41), (W/2 + 0.02, -0.2, 0.41)], 0.009, M["хром"], root)
+    return root
+
+def дверь_комнаты(M, открыта=0.0):
+    """Межкомнатная дверь 0,8 × 2,0 с двумя матовыми стёклами с арочным верхом. Узел «полотно» стоит
+    на петле (x = -0,4), открывается поворотом вокруг z. Лицевая сторона — -y, в плоскости y=0."""
+    root = empty("Дверь_комнаты")
+    W, H, T = 0.8, 2.0, 0.04
+    leaf = empty("полотно", (-W/2, 0, 0)); leaf.parent = root
+    leaf.rotation_euler = (0, 0, -math.radians(открыта))
+    x0, x1 = 0.0, W
+    # обвязка вокруг двух проёмов: стойки, перекладины
+    box("стойка_л", x0, T/2, 0, x0 + 0.13, -T/2, H, M["ольха"], 0.003, "z", leaf)
+    box("стойка_п", x1 - 0.13, T/2, 0, x1, -T/2, H, M["ольха"], 0.003, "z", leaf)
+    box("низ", x0 + 0.13, T/2, 0, x1 - 0.13, -T/2, 0.22, M["ольха"], 0.003, "x", leaf)
+    box("середина", x0 + 0.13, T/2, 0.62, x1 - 0.13, -T/2, 0.78, M["ольха"], 0.003, "x", leaf)
+    # верх над арками — сплошной, арки вырезаны контуром
+    for z1, z2, rise in ((0.22, 0.62, 0.06), (0.78, 1.86, 0.1)):
+        top = H if z2 > 1 else 0.78
+        pts = arch_pts(x0 + 0.13, x1 - 0.13, z1, z2, rise)
+        extrude2d("стекло", pts, "xz", -0.004, 0.004, M["стекло_матовое"], leaf, None, 0.0)
+        # перемычка над аркой: прямоугольник минус арка — набираем из узких сегментов
+        arc = pts[2:]
+        for i in range(len(arc) - 1):
+            (ax, az), (bx, bz) = arc[i], arc[i+1]
+            xa_, xb_ = min(ax, bx), max(ax, bx)
+            box("над_аркой", xa_, T/2, min(az, bz), xb_ + 0.001, -T/2, top, M["ольха"], 0.0, "x", leaf)
+        box("раскладка", x0 + 0.11, -T/2, z1 - 0.02, x0 + 0.13, -T/2 - 0.008, z2 - rise, M["ольха"], 0.002, "z", leaf)
+        box("раскладка", x1 - 0.13, -T/2, z1 - 0.02, x1 - 0.11, -T/2 - 0.008, z2 - rise, M["ольха"], 0.002, "z", leaf)
+    # ручка-нажимная с обеих сторон
+    for sy in (-1, 1):
+        y = sy * (T/2 + 0.008)
+        box("розетка", x1 - 0.085, y, 0.92, x1 - 0.045, y + sy*0.008, 1.08, M["латунь"], 0.004, None, leaf)
+        tube("ручка", [(x1 - 0.065, y + sy*0.005, 1.03), (x1 - 0.065, y + sy*0.055, 1.03), (x1 - 0.2, y + sy*0.06, 1.03)], 0.011, M["латунь"], leaf, 0.02)
     return root
 
 # ---------------------------------------------------------------- экспорт и превью
@@ -395,23 +688,40 @@ def render(path, w=900, h=900, samples=64):
     print("превью:", path)
 
 SHOTS = os.path.join(ROOT, "shots")
-jobs = [
-    ("кровать", lambda M: кровать(M), ((0.1, -0.5, 0.45), 3.0, 1.7, -40), {}),
-    ("кровать_с_лентой", lambda M: кровать(M, лента=True), None, {}),
-    ("стол", lambda M: (стол(M), полка(M)), ((0.0, -0.3, 1.0), 2.6, 1.55, 28), {}),
-    ("шкаф", lambda M: шкаф(M), ((0.0, -0.3, 1.2), 3.6, 1.5, -22), {}),
+
+def стол_с_полкой(M):
+    root = стол(M); p = полка(M); p.parent = root
+    техника_на_стол(M, root)
+    return root
+
+JOBS = [
+    # имя, сборка, вид для превью (цель, дистанция, высота, азимут)
+    ("кровать", lambda M: кровать(M), ((0.1, -0.5, 0.45), 3.0, 1.7, -40)),
+    ("кровать_с_лентой", lambda M: кровать(M, лента=True), None),
+    ("стол", стол_с_полкой, ((0.0, -0.3, 1.0), 2.6, 1.55, 28)),
+    ("шкаф", lambda M: шкаф(M), ((0.0, -0.3, 1.2), 3.6, 1.5, -22)),
+    ("холодильник", холодильник, ((0.0, -0.3, 0.75), 2.4, 1.3, -30)),
+    ("тумба_свч", тумба_свч, ((0.0, -0.25, 0.65), 1.9, 1.3, 30)),
+    ("тумбочка", lambda M: тумбочка(M, "ольха", "выкл"), ((0.0, -0.2, 0.35), 1.4, 0.9, -30)),
+    ("тумбочка_светлая", lambda M: тумбочка(M, "дуб"), None),
+    ("столик", столик, ((0.0, -0.3, 0.6), 2.4, 1.4, 25)),
+    ("стул", стул, ((0.0, -0.2, 0.45), 1.8, 1.0, -35)),
+    ("дверь_комнаты", lambda M: дверь_комнаты(M), ((0.0, 0.0, 1.0), 3.0, 1.3, 0)),
 ]
-for name, make, view, _ in jobs:
-    clean()
-    M = materials()
-    made = make(M)
-    roots = made if isinstance(made, tuple) else (made,)
-    if name == "стол":
-        roots[1].location = (0, 0, 0)    # полка висит над столом, в одной модели
-        roots[1].parent = roots[0]
-    if not RENDER: export(roots[0], name)
-    if RENDER and view:
-        if name == "шкаф":   # для превью левая дверь отъехала, как на фото 1
-            clean(); M = materials(); шкаф(M, открыт=0.62)
-        stage(*view)
-        render(os.path.join(SHOTS, f"{name}.png"))
+
+if __name__ == "__main__":
+    only = [a for a in sys.argv[1:] if not a.startswith("--")]
+    for name, make, view in JOBS:
+        if only and name not in only: continue
+        clean()
+        M = materials()
+        root = make(M)
+        if not RENDER: export(root, name)
+        if RENDER and view:
+            if name == "шкаф":   # для превью левая дверь отъехала, как на фото 1
+                clean(); M = materials(); шкаф(M, открыт=0.62)
+            if name == "холодильник":   # для превью дверь холодильника открыта
+                clean(); M = materials(); r = холодильник(M)
+                bpy.data.objects["дверь_холодильник"].rotation_euler = (0, 0, math.radians(-100))
+            stage(*view)
+            render(os.path.join(SHOTS, f"{name}.png"))
