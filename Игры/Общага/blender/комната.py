@@ -131,7 +131,7 @@ def build():
 
     # ---------- мебель
     place(кровать(M, лента=True), L - 1.045, 0.0, 0, mirror_y=True)    # кровать 1 у стены со столом
-    place(кровать(M), L - 1.045, W, 0)                                  # кровать 2 у стены с холодильником
+    place(кровать(M, покрывало="одеяло_зелёное"), L - 1.045, W, 0)                                  # кровать 2 у стены с холодильником
     стол_root = стол(M); p = полка(M); p.parent = стол_root; техника_на_стол(M, стол_root)
     place(стол_root, 1.875, 0.0, 180)
     place(тумбочка(M, "дуб"), 1.045, 0.0, 180)
@@ -151,8 +151,7 @@ def build():
     # шторы, раздвинуты: у стены со столом и у балконной двери
     box("карниз", L - 0.12, 0.0, 2.5, L - 0.1, W, 2.53, M["пвх"], 0.002, None)
     curtain("штора_1", 0.0, 0.75, L - 0.12, 0.05, 2.5, M["шторы"], 6, 0.08)
-    curtain("штора_2", 2.3, 2.75, L - 0.12, 0.05, 2.5, M["шторы"], 4, 0.07)
-    curtain("штора_3", 2.95, W, L - 0.12, 0.05, 2.5, M["шторы"], 3, 0.06)
+    curtain("штора_2", 2.55, W, L - 0.12, 0.05, 2.5, M["шторы"], 6, 0.08)
 
     # ---------- коридор и санузел за стеной с дверью
     wall_box("перегородка_су", -2.3, 1.15, 0, -0.95, 1.25, H, M["обои"])
@@ -231,6 +230,41 @@ def light_day():
     bpy.ops.object.light_add(type="AREA", location=(2.3, 1.6, H - 0.1))
     f = bpy.context.object; f.data.energy = 60; f.data.size = 2.0
 
+def свет(режим="день", ночник=False):
+    """Режимы света: «день» — пасмурный день из окна; «вечер» — за окном сумерки, горит плафон;
+    «ночь» — темно, горит лента над кроватью 1. ночник=True — горит ночник на тумбочке (розовый, как на фото 3).
+    То же самое потом станет выключателями в Godot."""
+    sc = bpy.context.scene
+    if режим == "день":
+        light_day()
+    else:
+        w = bpy.data.worlds.new(режим); sc.world = w; w.use_nodes = True
+        bg = w.node_tree.nodes["Background"]
+        bg.inputs["Color"].default_value = (0.05, 0.07, 0.12, 1) if режим == "вечер" else (0.01, 0.012, 0.02, 1)
+        bg.inputs["Strength"].default_value = 0.6 if режим == "вечер" else 0.3
+    warm = flat_mat("плафон_горит", (1, 0.95, 0.85), 0.5, emit=(1.0, 0.86, 0.66))
+    if режим == "вечер":
+        for ob in bpy.data.objects:
+            if ob.name.startswith("плафон") and ob.type == "MESH":
+                ob.data.materials.clear(); ob.data.materials.append(warm)
+        bpy.ops.object.light_add(type="AREA", location=(2.3, 1.6, H - 0.08))
+        l = bpy.context.object; l.data.shape = "DISK"; l.data.size = 0.34; l.data.energy = 160
+        l.data.color = (1.0, 0.86, 0.68)
+        bpy.ops.object.light_add(type="AREA", location=(-1.3, 0.6, H - 0.07))
+        l = bpy.context.object; l.data.shape = "DISK"; l.data.size = 0.25; l.data.energy = 50; l.data.color = (1.0, 0.86, 0.68)
+    if режим in ("вечер", "ночь"):
+        # лента по верху щита кровати 1: тонкий светильник вдоль щита
+        bpy.ops.object.light_add(type="AREA", location=(L - 1.045, 0.04, 1.03))
+        l = bpy.context.object; l.data.shape = "RECTANGLE"; l.data.size = 2.0; l.data.size_y = 0.02
+        l.data.energy = 30; l.data.color = (1.0, 0.1, 0.25); l.rotation_euler = (math.radians(-90), 0, 0)
+    if ночник:
+        pink = flat_mat("ночник_горит", (1.0, 0.6, 0.95), 0.4, emit=(1.0, 0.3, 0.85))
+        for ob in bpy.data.objects:
+            if ob.name.startswith("абажур"):
+                ob.data.materials.clear(); ob.data.materials.append(pink)
+        bpy.ops.object.light_add(type="POINT", location=(L - 0.2, 1.375, 0.72))
+        l = bpy.context.object; l.data.energy = 25; l.data.shadow_soft_size = 0.07; l.data.color = (1.0, 0.35, 0.85)
+
 CAMS = {
     # фото 1: сидя на кровати 2 у окна, смотрю на стол, дверь и шкаф
     "ф1": ((4.0, 1.85, 0.95), (0.0, 0.25, 1.2), 24, (720, 960)),
@@ -258,9 +292,11 @@ def top_camera():
 
 if __name__ == "__main__":
     shots = [a for a in sys.argv[1:] if not a.startswith("--")] or ["ф1", "окно", "сверху"]
+    режим = next((a.split("=")[1] for a in sys.argv if a.startswith("--свет=")), "день")
+    ночник = "--ночник" in sys.argv
     for shot in shots:
         ceil = build()
-        light_day()
+        свет(режим, ночник)
         if shot == "сверху":
             rw, rh = top_camera()
             for ob in bpy.data.objects:   # без потолков, чтобы было видно сверху
@@ -271,4 +307,6 @@ if __name__ == "__main__":
         sc = bpy.context.scene
         sc.cycles.max_bounces = 8
         sc.view_settings.exposure = 1.0
-        render(os.path.join(SHOTS, f"комната_{shot}.png"), rw, rh, 32 if FAST else 128)
+        if режим != "день": sc.view_settings.exposure = 0.3
+        tag = "" if режим == "день" and not ночник else f"_{режим}" + ("_ночник" if ночник else "")
+        render(os.path.join(SHOTS, f"комната_{shot}{tag}.png"), rw, rh, 32 if FAST else 128)

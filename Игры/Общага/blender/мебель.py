@@ -50,6 +50,27 @@ def flat_mat(name, color, rough=0.5, metal=0.0, emit=None, bump=0.0):
         nt.links.new(nz.outputs["Fac"], bp.inputs["Height"]); nt.links.new(bp.outputs["Normal"], b.inputs["Normal"])
     return m
 
+def quilt_mat(name, color):
+    """Стёганое покрывало: ромбы прострочки (две диагональные волны), мягкая ткань."""
+    m = flat_mat(name, color, 0.92)
+    nt = m.node_tree; b = nt.nodes["Principled BSDF"]
+    tc = nt.nodes.new("ShaderNodeTexCoord")
+    waves = []
+    for ang in (45, -45):
+        mp = nt.nodes.new("ShaderNodeMapping"); mp.inputs["Rotation"].default_value[2] = math.radians(ang)
+        nt.links.new(tc.outputs["UV"], mp.inputs["Vector"])
+        wv = nt.nodes.new("ShaderNodeTexWave"); wv.wave_type = "BANDS"; wv.bands_direction = "X"
+        wv.inputs["Scale"].default_value = 1.2; wv.inputs["Distortion"].default_value = 0.0
+        nt.links.new(mp.outputs["Vector"], wv.inputs["Vector"])
+        waves.append(wv)
+    mn = nt.nodes.new("ShaderNodeMath"); mn.operation = "MINIMUM"
+    nt.links.new(waves[0].outputs["Fac"], mn.inputs[0]); nt.links.new(waves[1].outputs["Fac"], mn.inputs[1])
+    pw = nt.nodes.new("ShaderNodeMath"); pw.operation = "POWER"; pw.inputs[1].default_value = 0.35
+    nt.links.new(mn.outputs[0], pw.inputs[0])
+    bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.6; bp.inputs["Distance"].default_value = 0.01
+    nt.links.new(pw.outputs[0], bp.inputs["Height"]); nt.links.new(bp.outputs["Normal"], b.inputs["Normal"])
+    return m
+
 def materials():
     M = {}
     M["ольха"] = wood_mat("ольха", "ольха_diff.jpg", "oak_veneer_01_rough.jpg", "oak_veneer_01_nor.jpg", 0.7)
@@ -58,7 +79,8 @@ def materials():
     M["алюминий"] = flat_mat("алюминий", (0.75, 0.76, 0.78), 0.3, 1.0)
     M["матрас"] = flat_mat("матрас", (0.86, 0.86, 0.84), 0.9, bump=0.15)
     M["простыня"] = flat_mat("простыня", (0.55, 0.78, 0.76), 0.85, bump=0.2)
-    M["одеяло"] = flat_mat("одеяло", (0.52, 0.5, 0.42), 0.9, bump=0.4)
+    M["одеяло"] = quilt_mat("покрывало_бежевое", (0.42, 0.4, 0.33))
+    M["одеяло_зелёное"] = quilt_mat("покрывало_зелёное", (0.3, 0.42, 0.33))
     M["наволочка"] = flat_mat("наволочка", (0.9, 0.9, 0.88), 0.85, bump=0.2)
     M["наклейка"] = flat_mat("наклейка", (0.95, 0.35, 0.5), 0.6)
     M["лента"] = flat_mat("лента", (1.0, 0.1, 0.25), 0.5, emit=(1.0, 0.08, 0.2))
@@ -338,7 +360,7 @@ def soft(ob, levels=2, bevel=None):
 
 # ---------------------------------------------------------------- модели
 
-def кровать(M, лента=False):
+def кровать(M, лента=False, покрывало="одеяло"):
     """Кровать 0,9 × 2,0 с Г-образным щитом: изголовье у стены окна (+x), щит вдоль стены (y=0).
     Голова — к +x. Матрас сверху на 0,45."""
     root = empty("Кровать")
@@ -372,7 +394,7 @@ def кровать(M, лента=False):
     soft(s, 1, 0.006)
     p = box("подушка", x1 - 0.5, -0.12, 0.45, x1 - 0.06, -W + 0.1, 0.58, M["наволочка"], 0, None, root)
     soft(p, 3, 0.05)
-    drape("покрывало", x0 + 0.04, x0 + 1.25, -0.04, -W + 0.01, 0.468, 0.17, M["одеяло"], root)
+    drape("покрывало", x0 + 0.02, x1 - 0.48, -0.04, -W + 0.01, 0.468, 0.22, M[покрывало], root)
     if лента:
         box("лента_щит", x0, -0.005, 1.0, x1, -0.015, 1.008, M["лента"], 0, "x", root)
         box("лента_изголовье", hx + 0.005, 0.0, 1.05, hx + 0.015, -(W + 0.06), 1.058, M["лента"], 0, "y", root)
@@ -532,7 +554,7 @@ def тумбочка(M, mat="ольха", ночник=None):
     ящик("ящик_2", root, xa, xb, za, za + h, D, M[mat], M["латунь"])
     if ночник:
         lm = empty("ночник"); lm.parent = root
-        cyl("плафон", 0.068, 0.605, 0.80, 0.05, -0.2, M["ночник_розовый" if ночник == "розовый" else "ночник"], 32, lm)
+        cyl("абажур", 0.068, 0.605, 0.80, 0.05, -0.2, M["ночник_розовый" if ночник == "розовый" else "ночник"], 32, lm)
         cyl("основание", 0.06, 0.6, 0.607, 0.05, -0.2, M["пластик_белый"], 32, lm)
     return root
 
@@ -602,11 +624,6 @@ def холодильник(M):
         box("уплотнитель", -W + 0.02, 0.0, z1 + 0.02, -0.02, 0.012, z2 - 0.02, M["пластик_белый"], 0.004, None, d)
         box("ручка", -W + 0.015, -0.05, z1 + 0.05 if name == "дверь_морозилка" else z2 - 0.32, -W + 0.035, -0.07,
             z1 + 0.25 if name == "дверь_морозилка" else z2 - 0.05, M["пластик_чёрный"], 0.006, None, d)
-        for i in range(10 if name == "дверь_холодильник" else 5):   # магниты
-            r = rnd.uniform(0.025, 0.045)
-            mx = rnd.uniform(-W + 0.08, -0.06); mz = rnd.uniform(z1 + 0.08, z2 - 0.06)
-            mg = cyl("магнит", r, 0, 0.004, 0, 0, M[f"магнит_{rnd.randrange(5)}"], 20, d, "y")
-            mg.location = (mx, -0.052, mz)
     return root
 
 def стул(M):
