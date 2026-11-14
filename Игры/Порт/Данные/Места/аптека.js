@@ -30,7 +30,7 @@ export const АПТЕКА = {
   ЛЮДИ: {
     sibilla: {
       имя: "Сибилла Рейн",
-      портрет: "port_sibilla.jpg",
+      портрет: "port_sibilla_art.webp",
       любит: "прямо",
       место: "За прилавком",
       она: true,
