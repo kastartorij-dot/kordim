@@ -52,7 +52,7 @@ def flat_mat(name, color, rough=0.5, metal=0.0, emit=None, bump=0.0):
 
 def materials():
     M = {}
-    M["ольха"] = wood_mat("ольха", "ольха_diff.jpg", "cherry_veneer_rough.jpg", "cherry_veneer_nor.jpg", 0.75)
+    M["ольха"] = wood_mat("ольха", "ольха_diff.jpg", "oak_veneer_01_rough.jpg", "oak_veneer_01_nor.jpg", 0.7)
     M["дуб"] = wood_mat("дуб", "дуб_diff.jpg", "oak_veneer_01_rough.jpg", "oak_veneer_01_nor.jpg", 0.8)
     M["латунь"] = flat_mat("латунь", (0.62, 0.48, 0.25), 0.35, 1.0)
     M["алюминий"] = flat_mat("алюминий", (0.75, 0.76, 0.78), 0.3, 1.0)
@@ -138,6 +138,72 @@ def arc_solid(name, cx, cy, r_in, r_out, a1, a2, z1, z2, mat, segs=16, parent=No
         if abs(p.normal.z) < 0.5: p.use_smooth = True
     return ob
 
+def profile_x(name, pts_yz, x1, x2, mat, parent=None):
+    """Плоский профиль в плоскости yz, вытянутый по x от x1 до x2."""
+    bm = bmesh.new()
+    vb = [bm.verts.new((x1, y, z)) for y, z in pts_yz]
+    face = bm.faces.new(vb)
+    ext = bmesh.ops.extrude_face_region(bm, geom=[face])
+    for v in [e for e in ext["geom"] if isinstance(e, bmesh.types.BMVert)]:
+        v.co.x = x2
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
+    ob = bpy.data.objects.new(name, me); bpy.context.collection.objects.link(ob)
+    return finish(ob, mat, 0.002, "y", parent)
+
+def rounded_rect_yz(y1, y2, z1, z2, r, segs=10):
+    """Прямоугольник со скруглёнными верхними углами (радиус r) — контур в yz."""
+    ya, yb = max(y1, y2), min(y1, y2)
+    pts = [(ya, z1), (yb, z1)]
+    for i in range(segs + 1):                      # угол у yb: от 180° до 90°
+        a = math.radians(180 - 90 * i / segs)
+        pts.append((yb + r + r * math.cos(a), z2 - r + r * math.sin(a)))
+    for i in range(segs + 1):                      # угол у ya: от 90° до 0°
+        a = math.radians(90 - 90 * i / segs)
+        pts.append((ya - r + r * math.cos(a), z2 - r + r * math.sin(a)))
+    return pts
+
+def drape(name, x1, x2, y_wall, y_edge, z_top, hang, mat, parent=None, seed=1):
+    """Покрывало: лежит на матрасе от стены до края и свисает с края на hang вниз; мелкие складки."""
+    import random
+    rnd = random.Random(seed)
+    nx, ny = 36, 30
+    flat = y_wall - y_edge
+    rad = 0.05
+    total = flat + math.pi * rad / 2 + hang
+    bm = bmesh.new()
+    grid = []
+    waves = [(rnd.uniform(2, 6), rnd.uniform(0, 6.28), rnd.uniform(0.004, 0.012)) for _ in range(4)]
+    for j in range(ny + 1):
+        s = total * j / ny
+        row = []
+        for i in range(nx + 1):
+            x = x1 + (x2 - x1) * i / nx
+            if s <= flat:
+                y, z = y_wall - s, z_top
+            elif s <= flat + math.pi * rad / 2:
+                a = (s - flat) / rad
+                y, z = y_edge - rad * math.sin(a), z_top - rad + rad * math.cos(a)
+            else:
+                y, z = y_edge - rad, z_top - rad - (s - flat - math.pi * rad / 2)
+            w = sum(amp * math.sin(f * x * 6.28 + ph + s * 3) for f, ph, amp in waves)
+            if s > flat: y -= abs(w) * 1.5
+            else: z += w * 0.6
+            row.append(bm.verts.new((x, y, z)))
+        grid.append(row)
+    for j in range(ny):
+        for i in range(nx):
+            bm.faces.new((grid[j][i], grid[j][i+1], grid[j+1][i+1], grid[j+1][i]))
+    me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
+    ob = bpy.data.objects.new(name, me); bpy.context.collection.objects.link(ob)
+    ob.data.materials.append(mat)
+    uv_box(ob, tile=0.5)
+    so = ob.modifiers.new("толщина", "SOLIDIFY"); so.thickness = 0.018; so.offset = 1
+    sd = ob.modifiers.new("гладко", "SUBSURF"); sd.levels = 1; sd.render_levels = 2
+    for p in ob.data.polygons: p.use_smooth = True
+    if parent: ob.parent = parent
+    return ob
+
 def empty(name, loc=(0, 0, 0)):
     ob = bpy.data.objects.new(name, None); ob.location = loc
     bpy.context.collection.objects.link(ob)
@@ -173,8 +239,7 @@ def кровать(M, лента=False):
     box("царга_у_стены", x0, -t - 0.005, zc1, x1, -2*t - 0.005, zc2, M["ольха"], 0.002, "x", root)
     box("царга_с_края", x0, -W + t, zc1, x1, -W, zc2, M["ольха"], 0.002, "x", root)
     # изножье: низкая спинка со скруглённым верхом
-    fb = box("изножье", x0 - t, -t - 0.005, 0.0, x0, -W, 0.5, M["ольха"], 0.0, "y", root)
-    md = fb.modifiers.new("скругление", "BEVEL"); md.width = 0.06; md.segments = 8; md.limit_method = "ANGLE"
+    profile_x("изножье", rounded_rect_yz(-t - 0.005, -W, 0.0, 0.5, 0.09), x0 - t, x0, M["ольха"], root)
     # ножки у изголовья — круглые
     for y in (-0.05, -W + 0.04):
         cyl("ножка", 0.03, 0.0, zc1 + 0.02, x1 - 0.05, y, M["ольха"], 20, root)
@@ -189,8 +254,7 @@ def кровать(M, лента=False):
     soft(s, 1, 0.006)
     p = box("подушка", x1 - 0.5, -0.12, 0.45, x1 - 0.06, -W + 0.1, 0.58, M["наволочка"], 0, None, root)
     soft(p, 3, 0.05)
-    o = box("одеяло", x0 + 0.05, -0.05, 0.45, x0 + 0.95, -W - 0.04, 0.52, M["одеяло"], 0, None, root)
-    soft(o, 2, 0.025)
+    drape("покрывало", x0 + 0.04, x0 + 1.25, -0.04, -W + 0.01, 0.468, 0.17, M["одеяло"], root)
     if лента:
         box("лента_щит", x0, -0.005, 1.0, x1, -0.015, 1.008, M["лента"], 0, "x", root)
         box("лента_изголовье", hx + 0.005, 0.0, 1.05, hx + 0.015, -(W + 0.06), 1.058, M["лента"], 0, "y", root)
@@ -219,12 +283,10 @@ def стол(M):
         dr = empty(f"ящик_{i+1}"); dr.parent = root
         xa, xb = x1 - tw + t + gap, x1 - t - gap
         box("фасад", xa, -D + 0.02, za, xb, -D - 0.0, zb, M["ольха"], 0.003, "x", dr)
-        # рамка-фреза: тонкий выступ по периметру
-        f = 0.03
-        box("рамка_верх", xa + 0.01, -D, zb - f, xb - 0.01, -D - 0.004, zb - 0.012, M["ольха"], 0.002, "x", dr)
-        box("рамка_низ", xa + 0.01, -D, za + 0.012, xb - 0.01, -D - 0.004, za + f, M["ольха"], 0.002, "x", dr)
-        box("рамка_лев", xa + 0.012, -D, za + 0.012, xa + f, -D - 0.004, zb - 0.012, M["ольха"], 0.002, "z", dr)
-        box("рамка_прав", xb - f, -D, za + 0.012, xb - 0.012, -D - 0.004, zb - 0.012, M["ольха"], 0.002, "z", dr)
+        # филёнка: приподнятая середина фасада, по краю — фрезерованная рамка
+        f = 0.032
+        fl = box("филёнка", xa + f, -D, za + f, xb - f, -D - 0.006, zb - f, M["ольха"], 0.0, "x", dr)
+        md = fl.modifiers.new("фаска", "BEVEL"); md.width = 0.005; md.segments = 3
         cx, cz = (xa + xb)/2, (za + zb)/2
         box("ручка", cx - 0.016, -D - 0.004, cz - 0.016, cx + 0.016, -D - 0.024, cz + 0.016, M["латунь"], 0.003, None, dr)
         box("короб", xa + 0.01, -0.03, za + 0.02, xb - 0.01, -D + 0.02, zb - 0.04, M["дуб"], 0.001, "y", dr)
@@ -270,9 +332,6 @@ def шкаф(M, открыт=0.0):
     # справа: 6 полок
     for i, z in enumerate([0.42, 0.76, 1.10, 1.44, 1.78, 2.06]):
         box(f"полка_прав_{i}", t/2, 0.0, z, x1 - t, -D + 0.08, z + t, M["дуб"], 0.0015, "x", root)
-    # рубашка на плечиках — чтобы было видно, что слева штанга
-    sh = box("рубашка", -0.55, -0.24, 1.05, -0.5, -0.3, 1.86, M["вешалка"], 0, None, root)
-    sh.scale = (1, 1, 1); soft(sh, 1, 0.01)
     # направляющие сверху и снизу
     box("направляющая_верх", x0 + t, -D + 0.07, H - 0.06, x1 - t, -D - 0.005, H - t, M["алюминий"], 0.001, "x", root)
     box("направляющая_низ", x0 + t, -D + 0.07, 0.06, x1 - t, -D - 0.005, 0.075, M["алюминий"], 0.001, "x", root)
@@ -306,7 +365,7 @@ def stage(target, dist, height, yaw, lens=35):
     floor = box("пол", -4, 3, -0.02, 4, -4, 0.0, wood_mat("ламинат", "laminate_floor_02_diff.jpg",
                "laminate_floor_02_rough.jpg", "laminate_floor_02_nor.jpg"), 0, "y")
     uv_box(floor, tile=1.4, grain="y")
-    box("стена", -4, 0.12, 0, 4, 0.0, 2.65, flat_mat("обои", (0.86, 0.8, 0.62), 0.9, bump=0.5), 0, None)
+    box("стена", -4, 0.12, 0, 4, 0.0, 3.2, flat_mat("обои", (0.86, 0.8, 0.62), 0.9, bump=0.5), 0, None)
     w = bpy.data.worlds.new("мир"); sc.world = w; w.use_nodes = True
     w.node_tree.nodes["Background"].inputs["Color"].default_value = (0.85, 0.87, 0.9, 1)
     w.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.5
