@@ -2,3 +2,5 @@
 /shots/
 # кэш Godot
 .godot/
+# кэш Python
+__pycache__/
