@@ -66,7 +66,7 @@ def build():
     M["куртка"] = flat_mat("куртка", (0.06, 0.07, 0.09), 0.8, bump=0.3)
     M["бутыль"] = glass_mat("бутыль", (0.85, 0.92, 0.95), 0.05)
     M["кружка"] = flat_mat("кружка", (0.92, 0.92, 0.9), 0.3)
-    lam = wood_mat("ламинат", "laminate_floor_02_diff.jpg", "laminate_floor_02_rough.jpg", "laminate_floor_02_nor.jpg")
+    lam = wood_mat("ламинат", "ламинат_diff.jpg", "laminate_floor_02_rough.jpg", "laminate_floor_02_nor.jpg")
 
     # ---------- пол, потолок
     f = box("пол", -2.3, -0.0, -0.02, L, W, 0.0, lam, 0, "x"); uv_box(f, tile=1.4, grain="x")
@@ -192,7 +192,7 @@ def light_day():
     except Exception:
         pass
     w.node_tree.links.new(sky.outputs["Color"], bg.inputs["Color"])
-    bg.inputs["Strength"].default_value = 0.35
+    bg.inputs["Strength"].default_value = 0.6
     bpy.ops.object.light_add(type="SUN", location=(10, 0, 10))
     sun = bpy.context.object; sun.data.energy = 2.5; sun.data.angle = math.radians(8)
     sun.rotation_euler = (math.radians(62), 0, math.radians(100))
@@ -204,11 +204,11 @@ def light_day():
         p.data.cycles.is_portal = True
     # плафон не горит, но потолочный свет днём немного добавим мягким заполнением — как в пасмурный день
     bpy.ops.object.light_add(type="AREA", location=(2.3, 1.6, H - 0.1))
-    f = bpy.context.object; f.data.energy = 25; f.data.size = 1.5
+    f = bpy.context.object; f.data.energy = 60; f.data.size = 2.0
 
 CAMS = {
     # фото 1: сидя на кровати 2 у окна, смотрю на стол, дверь и шкаф
-    "ф1": ((3.75, 2.55, 1.0), (0.2, 0.55, 1.05), 26, (720, 960)),
+    "ф1": ((3.95, 1.75, 0.95), (0.3, 0.8, 1.2), 24, (720, 960)),
     # от двери к окну
     "окно": ((0.7, 1.7, 1.55), (4.6, 1.6, 1.25), 22, (960, 720)),
 }
@@ -245,5 +245,5 @@ if __name__ == "__main__":
             rw, rh = camera(shot)
         sc = bpy.context.scene
         sc.cycles.max_bounces = 8
-        sc.view_settings.exposure = 0.6
+        sc.view_settings.exposure = 1.0
         render(os.path.join(SHOTS, f"комната_{shot}.png"), rw, rh, 32 if FAST else 128)
