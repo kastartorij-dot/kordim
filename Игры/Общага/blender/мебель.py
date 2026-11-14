@@ -216,6 +216,29 @@ def thick_line(pts, t):
         left.append(tuple(p + nrm*t/2)); right.append(tuple(p - nrm*t/2))
     return left + right[::-1]
 
+def bent_sheet(name, line, t, x1, x2, mat, parent=None):
+    """Гнутый лист толщиной t: средняя линия line в плоскости yz, ширина по x от x1 до x2. Собирается
+    из четырёхугольников, без больших вогнутых граней."""
+    prof = thick_line(line, t)
+    n = len(line)
+    top, bot = prof[:n], prof[n:][::-1]
+    bm = bmesh.new()
+    def ring(x): return [bm.verts.new((x, y, z)) for y, z in top], [bm.verts.new((x, y, z)) for y, z in bot]
+    (ta, ba), (tb, bb) = ring(x1), ring(x2)
+    for i in range(n - 1):
+        bm.faces.new((ta[i], ta[i+1], tb[i+1], tb[i]))
+        bm.faces.new((ba[i+1], ba[i], bb[i], bb[i+1]))
+        bm.faces.new((ta[i+1], ta[i], ba[i], ba[i+1]))
+        bm.faces.new((tb[i], tb[i+1], bb[i+1], bb[i]))
+    for i in (0, n - 1):
+        bm.faces.new((ta[i], tb[i], bb[i], ba[i]) if i == 0 else (tb[i], ta[i], ba[i], bb[i]))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
+    ob = bpy.data.objects.new(name, me); bpy.context.collection.objects.link(ob)
+    ob = finish(ob, mat, 0.0, "y", parent)
+    for p in ob.data.polygons: p.use_smooth = True
+    return ob
+
 def round_corners(pts, r=0.04, steps=6):
     """Скругляет углы ломаной (3D точки) квадратичной кривой — для гнутых трубок."""
     P = [Vector(p) for p in pts]
@@ -550,7 +573,7 @@ def техника_на_стол(M, parent):
 
 def холодильник(M):
     """Холодильник 0,55 × 0,6 × 1,45, двухкамерный, серебристый, в магнитах. Петли справа (+x).
-    Двери — узлы на петле: «дверь_морозилка», «дверь_холодильник», вращение вокруг z."""
+    Двери — узлы на петле: «дверь_морозилка», «дверь_холодильник», открываются поворотом вокруг z на +угол."""
     import random
     rnd = random.Random(7)
     root = empty("Холодильник")
@@ -597,7 +620,7 @@ def стул(M):
         a = math.radians(90*i/6)
         line.append((-0.05 + 0.08*math.sin(a), 0.45 + 0.08*(1 - math.cos(a))))
     line += [(0.04, 0.6), (0.06, 0.75), (0.07, 0.86)]
-    extrude2d("фанера", thick_line(line, 0.012), "yz", -W/2, W/2, M["фанера"], root, "y", 0.003)
+    bent_sheet("фанера", line, 0.012, -W/2, W/2, M["фанера"], root)
     for sx in (-1, 1):
         x = sx * (W/2 + 0.02)
         tube("рама", [(x, -0.44, 0.0), (x, -0.44, 0.64), (x, 0.0, 0.64), (x, 0.05, 0.47), (x, 0.17, 0.0)], 0.011, M["хром"], root, 0.05)
@@ -621,7 +644,7 @@ def дверь_комнаты(M, открыта=0.0):
     box("середина", x0 + 0.13, T/2, 0.62, x1 - 0.13, -T/2, 0.78, M["ольха"], 0.003, "x", leaf)
     # верх над арками — сплошной, арки вырезаны контуром
     for z1, z2, rise in ((0.22, 0.62, 0.06), (0.78, 1.86, 0.1)):
-        top = H if z2 > 1 else 0.78
+        top = H if z2 > 1 else 0.62
         pts = arch_pts(x0 + 0.13, x1 - 0.13, z1, z2, rise)
         extrude2d("стекло", pts, "xz", -0.004, 0.004, M["стекло_матовое"], leaf, None, 0.0)
         # перемычка над аркой: прямоугольник минус арка — набираем из узких сегментов
@@ -722,6 +745,6 @@ if __name__ == "__main__":
                 clean(); M = materials(); шкаф(M, открыт=0.62)
             if name == "холодильник":   # для превью дверь холодильника открыта
                 clean(); M = materials(); r = холодильник(M)
-                bpy.data.objects["дверь_холодильник"].rotation_euler = (0, 0, math.radians(-100))
+                bpy.data.objects["дверь_холодильник"].rotation_euler = (0, 0, math.radians(100))
             stage(*view)
             render(os.path.join(SHOTS, f"{name}.png"))
