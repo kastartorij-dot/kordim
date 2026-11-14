@@ -350,7 +350,7 @@ for name, make, view, _ in jobs:
     if name == "стол":
         roots[1].location = (0, 0, 0)    # полка висит над столом, в одной модели
         roots[1].parent = roots[0]
-    export(roots[0], name)
+    if not RENDER: export(roots[0], name)
     if RENDER and view:
         if name == "шкаф":   # для превью левая дверь отъехала, как на фото 1
             clean(); M = materials(); шкаф(M, открыт=0.62)
