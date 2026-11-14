@@ -761,11 +761,15 @@ def stage(target, dist, height, yaw, lens=35):
     sc.camera = cam
 
 def render(path, w=900, h=900, samples=64):
+    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
     sc = bpy.context.scene
     sc.render.engine = "CYCLES"
     sc.cycles.device = "CPU"
     sc.cycles.samples = samples
-    sc.cycles.use_denoising = True
+    # В системных сборках Blender (Debian) OIDN может быть выключен.
+    # Включённый denoise в таком случае срывает сохранение всего кадра.
+    import _cycles
+    sc.cycles.use_denoising = bool(getattr(_cycles, "with_openimagedenoise", False))
     sc.render.resolution_x, sc.render.resolution_y = w, h
     sc.view_settings.view_transform = "AgX"
     sc.render.filepath = path

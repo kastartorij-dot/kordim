@@ -144,39 +144,42 @@ def в_коридоре():
 # на восток-юго-восток (≈106°): прямо напротив — 46 к2 (кирпичный, бирюзовый карниз), за ним деревья
 # и Наличная улица, за дорогой 12-этажный кирпичный дом Наличная 55. Пол комнаты — на 10 м над землёй.
 import json
-UX = (0.961, -0.277)      # куда смотрит окно (восток, север)
-UY = (0.277, 0.961)       # «влево», если стоять лицом к окну
-WC = (52.55, -30.64)      # наружная плоскость стены с окном, середина комнаты — в метрах OSM
+from окружение import VIEW, to_room, building_span, building_kind, is_own_building
 
-def to_room(e, n, L, W):
-    dx, dy = e - WC[0], n - WC[1]
-    return (L + 0.3 + dx * UX[0] + dy * UX[1], W / 2 + dx * UY[0] + dy * UY[1])
-
-def _mesh(name, polys, m, uvtile=None):
+def _mesh(name, polys, m, uvtile=None, roof=None):
     """polys: [([(x, y), ...], z1, z2)] — призмы, одним объектом."""
     import bmesh
     bm = bmesh.new()
+    uv = bm.loops.layers.uv.verify() if uvtile else None
     for pts, z1, z2 in polys:
         if len(pts) > 2 and pts[0] == pts[-1]: pts = pts[:-1]
         if len(pts) < 3: continue
         b = [bm.verts.new((x, y, z1)) for x, y in pts]; t = [bm.verts.new((x, y, z2)) for x, y in pts]
         try:
-            bm.faces.new(t)
+            top = bm.faces.new(t)
+            if roof: top.material_index = 1
             for i in range(len(pts)):
                 j = (i + 1) % len(pts)
-                bm.faces.new((b[i], b[j], t[j], t[i]))
+                face = bm.faces.new((b[i], b[j], t[j], t[i]))
+                if uv:
+                    # Развёртка вдоль стены и вверх: этажи остаются горизонтальными
+                    # и на повёрнутых контурах. На крышу текстура окон не идёт.
+                    length = math.dist(pts[i], pts[j])
+                    coords = ((0, 0), (length / uvtile, 0),
+                              (length / uvtile, (z2 - z1) / uvtile), (0, (z2 - z1) / uvtile))
+                    for loop, coord in zip(face.loops, coords): loop[uv].uv = coord
         except ValueError:
             pass
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
     ob = bpy.data.objects.new(name, me); bpy.context.collection.objects.link(ob)
     ob.data.materials.append(m)
-    if uvtile: uv_box(ob, tile=uvtile)
+    if roof: ob.data.materials.append(roof)
     return ob
 
 def вид(L, W, вечер=False):
     data = json.load(open(os.path.join(ROOT, "assets", "osm", "окрестности.json")))
-    g = -10.0   # первый этаж корпуса высокий, на колоннах: по фото крыша 46 к2 ниже глаз
+    g = -VIEW["floor_height_m"]
     rnd = random.Random(5)
     brick = img_mat("фасад_кирпич", "фасад_кирпич.png", 0.85)
     pan = img_mat("фасад_панелька", "фасад_панелька_вечер.png" if вечер else "фасад_панелька.png", 0.9)
@@ -188,25 +191,18 @@ def вид(L, W, вечер=False):
     groups = {"кирпич": [], "панель": [], "прочее": [], "стекло": []}
     for bid, b in data["buildings"].items():
         t = b["t"]
-        if b.get("rel") == "15608981" or bid in ("308929944", "16956114"): continue   # само общежитие
+        if is_own_building(bid, b): continue
         pts = [to_room(x, y, L, W) for x, y in b["p"]]
         cx = sum(p[0] for p in pts) / len(pts); cy = sum(p[1] for p in pts) / len(pts)
-        if cx < L + 2 or math.hypot(cx, cy) > 420: continue          # только то, что видно из окна
-        try: h = float(t.get("height") or 0) or float(t.get("building:levels") or 1) * 3.0
-        except ValueError: h = 3.0
-        try: h0 = float(t.get("min_height") or 0)
-        except ValueError: h0 = 0.0
-        if bid == "85426979": h = 8.4                                # 46 к2: два высоких этажа и цоколь
-        kind = t.get("building") or t.get("building:part")
-        if t.get("building:material") == "glass": grp = "стекло"
-        elif kind in ("apartments", "dormitory", "residential"): grp = "панель"
-        elif kind in ("school", "office") or t.get("building:material") == "brick" or t.get("building:cladding") == "brick": grp = "кирпич"
-        else: grp = "прочее"
-        groups[grp].append((pts, g + h0, g + h))
-    _mesh("дома_кирпич", groups["кирпич"], brick, 9.0)
-    _mesh("дома_панель", groups["панель"], pan, 12.0)
-    _mesh("дома_прочие", groups["прочее"], plain, 6.0)
-    _mesh("дома_стекло", groups["стекло"], glassy, 6.0)
+        if cx < L + 2 or math.hypot(cx - L, cy - W / 2) > VIEW["range_m"]: continue
+        z1, z2 = building_span(bid, t)
+        if z2 <= z1: continue
+        groups[building_kind(t)].append((pts, z1, z2))
+    roof = mat((0.22, 0.24, 0.24), 0.95)
+    _mesh("дома_кирпич", groups["кирпич"], brick, 9.0, roof)
+    _mesh("дома_панель", groups["панель"], pan, 12.0, roof)
+    _mesh("дома_прочие", groups["прочее"], plain, 6.0, roof)
+    _mesh("дома_стекло", groups["стекло"], glassy, 6.0, roof)
     # 46 к2 — бирюзовый карниз и кирпичные столбики на парапете, как на фото с вороной
     k2 = [to_room(x, y, L, W) for x, y in data["buildings"]["85426979"]["p"]]
     teal = mat((0.08, 0.42, 0.4), 0.45); dark_brick = mat((0.45, 0.2, 0.12), 0.85)
