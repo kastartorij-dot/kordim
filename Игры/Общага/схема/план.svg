@@ -1,194 +1,214 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1620" height="850" viewBox="0 0 1620 850" font-family="DejaVu Sans, Arial, sans-serif">
-<rect width="1620" height="850" fill="#fbfaf7"/>
-<text x="40" y="44" font-size="24" font-weight="bold" fill="#222">Комната в общаге — схема сверху (черновик 1)</text>
-<text x="40" y="72" font-size="13" fill="#555">По наброску автора, 7 фото и 4 видео. Размеры — оценка по стандартным вещам (кровать 0,9×2 м, дверь 0,8 м), не замер. Красные цифры — вопросы.</text>
-<rect x="465.0" y="195.5" width="572.0" height="416.0" fill="#e8d2b0" stroke="none" stroke-width="1.2" />
-<rect x="166.0" y="462.0" width="283.4" height="149.5" fill="#e8d2b0" stroke="none" stroke-width="1.2" />
-<rect x="166.0" y="273.5" width="283.4" height="175.5" fill="#e9e3d3" stroke="none" stroke-width="1.2" />
-<line x1="205.0" y1="273.5" x2="205.0" y2="449.0" stroke="#d8d0bd" stroke-width="0.6" />
-<line x1="244.0" y1="273.5" x2="244.0" y2="449.0" stroke="#d8d0bd" stroke-width="0.6" />
-<line x1="283.0" y1="273.5" x2="283.0" y2="449.0" stroke="#d8d0bd" stroke-width="0.6" />
-<line x1="322.0" y1="273.5" x2="322.0" y2="449.0" stroke="#d8d0bd" stroke-width="0.6" />
-<line x1="361.0" y1="273.5" x2="361.0" y2="449.0" stroke="#d8d0bd" stroke-width="0.6" />
-<line x1="400.0" y1="273.5" x2="400.0" y2="449.0" stroke="#d8d0bd" stroke-width="0.6" />
-<line x1="439.0" y1="273.5" x2="439.0" y2="449.0" stroke="#d8d0bd" stroke-width="0.6" />
-<line x1="166.0" y1="312.5" x2="449.4" y2="312.5" stroke="#d8d0bd" stroke-width="0.6" />
-<line x1="166.0" y1="351.5" x2="449.4" y2="351.5" stroke="#d8d0bd" stroke-width="0.6" />
-<line x1="166.0" y1="390.5" x2="449.4" y2="390.5" stroke="#d8d0bd" stroke-width="0.6" />
-<line x1="166.0" y1="429.5" x2="449.4" y2="429.5" stroke="#d8d0bd" stroke-width="0.6" />
-<rect x="1076.0" y="179.9" width="146.9" height="447.2" fill="#8d8f93" stroke="none" stroke-width="1.2" />
-<line x1="1115.0" y1="179.9" x2="1115.0" y2="627.1" stroke="#7b7d81" stroke-width="0.6" />
-<line x1="1154.0" y1="179.9" x2="1154.0" y2="627.1" stroke="#7b7d81" stroke-width="0.6" />
-<line x1="1193.0" y1="179.9" x2="1193.0" y2="627.1" stroke="#7b7d81" stroke-width="0.6" />
-<line x1="1076.0" y1="218.9" x2="1222.9" y2="218.9" stroke="#7b7d81" stroke-width="0.6" />
-<line x1="1076.0" y1="257.9" x2="1222.9" y2="257.9" stroke="#7b7d81" stroke-width="0.6" />
-<line x1="1076.0" y1="296.9" x2="1222.9" y2="296.9" stroke="#7b7d81" stroke-width="0.6" />
-<line x1="1076.0" y1="335.9" x2="1222.9" y2="335.9" stroke="#7b7d81" stroke-width="0.6" />
-<line x1="1076.0" y1="374.9" x2="1222.9" y2="374.9" stroke="#7b7d81" stroke-width="0.6" />
-<line x1="1076.0" y1="413.9" x2="1222.9" y2="413.9" stroke="#7b7d81" stroke-width="0.6" />
-<line x1="1076.0" y1="452.9" x2="1222.9" y2="452.9" stroke="#7b7d81" stroke-width="0.6" />
-<line x1="1076.0" y1="491.9" x2="1222.9" y2="491.9" stroke="#7b7d81" stroke-width="0.6" />
-<line x1="1076.0" y1="530.9" x2="1222.9" y2="530.9" stroke="#7b7d81" stroke-width="0.6" />
-<line x1="1076.0" y1="569.9" x2="1222.9" y2="569.9" stroke="#7b7d81" stroke-width="0.6" />
-<line x1="465.0" y1="221.5" x2="1037.0" y2="221.5" stroke="#dcc29c" stroke-width="0.5" />
-<line x1="465.0" y1="247.5" x2="1037.0" y2="247.5" stroke="#dcc29c" stroke-width="0.5" />
-<line x1="465.0" y1="273.5" x2="1037.0" y2="273.5" stroke="#dcc29c" stroke-width="0.5" />
-<line x1="465.0" y1="299.5" x2="1037.0" y2="299.5" stroke="#dcc29c" stroke-width="0.5" />
-<line x1="465.0" y1="325.5" x2="1037.0" y2="325.5" stroke="#dcc29c" stroke-width="0.5" />
-<line x1="465.0" y1="351.5" x2="1037.0" y2="351.5" stroke="#dcc29c" stroke-width="0.5" />
-<line x1="465.0" y1="377.5" x2="1037.0" y2="377.5" stroke="#dcc29c" stroke-width="0.5" />
-<line x1="465.0" y1="403.5" x2="1037.0" y2="403.5" stroke="#dcc29c" stroke-width="0.5" />
-<line x1="465.0" y1="429.5" x2="1037.0" y2="429.5" stroke="#dcc29c" stroke-width="0.5" />
-<line x1="465.0" y1="455.5" x2="1037.0" y2="455.5" stroke="#dcc29c" stroke-width="0.5" />
-<line x1="465.0" y1="481.5" x2="1037.0" y2="481.5" stroke="#dcc29c" stroke-width="0.5" />
-<line x1="465.0" y1="507.5" x2="1037.0" y2="507.5" stroke="#dcc29c" stroke-width="0.5" />
-<line x1="465.0" y1="533.5" x2="1037.0" y2="533.5" stroke="#dcc29c" stroke-width="0.5" />
-<line x1="465.0" y1="559.5" x2="1037.0" y2="559.5" stroke="#dcc29c" stroke-width="0.5" />
-<line x1="465.0" y1="585.5" x2="1037.0" y2="585.5" stroke="#dcc29c" stroke-width="0.5" />
-<rect x="449.4" y="179.9" width="587.6" height="15.6" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
-<rect x="150.4" y="611.5" width="886.6" height="15.6" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
-<rect x="449.4" y="179.9" width="15.6" height="301.6" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
-<rect x="449.4" y="585.5" width="15.6" height="41.6" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
-<rect x="1037.0" y="179.9" width="39.0" height="41.6" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
-<rect x="1037.0" y="319.0" width="39.0" height="45.5" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
-<rect x="1037.0" y="533.5" width="39.0" height="93.6" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
-<rect x="1037.0" y="364.5" width="39.0" height="169.0" fill="#cfe6ee" stroke="#4a4a4a" stroke-width="1" />
-<line x1="1056.5" y1="364.5" x2="1056.5" y2="533.5" stroke="#4a4a4a" stroke-width="1" />
-<rect x="150.4" y="257.9" width="299.0" height="15.6" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
-<rect x="150.4" y="257.9" width="15.6" height="230.1" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
-<rect x="150.4" y="592.0" width="15.6" height="35.1" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
-<rect x="166.0" y="449.0" width="175.5" height="13.0" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
-<rect x="432.5" y="449.0" width="16.9" height="13.0" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
-<rect x="1076.0" y="163.0" width="162.5" height="16.9" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
-<rect x="1076.0" y="627.1" width="162.5" height="16.9" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
-<rect x="1222.9" y="179.9" width="15.6" height="447.2" fill="#e9dccf" stroke="#4a4a4a" stroke-width="1" />
-<line x1="1230.7" y1="179.9" x2="1230.7" y2="627.1" stroke="#1f7a5c" stroke-width="4" />
-<line x1="465.0" y1="585.5" x2="562.7" y2="549.9" stroke="#8a5a2b" stroke-width="5" />
-<path d="M465.0,481.5 A104.0,104.0 0 0,1 562.7,549.9" fill="none" stroke="#555" stroke-width="1" stroke-dasharray="4 3"/>
-<line x1="341.5" y1="462.0" x2="341.5" y2="553.0" stroke="#8a5a2b" stroke-width="4" />
-<path d="M432.5,462.0 A91.0,91.0 0 0,1 341.5,553.0" fill="none" stroke="#555" stroke-width="1" stroke-dasharray="4 3"/>
-<line x1="150.4" y1="592.0" x2="49.0" y2="592.0" stroke="#555" stroke-width="4" />
-<path d="M150.4,488.0 A104.0,104.0 0 0,1 49.0,592.0" fill="none" stroke="#555" stroke-width="1" stroke-dasharray="4 3"/>
-<text x="88.0" y="644.0" font-size="11" text-anchor="middle" fill="#666" font-weight="normal" dominant-baseline="middle">на этаж</text>
-<line x1="1076.0" y1="221.5" x2="1169.6" y2="221.5" stroke="#ffffff" stroke-width="4" />
-<line x1="1076.0" y1="221.5" x2="1169.6" y2="221.5" stroke="#777" stroke-width="1" />
-<path d="M1076.0,319.0 A97.5,97.5 0 0,1 1169.6,221.5" fill="none" stroke="#555" stroke-width="1" stroke-dasharray="4 3"/>
-<rect x="465.0" y="195.5" width="65.0" height="65.0" fill="#c98a5a" stroke="#333" stroke-width="1.2" />
-<text x="497.5" y="218.9" font-size="10" text-anchor="middle" fill="#222" font-weight="normal" dominant-baseline="middle">тумба</text>
-<text x="497.5" y="239.7" font-size="10" text-anchor="middle" fill="#222" font-weight="normal" dominant-baseline="middle">СВЧ</text>
-<rect x="465.0" y="267.0" width="78.0" height="195.0" fill="#d9b27c" stroke="#333" stroke-width="1.2" />
-<text x="500.1" y="364.5" font-size="12" text-anchor="middle" fill="#222" font-weight="bold" dominant-baseline="middle" transform="rotate(-90 500.1 364.5)">ШКАФ-КУПЕ</text>
-<line x1="543.0" y1="267.0" x2="543.0" y2="371.0" stroke="#6b4a2a" stroke-width="3" />
-<line x1="548.2" y1="358.0" x2="548.2" y2="462.0" stroke="#6b4a2a" stroke-width="3" />
-<rect x="543.0" y="195.5" width="130.0" height="78.0" fill="#bfc4c8" stroke="#333" stroke-width="1.2" />
-<text x="608.0" y="224.1" font-size="11" text-anchor="middle" fill="#222" font-weight="normal" dominant-baseline="middle">столик</text>
-<text x="608.0" y="247.5" font-size="9" text-anchor="middle" fill="#555" font-weight="normal" dominant-baseline="middle">(мет. ножки)</text>
-<rect x="679.5" y="195.5" width="71.5" height="78.0" fill="#dfe3e6" stroke="#333" stroke-width="1.2" />
-<text x="715.2" y="234.5" font-size="10" text-anchor="middle" fill="#222" font-weight="normal" dominant-baseline="middle">холод.</text>
-<rect x="757.5" y="198.1" width="260.0" height="114.4" fill="#ffffff" stroke="#333" stroke-width="1.2" />
-<rect x="757.5" y="195.5" width="260.0" height="7.8" fill="#e8c99a" stroke="#8a6a40" stroke-width="1" />
-<rect x="959.0" y="215.0" width="45.5" height="78.0" fill="#eef" stroke="#99a" stroke-width="0.8" />
-<text x="881.0" y="260.5" font-size="13" text-anchor="middle" fill="#222" font-weight="bold" dominant-baseline="middle">КРОВАТЬ 2</text>
-<rect x="699.0" y="494.5" width="260.0" height="114.4" fill="#ffffff" stroke="#333" stroke-width="1.2" />
-<rect x="699.0" y="603.7" width="260.0" height="7.8" fill="#e8c99a" stroke="#8a6a40" stroke-width="1" />
-<rect x="900.5" y="514.0" width="45.5" height="78.0" fill="#eef" stroke="#99a" stroke-width="0.8" />
-<text x="803.0" y="549.1" font-size="13" text-anchor="middle" fill="#222" font-weight="bold" dominant-baseline="middle">КРОВАТЬ 1</text>
-<line x1="699.0" y1="601.1" x2="959.0" y2="601.1" stroke="#ff3b6b" stroke-width="2.5" />
-<rect x="530.0" y="533.5" width="156.0" height="78.0" fill="#c98a5a" stroke="#333" stroke-width="1.2" />
-<rect x="530.0" y="533.5" width="54.6" height="78.0" fill="#b07448" stroke="#333" stroke-width="1.2" />
-<text x="634.0" y="562.1" font-size="12" text-anchor="middle" fill="#222" font-weight="bold" dominant-baseline="middle">СТОЛ 1</text>
-<text x="557.3" y="572.5" font-size="9" text-anchor="middle" fill="#fff" font-weight="normal" dominant-baseline="middle">тумба</text>
-<text x="557.3" y="590.7" font-size="9" text-anchor="middle" fill="#fff" font-weight="normal" dominant-baseline="middle">3 ящ.</text>
-<rect x="530.0" y="585.5" width="156.0" height="26.0" fill="none" stroke="#333" stroke-width="1" stroke-dasharray="3 2"/>
-<text x="634.0" y="598.5" font-size="8" text-anchor="middle" fill="#333" font-weight="normal" dominant-baseline="middle">полка над столом</text>
-<rect x="978.5" y="403.5" width="58.5" height="58.5" fill="#c98a5a" stroke="#333" stroke-width="1.2" />
-<text x="1007.1" y="423.0" font-size="9" text-anchor="middle" fill="#222" font-weight="normal" dominant-baseline="middle">тумб.</text>
-<circle cx="1011.0" cy="445.1" r="7" fill="#ff7ad9" stroke="#a04"/>
-<rect x="1024.0" y="384.0" width="13.0" height="78.0" fill="#fff" stroke="#666" stroke-width="1" stroke-dasharray="2 1"/>
-<rect x="592.4" y="459.4" width="57.2" height="57.2" fill="#e2c08e" stroke="#777" stroke-width="1" rx="6"/>
-<rect x="579.4" y="290.4" width="57.2" height="57.2" fill="#e2c08e" stroke="#777" stroke-width="1" rx="6"/>
-<circle cx="751.0" cy="403.5" r="24" fill="none" stroke="#e0a000" stroke-width="1.5" stroke-dasharray="4 3"/>
-<text x="751.0" y="403.5" font-size="9" text-anchor="middle" fill="#a07000" font-weight="normal" dominant-baseline="middle">плафон</text>
-<circle cx="309.0" cy="536.1" r="16" fill="none" stroke="#e0a000" stroke-width="1.5" stroke-dasharray="4 3"/>
-<rect x="166.0" y="273.5" width="117.0" height="104.0" fill="#d9eef2" stroke="#333" stroke-width="1.2" />
-<line x1="283.0" y1="273.5" x2="283.0" y2="377.5" stroke="#7a9a8a" stroke-width="3" />
-<text x="224.5" y="325.5" font-size="11" text-anchor="middle" fill="#222" font-weight="normal" dominant-baseline="middle">душ</text>
-<rect x="166.0" y="384.0" width="49.4" height="58.5" fill="#fff" stroke="#333" stroke-width="1.2" />
-<text x="190.7" y="412.6" font-size="9" text-anchor="middle" fill="#222" font-weight="normal" dominant-baseline="middle">рак.</text>
-<rect x="367.5" y="273.5" width="45.5" height="23.4" fill="#fff" stroke="#333" stroke-width="1.2" />
-<ellipse cx="390.2" cy="325.5" rx="22.1" ry="31.2" fill="#fff" stroke="#333"/>
-<text x="390.2" y="325.5" font-size="9" text-anchor="middle" fill="#222" font-weight="normal" dominant-baseline="middle">унит.</text>
-<circle cx="436.4" cy="286.5" r="5" fill="#fff" stroke="#333"/>
-<text x="436.4" y="307.3" font-size="8" text-anchor="middle" fill="#555" font-weight="normal" dominant-baseline="middle">стояк</text>
-<text x="309.0" y="423.0" font-size="12" text-anchor="middle" fill="#222" font-weight="bold" dominant-baseline="middle">САНУЗЕЛ</text>
-<rect x="237.5" y="588.1" width="130.0" height="23.4" fill="#7a5a3a" stroke="#333" stroke-width="1.2" />
-<text x="302.5" y="575.1" font-size="10" text-anchor="middle" fill="#222" font-weight="normal" dominant-baseline="middle">вешалка</text>
-<text x="309.0" y="507.5" font-size="12" text-anchor="middle" fill="#222" font-weight="bold" dominant-baseline="middle">КОРИДОР</text>
-<text x="1150.1" y="403.5" font-size="12" text-anchor="middle" fill="#fff" font-weight="bold" dominant-baseline="middle" transform="rotate(-90 1150.1 403.5)">ЛОДЖИЯ</text>
-<text x="1264.5" y="403.5" font-size="10" text-anchor="middle" fill="#1f7a5c" font-weight="normal" dominant-baseline="middle" transform="rotate(-90 1264.5 403.5)">остекление, зелёные рамы</text>
-<line x1="1212.5" y1="228.0" x2="1193.0" y2="202.0" stroke="#c8963c" stroke-width="5" stroke-linecap="round"/>
-<text x="1056.5" y="273.5" font-size="9" text-anchor="middle" fill="#fff" font-weight="normal" dominant-baseline="middle" transform="rotate(-90 1056.5 273.5)">балк.</text>
-<text x="1056.5" y="449.0" font-size="9" text-anchor="middle" fill="#222" font-weight="normal" dominant-baseline="middle" transform="rotate(-90 1056.5 449.0)">окно</text>
-<line x1="465.0" y1="153.9" x2="1037.0" y2="153.9" stroke="#1a5fb4" stroke-width="1" />
-<line x1="465.0" y1="146.1" x2="465.0" y2="161.7" stroke="#1a5fb4" stroke-width="1" />
-<line x1="1037.0" y1="146.1" x2="1037.0" y2="161.7" stroke="#1a5fb4" stroke-width="1" />
-<text x="751.0" y="140.9" font-size="11" text-anchor="middle" fill="#1a5fb4" font-weight="normal" dominant-baseline="middle">≈ 4,4 м</text>
-<line x1="166.0" y1="237.1" x2="449.4" y2="237.1" stroke="#1a5fb4" stroke-width="1" />
-<line x1="166.0" y1="229.3" x2="166.0" y2="244.9" stroke="#1a5fb4" stroke-width="1" />
-<line x1="449.4" y1="229.3" x2="449.4" y2="244.9" stroke="#1a5fb4" stroke-width="1" />
-<text x="307.7" y="224.1" font-size="11" text-anchor="middle" fill="#1a5fb4" font-weight="normal" dominant-baseline="middle">≈ 2,2 м</text>
-<line x1="1076.0" y1="143.5" x2="1222.9" y2="143.5" stroke="#1a5fb4" stroke-width="1" />
-<line x1="1076.0" y1="135.7" x2="1076.0" y2="151.3" stroke="#1a5fb4" stroke-width="1" />
-<line x1="1222.9" y1="135.7" x2="1222.9" y2="151.3" stroke="#1a5fb4" stroke-width="1" />
-<text x="1149.5" y="130.5" font-size="11" text-anchor="middle" fill="#1a5fb4" font-weight="normal" dominant-baseline="middle">≈ 1,1</text>
-<line x1="120.5" y1="273.5" x2="120.5" y2="449.0" stroke="#1a5fb4" stroke-width="1" />
-<line x1="112.7" y1="273.5" x2="128.3" y2="273.5" stroke="#1a5fb4" stroke-width="1" />
-<line x1="112.7" y1="449.0" x2="128.3" y2="449.0" stroke="#1a5fb4" stroke-width="1" />
-<text x="104.9" y="361.2" font-size="11" text-anchor="middle" fill="#1a5fb4" font-weight="normal" dominant-baseline="middle" transform="rotate(-90 104.9 361.2)">≈ 1,35</text>
-<line x1="120.5" y1="462.0" x2="120.5" y2="611.5" stroke="#1a5fb4" stroke-width="1" />
-<line x1="112.7" y1="462.0" x2="128.3" y2="462.0" stroke="#1a5fb4" stroke-width="1" />
-<line x1="112.7" y1="611.5" x2="128.3" y2="611.5" stroke="#1a5fb4" stroke-width="1" />
-<text x="104.9" y="536.8" font-size="11" text-anchor="middle" fill="#1a5fb4" font-weight="normal" dominant-baseline="middle" transform="rotate(-90 104.9 536.8)">≈ 1,15</text>
-<line x1="1303.5" y1="195.5" x2="1303.5" y2="611.5" stroke="#1a5fb4" stroke-width="1" />
-<line x1="1295.7" y1="195.5" x2="1311.3" y2="195.5" stroke="#1a5fb4" stroke-width="1" />
-<line x1="1295.7" y1="611.5" x2="1311.3" y2="611.5" stroke="#1a5fb4" stroke-width="1" />
-<text x="1287.9" y="403.5" font-size="11" text-anchor="middle" fill="#1a5fb4" font-weight="normal" dominant-baseline="middle" transform="rotate(-90 1287.9 403.5)">≈ 3,2 м</text>
-<circle cx="1160.5" cy="319.0" r="11" fill="#d33" stroke="white" stroke-width="2"/>
-<text x="1160.5" y="319.6" font-size="12" text-anchor="middle" fill="white" font-weight="bold" dominant-baseline="middle">1</text>
-<circle cx="588.5" cy="514.0" r="11" fill="#d33" stroke="white" stroke-width="2"/>
-<text x="588.5" y="514.7" font-size="12" text-anchor="middle" fill="white" font-weight="bold" dominant-baseline="middle">2</text>
-<circle cx="387.0" cy="494.5" r="11" fill="#d33" stroke="white" stroke-width="2"/>
-<text x="387.0" y="495.1" font-size="12" text-anchor="middle" fill="white" font-weight="bold" dominant-baseline="middle">3</text>
-<circle cx="1160.5" cy="260.5" r="11" fill="#d33" stroke="white" stroke-width="2"/>
-<text x="1160.5" y="261.1" font-size="12" text-anchor="middle" fill="white" font-weight="bold" dominant-baseline="middle">4</text>
-<circle cx="497.5" cy="293.0" r="11" fill="#d33" stroke="white" stroke-width="2"/>
-<text x="497.5" y="293.6" font-size="12" text-anchor="middle" fill="white" font-weight="bold" dominant-baseline="middle">5</text>
-<circle cx="211.5" cy="351.5" r="11" fill="#d33" stroke="white" stroke-width="2"/>
-<text x="211.5" y="352.1" font-size="12" text-anchor="middle" fill="white" font-weight="bold" dominant-baseline="middle">6</text>
-<text x="40" y="668" font-size="14" font-weight="bold" fill="#d33">Вопросы по схеме</text>
-<circle cx="49" cy="690" r="9" fill="#d33"/><text x="49" y="694" font-size="11" fill="white" text-anchor="middle" font-weight="bold">1</text>
-<text x="66" y="694" font-size="12" fill="#333">Балконная дверь: на наброске она у кровати 2 (вверху), на фото окна — справа, то есть у кровати 1.</text>
-<text x="66" y="710" font-size="12" fill="#333">Фото окна из твоей комнаты или из соседней?</text>
-<circle cx="49" cy="730" r="9" fill="#d33"/><text x="49" y="734" font-size="11" fill="white" text-anchor="middle" font-weight="bold">2</text>
-<text x="66" y="734" font-size="12" fill="#333">Дверь в комнату открывается к столу 1 и упирается в него примерно на 70°. Так и было? Есть ли у двери</text>
-<text x="66" y="750" font-size="12" fill="#333">низкая надставка (на фото 2 там кружка)?</text>
-<circle cx="49" cy="770" r="9" fill="#d33"/><text x="49" y="774" font-size="11" fill="white" text-anchor="middle" font-weight="bold">3</text>
-<text x="66" y="774" font-size="12" fill="#333">Дверь санузла открывается в коридор или внутрь?</text>
-<circle cx="829" cy="690" r="9" fill="#d33"/><text x="829" y="694" font-size="11" fill="white" text-anchor="middle" font-weight="bold">4</text>
-<text x="846" y="694" font-size="12" fill="#333">Балконная дверь открывается на лоджию или в комнату? В комнату ей мешает кровать 2.</text>
-<circle cx="829" cy="730" r="9" fill="#d33"/><text x="829" y="734" font-size="11" fill="white" text-anchor="middle" font-weight="bold">5</text>
-<text x="846" y="734" font-size="12" fill="#333">Тумба с СВЧ: стоит в углу перед шкафом или рядом с ним вдоль стены?</text>
-<circle cx="829" cy="770" r="9" fill="#d33"/><text x="829" y="774" font-size="11" fill="white" text-anchor="middle" font-weight="bold">6</text>
-<text x="846" y="774" font-size="12" fill="#333">Душ: поддон со шторкой или кабина? Серо-зелёная панель на видео — это она?</text>
-<text x="1360" y="150" font-size="13" font-weight="bold" fill="#222">Обозначения</text>
-<rect x="1360" y="160" width="22" height="13" fill="#4a4a4a" stroke="#666" stroke-width="0.6"/><text x="1390" y="170" font-size="12" fill="#333">стена</text>
-<rect x="1360" y="180" width="22" height="13" fill="#e8d2b0" stroke="#666" stroke-width="0.6"/><text x="1390" y="190" font-size="12" fill="#333">ламинат</text>
-<rect x="1360" y="200" width="22" height="13" fill="#e9e3d3" stroke="#666" stroke-width="0.6"/><text x="1390" y="210" font-size="12" fill="#333">плитка санузла</text>
-<rect x="1360" y="220" width="22" height="13" fill="#8d8f93" stroke="#666" stroke-width="0.6"/><text x="1390" y="230" font-size="12" fill="#333">плитка лоджии</text>
-<rect x="1360" y="240" width="22" height="13" fill="#d9b27c" stroke="#666" stroke-width="0.6"/><text x="1390" y="250" font-size="12" fill="#333">шкаф «дуб»</text>
-<rect x="1360" y="260" width="22" height="13" fill="#c98a5a" stroke="#666" stroke-width="0.6"/><text x="1390" y="270" font-size="12" fill="#333">мебель «ольха»</text>
-<rect x="1360" y="280" width="22" height="13" fill="#e8c99a" stroke="#666" stroke-width="0.6"/><text x="1390" y="290" font-size="12" fill="#333">щит на стене вдоль кровати</text>
-<rect x="1360" y="300" width="22" height="13" fill="#ff3b6b" stroke="#666" stroke-width="0.6"/><text x="1390" y="310" font-size="12" fill="#333">светодиодная лента</text>
-<line x1="1360" y1="326" x2="1382" y2="326" stroke="#555" stroke-dasharray="4 3"/><text x="1390" y="330" font-size="12" fill="#333">куда открывается дверь</text>
-<circle cx="1371" cy="346" r="8" fill="none" stroke="#e0a000" stroke-dasharray="3 2"/><text x="1390" y="350" font-size="12" fill="#333">свет на потолке</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1640" height="900" viewBox="0 0 1640 900" font-family="DejaVu Sans, Arial, sans-serif">
+<rect width="1640" height="900" fill="#fbfaf7"/>
+<text x="40" y="44" font-size="24" font-weight="bold" fill="#222">Комната в общаге — схема сверху (черновик 2)</text>
+<text x="40" y="72" font-size="13" fill="#555">По наброску, 7 фото и 6 видео. Размеры — оценка по стандартным вещам, не замер. Зелёная галочка — нашлось в кадрах, красная цифра — ещё вопрос.</text>
+<rect x="462.5" y="193.8" width="575.0" height="400.0" fill="#e8d2b0" stroke="none" stroke-width="1.2" />
+<line x1="462.5" y1="218.8" x2="1037.5" y2="218.8" stroke="#dcc29c" stroke-width="0.5" />
+<line x1="462.5" y1="243.8" x2="1037.5" y2="243.8" stroke="#dcc29c" stroke-width="0.5" />
+<line x1="462.5" y1="268.8" x2="1037.5" y2="268.8" stroke="#dcc29c" stroke-width="0.5" />
+<line x1="462.5" y1="293.8" x2="1037.5" y2="293.8" stroke="#dcc29c" stroke-width="0.5" />
+<line x1="462.5" y1="318.8" x2="1037.5" y2="318.8" stroke="#dcc29c" stroke-width="0.5" />
+<line x1="462.5" y1="343.8" x2="1037.5" y2="343.8" stroke="#dcc29c" stroke-width="0.5" />
+<line x1="462.5" y1="368.8" x2="1037.5" y2="368.8" stroke="#dcc29c" stroke-width="0.5" />
+<line x1="462.5" y1="393.8" x2="1037.5" y2="393.8" stroke="#dcc29c" stroke-width="0.5" />
+<line x1="462.5" y1="418.8" x2="1037.5" y2="418.8" stroke="#dcc29c" stroke-width="0.5" />
+<line x1="462.5" y1="443.8" x2="1037.5" y2="443.8" stroke="#dcc29c" stroke-width="0.5" />
+<line x1="462.5" y1="468.8" x2="1037.5" y2="468.8" stroke="#dcc29c" stroke-width="0.5" />
+<line x1="462.5" y1="493.8" x2="1037.5" y2="493.8" stroke="#dcc29c" stroke-width="0.5" />
+<line x1="462.5" y1="518.8" x2="1037.5" y2="518.8" stroke="#dcc29c" stroke-width="0.5" />
+<line x1="462.5" y1="543.8" x2="1037.5" y2="543.8" stroke="#dcc29c" stroke-width="0.5" />
+<line x1="462.5" y1="568.8" x2="1037.5" y2="568.8" stroke="#dcc29c" stroke-width="0.5" />
+<rect x="175.0" y="450.0" width="272.5" height="143.8" fill="#e8d2b0" stroke="none" stroke-width="1.2" />
+<rect x="175.0" y="268.8" width="272.5" height="168.8" fill="#e9e3d3" stroke="none" stroke-width="1.2" />
+<line x1="212.5" y1="268.8" x2="212.5" y2="437.5" stroke="#d8d0bd" stroke-width="0.6" />
+<line x1="250.0" y1="268.8" x2="250.0" y2="437.5" stroke="#d8d0bd" stroke-width="0.6" />
+<line x1="287.5" y1="268.8" x2="287.5" y2="437.5" stroke="#d8d0bd" stroke-width="0.6" />
+<line x1="325.0" y1="268.8" x2="325.0" y2="437.5" stroke="#d8d0bd" stroke-width="0.6" />
+<line x1="362.5" y1="268.8" x2="362.5" y2="437.5" stroke="#d8d0bd" stroke-width="0.6" />
+<line x1="400.0" y1="268.8" x2="400.0" y2="437.5" stroke="#d8d0bd" stroke-width="0.6" />
+<line x1="437.5" y1="268.8" x2="437.5" y2="437.5" stroke="#d8d0bd" stroke-width="0.6" />
+<line x1="175.0" y1="306.2" x2="447.5" y2="306.2" stroke="#d8d0bd" stroke-width="0.6" />
+<line x1="175.0" y1="343.8" x2="447.5" y2="343.8" stroke="#d8d0bd" stroke-width="0.6" />
+<line x1="175.0" y1="381.2" x2="447.5" y2="381.2" stroke="#d8d0bd" stroke-width="0.6" />
+<line x1="175.0" y1="418.8" x2="447.5" y2="418.8" stroke="#d8d0bd" stroke-width="0.6" />
+<rect x="1075.0" y="178.8" width="141.2" height="430.0" fill="#8d8f93" stroke="none" stroke-width="1.2" />
+<line x1="1112.5" y1="178.8" x2="1112.5" y2="608.8" stroke="#7b7d81" stroke-width="0.6" />
+<line x1="1150.0" y1="178.8" x2="1150.0" y2="608.8" stroke="#7b7d81" stroke-width="0.6" />
+<line x1="1187.5" y1="178.8" x2="1187.5" y2="608.8" stroke="#7b7d81" stroke-width="0.6" />
+<line x1="1075.0" y1="216.2" x2="1216.2" y2="216.2" stroke="#7b7d81" stroke-width="0.6" />
+<line x1="1075.0" y1="253.8" x2="1216.2" y2="253.8" stroke="#7b7d81" stroke-width="0.6" />
+<line x1="1075.0" y1="291.2" x2="1216.2" y2="291.2" stroke="#7b7d81" stroke-width="0.6" />
+<line x1="1075.0" y1="328.8" x2="1216.2" y2="328.8" stroke="#7b7d81" stroke-width="0.6" />
+<line x1="1075.0" y1="366.2" x2="1216.2" y2="366.2" stroke="#7b7d81" stroke-width="0.6" />
+<line x1="1075.0" y1="403.8" x2="1216.2" y2="403.8" stroke="#7b7d81" stroke-width="0.6" />
+<line x1="1075.0" y1="441.2" x2="1216.2" y2="441.2" stroke="#7b7d81" stroke-width="0.6" />
+<line x1="1075.0" y1="478.8" x2="1216.2" y2="478.8" stroke="#7b7d81" stroke-width="0.6" />
+<line x1="1075.0" y1="516.2" x2="1216.2" y2="516.2" stroke="#7b7d81" stroke-width="0.6" />
+<line x1="1075.0" y1="553.8" x2="1216.2" y2="553.8" stroke="#7b7d81" stroke-width="0.6" />
+<rect x="447.5" y="178.8" width="590.0" height="15.0" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
+<rect x="160.0" y="593.8" width="877.5" height="15.0" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
+<rect x="447.5" y="178.8" width="15.0" height="296.2" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
+<rect x="447.5" y="575.0" width="15.0" height="33.8" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
+<rect x="1037.5" y="178.8" width="37.5" height="33.8" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
+<rect x="1037.5" y="306.2" width="37.5" height="50.0" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
+<rect x="1037.5" y="518.8" width="37.5" height="90.0" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
+<rect x="1037.5" y="356.2" width="37.5" height="162.5" fill="#cfe6ee" stroke="#4a4a4a" stroke-width="1" />
+<line x1="1056.2" y1="356.2" x2="1056.2" y2="518.8" stroke="#4a4a4a" stroke-width="1" />
+<rect x="160.0" y="253.8" width="287.5" height="15.0" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
+<rect x="160.0" y="253.8" width="15.0" height="227.5" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
+<rect x="160.0" y="581.2" width="15.0" height="27.5" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
+<rect x="175.0" y="437.5" width="168.7" height="12.5" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
+<rect x="431.2" y="437.5" width="16.2" height="12.5" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
+<rect x="1075.0" y="162.5" width="156.2" height="16.2" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
+<rect x="1075.0" y="608.8" width="156.2" height="16.2" fill="#4a4a4a" stroke="none" stroke-width="1.2" />
+<rect x="1216.2" y="178.8" width="15.0" height="430.0" fill="#e9dccf" stroke="#4a4a4a" stroke-width="1" />
+<line x1="1223.8" y1="178.8" x2="1223.8" y2="608.8" stroke="#1f9a8a" stroke-width="4" />
+<line x1="462.5" y1="575.0" x2="562.1" y2="566.3" stroke="#8a5a2b" stroke-width="5" />
+<path d="M462.5,475.0 A100.0,100.0 0 0,1 562.1,566.3" fill="none" stroke="#555" stroke-width="1" stroke-dasharray="4 3"/>
+<line x1="343.8" y1="450.0" x2="343.8" y2="537.5" stroke="#8a5a2b" stroke-width="4" />
+<path d="M431.2,450.0 A87.5,87.5 0 0,1 343.8,537.5" fill="none" stroke="#555" stroke-width="1" stroke-dasharray="4 3"/>
+<line x1="160.0" y1="581.2" x2="62.5" y2="581.2" stroke="#3a2a1f" stroke-width="5" />
+<path d="M160.0,481.2 A100.0,100.0 0 0,1 62.5,581.2" fill="none" stroke="#555" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="106.2" y="618.8" font-size="11" text-anchor="middle" fill="#666" font-weight="normal" dominant-baseline="middle">на этаж</text>
+<line x1="1075.0" y1="212.5" x2="1166.2" y2="212.5" stroke="#ffffff" stroke-width="5" />
+<line x1="1075.0" y1="212.5" x2="1166.2" y2="212.5" stroke="#777" stroke-width="1" />
+<path d="M1075.0,306.2 A93.8,93.8 0 0,1 1166.2,212.5" fill="none" stroke="#555" stroke-width="1" stroke-dasharray="4 3"/>
+<rect x="462.5" y="193.8" width="62.5" height="62.5" fill="#c98a5a" stroke="#333" stroke-width="1.2" />
+<text x="493.8" y="215.0" font-size="10" text-anchor="middle" fill="#222" font-weight="normal" dominant-baseline="middle">тумба</text>
+<text x="493.8" y="235.0" font-size="8" text-anchor="middle" fill="#222" font-weight="normal" dominant-baseline="middle">СВЧ, чайник</text>
+<rect x="462.5" y="262.5" width="75.0" height="200.0" fill="#d9b27c" stroke="#333" stroke-width="1.2" />
+<text x="496.2" y="362.5" font-size="12" text-anchor="middle" fill="#222" font-weight="bold" dominant-baseline="middle" transform="rotate(-90 496.2 362.5)">ШКАФ-КУПЕ</text>
+<line x1="537.5" y1="262.5" x2="537.5" y2="368.8" stroke="#6b4a2a" stroke-width="3" />
+<line x1="542.5" y1="356.2" x2="542.5" y2="462.5" stroke="#6b4a2a" stroke-width="3" />
+<rect x="531.2" y="193.8" width="150.0" height="75.0" fill="#bfc4c8" stroke="#333" stroke-width="1.2" />
+<text x="606.2" y="218.8" font-size="11" text-anchor="middle" fill="#222" font-weight="normal" dominant-baseline="middle">столик</text>
+<text x="606.2" y="238.8" font-size="8" text-anchor="middle" fill="#444" font-weight="normal" dominant-baseline="middle">мет. ножки, 2-й монитор</text>
+<rect x="687.5" y="193.8" width="75.0" height="77.5" fill="#dfe3e6" stroke="#333" stroke-width="1.2" />
+<text x="725.0" y="232.5" font-size="10" text-anchor="middle" fill="#222" font-weight="normal" dominant-baseline="middle">холод.</text>
+<rect x="775.0" y="196.2" width="250.0" height="110.0" fill="#ffffff" stroke="#333" stroke-width="1.2" />
+<rect x="775.0" y="193.8" width="250.0" height="7.5" fill="#e8c99a" stroke="#8a6a40" stroke-width="1" />
+<rect x="968.8" y="212.5" width="43.8" height="75.0" fill="#eef" stroke="#99a" stroke-width="0.8" />
+<text x="887.5" y="256.2" font-size="13" text-anchor="middle" fill="#222" font-weight="bold" dominant-baseline="middle">КРОВАТЬ 2</text>
+<rect x="775.0" y="481.2" width="250.0" height="110.0" fill="#ffffff" stroke="#333" stroke-width="1.2" />
+<rect x="775.0" y="586.2" width="250.0" height="7.5" fill="#e8c99a" stroke="#8a6a40" stroke-width="1" />
+<rect x="968.8" y="500.0" width="43.8" height="75.0" fill="#eef" stroke="#99a" stroke-width="0.8" />
+<text x="875.0" y="533.8" font-size="13" text-anchor="middle" fill="#222" font-weight="bold" dominant-baseline="middle">КРОВАТЬ 1</text>
+<line x1="775.0" y1="583.8" x2="1025.0" y2="583.8" stroke="#ff3b6b" stroke-width="2.5" />
+<rect x="565.0" y="537.5" width="56.3" height="56.3" fill="#ecd3a3" stroke="#333" stroke-width="1.2" />
+<text x="593.1" y="558.8" font-size="9" text-anchor="middle" fill="#222" font-weight="normal" dominant-baseline="middle">тумб.</text>
+<text x="593.1" y="576.2" font-size="8" text-anchor="middle" fill="#555" font-weight="normal" dominant-baseline="middle">светл.</text>
+<rect x="625.0" y="518.8" width="143.8" height="75.0" fill="#c98a5a" stroke="#333" stroke-width="1.2" />
+<rect x="625.0" y="518.8" width="52.5" height="75.0" fill="#b07448" stroke="#333" stroke-width="1.2" />
+<text x="722.5" y="546.2" font-size="12" text-anchor="middle" fill="#222" font-weight="bold" dominant-baseline="middle">СТОЛ 1</text>
+<text x="651.2" y="556.2" font-size="9" text-anchor="middle" fill="#fff" font-weight="normal" dominant-baseline="middle">3 ящ.</text>
+<rect x="625.0" y="568.8" width="143.8" height="25.0" fill="none" stroke="#333" stroke-width="1" stroke-dasharray="3 2"/>
+<text x="700.0" y="581.2" font-size="8" text-anchor="middle" fill="#222" font-weight="normal" dominant-baseline="middle">полка над столом</text>
+<rect x="981.2" y="393.8" width="56.2" height="56.2" fill="#c98a5a" stroke="#333" stroke-width="1.2" />
+<text x="1008.8" y="412.5" font-size="9" text-anchor="middle" fill="#222" font-weight="normal" dominant-baseline="middle">тумб.</text>
+<circle cx="1012.5" cy="433.8" r="7" fill="#ff7ad9" stroke="#a04"/>
+<rect x="1025.0" y="375.0" width="12.5" height="75.0" fill="#fff" stroke="#666" stroke-width="1" stroke-dasharray="2 1"/>
+<rect x="685.0" y="447.5" width="55.0" height="55.0" fill="#e2c08e" stroke="#777" stroke-width="1" rx="6"/>
+<rect x="578.8" y="285.0" width="55.0" height="55.0" fill="#e2c08e" stroke="#777" stroke-width="1" rx="6"/>
+<circle cx="750.0" cy="393.8" r="24" fill="none" stroke="#e0a000" stroke-width="1.5" stroke-dasharray="4 3"/>
+<text x="750.0" y="393.8" font-size="9" text-anchor="middle" fill="#a07000" font-weight="normal" dominant-baseline="middle">плафон</text>
+<circle cx="300.0" cy="518.8" r="16" fill="none" stroke="#e0a000" stroke-width="1.5" stroke-dasharray="4 3"/>
+<rect x="175.0" y="268.8" width="112.5" height="100.0" fill="#d9eef2" stroke="#333" stroke-width="1.2" />
+<line x1="287.5" y1="268.8" x2="287.5" y2="368.8" stroke="#7a9a8a" stroke-width="3" />
+<line x1="175.0" y1="368.8" x2="287.5" y2="368.8" stroke="#7a9a8a" stroke-width="3" />
+<text x="231.2" y="308.8" font-size="10" text-anchor="middle" fill="#222" font-weight="normal" dominant-baseline="middle">душ:</text>
+<text x="231.2" y="331.2" font-size="9" text-anchor="middle" fill="#222" font-weight="normal" dominant-baseline="middle">поддон + стекло</text>
+<text x="231.2" y="350.0" font-size="8" text-anchor="middle" fill="#555" font-weight="normal" dominant-baseline="middle">в серо-зел. профиле</text>
+<rect x="175.0" y="375.0" width="47.5" height="56.2" fill="#fff" stroke="#333" stroke-width="1.2" />
+<text x="198.8" y="402.5" font-size="9" text-anchor="middle" fill="#222" font-weight="normal" dominant-baseline="middle">рак.</text>
+<rect x="368.8" y="268.8" width="43.8" height="22.5" fill="#fff" stroke="#333" stroke-width="1.2" />
+<ellipse cx="390.6" cy="318.8" rx="21.2" ry="30.0" fill="#fff" stroke="#333"/>
+<text x="390.6" y="318.8" font-size="9" text-anchor="middle" fill="#222" font-weight="normal" dominant-baseline="middle">Jika</text>
+<circle cx="435.0" cy="281.2" r="5" fill="#fff" stroke="#333"/>
+<text x="435.0" y="301.2" font-size="8" text-anchor="middle" fill="#555" font-weight="normal" dominant-baseline="middle">стояк</text>
+<text x="325.0" y="408.8" font-size="12" text-anchor="middle" fill="#222" font-weight="bold" dominant-baseline="middle">САНУЗЕЛ</text>
+<rect x="318.8" y="562.5" width="125.0" height="31.2" fill="#ecd3a3" stroke="#333" stroke-width="1.2" />
+<text x="381.2" y="547.5" font-size="8" text-anchor="middle" fill="#222" font-weight="normal" dominant-baseline="middle">вешалка, полка для обуви</text>
+<text x="275.0" y="487.5" font-size="12" text-anchor="middle" fill="#222" font-weight="bold" dominant-baseline="middle">КОРИДОР</text>
+<text x="1146.2" y="393.8" font-size="12" text-anchor="middle" fill="#fff" font-weight="bold" dominant-baseline="middle" transform="rotate(-90 1146.2 393.8)">ЛОДЖИЯ</text>
+<text x="1256.2" y="393.8" font-size="10" text-anchor="middle" fill="#1f7a6a" font-weight="normal" dominant-baseline="middle" transform="rotate(-90 1256.2 393.8)">остекление, зелёные рамы</text>
+<text x="1306.2" y="393.8" font-size="10" text-anchor="middle" fill="#555" font-weight="normal" dominant-baseline="middle" transform="rotate(-90 1306.2 393.8)">вид: двор, кирпичный дом 2–3 эт., за ним многоэтажки</text>
+<line x1="1206.2" y1="225.0" x2="1187.5" y2="200.0" stroke="#c8963c" stroke-width="5" stroke-linecap="round"/>
+<text x="1056.2" y="260.0" font-size="9" text-anchor="middle" fill="#fff" font-weight="normal" dominant-baseline="middle" transform="rotate(-90 1056.2 260.0)">балк.</text>
+<text x="1056.2" y="437.5" font-size="9" text-anchor="middle" fill="#222" font-weight="normal" dominant-baseline="middle" transform="rotate(-90 1056.2 437.5)">окно</text>
+<line x1="462.5" y1="153.8" x2="1037.5" y2="153.8" stroke="#1a5fb4" stroke-width="1" />
+<line x1="462.5" y1="146.2" x2="462.5" y2="161.2" stroke="#1a5fb4" stroke-width="1" />
+<line x1="1037.5" y1="146.2" x2="1037.5" y2="161.2" stroke="#1a5fb4" stroke-width="1" />
+<text x="750.0" y="141.2" font-size="11" text-anchor="middle" fill="#1a5fb4" font-weight="normal" dominant-baseline="middle">≈ 4,6 м</text>
+<line x1="175.0" y1="233.8" x2="447.5" y2="233.8" stroke="#1a5fb4" stroke-width="1" />
+<line x1="175.0" y1="226.2" x2="175.0" y2="241.2" stroke="#1a5fb4" stroke-width="1" />
+<line x1="447.5" y1="226.2" x2="447.5" y2="241.2" stroke="#1a5fb4" stroke-width="1" />
+<text x="311.2" y="221.2" font-size="11" text-anchor="middle" fill="#1a5fb4" font-weight="normal" dominant-baseline="middle">≈ 2,2 м</text>
+<line x1="1075.0" y1="141.2" x2="1216.2" y2="141.2" stroke="#1a5fb4" stroke-width="1" />
+<line x1="1075.0" y1="133.8" x2="1075.0" y2="148.8" stroke="#1a5fb4" stroke-width="1" />
+<line x1="1216.2" y1="133.8" x2="1216.2" y2="148.8" stroke="#1a5fb4" stroke-width="1" />
+<text x="1145.6" y="128.8" font-size="11" text-anchor="middle" fill="#1a5fb4" font-weight="normal" dominant-baseline="middle">≈ 1,1</text>
+<line x1="131.2" y1="268.8" x2="131.2" y2="437.5" stroke="#1a5fb4" stroke-width="1" />
+<line x1="123.8" y1="268.8" x2="138.8" y2="268.8" stroke="#1a5fb4" stroke-width="1" />
+<line x1="123.8" y1="437.5" x2="138.8" y2="437.5" stroke="#1a5fb4" stroke-width="1" />
+<text x="116.2" y="353.1" font-size="11" text-anchor="middle" fill="#1a5fb4" font-weight="normal" dominant-baseline="middle" transform="rotate(-90 116.2 353.1)">≈ 1,35</text>
+<line x1="131.2" y1="450.0" x2="131.2" y2="593.8" stroke="#1a5fb4" stroke-width="1" />
+<line x1="123.8" y1="450.0" x2="138.8" y2="450.0" stroke="#1a5fb4" stroke-width="1" />
+<line x1="123.8" y1="593.8" x2="138.8" y2="593.8" stroke="#1a5fb4" stroke-width="1" />
+<text x="116.2" y="521.9" font-size="11" text-anchor="middle" fill="#1a5fb4" font-weight="normal" dominant-baseline="middle" transform="rotate(-90 116.2 521.9)">≈ 1,15</text>
+<line x1="1356.2" y1="193.8" x2="1356.2" y2="593.8" stroke="#1a5fb4" stroke-width="1" />
+<line x1="1348.8" y1="193.8" x2="1363.8" y2="193.8" stroke="#1a5fb4" stroke-width="1" />
+<line x1="1348.8" y1="593.8" x2="1363.8" y2="593.8" stroke="#1a5fb4" stroke-width="1" />
+<text x="1341.2" y="393.8" font-size="11" text-anchor="middle" fill="#1a5fb4" font-weight="normal" dominant-baseline="middle" transform="rotate(-90 1341.2 393.8)">≈ 3,2 м</text>
+<circle cx="531.2" cy="500.0" r="10" fill="#2a9d55" stroke="white" stroke-width="2"/>
+<text x="531.2" y="500.6" font-size="12" text-anchor="middle" fill="white" font-weight="bold" dominant-baseline="middle">✓</text>
+<circle cx="387.5" cy="487.5" r="10" fill="#2a9d55" stroke="white" stroke-width="2"/>
+<text x="387.5" y="488.1" font-size="12" text-anchor="middle" fill="white" font-weight="bold" dominant-baseline="middle">✓</text>
+<circle cx="493.8" cy="283.8" r="10" fill="#2a9d55" stroke="white" stroke-width="2"/>
+<text x="493.8" y="284.4" font-size="12" text-anchor="middle" fill="white" font-weight="bold" dominant-baseline="middle">✓</text>
+<circle cx="218.8" cy="287.5" r="10" fill="#2a9d55" stroke="white" stroke-width="2"/>
+<text x="218.8" y="288.1" font-size="12" text-anchor="middle" fill="white" font-weight="bold" dominant-baseline="middle">✓</text>
+<circle cx="1137.5" cy="250.0" r="11" fill="#d33" stroke="white" stroke-width="2"/>
+<text x="1137.5" y="250.6" font-size="12" text-anchor="middle" fill="white" font-weight="bold" dominant-baseline="middle">1</text>
+<circle cx="193.8" cy="531.2" r="11" fill="#d33" stroke="white" stroke-width="2"/>
+<text x="193.8" y="531.9" font-size="12" text-anchor="middle" fill="white" font-weight="bold" dominant-baseline="middle">2</text>
+<circle cx="247.5" cy="402.5" r="11" fill="#d33" stroke="white" stroke-width="2"/>
+<text x="247.5" y="403.1" font-size="12" text-anchor="middle" fill="white" font-weight="bold" dominant-baseline="middle">3</text>
+<text x="40" y="690" font-size="14" font-weight="bold" fill="#2a9d55">Что ответили кадры</text>
+<circle cx="49" cy="710" r="8" fill="#2a9d55"/><text x="49" y="714" font-size="10" fill="white" text-anchor="middle">✓</text>
+<text x="66" y="714" font-size="12" fill="#333">Дверь в комнату открывается внутрь, к столу 1, и упирается в светлую тумбочку с ящиком: она стоит</text>
+<text x="66" y="730" font-size="12" fill="#333">между дверью и столом (видео с коридором, фото 2).</text>
+<circle cx="49" cy="750" r="8" fill="#2a9d55"/><text x="49" y="754" font-size="10" fill="white" text-anchor="middle">✓</text>
+<text x="66" y="754" font-size="12" fill="#333">Дверь санузла открывается в коридор: на видео 2 она стоит открытой справа, если смотреть из</text>
+<text x="66" y="770" font-size="12" fill="#333">комнаты.</text>
+<circle cx="49" cy="790" r="8" fill="#2a9d55"/><text x="49" y="794" font-size="10" fill="white" text-anchor="middle">✓</text>
+<text x="66" y="794" font-size="12" fill="#333">Тумба с СВЧ стоит в углу у стены с дверью, рядом со шкафом; перед ней по стене — столик на</text>
+<text x="66" y="810" font-size="12" fill="#333">металлических ножках со вторым монитором, потом холодильник, потом кровать 2.</text>
+<circle cx="49" cy="830" r="8" fill="#2a9d55"/><text x="49" y="834" font-size="10" fill="white" text-anchor="middle">✓</text>
+<text x="66" y="834" font-size="12" fill="#333">Душ: низкий белый поддон слева от унитаза, огорожен стеклом в серо-зелёном профиле. Унитаз Jika</text>
+<text x="66" y="850" font-size="12" fill="#333">Zeta, смотрит на дверь; справа белый стояк и держатель бумаги.</text>
+<circle cx="49" cy="870" r="8" fill="#2a9d55"/><text x="49" y="874" font-size="10" fill="white" text-anchor="middle">✓</text>
+<text x="66" y="874" font-size="12" fill="#333">Фото окна, по твоим словам, из соседней комнаты: там балконная дверь с другой стороны. В твоей</text>
+<text x="66" y="890" font-size="12" fill="#333">ставлю как на наброске — у кровати 2.</text>
+<text x="930" y="690" font-size="14" font-weight="bold" fill="#d33">Осталось спросить</text>
+<circle cx="939" cy="710" r="9" fill="#d33"/><text x="939" y="714" font-size="11" fill="white" text-anchor="middle" font-weight="bold">1</text>
+<text x="956" y="714" font-size="12" fill="#333">Балконная дверь в твоей комнате открывалась на лоджию? Внутрь ей мешала</text>
+<text x="956" y="730" font-size="12" fill="#333">бы кровать 2: она стоит почти вплотную к стене.</text>
+<circle cx="939" cy="750" r="9" fill="#d33"/><text x="939" y="754" font-size="11" fill="white" text-anchor="middle" font-weight="bold">2</text>
+<text x="956" y="754" font-size="12" fill="#333">Входная дверь: тёмная, с листком на уровне глаз (видно в конце коридора).</text>
+<text x="956" y="770" font-size="12" fill="#333">Деревянная или металлическая? Открывалась наружу?</text>
+<circle cx="939" cy="790" r="9" fill="#d33"/><text x="939" y="794" font-size="11" fill="white" text-anchor="middle" font-weight="bold">3</text>
+<text x="956" y="794" font-size="12" fill="#333">Раковина в санузле: на тумбе, на ножке или просто на стене? И было ли</text>
+<text x="956" y="810" font-size="12" fill="#333">зеркало?</text>
+<text x="1420" y="150" font-size="13" font-weight="bold" fill="#222">Обозначения</text>
+<rect x="1420" y="160" width="22" height="13" fill="#4a4a4a" stroke="#666" stroke-width="0.6"/><text x="1450" y="170" font-size="12" fill="#333">стена</text>
+<rect x="1420" y="180" width="22" height="13" fill="#e8d2b0" stroke="#666" stroke-width="0.6"/><text x="1450" y="190" font-size="12" fill="#333">ламинат</text>
+<rect x="1420" y="200" width="22" height="13" fill="#e9e3d3" stroke="#666" stroke-width="0.6"/><text x="1450" y="210" font-size="12" fill="#333">плитка санузла</text>
+<rect x="1420" y="220" width="22" height="13" fill="#8d8f93" stroke="#666" stroke-width="0.6"/><text x="1450" y="230" font-size="12" fill="#333">плитка лоджии</text>
+<rect x="1420" y="240" width="22" height="13" fill="#d9b27c" stroke="#666" stroke-width="0.6"/><text x="1450" y="250" font-size="12" fill="#333">шкаф «дуб»</text>
+<rect x="1420" y="260" width="22" height="13" fill="#c98a5a" stroke="#666" stroke-width="0.6"/><text x="1450" y="270" font-size="12" fill="#333">мебель «ольха»</text>
+<rect x="1420" y="280" width="22" height="13" fill="#ecd3a3" stroke="#666" stroke-width="0.6"/><text x="1450" y="290" font-size="12" fill="#333">светлое дерево</text>
+<rect x="1420" y="300" width="22" height="13" fill="#e8c99a" stroke="#666" stroke-width="0.6"/><text x="1450" y="310" font-size="12" fill="#333">щит вдоль кровати</text>
+<rect x="1420" y="320" width="22" height="13" fill="#ff3b6b" stroke="#666" stroke-width="0.6"/><text x="1450" y="330" font-size="12" fill="#333">светодиодная лента</text>
+<line x1="1420" y1="346" x2="1442" y2="346" stroke="#555" stroke-dasharray="4 3"/><text x="1450" y="350" font-size="12" fill="#333">куда открывается дверь</text>
+<circle cx="1431" cy="366" r="8" fill="none" stroke="#e0a000" stroke-dasharray="3 2"/><text x="1450" y="370" font-size="12" fill="#333">свет на потолке</text>
 </svg>
