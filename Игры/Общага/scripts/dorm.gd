@@ -32,17 +32,20 @@ func _ready() -> void:
 	env.sky = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = Color(0.82, 0.86, 0.9)
-	env.ambient_light_energy = 0.35
+	env.ambient_light_energy = 0.28
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	environment.environment = env
 	add_child(environment)
 	var sun := DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-38, -110, 0)
-	sun.light_energy = 0.6
+	sun.light_energy = 0.45
 	sun.shadow_enabled = true
 	sun.directional_shadow_max_distance = 180
 	add_child(sun)
-	_fill_light(Vector3(2.3, 2.4, -1.6), 0.7, 5)
+	# Основной рассеянный свет приходит от окна. Тени мебели нужны и в Compatibility.
+	_window_light(Vector3(4.15, 1.9, -1.15))
+	_window_light(Vector3(4.15, 1.9, -2.35))
+	_fill_light(Vector3(2.3, 2.4, -1.6), 0.22, 4)
 	_fill_light(Vector3(-1.3, 2.4, -1.9), 0.8, 3)
 	camera = Camera3D.new()
 	camera.fov = 72
@@ -76,6 +79,17 @@ func _fill_light(at: Vector3, energy: float, radius: float) -> void:
 	light.position = at
 	light.light_energy = energy
 	light.omni_range = radius
+	add_child(light)
+
+func _window_light(at: Vector3) -> void:
+	var light := OmniLight3D.new()
+	light.position = at
+	light.light_color = Color(1.0, 0.98, 0.94)
+	light.light_energy = 0.025
+	light.omni_range = 5.5
+	light.shadow_enabled = true
+	light.shadow_bias = 0.025
+	light.shadow_normal_bias = 0.08
 	add_child(light)
 
 func _set_view(index: int) -> void:

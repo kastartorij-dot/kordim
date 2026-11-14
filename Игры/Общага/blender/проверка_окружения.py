@@ -67,7 +67,7 @@ class ExportTests(unittest.TestCase):
 
     def test_facade_and_bedding_keep_their_uv_after_join(self):
         checked = set()
-        expected = {"фасад_кирпич", "пододеяльник_розы", "пододеяльник_синий"}
+        expected = {"фасад_кирпич", "покрывало_зелёное"}
         for mesh in self.gltf["meshes"]:
             for primitive in mesh["primitives"]:
                 name = self.gltf["materials"][primitive["material"]].get("name")
@@ -82,6 +82,13 @@ class ExportTests(unittest.TestCase):
                     self.assertGreater(max(values) - min(values), 0.1, name)
                 checked.add(name)
         self.assertEqual(checked, expected)
+
+    def test_surface_detail_survives_export(self):
+        materials = {m["name"]: m for m in self.gltf["materials"]}
+        for name in ("покрывало_зелёное", "обои", "шторы"):
+            self.assertIn("normalTexture", materials[name], name)
+        self.assertNotIn("пододеяльник_розы", materials)
+        self.assertNotIn("пододеяльник_синий", materials)
 
 
 if __name__ == "__main__":

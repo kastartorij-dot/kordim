@@ -19,11 +19,9 @@ def wall_box(name, x1, y1, z1, x2, y2, z2, mat):
     return box(name, x1, y1, z1, x2, y2, z2, mat, 0.0, None)
 
 def wallpaper():
-    m = flat_mat("обои", (0.86, 0.80, 0.62), 0.92)
-    nt = m.node_tree; b = nt.nodes["Principled BSDF"]
-    nz = nt.nodes.new("ShaderNodeTexNoise"); nz.inputs["Scale"].default_value = 90; nz.inputs["Detail"].default_value = 6
-    bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.35; bp.inputs["Distance"].default_value = 0.002
-    nt.links.new(nz.outputs["Fac"], bp.inputs["Height"]); nt.links.new(bp.outputs["Normal"], b.inputs["Normal"])
+    m = flat_mat("обои", (0.78, 0.75, 0.64), 0.92)
+    from материалы import normal_map
+    normal_map(m, "обои_normal.png", 0.65)
     return m
 
 def curtain(name, y1, y2, x, z1, z2, mat, folds=7, depth=0.06, seed=1, lean=0.0):
@@ -58,6 +56,7 @@ def curtain(name, y1, y2, x, z1, z2, mat, folds=7, depth=0.06, seed=1, lean=0.0)
     me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
     ob = bpy.data.objects.new(name, me); bpy.context.collection.objects.link(ob)
     ob.data.materials.append(mat)
+    uv_box(ob, tile=1.0, grain="z")
     so = ob.modifiers.new("толщина", "SOLIDIFY"); so.thickness = 0.003
     sd = ob.modifiers.new("гладко", "SUBSURF"); sd.levels = 1; sd.render_levels = 2
     for p in ob.data.polygons: p.use_smooth = True
@@ -79,9 +78,8 @@ def fabric_mat(name, color, sheen=0.35):
     b.inputs["Sheen Weight"].default_value = sheen
     b.inputs["Sheen Tint"].default_value = (*[min(1, c * 2 + 0.15) for c in color], 1)
     nt = m.node_tree
-    nz = nt.nodes.new("ShaderNodeTexNoise"); nz.inputs["Scale"].default_value = 400
-    bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.08
-    nt.links.new(nz.outputs["Fac"], bp.inputs["Height"]); nt.links.new(bp.outputs["Normal"], b.inputs["Normal"])
+    from материалы import normal_map
+    normal_map(m, "ткань_normal.png", 0.6)
     return m
 
 def puffer_mat(name, color):
@@ -245,7 +243,6 @@ def build():
     M["пуховик"] = puffer_mat("пуховик", (0.03, 0.03, 0.035))
     M["пуховик_синий"] = flat_mat("пуховик_синий", (0.03, 0.045, 0.1), 0.3)
     M["мех"] = flat_mat("мех", (0.28, 0.2, 0.13), 0.95, bump=1.0)
-    M["дуб_светлый"] = wood_mat("дуб_светлый", "дуб_светлый_diff.jpg", "oak_veneer_01_rough.jpg", "oak_veneer_01_nor.jpg", 0.7)
     M["коврик"] = flat_mat("коврик", (0.35, 0.05, 0.05), 0.95, bump=0.8)
     M["резина_тёмная"] = flat_mat("резина_тёмная", (0.02, 0.02, 0.025), 0.8)
     M["кроссовки_белые"] = flat_mat("кроссовки_белые", (0.85, 0.85, 0.85), 0.6)
@@ -261,7 +258,7 @@ def build():
     from детали import img_mat
     M["пододеяльник_синий"] = img_mat("пододеяльник_синий", "пододеяльник_синий.png", 0.85, 0.2)
     M["пододеяльник_розы"] = img_mat("пододеяльник_розы", "пододеяльник_розы.png", 0.85, 0.2)
-    lam = wood_mat("ламинат", "ламинат_diff.jpg", "laminate_floor_02_rough.jpg", "laminate_floor_02_nor.jpg")
+    lam = wood_mat("ламинат", "ламинат_светлый_diff.png", "laminate_floor_02_rough.jpg", "laminate_floor_02_nor.jpg")
 
     # ---------- пол, потолок
     # доски вдоль комнаты (по X): у текстуры доски идут поперёк V
@@ -320,8 +317,8 @@ def build():
     box("выключатель", 0.3, 0.0, 1.05, 0.38, 0.015, 1.13, M["пластик_белый"], 0.004, None)
 
     # ---------- мебель
-    place(кровать(M, лента=True, покрывало="пододеяльник_синий"), L - 1.045, 0.0, 0, mirror_y=True)    # кровать 1 у стены со столом
-    place(кровать(M, покрывало="пододеяльник_розы"), L - 1.045, W, 0)                                  # кровать 2 у стены с холодильником
+    place(кровать(M, лента=True, покрывало="одеяло_зелёное"), L - 1.045, 0.0, 0, mirror_y=True)
+    place(кровать(M, покрывало="одеяло_зелёное", seed=7), L - 1.045, W, 0)
     стол_root = стол(M); p = полка(M); p.parent = стол_root; техника_на_стол(M, стол_root)
     place(стол_root, 1.875, 0.0, 180)
     place(комод(M), 1.045, 0.0, 180)
@@ -336,8 +333,8 @@ def build():
     # мелочь: полка, шкаф, холодильник, столы, подоконник, тумбочка — blender/мелочь.py
     from мелочь import наполнить
     наполнить(L, W)
-    from детали import у_стола, на_изголовье, в_шкафу, санузел, в_коридоре, вид
-    у_стола(L, W); на_изголовье(L); в_шкафу(); в_коридоре()
+    from детали import у_стола, гладильная_доска, в_шкафу, санузел, в_коридоре, вид
+    у_стола(L, W); гладильная_доска(L); в_шкафу(); в_коридоре()
     # шторы, раздвинуты: у стены со столом и у балконной двери
     box("карниз", L - 0.12, 0.0, 2.5, L - 0.1, W, 2.53, M["пвх"], 0.002, None)
     _ring.clear()

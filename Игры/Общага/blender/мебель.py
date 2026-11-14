@@ -18,7 +18,7 @@ def clean():
 def img(name):
     return bpy.data.images.load(os.path.join(TEX, name), check_existing=True)
 
-def wood_mat(name, diff, rough, nor, rough_k=1.0, nor_k=0.35):
+def wood_mat(name, diff, rough, nor, rough_k=1.0, nor_k=0.12):
     m = bpy.data.materials.new(name)
     m.use_nodes = True
     nt = m.node_tree
@@ -53,25 +53,13 @@ def flat_mat(name, color, rough=0.5, metal=0.0, emit=None, bump=0.0):
 def quilt_mat(name, color):
     """Стёганое покрывало: ромбы прострочки (две диагональные волны), мягкая ткань."""
     m = flat_mat(name, color, 0.92)
-    nt = m.node_tree; b = nt.nodes["Principled BSDF"]
-    tc = nt.nodes.new("ShaderNodeTexCoord")
-    waves = []
-    for ang in (45, -45):
-        mp = nt.nodes.new("ShaderNodeMapping"); mp.inputs["Rotation"].default_value[2] = math.radians(ang)
-        nt.links.new(tc.outputs["UV"], mp.inputs["Vector"])
-        wv = nt.nodes.new("ShaderNodeTexWave"); wv.wave_type = "BANDS"; wv.bands_direction = "X"
-        wv.inputs["Scale"].default_value = 1.2; wv.inputs["Distortion"].default_value = 0.0
-        nt.links.new(mp.outputs["Vector"], wv.inputs["Vector"])
-        waves.append(wv)
-    mn = nt.nodes.new("ShaderNodeMath"); mn.operation = "MINIMUM"
-    nt.links.new(waves[0].outputs["Fac"], mn.inputs[0]); nt.links.new(waves[1].outputs["Fac"], mn.inputs[1])
-    pw = nt.nodes.new("ShaderNodeMath"); pw.operation = "POWER"; pw.inputs[1].default_value = 0.35
-    nt.links.new(mn.outputs[0], pw.inputs[0])
-    bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.6; bp.inputs["Distance"].default_value = 0.01
-    nt.links.new(pw.outputs[0], bp.inputs["Height"]); nt.links.new(bp.outputs["Normal"], b.inputs["Normal"])
+    from материалы import normal_map
+    normal_map(m, "покрывало_normal.png")
     return m
 
 def materials():
+    from материалы import generate
+    generate()
     M = {}
     M["ольха"] = wood_mat("ольха", "ольха_diff.jpg", "oak_veneer_01_rough.jpg", "oak_veneer_01_nor.jpg", 0.7)
     M["дуб"] = wood_mat("дуб", "дуб_diff.jpg", "oak_veneer_01_rough.jpg", "oak_veneer_01_nor.jpg", 0.8)
@@ -82,7 +70,7 @@ def materials():
     M["матрас"] = flat_mat("матрас", (0.86, 0.86, 0.84), 0.9, bump=0.15)
     M["простыня"] = flat_mat("простыня", (0.55, 0.78, 0.76), 0.85, bump=0.2)
     M["одеяло"] = quilt_mat("покрывало_бежевое", (0.42, 0.4, 0.33))
-    M["одеяло_зелёное"] = quilt_mat("покрывало_зелёное", (0.3, 0.42, 0.33))
+    M["одеяло_зелёное"] = quilt_mat("покрывало_зелёное", (0.22, 0.31, 0.23))
     M["наволочка"] = flat_mat("наволочка", (0.9, 0.9, 0.88), 0.85, bump=0.2)
     M["наклейка"] = flat_mat("наклейка", (0.95, 0.35, 0.5), 0.6)
     M["лента"] = flat_mat("лента", (1.0, 0.1, 0.25), 0.5, emit=(1.0, 0.08, 0.2))
@@ -101,6 +89,13 @@ def materials():
     M["ночник_розовый"] = flat_mat("ночник_розовый", (1.0, 0.5, 0.9), 0.4, emit=(1.0, 0.25, 0.85))
     for i, c in enumerate([(0.9, 0.75, 0.1), (0.85, 0.15, 0.1), (0.15, 0.45, 0.85), (0.2, 0.7, 0.3), (0.95, 0.95, 0.9)]):
         M[f"магнит_{i}"] = flat_mat(f"магнит_{i}", c, 0.4)
+    # Ламинированная мебель на фото полуматовая. Сильная карта глянца и
+    # normal map раньше делали фасады похожими на мокрый шпон.
+    for key in ("ольха", "дуб", "дуб_светлый", "фанера"):
+        node = M[key].node_tree.nodes["Principled BSDF"]
+        for link in list(node.inputs["Roughness"].links):
+            M[key].node_tree.links.remove(link)
+        node.inputs["Roughness"].default_value = 0.72
     return M
 
 def glass_mat(name, color, rough):
@@ -330,16 +325,22 @@ def drape(name, x1, x2, y_wall, y_edge, z_top, hang, mat, parent=None, seed=1):
                 y, z = y_edge - rad, z_top - rad - (s - flat - math.pi * rad / 2)
             w = sum(amp * math.sin(f * x * 6.28 + ph + s * 3) for f, ph, amp in waves)
             if s > flat: y -= abs(w) * 1.5
-            else: z += w * 0.6
+            else:
+                z += w * 0.6 + 0.018 * math.exp(-((x - (x1 + x2) / 2) / 0.35) ** 2
+                                               - ((s - flat * 0.55) / 0.3) ** 2)
             row.append(bm.verts.new((x, y, z)))
         grid.append(row)
+    uv = bm.loops.layers.uv.verify()
     for j in range(ny):
         for i in range(nx):
-            bm.faces.new((grid[j][i], grid[j][i+1], grid[j+1][i+1], grid[j+1][i]))
+            face = bm.faces.new((grid[j][i], grid[j][i+1], grid[j+1][i+1], grid[j+1][i]))
+            coords = ((i / nx, j / ny), ((i + 1) / nx, j / ny),
+                      ((i + 1) / nx, (j + 1) / ny), (i / nx, (j + 1) / ny))
+            for loop, (uu, vv) in zip(face.loops, coords):
+                loop[uv].uv = (uu * (x2 - x1), vv * total)
     me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
     ob = bpy.data.objects.new(name, me); bpy.context.collection.objects.link(ob)
     ob.data.materials.append(mat)
-    uv_box(ob, tile=1.0)
     so = ob.modifiers.new("толщина", "SOLIDIFY"); so.thickness = 0.018; so.offset = 1
     sd = ob.modifiers.new("гладко", "SUBSURF"); sd.levels = 1; sd.render_levels = 2
     for p in ob.data.polygons: p.use_smooth = True
@@ -362,7 +363,7 @@ def soft(ob, levels=2, bevel=None):
 
 # ---------------------------------------------------------------- модели
 
-def кровать(M, лента=False, покрывало="одеяло"):
+def кровать(M, лента=False, покрывало="одеяло", seed=1):
     """Кровать 0,9 × 2,0 с Г-образным щитом: изголовье у стены окна (+x), щит вдоль стены (y=0).
     Голова — к +x. Матрас сверху на 0,45."""
     root = empty("Кровать")
@@ -396,7 +397,12 @@ def кровать(M, лента=False, покрывало="одеяло"):
     soft(s, 1, 0.006)
     p = box("подушка", x1 - 0.5, -0.12, 0.45, x1 - 0.06, -W + 0.1, 0.58, M["наволочка"], 0, None, root)
     soft(p, 3, 0.05)
-    drape("покрывало", x0 + 0.02, x1 - 0.48, -0.04, -W + 0.01, 0.468, 0.22, M[покрывало], root)
+    texture = bpy.data.textures.new("мягкие_складки_подушки", type="CLOUDS")
+    texture.noise_scale = 0.16
+    displace = p.modifiers.new("неровность_ткани", "DISPLACE")
+    displace.texture = texture
+    displace.strength = 0.008
+    drape("покрывало", x0 + 0.02, x1 - 0.48, -0.04, -W + 0.01, 0.468, 0.22, M[покрывало], root, seed=seed)
     if лента:
         box("лента_щит", x0, -0.005, 1.0, x1, -0.015, 1.008, M["лента"], 0, "x", root)
         box("лента_изголовье", hx + 0.005, 0.0, 1.05, hx + 0.015, -(W + 0.06), 1.058, M["лента"], 0, "y", root)
