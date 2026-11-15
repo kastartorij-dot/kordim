@@ -39,5 +39,11 @@ for ob in meshes:
   md=ob.modifiers.new('Distant LOD','DECIMATE');md.ratio=min(1,12000/max(1,n))
   bpy.context.view_layer.objects.active=ob
   bpy.ops.object.modifier_apply(modifier=md.name)
+# Для деревьев в десятках метров достаточно 512px: экономит VRAM и размер PCK.
+for image in bpy.data.images:
+ if image.size[0]>512 or image.size[1]>512:
+  factor=512/max(image.size)
+  image.scale(max(1,int(image.size[0]*factor)),max(1,int(image.size[1]*factor)))
+  image.pack()
 bpy.ops.export_scene.gltf(filepath=str(root/'models/дерево.glb'),export_format='GLB',export_cameras=False,export_lights=False)
 print('Tree LOD triangles:',sum(sum(len(p.vertices)-2 for p in ob.data.polygons) for ob in meshes))

@@ -29,6 +29,11 @@ func _run() -> void:
 	click.button_index = MOUSE_BUTTON_LEFT
 	click.pressed = true
 	Input.parse_input_event(click)
+	# Захват может породить системное движение указателя. Сначала обрабатываем его,
+	# затем восстанавливаем тестовое направление перед удержанием W.
+	await process_frame
+	await process_frame
+	scene._set_view(1)
 	var key := InputEventKey.new()
 	key.physical_keycode = KEY_W
 	key.pressed = true
@@ -40,7 +45,7 @@ func _run() -> void:
 	key.pressed = false
 	Input.parse_input_event(key)
 	var input_test := DisplayServer.get_name() != "headless"
-	if input_test and not _check(player.position.distance_to(start) > 0.4, "W не двигает игрока"): return
+	if input_test and not _check(player.position.distance_to(start) > 0.4, "W не двигает игрока: start=%s pos=%s mouse=%s basis=%s" % [start, player.position, Input.mouse_mode, player.basis]): return
 	key = InputEventKey.new()
 	key.physical_keycode = KEY_SPACE
 	key.pressed = true

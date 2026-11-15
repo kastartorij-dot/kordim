@@ -1,0 +1,15 @@
+{
+  "engine": "4.7.2.stable.official.ed1daf0bf",
+  "windows_exe_run_on_windows": false,
+  "embedded_pack_checked_on_linux": true,
+  "archives": {
+    "Общага-прогулка-Godot.zip": {
+      "bytes": 41314525,
+      "sha256": "f5ddf74b02366b6f0c3e92257acfb3a417a9af9c940f9c4500c7e5b5c0adad9f"
+    },
+    "Общага-прогулка-Windows.zip": {
+      "bytes": 91743130,
+      "sha256": "3d209f70d1c13d7105148c3bd99b2dfd3f5da2f1b68d51a29761b81ff1e7c183"
+    }
+  }
+}

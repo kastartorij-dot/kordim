@@ -8,6 +8,7 @@ const EYE_HEIGHT := 1.62
 
 var camera: Camera3D
 var jump_queued := false
+var ignore_capture_motion := false
 
 func _ready() -> void:
 	collision_layer = 4
@@ -25,6 +26,8 @@ func _ready() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed:
+		if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+			ignore_capture_motion = true
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	elif event is InputEventKey and event.pressed:
 		if event.physical_keycode == KEY_ESCAPE:
@@ -35,6 +38,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			var fullscreen := DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if fullscreen else DisplayServer.WINDOW_MODE_FULLSCREEN)
 	elif event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and camera != null:
+		if ignore_capture_motion:
+			ignore_capture_motion = false
+			return
 		rotation.y -= event.relative.x * 0.0025
 		camera.rotation.x = clampf(camera.rotation.x - event.relative.y * 0.0025, -1.45, 1.45)
 
