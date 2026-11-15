@@ -1,0 +1,212 @@
+[
+  {
+    "node": "Moving_00",
+    "label": "Ящик · Стол",
+    "kind": "slide",
+    "closed": 0,
+    "opened": 0.28,
+    "axis": [
+      -8.742277657347586e-08,
+      0.0,
+      -1.0
+    ],
+    "initial_open": false
+  },
+  {
+    "node": "Moving_01",
+    "label": "Ящик · Стол",
+    "kind": "slide",
+    "closed": 0,
+    "opened": 0.28,
+    "axis": [
+      -8.742277657347586e-08,
+      0.0,
+      -1.0
+    ],
+    "initial_open": false
+  },
+  {
+    "node": "Moving_02",
+    "label": "Ящик · Стол",
+    "kind": "slide",
+    "closed": 0,
+    "opened": 0.28,
+    "axis": [
+      -8.742277657347586e-08,
+      0.0,
+      -1.0
+    ],
+    "initial_open": false
+  },
+  {
+    "node": "Moving_03",
+    "label": "Ящик · Комод",
+    "kind": "slide",
+    "closed": 0,
+    "opened": 0.28,
+    "axis": [
+      -8.742277657347586e-08,
+      0.0,
+      -1.0
+    ],
+    "initial_open": false
+  },
+  {
+    "node": "Moving_04",
+    "label": "Ящик · Комод",
+    "kind": "slide",
+    "closed": 0,
+    "opened": 0.28,
+    "axis": [
+      -8.742277657347586e-08,
+      0.0,
+      -1.0
+    ],
+    "initial_open": false
+  },
+  {
+    "node": "Moving_05",
+    "label": "Ящик · Комод",
+    "kind": "slide",
+    "closed": 0,
+    "opened": 0.28,
+    "axis": [
+      -8.742277657347586e-08,
+      0.0,
+      -1.0
+    ],
+    "initial_open": false
+  },
+  {
+    "node": "Moving_06",
+    "label": "Створка шкафа",
+    "kind": "slide",
+    "closed": -0.45,
+    "opened": 0.33,
+    "axis": [
+      -4.371138828673793e-08,
+      0.0,
+      -1.0
+    ],
+    "initial_open": true,
+    "initial_value": 0
+  },
+  {
+    "node": "Moving_07",
+    "label": "Створка шкафа",
+    "kind": "slide",
+    "closed": 0,
+    "opened": -0.78,
+    "axis": [
+      -4.371138828673793e-08,
+      0.0,
+      -1.0
+    ],
+    "initial_open": false,
+    "initial_value": 0
+  },
+  {
+    "node": "Moving_08",
+    "label": "Ящик · Тумба_СВЧ",
+    "kind": "slide",
+    "closed": 0,
+    "opened": 0.28,
+    "axis": [
+      1.0,
+      0.0,
+      -4.371138828673793e-08
+    ],
+    "initial_open": false
+  },
+  {
+    "node": "Moving_09",
+    "label": "Дверца тумбы",
+    "kind": "rotate",
+    "closed": 0,
+    "opened": 1.6580627893946132,
+    "axis": [
+      0,
+      1,
+      0
+    ],
+    "initial_open": false
+  },
+  {
+    "node": "Moving_10",
+    "label": "Холодильник",
+    "kind": "rotate",
+    "closed": 0,
+    "opened": 1.7453292519943295,
+    "axis": [
+      0,
+      1,
+      0
+    ],
+    "initial_open": false
+  },
+  {
+    "node": "Moving_11",
+    "label": "Морозилка",
+    "kind": "rotate",
+    "closed": 0,
+    "opened": 1.7453292519943295,
+    "axis": [
+      0,
+      1,
+      0
+    ],
+    "initial_open": false
+  },
+  {
+    "node": "Moving_12",
+    "label": "Ящик · Тумбочка",
+    "kind": "slide",
+    "closed": 0,
+    "opened": 0.28,
+    "axis": [
+      -1.0,
+      0.0,
+      -4.371138828673793e-08
+    ],
+    "initial_open": false
+  },
+  {
+    "node": "Moving_13",
+    "label": "Ящик · Тумбочка",
+    "kind": "slide",
+    "closed": 0,
+    "opened": 0.28,
+    "axis": [
+      -1.0,
+      0.0,
+      -4.371138828673793e-08
+    ],
+    "initial_open": false
+  },
+  {
+    "node": "Moving_14",
+    "label": "Дверь в комнату",
+    "kind": "rotate",
+    "closed": 1.3962634015954636,
+    "opened": 0,
+    "axis": [
+      0,
+      1,
+      0
+    ],
+    "initial_open": true
+  },
+  {
+    "node": "Moving_15",
+    "label": "Дверь санузла",
+    "kind": "rotate",
+    "closed": 1.5707963267948966,
+    "opened": 0,
+    "axis": [
+      0,
+      1,
+      0
+    ],
+    "initial_open": true
+  }
+]

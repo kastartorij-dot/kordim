@@ -8,11 +8,14 @@ var shot_frames := 30
 var preset := 1
 var player: CharacterBody3D
 var walk_enabled := true
+var interaction_hint: Label
+var interactables: Array[Node3D] = []
 
 const VIEWS := [
 	[Vector3(0.75, 1.62, -1.6), Vector3(4.6, 1.3, -1.6)],
 	[Vector3(4.0, 0.95, -1.85), Vector3(0, 1.2, -0.25)],
 	[Vector3(5.35, 1.62, -0.9), Vector3(35, 1.62, -0.9)],
+	[Vector3(0.85, 1.62, -0.65), Vector3(0.5, 1.05, -0.23)],
 ]
 
 func _ready() -> void:
@@ -29,6 +32,7 @@ func _ready() -> void:
 	var room := packed.instantiate()
 	add_child(room)
 	if walk_enabled:
+		_build_interactions(room)
 		_build_collisions(room)
 	var environment := WorldEnvironment.new()
 	var env := Environment.new()
@@ -79,11 +83,27 @@ func _ready() -> void:
 	hint.add_theme_constant_override("shadow_offset_x", 1)
 	hint.add_theme_constant_override("shadow_offset_y", 1)
 	if walk_enabled:
-		hint.text = "Клик — начать · WASD / стрелки — идти · Shift — бежать · Пробел — прыжок\n1 — комната · 2 — у кровати · 3 — на лоджию · Esc — отпустить мышь · F11 — полный экран"
+		hint.text = "Клик — начать · WASD / стрелки — идти · Shift — бежать · Пробел — прыжок · E — открыть/закрыть\n1 — комната · 2 — у кровати · 3 — на лоджию · 4 — у двери · Esc — отпустить мышь · F11 — полный экран"
 	else:
-		hint.text = "Осмотр · Клик — мышь · WASD — движение · Q/E — вниз/вверх · Shift — быстрее\n1 — комната · 2 — от кровати · 3 — лоджия · Esc — отпустить мышь"
+		hint.text = "Осмотр · Клик — мышь · WASD — движение · Q/E — вниз/вверх · Shift — быстрее\n1 — комната · 2 — от кровати · 3 — лоджия · 4 — у двери · Esc — отпустить мышь"
 	layer.add_child(hint)
+	interaction_hint = Label.new()
+	interaction_hint.position = Vector2(0, 390)
+	interaction_hint.size = Vector2(1280, 40)
+	interaction_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	interaction_hint.add_theme_color_override("font_shadow_color", Color.BLACK)
+	interaction_hint.add_theme_constant_override("shadow_offset_x", 2)
+	interaction_hint.add_theme_constant_override("shadow_offset_y", 2)
+	layer.add_child(interaction_hint)
+	var crosshair := Label.new()
+	crosshair.text = "+"
+	crosshair.position = Vector2(635, 348)
+	layer.add_child(crosshair)
+	crosshair.visible = walk_enabled
+	for label in [hint, interaction_hint, crosshair]:
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var credit := Label.new()
+	credit.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	credit.position = Vector2(20, 675)
 	credit.text = "Контуры: © участники OpenStreetMap · ODbL 1.0 · Фасады и высоты — черновик"
 	credit.add_theme_font_size_override("font_size", 14)
@@ -128,7 +148,10 @@ func _set_view(index: int) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if player != null:
-		if event is InputEventKey and event.pressed and event.physical_keycode >= KEY_1 and event.physical_keycode <= KEY_3:
+		if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_E and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+			var item := _interaction_target()
+			if item != null: item.toggle()
+		if event is InputEventKey and event.pressed and event.physical_keycode >= KEY_1 and event.physical_keycode <= KEY_4:
 			_set_view(event.physical_keycode - KEY_1 + 1)
 		return
 	if event is InputEventMouseButton and event.pressed:
@@ -136,7 +159,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event is InputEventKey and event.pressed:
 		if event.physical_keycode == KEY_ESCAPE:
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-		elif event.physical_keycode >= KEY_1 and event.physical_keycode <= KEY_3:
+		elif event.physical_keycode >= KEY_1 and event.physical_keycode <= KEY_4:
 			_set_view(event.physical_keycode - KEY_1 + 1)
 	elif event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		camera.rotation.y -= event.relative.x * 0.0025
@@ -152,7 +175,10 @@ func _process(delta: float) -> void:
 			var result := get_viewport().get_texture().get_image().save_png(target)
 			get_tree().quit(0 if result == OK else 1)
 		return
-	if player != null: return
+	if player != null:
+		var item := _interaction_target() if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED else null
+		interaction_hint.text = item.prompt() if item != null else ""
+		return
 	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED: return
 	var direction := Vector3(
 		float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A)),
@@ -173,6 +199,7 @@ func _build_collisions(room: Node) -> void:
 	var clutter := AABB(Vector3(-0.55, -0.05, -0.72), Vector3(0.60, 0.50, 0.72))
 	for node in nodes:
 		var mesh_node: MeshInstance3D = node
+		if mesh_node.get_parent() in interactables: continue
 		var triangles := mesh_node.mesh.get_faces()
 		for i in range(0, triangles.size(), 3):
 			var a: Vector3 = mesh_node.global_transform * triangles[i]
@@ -194,3 +221,22 @@ func _build_collisions(room: Node) -> void:
 	body.add_child(collision)
 	add_child(body)
 	print("Физика комнаты: ", faces.size() / 3, " треугольников")
+
+func _build_interactions(room: Node3D) -> void:
+	var settings = JSON.parse_string(FileAccess.get_file_as_string("res://models/подвижные.json"))
+	for spec in settings:
+		var mesh_node := room.find_child(spec.node, true, false) as MeshInstance3D
+		assert(mesh_node != null, "В GLB отсутствует подвижный узел: " + spec.node)
+		var body := AnimatableBody3D.new()
+		body.name = spec.node
+		body.set_script(load("res://scripts/movable.gd"))
+		room.add_child(body)
+		body.configure(mesh_node, spec)
+		interactables.append(body)
+
+func _interaction_target() -> Node3D:
+	var origin := camera.global_position
+	var ray := PhysicsRayQueryParameters3D.create(origin, origin - camera.global_basis.z * 2.0, 3)
+	var hit := get_world_3d().direct_space_state.intersect_ray(ray)
+	if not hit.is_empty() and hit.collider in interactables: return hit.collider
+	return null
