@@ -53,6 +53,15 @@ for ob in list(bpy.context.scene.objects):
     elif ob.type == "EMPTY" and base == "дверца" and parent == "Тумба_СВЧ":
         movable(ob, "Дверца тумбы", "rotate", 0, math.radians(95), (0, 1, 0))
 
+# Входное полотно и вся его фурнитура движутся одним узлом.
+entry_parts = [bpy.data.objects[name] for name in ("входная_дверь", "ручка_вход", "ручка_вход_накладка", "глазок")]
+movable(entry_parts[0], "Входная дверь", "rotate", 0, math.radians(95), (0, 1, 0), pivot=(-2.3, 0.15, 0))
+groups[-1] = (entry_parts, groups[-1][1], groups[-1][2])
+
+balcony_parts = [ob for ob in bpy.context.scene.objects if ob.type == "MESH" and ob.name.split(".")[0] in ("рама_балк", "стекло_балк", "панель_балк", "ручка_балк")]
+movable(balcony_parts[0], "Балконная дверь", "rotate", 0, -math.pi / 2, (0, 1, 0), pivot=(4.835, 3.1, 0))
+groups[-1] = (balcony_parts, groups[-1][1], groups[-1][2])
+
 meshes = [ob for ob in bpy.context.scene.objects if ob.type == "MESH"]
 bpy.ops.object.select_all(action="DESELECT")
 for ob in meshes:
@@ -88,10 +97,14 @@ def merge(parts, name, pivot):
     result.name = name
     return result
 
-moving_parts = {ob for parts, _, _ in groups for ob in parts}
+curtains = [(bpy.data.objects["штора_1"], Vector((4.48, 0, 0))),
+            (bpy.data.objects["штора_2"], Vector((4.48, 3.2, 0)))]
+moving_parts = {ob for parts, _, _ in groups for ob in parts} | {ob for ob, _ in curtains}
 exported = [merge([ob for ob in meshes if ob not in moving_parts], "Общага", Vector((0, 0, 0)))]
 for parts, pivot, spec in groups:
     exported.append(merge(parts, spec["node"], pivot))
+for i, (ob, pivot) in enumerate(curtains):
+    exported.append(merge([ob], "Curtain_%s" % i, pivot))
 bpy.ops.object.select_all(action="DESELECT")
 for ob in exported:
     ob.select_set(True)

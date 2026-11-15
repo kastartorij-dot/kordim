@@ -209,7 +209,32 @@ def вид(L, W, вечер=False):
         if cx < L + 2 or math.hypot(cx - L, cy - W / 2) > VIEW["range_m"]: continue
         z1, z2 = building_span(bid, t)
         if z2 <= z1: continue
-        groups[building_kind(t)].append((pts, z1, z2))
+        if bid == "85426979":
+            _mesh("корпус_46к2", [(pts, z1, z2)], mat((0.72, 0.66, 0.43), 0.9), 6, mat((0.20, 0.23, 0.23), 0.9))
+            # Два ряда высоких окон, светлый кирпич и тёмные обрамления по F18/F20.
+            frame_mat = mat((0.35, 0.16, 0.12), 0.85)
+            pane_mat = mat((0.13, 0.29, 0.30), 0.3)
+            bar_mat = mat((0.36, 0.55, 0.48), 0.55)
+            area = sum(a[0]*b[1]-b[0]*a[1] for a,b in zip(pts,pts[1:]+pts[:1]))
+            for a,b in zip(pts, pts[1:]+pts[:1]):
+                dx,dy=b[0]-a[0],b[1]-a[1]; length=math.hypot(dx,dy)
+                if length < 2.5: continue
+                nx,ny=(dy/length,-dx/length) if area > 0 else (-dy/length,dx/length)
+                count=max(1,int(length/2.7))
+                for i in range(count):
+                    f=(i+0.5)/count; xx=a[0]+dx*f; yy=a[1]+dy*f
+                    for bottom in (g+1.1,g+4.5):
+                        for name,w,h,depth,offset,material in [
+                            ("обрамление_46к2",1.65,2.45,0.08,0.03,frame_mat),
+                            ("окно_46к2",1.40,2.15,0.04,0.09,pane_mat),
+                            ("импост_46к2",0.055,2.15,0.04,0.12,bar_mat)]:
+                            ob=box(name,-w/2,-depth/2,0,w/2,depth/2,h,material,0,None)
+                            ob.location=(xx+nx*offset,yy+ny*offset,bottom+(2.45-h)/2)
+                            ob.rotation_euler.z=math.atan2(dy,dx)
+        elif bid == "16237661":
+            _mesh("дом_55_светлый", [(pts,z1,z2)], pan, 9, mat((0.24,0.25,0.25),0.9))
+        else:
+            groups[building_kind(t)].append((pts, z1, z2))
     roof = mat((0.22, 0.24, 0.24), 0.95)
     _mesh("дома_кирпич", groups["кирпич"], brick, 9.0, roof)
     _mesh("дома_панель", groups["панель"], pan, 12.0, roof)
@@ -260,6 +285,8 @@ def вид(L, W, вечер=False):
     ствол = mat((0.25, 0.2, 0.15), 0.9)
     for (x, y) in spots:
         if x < L + 8 or math.hypot(x, y) > 380: continue
+        # Ближний план заменён готовыми CC0-деревьями в Godot; здесь только дальний LOD.
+        if math.hypot(x - L, y - W / 2) < 65: continue
         h = rnd.uniform(7, 13)
         cyl("ствол", 0.2, g, g + h * 0.4, x, y, ствол, 8)
         if rnd.random() < 0.45:   # ель

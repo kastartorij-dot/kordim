@@ -30,7 +30,7 @@ func _run() -> void:
 	player.position = Vector3(5.4, 0.03, -1.6)
 	await physics_frame
 	await physics_frame
-	if not _check(scene.interactables.size() == 16, "Ожидались 16 подвижных узлов"): return
+	if not _check(scene.interactables.size() == 18, "Ожидались 16 подвижных узлов"): return
 	var room_door: Node3D
 	var bathroom_door: Node3D
 	var drawer: Node3D
@@ -95,5 +95,5 @@ func _run() -> void:
 	drawer.toggle()
 	await _settle(drawer)
 	if not _check(drawer.blocked and drawer.value > 0 and drawer.value < drawer.spec.opened, "Ящик не остановился перед игроком"): return
-	print("Взаимодействия OK: 16 узлов, оба положения, коллизии дверей, коридор туда/обратно, луч, защита игрока")
+	print("Взаимодействия OK: 18 узлов, оба положения, коллизии дверей, коридор туда/обратно, луч, защита игрока")
 	quit()

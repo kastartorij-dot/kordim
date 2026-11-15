@@ -208,5 +208,31 @@
       0
     ],
     "initial_open": true
+  },
+  {
+    "node": "Moving_16",
+    "label": "Входная дверь",
+    "kind": "rotate",
+    "closed": 0,
+    "opened": 1.6580627893946132,
+    "axis": [
+      0,
+      1,
+      0
+    ],
+    "initial_open": false
+  },
+  {
+    "node": "Moving_17",
+    "label": "Балконная дверь",
+    "kind": "rotate",
+    "closed": 0,
+    "opened": -1.5707963267948966,
+    "axis": [
+      0,
+      1,
+      0
+    ],
+    "initial_open": false
   }
 ]

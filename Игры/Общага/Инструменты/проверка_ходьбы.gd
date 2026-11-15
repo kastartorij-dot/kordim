@@ -78,7 +78,7 @@ func _run() -> void:
 		await physics_frame
 		player.velocity = Vector3(-2, -0.2, 0)
 		player.move_and_slide()
-	# Дальше стоит открытая дверь санузла: анимации дверей пока не реализованы.
+	# Дальше стоит открытая дверь санузла; полный проход после её закрывания проверяется отдельно.
 	if not _check(player.position.x < -0.35, "Нет прохода в коридор: %s" % player.position): return
 	print("Ходьба OK: полы, мебель, ограждение, вход в коридор; ввод проверен: ", input_test)
 	quit()

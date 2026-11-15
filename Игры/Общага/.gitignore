@@ -12,3 +12,10 @@
 __pycache__/
 /builds/
 /референсы_локально/
+
+# Полный исходник дерева ~100 MB; в игре используется оптимизированный GLB.
+/assets/polyhaven/tree_small_02/
+
+!models/дерево.glb.import
+/models/дерево_*.jpg
+/models/дерево_*.png

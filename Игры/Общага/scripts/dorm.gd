@@ -18,6 +18,8 @@ var interaction_hint: Label
 var interactables: Array[Node3D] = []
 var status_hint: Label
 var status_time := 0.0
+var room_controls: Array[Area3D] = []
+var loaded_room: Node3D
 const SAVE_PATH := "user://walk.cfg"
 
 const VIEWS := [
@@ -40,6 +42,8 @@ func _ready() -> void:
 	var packed: PackedScene = load(path)
 	var room := packed.instantiate()
 	add_child(room)
+	loaded_room = room
+	_build_trees()
 	if walk_enabled:
 		_build_interactions(room)
 		_build_collisions(room)
@@ -63,7 +67,7 @@ func _ready() -> void:
 	sun.rotation_degrees = Vector3(-38, -110, 0)
 	sun.light_energy = 0.45
 	sun.shadow_enabled = true
-	sun.directional_shadow_max_distance = 180
+	sun.directional_shadow_max_distance = 60
 	add_child(sun)
 	daylight.append(sun)
 	# Основной рассеянный свет приходит от окна. Тени мебели нужны и в Compatibility.
@@ -86,6 +90,7 @@ func _ready() -> void:
 	bedside_light.shadow_enabled = true
 	add_child(bedside_light)
 	_set_lighting(0)
+	_build_room_controls()
 	camera = Camera3D.new()
 	camera.fov = 72
 	camera.near = 0.03
@@ -154,6 +159,8 @@ func _ready() -> void:
 		elif arg.begins_with("--shot="): shot_path = arg.substr(7)
 		elif arg.begins_with("--frames="): shot_frames = maxi(1, int(arg.substr(9)))
 	_set_view(preset)
+	for arg in args:
+		if arg.begins_with("--light="): _set_lighting(clampi(int(arg.substr(8)), 0, 2))
 	if not shot_path.is_empty(): layer.hide()
 
 func _fill_light(at: Vector3, energy: float, radius: float) -> void:
@@ -266,13 +273,13 @@ func _build_collisions(room: Node) -> void:
 	var faces := PackedVector3Array()
 	var nodes := room.find_children("*", "MeshInstance3D", true, false)
 	if room is MeshInstance3D: nodes.append(room)
-	var bounds := AABB(Vector3(-2.6, -0.15, -3.6), Vector3(9.1, 3.1, 4.0))
+	var bounds := AABB(Vector3(-3.8, -0.15, -3.6), Vector3(10.3, 3.1, 4.0))
 	# Пакеты/бутылки у порога — мягкая бытовая мелочь, не непроходимая стена.
 	# Исключаем только их маленькую область; большие треугольники пола остаются.
 	var clutter := AABB(Vector3(-0.55, -0.05, -0.72), Vector3(0.60, 0.50, 0.72))
 	for node in nodes:
 		var mesh_node: MeshInstance3D = node
-		if mesh_node.get_parent() in interactables: continue
+		if mesh_node.get_parent() in interactables or str(mesh_node.name).begins_with("Curtain_"): continue
 		var triangles := mesh_node.mesh.get_faces()
 		for i in range(0, triangles.size(), 3):
 			var a: Vector3 = mesh_node.global_transform * triangles[i]
@@ -309,9 +316,10 @@ func _build_interactions(room: Node3D) -> void:
 
 func _interaction_target() -> Node3D:
 	var origin := camera.global_position
-	var ray := PhysicsRayQueryParameters3D.create(origin, origin - camera.global_basis.z * 2.0, 3)
+	var ray := PhysicsRayQueryParameters3D.create(origin, origin - camera.global_basis.z * 2.0, 11)
+	ray.collide_with_areas = true
 	var hit := get_world_3d().direct_space_state.intersect_ray(ray)
-	if not hit.is_empty() and hit.collider in interactables: return hit.collider
+	if not hit.is_empty() and (hit.collider in interactables or hit.collider in room_controls): return hit.collider
 	return null
 
 func _show_status(message: String) -> void:
@@ -321,6 +329,11 @@ func _show_status(message: String) -> void:
 func save_walk(path: String = SAVE_PATH) -> Error:
 	var data := ConfigFile.new()
 	data.set_value("walk", "version", 1)
+	data.set_value("walk", "lighting", lighting_mode)
+	var curtains := {}
+	for control in room_controls:
+		if control.kind == "curtain": curtains[str(control.name)] = control.closed
+	data.set_value("walk", "curtains", curtains)
 	data.set_value("walk", "player", player.transform)
 	data.set_value("walk", "camera_pitch", camera.rotation.x)
 	var items := {}
@@ -342,14 +355,61 @@ func load_walk(path: String = SAVE_PATH) -> Error:
 		return ERR_INVALID_DATA
 	for item in interactables:
 		var state = items.get(item.spec.node)
+		if state == null: continue # новые узлы остаются в начальной позе старого сохранения
 		if not state is Dictionary: return ERR_INVALID_DATA
 		for key in ["pos_x", "pos_y", "pos_z", "rot_x", "rot_y", "rot_z"]:
 			if not state.get(key) is float: return ERR_INVALID_DATA
 		if not state.get("is_open") is bool or not state.get("is_locked") is bool: return ERR_INVALID_DATA
+	var saved_light = data.get_value("walk", "lighting", 0)
+	if not saved_light is int or saved_light < 0 or saved_light > 2: return ERR_INVALID_DATA
+	_set_lighting(saved_light)
+	var curtains = data.get_value("walk", "curtains", {})
+	if curtains is Dictionary:
+		for control in room_controls:
+			if control.kind == "curtain": control.set_closed(bool(curtains.get(str(control.name), false)), true)
 	player.transform = saved_player
 	player.velocity = Vector3.ZERO
 	player.jump_queued = false
 	camera.rotation.x = clampf(pitch, -1.45, 1.45)
 	for item in interactables:
-		item.restore_state(items[item.spec.node])
+		if items.has(item.spec.node): item.restore_state(items[item.spec.node])
 	return OK
+
+func _build_room_controls() -> void:
+	# Проёмы и размеры по существующей Blender-сцене, без новых внешних зависимостей.
+	_add_room_control("Выключатель", Vector3(0.34, 1.09, -0.02), Vector3(0.13, 0.14, 0.07), "light")
+	_add_room_control("Ночник", Vector3(4.35, 0.72, -1.375), Vector3(0.18, 0.25, 0.18), "lamp")
+	for index in range(2):
+		var control := _add_room_control("Штора_%s" % index, Vector3(4.46, 1.3, -0.36 if index == 0 else -2.85), Vector3(0.18, 2.5, 0.75), "curtain")
+		control.cloth = loaded_room.find_child("Curtain_%s" % index, true, false)
+		if control.cloth != null:
+			control.original_scale = control.cloth.scale
+			control.set_closed(false, true)
+
+func _add_room_control(label: String, at: Vector3, size: Vector3, kind: String) -> Area3D:
+	var control := Area3D.new()
+	control.name = label
+	control.set_script(load("res://scripts/room_control.gd"))
+	control.kind = kind
+	control.scene = self
+	control.collision_layer = 8
+	control.collision_mask = 0
+	add_child(control)
+	control.position = at
+	control.original_position = at
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = size
+	shape.shape = box
+	control.add_child(shape)
+	room_controls.append(control)
+	return control
+
+func _build_trees() -> void:
+	var packed := load("res://models/дерево.glb") as PackedScene
+	for at in [Vector3(23, -10, -12), Vector3(22, -10, 20), Vector3(46, -10, 8), Vector3(45, -10, -30)]:
+		var tree := packed.instantiate() as Node3D
+		add_child(tree)
+		tree.position = at
+		tree.rotation.y = at.x * 0.41
+		tree.scale = Vector3.ONE * (1.8 + fmod(at.x, 3.0) * 0.15)
