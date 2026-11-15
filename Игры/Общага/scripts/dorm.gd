@@ -3,6 +3,7 @@ extends Node3D
 
 var camera: Camera3D
 var hint: Label
+var help_button: Button
 var shot_path := ""
 var shot_frames := 30
 var preset := 1
@@ -90,6 +91,15 @@ func _ready() -> void:
 	else:
 		hint.text = "Осмотр · Клик — мышь · WASD — движение · Q/E — вниз/вверх · Shift — быстрее\n1 — комната · 2 — от кровати · 3 — лоджия · 4 — у двери · Esc — отпустить мышь"
 	layer.add_child(hint)
+	hint.hide()
+	help_button = Button.new()
+	help_button.position = Vector2(1020, 18)
+	help_button.size = Vector2(240, 38)
+	help_button.text = "Управление [H]"
+	help_button.tooltip_text = "Показать/скрыть управление. Esc — освободить мышь для нажатия кнопки."
+	help_button.focus_mode = Control.FOCUS_NONE
+	help_button.pressed.connect(_toggle_help)
+	layer.add_child(help_button)
 	interaction_hint = Label.new()
 	interaction_hint.position = Vector2(0, 390)
 	interaction_hint.size = Vector2(1280, 40)
@@ -154,6 +164,15 @@ func _set_view(index: int) -> void:
 		return
 	camera.position = VIEWS[index - 1][0]
 	camera.look_at(VIEWS[index - 1][1])
+
+func _toggle_help() -> void:
+	hint.visible = not hint.visible
+	help_button.text = "Скрыть управление [H]" if hint.visible else "Управление [H]"
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_H:
+		_toggle_help()
+		get_viewport().set_input_as_handled()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if player != null:
