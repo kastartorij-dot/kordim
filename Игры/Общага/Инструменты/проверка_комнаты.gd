@@ -5,13 +5,13 @@ func run():
  root.add_child(s)
  await physics_frame
  s.player.set_physics_process(false)
- assert(s.room_controls.size()==4)
+ assert(s.room_controls.size()==8)
  for control in s.room_controls:
   if control.kind=="curtain":
    assert(control.cloth!=null)
    control.set_closed(true,true)
    assert(is_equal_approx(control.cloth.scale.z,2.25))
-  else: control.toggle()
+  elif control.kind in ["light","lamp"]: control.toggle()
  # Луч на выключатель: сначала убираем полотно из его сектора обзора.
  s.player.position=Vector3(5.4,0.03,-1.6)
  for item in s.interactables:

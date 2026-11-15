@@ -114,7 +114,7 @@ func _ready() -> void:
 	hint.add_theme_constant_override("shadow_offset_x", 1)
 	hint.add_theme_constant_override("shadow_offset_y", 1)
 	if walk_enabled:
-		hint.text = "Клик — начать · WASD / стрелки — идти · Shift — бежать · Пробел — прыжок · E — открыть/закрыть\n1 — комната · 2 — у кровати · 3 — на лоджию · 4 — у двери · Esc — отпустить мышь · F11 — полный экран\nF5 — сохранить · F9 — загрузить · L — день / вечер / ночь"
+		hint.text = "Клик — начать · WASD / стрелки — идти · Shift — бежать · Пробел — прыжок · Ctrl — присесть · E — взаимодействовать\n1 — комната · 2 — у кровати · 3 — на лоджию · 4 — у двери · Esc — отпустить мышь · F11 — полный экран\nF5 — сохранить · F9 — загрузить · L — день / вечер / ночь"
 	else:
 		hint.text = "Осмотр · Клик — мышь · WASD — движение · Q/E — вниз/вверх · Shift — быстрее\n1 — комната · 2 — от кровати · 3 — лоджия · 4 — у двери · Esc — отпустить мышь"
 	layer.add_child(hint)
@@ -187,6 +187,7 @@ func _set_view(index: int) -> void:
 	if player != null:
 		var eye: Vector3 = VIEWS[index - 1][0]
 		var target: Vector3 = VIEWS[index - 1][1]
+		player.reset_posture()
 		player.position = Vector3(eye.x, 0.08, eye.z)
 		player.velocity = Vector3.ZERO
 		player.look_at(Vector3(target.x, player.position.y, target.z))
@@ -227,8 +228,11 @@ func _unhandled_input(event: InputEvent) -> void:
 				var result := load_walk()
 				_show_status("Сохранение загружено" if result == OK else ("Сохранения пока нет" if result == ERR_FILE_NOT_FOUND else "Не удалось загрузить сохранение"))
 		if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_E and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-			var item := _interaction_target()
-			if item != null: item.toggle()
+			if not player.resting.is_empty():
+				if not player.leave_rest(): _show_status("Место для вставания занято")
+			else:
+				var item := _interaction_target()
+				if item != null: item.toggle()
 		if event is InputEventKey and event.pressed and event.physical_keycode >= KEY_1 and event.physical_keycode <= KEY_4:
 			_set_view(event.physical_keycode - KEY_1 + 1)
 		return
@@ -257,7 +261,7 @@ func _process(delta: float) -> void:
 		status_time = maxf(0, status_time - delta)
 		status_hint.visible = status_time > 0
 		var item := _interaction_target() if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED else null
-		interaction_hint.text = item.prompt() if item != null else ""
+		interaction_hint.text = "E / Пробел — встать" if not player.resting.is_empty() else (item.prompt() if item != null else "")
 		return
 	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED: return
 	var direction := Vector3(
@@ -334,7 +338,7 @@ func save_walk(path: String = SAVE_PATH) -> Error:
 	for control in room_controls:
 		if control.kind == "curtain": curtains[str(control.name)] = control.closed
 	data.set_value("walk", "curtains", curtains)
-	data.set_value("walk", "player", player.transform)
+	data.set_value("walk", "player", player.return_transform if not player.resting.is_empty() else player.transform)
 	data.set_value("walk", "camera_pitch", camera.rotation.x)
 	var items := {}
 	for item in interactables:
@@ -367,6 +371,7 @@ func load_walk(path: String = SAVE_PATH) -> Error:
 	if curtains is Dictionary:
 		for control in room_controls:
 			if control.kind == "curtain": control.set_closed(bool(curtains.get(str(control.name), false)), true)
+	player.reset_posture()
 	player.transform = saved_player
 	player.velocity = Vector3.ZERO
 	player.jump_queued = false
@@ -376,6 +381,13 @@ func load_walk(path: String = SAVE_PATH) -> Error:
 	return OK
 
 func _build_room_controls() -> void:
+	for entry in [
+		["Стул у стола", Vector3(2.0, 0.45, -0.85), Vector3(1.875, 1.15, 0.0), "chair", Vector3(0.50, 0.35, 0.50)],
+		["Стул у столика", Vector3(0.85, 0.45, -2.3), Vector3(0.85, 1.15, -3.2), "chair", Vector3(0.50, 0.35, 0.50)],
+		["Кровать у стола", Vector3(3.55, 0.45, -0.45), Vector3(1.6, 0.8, -0.45), "bed", Vector3(1.8, 0.18, 0.75)],
+		["Кровать у балкона", Vector3(2.75, 0.45, -2.75), Vector3(0.8, 0.8, -2.75), "bed", Vector3(1.8, 0.18, 0.75)]]:
+		var control := _add_room_control(entry[0], entry[1], entry[4], entry[3])
+		control.rest_target = entry[2]
 	# Проёмы и размеры по существующей Blender-сцене, без новых внешних зависимостей.
 	_add_room_control("Выключатель", Vector3(0.34, 1.09, -0.02), Vector3(0.13, 0.14, 0.07), "light")
 	_add_room_control("Ночник", Vector3(4.35, 0.72, -1.375), Vector3(0.18, 0.25, 0.18), "lamp")
