@@ -83,6 +83,18 @@ class ExportTests(unittest.TestCase):
                 checked.add(name)
         self.assertEqual(checked, expected)
 
+    def test_desk_strip_is_horizontal(self):
+        checked = False
+        for mesh in self.gltf["meshes"]:
+            for primitive in mesh["primitives"]:
+                if self.gltf["materials"][primitive["material"]].get("name") != "лента_стол":
+                    continue
+                position = self.gltf["accessors"][primitive["attributes"]["POSITION"]]
+                self.assertLess(position["max"][1] - position["min"][1], 0.02)
+                self.assertGreater(position["max"][0] - position["min"][0], 1.2)
+                checked = True
+        self.assertTrue(checked, "Не найдена горизонтальная подсветка стола")
+
     def test_surface_detail_survives_export(self):
         materials = {m["name"]: m for m in self.gltf["materials"]}
         for name in ("покрывало_зелёное", "обои", "шторы"):

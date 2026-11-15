@@ -26,12 +26,12 @@ func set_closed(value: bool, immediate := false) -> void:
 	closed = value
 	var shape := get_child(0) as CollisionShape3D
 	var box := shape.shape as BoxShape3D
-	box.size.z = 1.62 if closed else 0.20
-	position.z = (-0.81 if original_position.z > -1.6 else -2.39) if closed else (-0.08 if original_position.z > -1.6 else -3.12)
+	box.size.z = 1.60 if closed else 0.29
+	position.z = (-0.81 if original_position.z > -1.6 else -2.39) if closed else (-0.14 if original_position.z > -1.6 else -3.06)
 	if cloth == null: return
 	if animation: animation.kill()
 	var target := original_scale
-	target.z *= 2.25 if closed else 0.22
+	target.z *= 1.0 if closed else 0.18
 	if immediate: cloth.scale = target
 	else:
 		animation = create_tween()

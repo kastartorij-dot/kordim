@@ -11,10 +11,33 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import bpy
-from комната import build
+from комната import build, FRAME_X, CURTAIN_X, W, BED_GAP
 from мебель import ROOT
 
 build()
+# Регрессия по замечанию автора: ткань за щитами, а не поверх них.
+bpy.context.view_layer.update()
+def world_points(ob):
+    graph = bpy.context.evaluated_depsgraph_get()
+    return [part.matrix_world @ Vector(corner)
+            for part in [ob, *ob.children_recursive] if part.type == "MESH"
+            for corner in part.evaluated_get(graph).bound_box]
+
+bed_ends = [max(v.x for v in world_points(bpy.data.objects[name]))
+            for name in ("Кровать", "Кровать.001")]
+for name in ("штора_1", "штора_2"):
+    assert min(v.x for v in world_points(bpy.data.objects[name])) > max(bed_ends) + 0.05, "Штора перекрывает изголовье"
+assert abs(bed_ends[0] - bed_ends[1]) < 0.01
+assert BED_GAP < 0.3, "Вернулся прежний чрезмерный зазор кровати"
+# Весь ход балконной двери остаётся за торцами кроватей, не только крайние позы.
+pivot = Vector((FRAME_X + 0.035, 2.6, 0))
+door_points = [v for ob in bpy.context.scene.objects
+               if ob.type == "MESH" and ob.name.split(".")[0] in ("рама_балк", "стекло_балк", "панель_балк", "ручка_балк")
+               for v in world_points(ob)]
+for angle in range(0, 91):
+    rotation = Matrix.Rotation(math.radians(-angle), 4, "Z")
+    assert min((pivot + rotation @ (v - pivot)).x for v in door_points) > max(bed_ends) + 0.05, "Полотно задевает кровать"
+print("Окно/кровати OK: ткань за щитами, малый зазор, ход двери свободен")
 # Сохраняем подвижные узлы отдельно, остальную геометрию объединяем.
 # Положение петель и направления берутся из исходной иерархии Blender.
 groups = []
@@ -59,7 +82,7 @@ movable(entry_parts[0], "Входная дверь", "rotate", 0, math.radians(9
 groups[-1] = (entry_parts, groups[-1][1], groups[-1][2])
 
 balcony_parts = [ob for ob in bpy.context.scene.objects if ob.type == "MESH" and ob.name.split(".")[0] in ("рама_балк", "стекло_балк", "панель_балк", "ручка_балк")]
-movable(balcony_parts[0], "Балконная дверь", "rotate", 0, -math.pi / 2, (0, 1, 0), pivot=(4.835, 3.1, 0))
+movable(balcony_parts[0], "Балконная дверь", "rotate", 0, -math.pi / 2, (0, 1, 0), pivot=(FRAME_X + 0.035, 2.6, 0))
 groups[-1] = (balcony_parts, groups[-1][1], groups[-1][2])
 
 meshes = [ob for ob in bpy.context.scene.objects if ob.type == "MESH"]
@@ -97,8 +120,8 @@ def merge(parts, name, pivot):
     result.name = name
     return result
 
-curtains = [(bpy.data.objects["штора_1"], Vector((4.48, 0, 0))),
-            (bpy.data.objects["штора_2"], Vector((4.48, 3.2, 0)))]
+curtains = [(bpy.data.objects["штора_1"], Vector((CURTAIN_X, 0, 0))),
+            (bpy.data.objects["штора_2"], Vector((CURTAIN_X, W, 0)))]
 moving_parts = {ob for parts, _, _ in groups for ob in parts} | {ob for ob, _ in curtains}
 exported = [merge([ob for ob in meshes if ob not in moving_parts], "Общага", Vector((0, 0, 0)))]
 for parts, pivot, spec in groups:

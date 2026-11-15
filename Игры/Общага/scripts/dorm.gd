@@ -229,9 +229,9 @@ func _build_accent_lighting() -> void:
 			var key := material.resource_name
 			if not light_materials.has(key): light_materials[key] = material.duplicate()
 			mesh.set_surface_override_material(surface, light_materials[key])
-	# Короткая Г-лента за монитором и лента над щитом кровати.
+	# Горизонтальная лента за столом до кровати и лента над её щитом.
 	# Ограниченный радиус и тени оставляют углы и полку тёмными.
-	for at in [Vector3(1.65, 0.86, -0.10), Vector3(2.36, 1.03, -0.10), Vector3(3.60, 1.08, -0.08)]:
+	for at in [Vector3(1.65, 0.86, -0.10), Vector3(2.50, 0.86, -0.10), Vector3(3.60, 1.08, -0.08)]:
 		var light := OmniLight3D.new()
 		light.position = at
 		light.light_energy = 0.24
@@ -346,7 +346,7 @@ func _build_collisions(room: Node) -> void:
 	var faces := PackedVector3Array()
 	var nodes := room.find_children("*", "MeshInstance3D", true, false)
 	if room is MeshInstance3D: nodes.append(room)
-	var bounds := AABB(Vector3(-3.8, -0.15, -3.6), Vector3(10.3, 3.1, 4.0))
+	var bounds := AABB(Vector3(-3.8, -0.15, -3.6), Vector3(10.7, 3.1, 4.0))
 	# Пакеты/бутылки у порога — мягкая бытовая мелочь, не непроходимая стена.
 	# Исключаем только их маленькую область; большие треугольники пола остаются.
 	var clutter := AABB(Vector3(-0.55, -0.05, -0.72), Vector3(0.60, 0.50, 0.72))
@@ -461,15 +461,15 @@ func _build_room_controls() -> void:
 	for entry in [
 		["Стул у стола", Vector3(2.0, 0.45, -0.85), Vector3(1.875, 1.15, 0.0), "chair", Vector3(0.50, 0.35, 0.50)],
 		["Стул у столика", Vector3(0.85, 0.45, -2.3), Vector3(0.85, 1.15, -3.2), "chair", Vector3(0.50, 0.35, 0.50)],
-		["Кровать у стола", Vector3(3.55, 0.45, -0.45), Vector3(1.6, 0.8, -0.45), "bed", Vector3(1.8, 0.18, 0.75)],
-		["Кровать у балкона", Vector3(2.75, 0.45, -2.75), Vector3(0.8, 0.8, -2.75), "bed", Vector3(1.8, 0.18, 0.75)]]:
+		["Кровать у стола", Vector3(3.35, 0.45, -0.45), Vector3(1.6, 0.8, -0.45), "bed", Vector3(1.8, 0.18, 0.75)],
+		["Кровать у балкона", Vector3(3.35, 0.45, -2.75), Vector3(0.8, 0.8, -2.75), "bed", Vector3(1.8, 0.18, 0.75)]]:
 		var control := _add_room_control(entry[0], entry[1], entry[4], entry[3])
 		control.rest_target = entry[2]
 	# Проёмы и размеры по существующей Blender-сцене, без новых внешних зависимостей.
 	_add_room_control("Выключатель", Vector3(0.34, 1.09, -0.02), Vector3(0.13, 0.14, 0.07), "light")
 	_add_room_control("Ночник", Vector3(4.35, 0.72, -1.375), Vector3(0.18, 0.25, 0.18), "lamp")
 	for index in range(2):
-		var control := _add_room_control("Штора_%s" % index, Vector3(4.46, 1.3, -0.36 if index == 0 else -2.85), Vector3(0.18, 2.5, 0.75), "curtain")
+		var control := _add_room_control("Штора_%s" % index, Vector3(4.49, 1.3, -0.36 if index == 0 else -2.85), Vector3(0.18, 2.5, 0.75), "curtain")
 		control.cloth = loaded_room.find_child("Curtain_%s" % index, true, false)
 		if control.cloth != null:
 			control.original_scale = control.cloth.scale
