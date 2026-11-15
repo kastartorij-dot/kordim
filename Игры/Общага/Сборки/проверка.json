@@ -4,12 +4,12 @@
   "embedded_pack_checked_on_linux": true,
   "archives": {
     "Общага-прогулка-Godot.zip": {
-      "bytes": 41317806,
-      "sha256": "83998a2a273db10354cb86534312cb1d6bfc2b44817c634fff823af5e2ddbc44"
+      "bytes": 41566691,
+      "sha256": "0c97e11bf7e3b1cfef07bc33e2a3bb554666c96eb1694b7b8b08e2f73afc4744"
     },
     "Общага-прогулка-Windows.zip": {
-      "bytes": 91745754,
-      "sha256": "fdf65362c392208a9e897ad613eee627e430f4472a959a588a80dd823a17645e"
+      "bytes": 91749095,
+      "sha256": "ada934265ad4a930519027ca9f1e134a6fab9a5a072d5586207a2a305bfa54f1"
     }
   }
 }
