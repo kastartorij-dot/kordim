@@ -13,7 +13,7 @@ config_version=5
 config/name="Общага"
 config/description="Комната, лоджия и вид на Наличную улицу"
 run/main_scene="res://scenes/dorm.tscn"
-config/features=PackedStringArray("4.6", "GL Compatibility")
+config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [display]
 

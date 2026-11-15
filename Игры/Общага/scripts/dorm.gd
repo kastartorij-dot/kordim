@@ -10,6 +10,9 @@ var player: CharacterBody3D
 var walk_enabled := true
 var interaction_hint: Label
 var interactables: Array[Node3D] = []
+var status_hint: Label
+var status_time := 0.0
+const SAVE_PATH := "user://walk.cfg"
 
 const VIEWS := [
 	[Vector3(0.75, 1.62, -1.6), Vector3(4.6, 1.3, -1.6)],
@@ -83,7 +86,7 @@ func _ready() -> void:
 	hint.add_theme_constant_override("shadow_offset_x", 1)
 	hint.add_theme_constant_override("shadow_offset_y", 1)
 	if walk_enabled:
-		hint.text = "Клик — начать · WASD / стрелки — идти · Shift — бежать · Пробел — прыжок · E — открыть/закрыть\n1 — комната · 2 — у кровати · 3 — на лоджию · 4 — у двери · Esc — отпустить мышь · F11 — полный экран"
+		hint.text = "Клик — начать · WASD / стрелки — идти · Shift — бежать · Пробел — прыжок · E — открыть/закрыть\n1 — комната · 2 — у кровати · 3 — на лоджию · 4 — у двери · Esc — отпустить мышь · F11 — полный экран\nF5 — сохранить · F9 — загрузить"
 	else:
 		hint.text = "Осмотр · Клик — мышь · WASD — движение · Q/E — вниз/вверх · Shift — быстрее\n1 — комната · 2 — от кровати · 3 — лоджия · 4 — у двери · Esc — отпустить мышь"
 	layer.add_child(hint)
@@ -95,12 +98,18 @@ func _ready() -> void:
 	interaction_hint.add_theme_constant_override("shadow_offset_x", 2)
 	interaction_hint.add_theme_constant_override("shadow_offset_y", 2)
 	layer.add_child(interaction_hint)
+	status_hint = Label.new()
+	status_hint.position = Vector2(20, 625)
+	status_hint.add_theme_color_override("font_shadow_color", Color.BLACK)
+	status_hint.add_theme_constant_override("shadow_offset_x", 2)
+	status_hint.add_theme_constant_override("shadow_offset_y", 2)
+	layer.add_child(status_hint)
 	var crosshair := Label.new()
 	crosshair.text = "+"
 	crosshair.position = Vector2(635, 348)
 	layer.add_child(crosshair)
 	crosshair.visible = walk_enabled
-	for label in [hint, interaction_hint, crosshair]:
+	for label in [hint, interaction_hint, crosshair, status_hint]:
 		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var credit := Label.new()
 	credit.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -148,6 +157,12 @@ func _set_view(index: int) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if player != null:
+		if event is InputEventKey and event.pressed and not event.echo:
+			if event.physical_keycode == KEY_F5:
+				_show_status("Сохранено" if save_walk() == OK else "Не удалось сохранить")
+			elif event.physical_keycode == KEY_F9:
+				var result := load_walk()
+				_show_status("Сохранение загружено" if result == OK else ("Сохранения пока нет" if result == ERR_FILE_NOT_FOUND else "Не удалось загрузить сохранение"))
 		if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_E and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 			var item := _interaction_target()
 			if item != null: item.toggle()
@@ -176,6 +191,8 @@ func _process(delta: float) -> void:
 			get_tree().quit(0 if result == OK else 1)
 		return
 	if player != null:
+		status_time = maxf(0, status_time - delta)
+		status_hint.visible = status_time > 0
 		var item := _interaction_target() if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED else null
 		interaction_hint.text = item.prompt() if item != null else ""
 		return
@@ -240,3 +257,43 @@ func _interaction_target() -> Node3D:
 	var hit := get_world_3d().direct_space_state.intersect_ray(ray)
 	if not hit.is_empty() and hit.collider in interactables: return hit.collider
 	return null
+
+func _show_status(message: String) -> void:
+	status_hint.text = message
+	status_time = 3.0
+
+func save_walk(path: String = SAVE_PATH) -> Error:
+	var data := ConfigFile.new()
+	data.set_value("walk", "version", 1)
+	data.set_value("walk", "player", player.transform)
+	data.set_value("walk", "camera_pitch", camera.rotation.x)
+	var items := {}
+	for item in interactables:
+		items[item.spec.node] = item.save() # COGITO state schema, stable ID from Blender export
+	data.set_value("walk", "items", items)
+	return data.save(path)
+
+func load_walk(path: String = SAVE_PATH) -> Error:
+	var data := ConfigFile.new()
+	var error := data.load(path)
+	if error != OK: return error
+	for key in ["player", "camera_pitch", "items"]:
+		if not data.has_section_key("walk", key): return ERR_INVALID_DATA
+	var saved_player = data.get_value("walk", "player")
+	var pitch = data.get_value("walk", "camera_pitch")
+	var items = data.get_value("walk", "items")
+	if data.get_value("walk", "version", 0) != 1 or not saved_player is Transform3D or not pitch is float or not items is Dictionary:
+		return ERR_INVALID_DATA
+	for item in interactables:
+		var state = items.get(item.spec.node)
+		if not state is Dictionary: return ERR_INVALID_DATA
+		for key in ["pos_x", "pos_y", "pos_z", "rot_x", "rot_y", "rot_z"]:
+			if not state.get(key) is float: return ERR_INVALID_DATA
+		if not state.get("is_open") is bool or not state.get("is_locked") is bool: return ERR_INVALID_DATA
+	player.transform = saved_player
+	player.velocity = Vector3.ZERO
+	player.jump_queued = false
+	camera.rotation.x = clampf(pitch, -1.45, 1.45)
+	for item in interactables:
+		item.restore_state(items[item.spec.node])
+	return OK
