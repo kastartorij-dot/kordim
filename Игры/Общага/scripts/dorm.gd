@@ -5,6 +5,7 @@ var camera: Camera3D
 var hint: Label
 var help_button: Button
 var lighting_mode := 0
+var daylight_prototype := false
 var room_environment: Environment
 var daylight: Array[Light3D] = []
 var ceiling_light: OmniLight3D
@@ -31,6 +32,7 @@ const VIEWS := [
 
 func _ready() -> void:
 	var args := OS.get_cmdline_user_args()
+	daylight_prototype = args.has("--daylight-prototype")
 	for arg in args:
 		if arg == "--inspect" or arg.begins_with("--shot="):
 			walk_enabled = false
@@ -73,7 +75,7 @@ func _ready() -> void:
 	# Основной рассеянный свет приходит от окна. Тени мебели нужны и в Compatibility.
 	_window_light(Vector3(4.15, 1.9, -1.15))
 	_window_light(Vector3(4.15, 1.9, -2.35))
-	_fill_light(Vector3(2.3, 2.4, -1.6), 0.22, 4)
+	_fill_light(Vector3(2.3, 2.4, -1.6), 0.09 if daylight_prototype else 0.22, 4)
 	_fill_light(Vector3(-1.3, 2.4, -1.9), 0.8, 3)
 	ceiling_light = OmniLight3D.new()
 	ceiling_light.position = Vector3(2.3, 2.45, -1.6)
@@ -175,7 +177,7 @@ func _window_light(at: Vector3) -> void:
 	var light := OmniLight3D.new()
 	light.position = at
 	light.light_color = Color(1.0, 0.98, 0.94)
-	light.light_energy = 0.025
+	light.light_energy = 0.055 if daylight_prototype else 0.025
 	light.omni_range = 5.5
 	light.shadow_enabled = true
 	light.shadow_bias = 0.025
@@ -202,7 +204,8 @@ func _set_lighting(mode: int) -> void:
 	for light in daylight: light.visible = lighting_mode == 0
 	ceiling_light.visible = lighting_mode == 1
 	bedside_light.visible = lighting_mode == 2
-	room_environment.ambient_light_energy = [0.28, 0.08, 0.015][lighting_mode]
+	var day_ambient := 0.18 if daylight_prototype else 0.28
+	room_environment.ambient_light_energy = [day_ambient, 0.08, 0.015][lighting_mode]
 	room_environment.background_mode = Environment.BG_SKY if lighting_mode == 0 else Environment.BG_COLOR
 	room_environment.background_color = Color(0.015, 0.02, 0.04)
 
