@@ -4,6 +4,11 @@ extends Node3D
 var camera: Camera3D
 var hint: Label
 var help_button: Button
+var lighting_mode := 0
+var room_environment: Environment
+var daylight: Array[Light3D] = []
+var ceiling_light: OmniLight3D
+var bedside_light: OmniLight3D
 var shot_path := ""
 var shot_frames := 30
 var preset := 1
@@ -51,6 +56,7 @@ func _ready() -> void:
 	env.ambient_light_color = Color(0.82, 0.86, 0.9)
 	env.ambient_light_energy = 0.28
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	room_environment = env
 	environment.environment = env
 	add_child(environment)
 	var sun := DirectionalLight3D.new()
@@ -59,11 +65,27 @@ func _ready() -> void:
 	sun.shadow_enabled = true
 	sun.directional_shadow_max_distance = 180
 	add_child(sun)
+	daylight.append(sun)
 	# Основной рассеянный свет приходит от окна. Тени мебели нужны и в Compatibility.
 	_window_light(Vector3(4.15, 1.9, -1.15))
 	_window_light(Vector3(4.15, 1.9, -2.35))
 	_fill_light(Vector3(2.3, 2.4, -1.6), 0.22, 4)
 	_fill_light(Vector3(-1.3, 2.4, -1.9), 0.8, 3)
+	ceiling_light = OmniLight3D.new()
+	ceiling_light.position = Vector3(2.3, 2.45, -1.6)
+	ceiling_light.light_color = Color(1.0, 0.80, 0.57)
+	ceiling_light.light_energy = 0.65
+	ceiling_light.omni_range = 5.0
+	ceiling_light.shadow_enabled = true
+	add_child(ceiling_light)
+	bedside_light = OmniLight3D.new()
+	bedside_light.position = Vector3(4.35, 0.75, -1.375)
+	bedside_light.light_color = Color(1.0, 0.18, 0.48)
+	bedside_light.light_energy = 0.3
+	bedside_light.omni_range = 2.2
+	bedside_light.shadow_enabled = true
+	add_child(bedside_light)
+	_set_lighting(0)
 	camera = Camera3D.new()
 	camera.fov = 72
 	camera.near = 0.03
@@ -87,7 +109,7 @@ func _ready() -> void:
 	hint.add_theme_constant_override("shadow_offset_x", 1)
 	hint.add_theme_constant_override("shadow_offset_y", 1)
 	if walk_enabled:
-		hint.text = "Клик — начать · WASD / стрелки — идти · Shift — бежать · Пробел — прыжок · E — открыть/закрыть\n1 — комната · 2 — у кровати · 3 — на лоджию · 4 — у двери · Esc — отпустить мышь · F11 — полный экран\nF5 — сохранить · F9 — загрузить"
+		hint.text = "Клик — начать · WASD / стрелки — идти · Shift — бежать · Пробел — прыжок · E — открыть/закрыть\n1 — комната · 2 — у кровати · 3 — на лоджию · 4 — у двери · Esc — отпустить мышь · F11 — полный экран\nF5 — сохранить · F9 — загрузить · L — день / вечер / ночь"
 	else:
 		hint.text = "Осмотр · Клик — мышь · WASD — движение · Q/E — вниз/вверх · Shift — быстрее\n1 — комната · 2 — от кровати · 3 — лоджия · 4 — у двери · Esc — отпустить мышь"
 	layer.add_child(hint)
@@ -140,6 +162,7 @@ func _fill_light(at: Vector3, energy: float, radius: float) -> void:
 	light.light_energy = energy
 	light.omni_range = radius
 	add_child(light)
+	daylight.append(light)
 
 func _window_light(at: Vector3) -> void:
 	var light := OmniLight3D.new()
@@ -151,6 +174,7 @@ func _window_light(at: Vector3) -> void:
 	light.shadow_bias = 0.025
 	light.shadow_normal_bias = 0.08
 	add_child(light)
+	daylight.append(light)
 
 func _set_view(index: int) -> void:
 	if player != null:
@@ -165,11 +189,24 @@ func _set_view(index: int) -> void:
 	camera.position = VIEWS[index - 1][0]
 	camera.look_at(VIEWS[index - 1][1])
 
+func _set_lighting(mode: int) -> void:
+	lighting_mode = mode % 3
+	for light in daylight: light.visible = lighting_mode == 0
+	ceiling_light.visible = lighting_mode == 1
+	bedside_light.visible = lighting_mode == 2
+	room_environment.ambient_light_energy = [0.28, 0.08, 0.015][lighting_mode]
+	room_environment.background_mode = Environment.BG_SKY if lighting_mode == 0 else Environment.BG_COLOR
+	room_environment.background_color = Color(0.015, 0.02, 0.04)
+
 func _toggle_help() -> void:
 	hint.visible = not hint.visible
 	help_button.text = "Скрыть управление [H]" if hint.visible else "Управление [H]"
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_L:
+		_set_lighting(lighting_mode + 1)
+		_show_status(["Дневной свет", "Вечерний свет", "Ночник"][lighting_mode])
+		get_viewport().set_input_as_handled()
 	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_H:
 		_toggle_help()
 		get_viewport().set_input_as_handled()
