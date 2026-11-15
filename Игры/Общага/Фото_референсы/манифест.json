@@ -1,0 +1,48 @@
+{
+  "source_folder": "https://drive.google.com/drive/folders/1R7kuWVsG1TpuBPkm6Ern_i9B48c5G8y0",
+  "reviewed_files": 11,
+  "included_files": 4,
+  "processing": "JPEG quality 65, progressive, EXIF removed, maximum side 1280; no cropping or retouching",
+  "photos": [
+    {
+      "file": "01-схема-комнаты.jpg",
+      "title": "Авторская схема",
+      "note": "Главный источник стороны балконной двери и порядка мебели. Размеры на рисунке не заданы.",
+      "source_filename": "IMG_20261115_072559_751.jpg",
+      "source_bytes": 155947,
+      "bytes": 130777,
+      "width": 1280,
+      "height": 960
+    },
+    {
+      "file": "02-лоджия.jpg",
+      "title": "Лоджия",
+      "note": "Зелёные рамы, светлая стенка, тёмная плитка, подоконник и фасад напротив.",
+      "source_filename": "IMG_20261115_072559_443.jpg",
+      "source_bytes": 42052,
+      "bytes": 35204,
+      "width": 573,
+      "height": 1280
+    },
+    {
+      "file": "03-балконная-дверь.jpg",
+      "title": "Балконная дверь — другая комната",
+      "note": "Оранжевые шторы и дверь справа: пример конструкции и открывания внутрь. НЕ переносить сторону двери или планировку в авторскую комнату.",
+      "source_filename": "IMG_20261115_072600_184.jpg",
+      "source_bytes": 49666,
+      "bytes": 42300,
+      "width": 573,
+      "height": 1280
+    },
+    {
+      "file": "04-ночник.jpg",
+      "title": "Ночник между кроватями",
+      "note": "Расположение тумбы и цилиндрического светильника, характер ночного света. Цвет штор и покрывал при таком освещении не определять.",
+      "source_filename": "IMG_20261115_072559_656.jpg",
+      "source_bytes": 43518,
+      "bytes": 36197,
+      "width": 573,
+      "height": 1280
+    }
+  ]
+}
