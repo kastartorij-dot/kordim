@@ -418,6 +418,8 @@ ul.журнал li::marker { color: var(--свеча); }
   mask-image: linear-gradient(to right, transparent 0, #000 16%, #000 84%, transparent 100%), linear-gradient(to bottom, transparent 0, #000 14%, #000 100%);
   mask-composite: intersect;
 }
+/* У вырезанных фигур свой прозрачный край: маска фото съедала волосы и кисти. */
+#portrait.sprite.cutout img { -webkit-mask-image: none; mask-image: none; }
 /* Обычный портрет — в раме на подставке, как картина в доме. */
 #portrait:not(.sprite):not(:has(.портрет-буквы)) {
   left: auto; right: 4%; bottom: 4%; transform: none; width: min(330px, 46%); aspect-ratio: 3 / 4; height: auto;
@@ -792,6 +794,9 @@ select { background: var(--смола); color: var(--бумага); border: 1px 
   #scene:has(#portrait:empty) { height: clamp(96px, 15vh, 150px); }
   #scene:has(#portrait:not(:empty)) { height: clamp(140px, 22vh, 220px); }
   #scene:has(#известное[open]) { height: clamp(240px, 45vh, 420px); }
+  /* Закрытая плашка знаний занимает свою полосу над вырезанной фигурой, не закрывая лицо. */
+  #scene:has(#известное:not([hidden]):not([open])):has(#portrait.cutout) { height: calc(clamp(140px, 22vh, 220px) + 44px); }
+  #scene:has(#известное:not([hidden]):not([open])) #portrait.cutout { height: calc(100% - 44px); }
   #portrait:has(.портрет-буквы), #portrait:not(.sprite):not(:has(.портрет-буквы)) { width: auto; height: 92%; right: 4%; }
   #plate { flex: 1; min-height: 0; padding: 16px; overflow: auto; }
   #say { flex: none; min-height: 0; overflow: visible; }

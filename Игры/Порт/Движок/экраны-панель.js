@@ -32,7 +32,7 @@ export function откудаВещь(п) {
   return /^[a-zа-яё0-9_-]+$/i.test(п) ? null : п; // id без названия — служебное
 }
 
-const ПОРТРЕТ = new URL('../Ресурсы/Герой/одвин.svg', import.meta.url).href;
+const ПОРТРЕТ = new URL('../Ресурсы/Герой/одвин_art.webp', import.meta.url).href;
 const шкала = з => '<span class="шкала">' + [1, 2, 3].map(i => '<i class="' + (i <= з ? 'есть' : '') + '"></i>').join('') + '</span>';
 // Отношение −3…+3: полоса от середины влево или вправо.
 const весы = з => '<span class="весы" aria-hidden="true"><i class="' + (з < 0 ? 'минус' : '') + '" style="left:' + (з < 0 ? 50 + з * 50 / 3 : 50) + '%;width:' + Math.abs(з) * 50 / 3 + '%"></i></span>';

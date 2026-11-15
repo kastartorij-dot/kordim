@@ -140,6 +140,7 @@ export function рендерМесто(S, onШаг) {
       if (!S.сцена || S.сцена.собеседник !== этот || !п) return; // собеседника успели сменить
       п.style.padding = '0';
       п.className = найден.спрайт ? 'sprite' : '';
+      п.classList.toggle('cutout', /_art\.webp$/.test(найден.путь));
       п.innerHTML = '<img src="' + найден.путь + '" alt="' + экр(в.портрет.имя) + '"' +
         (найден.спрайт ? '>' : ' style="display:block;width:100%;height:100%;object-fit:cover;object-position:50% 18%">');
     });

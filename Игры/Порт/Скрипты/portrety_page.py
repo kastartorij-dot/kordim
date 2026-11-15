@@ -149,6 +149,7 @@ COMMON='''Перерисуй человека с первой картинки �
 import subprocess
 people=json.loads(subprocess.check_output(['node',os.path.join(HERE,'portrety_people.mjs'),os.path.abspath(os.path.join(HERE,'..'))]))
 have={x['id'] for x in people if x['портрет']}
+in_game={x['id']:x['портрет'] for x in people if x['портрет'].endswith('_art.webp')}
 none=[];seen=set()
 for x in people:
   if not x['портрет'] and x['id'] not in seen and x['id'] not in have: seen.add(x['id']);none.append((x['имя'],x['место']))
@@ -172,11 +173,15 @@ for i,(id,name,where,src,who,bg) in enumerate(P,1):
     pr=COMMON.format(who=WHO.get(id,who),pose=pose,place=pl,pal=pv,frame=FRAME[kind])
     pg=GPT.format(who=WHO.get(id,who),pose=pose,place=pl,pal=pv,frame=FRAME[kind])
     vh+=f'<div class="var">'+(f'<p class="vlab">{html.escape(lab)}</p>' if len(vs)>1 else '')+f'<button class="btn main" data-copy>Копировать промт{": "+html.escape(lab.split(" — ")[0].lower()) if len(vs)>1 else ""}</button><textarea readonly rows="6" data-gem="{html.escape(pr)}" data-gpt="{html.escape(pg)}">{html.escape(pr)}</textarea></div>'
-  isd=(id in DONE) or os.path.exists(os.path.join(SITE,R+src[:src.rfind('.')]+'_art.webp'))
+  art=src.rsplit('/',1)[0]+'/'+in_game.get(id,'')
+  isd=id in in_game and os.path.isfile(os.path.join(SITE,R+art))
+  preview=art if isd else src
   dc=' is-done' if isd else ''
-  dl='<label class="done lock"><input type="checkbox" checked disabled> в игре</label>' if isd else '<label class="done"><input type="checkbox"> готово</label>'
+  dl=('<label class="done lock"><input type="checkbox" checked disabled> в игре</label>' if isd else
+      '<label class="done lock"><input type="checkbox" checked disabled> принят · ждёт подключения</label>' if id in DONE else
+      '<label class="done"><input type="checkbox"> готово</label>')
   cards.append(f'''<article class="card{dc}" data-id="{id}">
-<div class="pic"><img loading="lazy" src="{R+src}" alt="{html.escape(name)}"></div>
+<div class="pic"><img loading="lazy" src="{R+preview}" alt="{html.escape(name)}"></div>
 <div class="body"><div class="head"><span class="n">{i:02d}</span><div><h2>{html.escape(name)}</h2><p class="where">{html.escape(where)}</p></div>
 {dl}</div>
 <div class="btns"><a class="btn" href="{R+src}" download="{fn}">Скачать фото</a><button class="btn" data-copyimg="{R+src}">Копировать фото</button></div>
