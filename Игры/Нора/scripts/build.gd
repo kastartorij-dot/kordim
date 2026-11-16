@@ -22,7 +22,7 @@ func _ready() -> void:
 	_сруб_визуально()
 	_внутри()
 	_снаружи()
-	_лес()
+	_лес_новый()
 	var игрок := CharacterBody3D.new()
 	игрок.set_script(load("res://scripts/player.gd"))
 	add_child(игрок)
@@ -32,6 +32,18 @@ func _ready() -> void:
 	else:
 		игрок.position = Vector3(-1.5, 0.05, 13)
 		игрок.rotation.y = deg_to_rad(-8)
+
+# Новый слой окружения. Черновой _лес() сохранён только как запасной вариант.
+func _лес_новый() -> void:
+	var скрипт_леса := load("res://scripts/forest.gd") as Script
+	if скрипт_леса == null:
+		push_warning("Нора: не найден forest.gd, используем старый лес.")
+		_лес()
+		return
+	var лес := Node3D.new()
+	лес.name = "Лес_и_тропа"
+	лес.set_script(скрипт_леса)
+	add_child(лес)
 
 # Используем игровой GLB для внешней оболочки дома, но сохраняем коллизии
 # чернового сруба, проёмов и открытой двери. Это не ломает перемещение и подписи.
