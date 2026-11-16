@@ -40,6 +40,11 @@ func _сруб_визуально() -> void:
 	if not ResourceLoader.exists("res://models/nora_shell.glb"):
 		_сруб()
 		return
+	var сцена_модели := load("res://models/nora_shell.glb") as PackedScene
+	if сцена_модели == null:
+		push_warning("Нора: модель сруба не импортирована, остаётся черновая геометрия.")
+		_сруб()
+		return
 	var старые_узлы := get_children()
 	_сруб()
 	for узел in get_children():
@@ -51,7 +56,10 @@ func _сруб_визуально() -> void:
 			for дочерний in узел.get_children():
 				if дочерний is MeshInstance3D:
 					дочерний.visible = false
-	var модель: Node3D = load("res://models/nora_shell.glb").instantiate()
+	var модель := сцена_модели.instantiate() as Node3D
+	if модель == null:
+		push_error("Нора: GLB загрузился, но не создал узел Node3D.")
+		return
 	модель.name = "Сруб_Модель"
 	add_child(модель)
 
