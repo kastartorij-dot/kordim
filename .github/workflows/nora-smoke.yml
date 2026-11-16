@@ -1,0 +1,70 @@
+name: Нора — проверка Godot
+on:
+  pull_request:
+    paths:
+      - "Игры/Нора/**"
+      - ".github/workflows/nora-smoke.yml"
+  workflow_dispatch:
+
+jobs:
+  godot-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Проверить генератор GLB и его воспроизводимость
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check "Игры/Нора/Инструменты/собрать_сруб.mjs"
+          node "Игры/Нора/Инструменты/собрать_сруб.mjs"
+          git diff --exit-code -- "Игры/Нора/models/nora_shell.glb"
+
+      - name: Установить Godot 4.7.2 и программный Vulkan
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq unzip xvfb libvulkan1 mesa-vulkan-drivers
+          curl -fL --retry 3 --retry-delay 2 \
+            "https://downloads.godotengine.org/?version=4.7.2&flavor=stable&slug=linux.x86_64.zip&platform=linux.64" \
+            -o /tmp/nora-godot.zip
+          unzip -q /tmp/nora-godot.zip -d /tmp/nora-godot
+          find /tmp/nora-godot -maxdepth 1 -type f -name 'Godot*' -exec mv '{}' /tmp/nora-godot/godot \;
+          chmod +x /tmp/nora-godot/godot
+          /tmp/nora-godot/godot --version
+
+      - name: Проверить импорт и скрипты
+        shell: bash
+        run: |
+          set -euo pipefail
+          /tmp/nora-godot/godot --headless --path "Игры/Нора" --editor --import --quit
+
+      - name: Проверить запуск игровой сцены без графического вывода
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 90 /tmp/nora-godot/godot --headless --path "Игры/Нора" --quit-after 35
+
+      - name: Попробовать снять кадр с программным Vulkan
+        shell: bash
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          timeout 160 xvfb-run -a -s "-screen 0 1280x720x24" \
+            /tmp/nora-godot/godot --path "Игры/Нора" --resolution 1280x720 \
+            -- --shot=shots/approach.png --frames=90
+          test -s "Игры/Нора/shots/approach.png"
+
+      - name: Опубликовать диагностический кадр, если он создан
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nora-approach
+          path: Игры/Нора/shots/approach.png
+          if-no-files-found: ignore

@@ -19,10 +19,10 @@ func _ready() -> void:
 	seed(1026)
 	_материалы()
 	_земля()
-	_сруб()
+	_сруб_визуально()
 	_внутри()
 	_снаружи()
-	_лес()
+	_лес_новый()
 	var игрок := CharacterBody3D.new()
 	игрок.set_script(load("res://scripts/player.gd"))
 	add_child(игрок)
@@ -32,6 +32,78 @@ func _ready() -> void:
 	else:
 		игрок.position = Vector3(-1.5, 0.05, 13)
 		игрок.rotation.y = deg_to_rad(-8)
+
+# Новый слой окружения. Черновой _лес() сохранён только как запасной вариант.
+func _лес_новый() -> void:
+	var скрипт_леса := load("res://scripts/forest.gd") as Script
+	if скрипт_леса == null:
+		push_warning("Нора: не найден forest.gd, используем старый лес.")
+		_лес()
+		return
+	var лес := Node3D.new()
+	лес.name = "Лес_и_тропа"
+	лес.set_script(скрипт_леса)
+	add_child(лес)
+
+# Используем игровой GLB для внешней оболочки дома, но сохраняем коллизии
+# чернового сруба, проёмов и открытой двери. Это не ломает перемещение и подписи.
+# При отсутствии GLB остаётся полностью работоспособная исходная заготовка.
+func _сруб_визуально() -> void:
+	if not ResourceLoader.exists("res://models/nora_shell.glb"):
+		_сруб()
+		return
+	var сцена_модели := load("res://models/nora_shell.glb") as PackedScene
+	if сцена_модели == null:
+		push_warning("Нора: модель сруба не импортирована, остаётся черновая геометрия.")
+		_сруб()
+		return
+	var старые_узлы := get_children()
+	_сруб()
+	for узел in get_children():
+		if старые_узлы.has(узел):
+			continue
+		if узел is MeshInstance3D:
+			узел.visible = false
+		elif узел is StaticBody3D:
+			for дочерний in узел.get_children():
+				if дочерний is MeshInstance3D:
+					дочерний.visible = false
+	var модель := сцена_модели.instantiate() as Node3D
+	if модель == null:
+		push_error("Нора: GLB загрузился, но не создал узел Node3D.")
+		return
+	модель.name = "Сруб_Модель"
+	add_child(модель)
+	_исправить_материалы_сруба(модель)
+
+# В glTF часть групп без корректной интерпретации COLOR_0 получалась почти
+# белой. Задаём явные оттенки в Godot; исходные цвета вершин сохраняют вариации.
+func _исправить_материалы_сруба(узел: Node) -> void:
+	var палитра := {
+		"Logs": Color(0.50, 0.45, 0.40),
+		"Endgrain": Color(0.56, 0.51, 0.43),
+		"Planks": Color(0.54, 0.47, 0.40),
+		"Shingles": Color(0.49, 0.48, 0.43),
+		"Moss": Color(0.57, 0.62, 0.44),
+		"Stone": Color(0.62, 0.60, 0.56),
+		"Iron": Color(0.46, 0.44, 0.43),
+		"Glass": Color(0.38, 0.46, 0.47, 0.65)
+	}
+	if узел is MeshInstance3D:
+		for группа in палитра:
+			if str(узел.name).begins_with(группа):
+				var mat := StandardMaterial3D.new()
+				mat.albedo_color = палитра[группа]
+				mat.vertex_color_use_as_albedo = true
+				mat.roughness = 0.94
+				mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+				if группа == "Glass":
+					mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+					mat.roughness = 0.27
+				узел.material_override = mat
+				break
+	for дочерний in узел.get_children():
+		_исправить_материалы_сруба(дочерний)
 
 func _process(_dt: float) -> void:
 	огонь.light_energy = 2.2 + 0.35 * sin(Time.get_ticks_msec() * 0.013) + randf() * 0.25
