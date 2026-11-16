@@ -10,7 +10,7 @@ func run():
   if control.kind=="curtain":
    assert(control.cloth!=null)
    control.set_closed(true,true)
-   assert(is_equal_approx(control.cloth.scale.z,2.25))
+   assert(is_equal_approx(control.cloth.scale.z,1.0))
   elif control.kind in ["light","lamp"]: control.toggle()
  # Луч на выключатель: сначала убираем полотно из его сектора обзора.
  s.player.position=Vector3(5.4,0.03,-1.6)
@@ -29,7 +29,7 @@ func run():
  assert(s.load_walk("user://controls-test.cfg")==OK)
  assert(s.lighting_mode==2)
  for c in s.room_controls:
-  if c.kind=="curtain": assert(c.closed and c.cloth.scale.z>2)
+  if c.kind=="curtain": assert(c.closed and is_equal_approx(c.cloth.scale.z,1.0))
  DirAccess.remove_absolute(ProjectSettings.globalize_path("user://controls-test.cfg"))
  print("Комната OK: выключатель, ночник, две шторы, сохранение света и штор")
  quit()

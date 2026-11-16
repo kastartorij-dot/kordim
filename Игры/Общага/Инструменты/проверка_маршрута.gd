@@ -27,7 +27,7 @@ func run():
    if item.blocked or not item.opened:
     push_error("Дверь не открыта: "+item.spec.label);quit(1);return
  # Один старт. Дальше весь маршрут капсулой, без смены ракурса/телепортации.
- for at in [Vector3(-3.0,0,-0.63),Vector3(1.05,0,-0.63),Vector3(1.05,0,-1.6),Vector3(3.95,0,-1.6),Vector3(3.95,0,-1.95),Vector3(4.25,0,-1.95),Vector3(4.25,0,-2.65),Vector3(5.35,0,-2.65),Vector3(4.25,0,-2.65),Vector3(4.25,0,-1.95),Vector3(3.95,0,-1.95),Vector3(3.95,0,-1.6),Vector3(1.05,0,-1.6)]:
+ for at in [Vector3(-3.0,0,-0.63),Vector3(1.05,0,-0.63),Vector3(1.05,0,-1.6),Vector3(3.95,0,-1.6),Vector3(3.95,0,-2.0),Vector3(4.76,0,-2.0),Vector3(4.76,0,-2.15),Vector3(5.75,0,-2.15),Vector3(4.76,0,-2.15),Vector3(4.76,0,-2.0),Vector3(3.95,0,-2.0),Vector3(3.95,0,-1.6),Vector3(1.05,0,-1.6)]:
   if not await travel(p,at): quit(1);return
  print("Маршрут OK: площадка → коридор → комната → лоджия → комната без телепортации")
  quit()

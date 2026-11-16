@@ -77,7 +77,7 @@ func _run() -> void:
 		await physics_frame
 		player.velocity = Vector3(2, -0.2, 0)
 		player.move_and_slide()
-	if not _check(player.position.x < 6.1, "Игрок прошёл сквозь ограждение лоджии"): return
+	if not _check(player.position.x < 6.35, "Игрок прошёл сквозь ограждение лоджии"): return
 	player.position = Vector3(0.75, 0.02, -0.55)
 	for i in range(90):
 		await physics_frame

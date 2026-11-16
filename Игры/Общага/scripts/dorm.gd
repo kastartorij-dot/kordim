@@ -5,10 +5,20 @@ var camera: Camera3D
 var hint: Label
 var help_button: Button
 var lighting_mode := 0
+var daylight_prototype := false
+var daylight_prototype_v2 := false # Флаг для сравнения, пока не вариант по умолчанию.
 var room_environment: Environment
 var daylight: Array[Light3D] = []
 var ceiling_light: OmniLight3D
 var bedside_light: OmniLight3D
+var lamp_color := 0
+var strip_mode := 0
+var strip_lights: Array[OmniLight3D] = []
+var light_materials := {}
+const LAMP_COLORS := [Color(1.0, 0.12, 0.65), Color(0.22, 1.0, 0.35), Color(1.0, 0.73, 0.42)]
+const LAMP_NAMES := ["розовый", "зелёный", "тёплый"]
+const STRIP_COLORS := [Color.BLACK, Color(1.0, 0.025, 0.08), Color(0.42, 0.08, 1.0)]
+const STRIP_NAMES := ["выключена", "красная", "фиолетовая"]
 var shot_path := ""
 var shot_frames := 30
 var preset := 1
@@ -31,6 +41,8 @@ const VIEWS := [
 
 func _ready() -> void:
 	var args := OS.get_cmdline_user_args()
+	daylight_prototype_v2 = args.has("--daylight-prototype-v2")
+	daylight_prototype = daylight_prototype_v2 or args.has("--daylight-prototype")
 	for arg in args:
 		if arg == "--inspect" or arg.begins_with("--shot="):
 			walk_enabled = false
@@ -73,7 +85,10 @@ func _ready() -> void:
 	# Основной рассеянный свет приходит от окна. Тени мебели нужны и в Compatibility.
 	_window_light(Vector3(4.15, 1.9, -1.15))
 	_window_light(Vector3(4.15, 1.9, -2.35))
-	_fill_light(Vector3(2.3, 2.4, -1.6), 0.22, 4)
+	var center_fill := 0.22
+	if daylight_prototype: center_fill = 0.09
+	if daylight_prototype_v2: center_fill = 0.12
+	_fill_light(Vector3(2.3, 2.4, -1.6), center_fill, 4)
 	_fill_light(Vector3(-1.3, 2.4, -1.9), 0.8, 3)
 	ceiling_light = OmniLight3D.new()
 	ceiling_light.position = Vector3(2.3, 2.45, -1.6)
@@ -83,12 +98,13 @@ func _ready() -> void:
 	ceiling_light.shadow_enabled = true
 	add_child(ceiling_light)
 	bedside_light = OmniLight3D.new()
-	bedside_light.position = Vector3(4.35, 0.75, -1.375)
+	bedside_light.position = Vector3(4.25, 0.83, -1.375) # Перед рассеивателем, чтобы он не перекрывал собственный свет.
 	bedside_light.light_color = Color(1.0, 0.18, 0.48)
 	bedside_light.light_energy = 0.3
 	bedside_light.omni_range = 2.2
 	bedside_light.shadow_enabled = true
 	add_child(bedside_light)
+	_build_accent_lighting()
 	_set_lighting(0)
 	_build_room_controls()
 	camera = Camera3D.new()
@@ -114,7 +130,7 @@ func _ready() -> void:
 	hint.add_theme_constant_override("shadow_offset_x", 1)
 	hint.add_theme_constant_override("shadow_offset_y", 1)
 	if walk_enabled:
-		hint.text = "Клик — начать · WASD / стрелки — идти · Shift — бежать · Пробел — прыжок · Ctrl — присесть · E — взаимодействовать\n1 — комната · 2 — у кровати · 3 — на лоджию · 4 — у двери · Esc — отпустить мышь · F11 — полный экран\nF5 — сохранить · F9 — загрузить · L — день / вечер / ночь"
+		hint.text = "WASD / стрелки — идти · Клик — захват мыши · Shift — бежать · Пробел — прыжок · Ctrl — присесть · E — взаимодействовать\n1 — комната · 2 — у кровати · 3 — на лоджию · 4 — у двери · Esc — отпустить мышь · F11 — полный экран\nF5 — сохранить · F9 — загрузить · L — день / вечер / ночь · N — цвет ночника · B — подсветка"
 	else:
 		hint.text = "Осмотр · Клик — мышь · WASD — движение · Q/E — вниз/вверх · Shift — быстрее\n1 — комната · 2 — от кровати · 3 — лоджия · 4 — у двери · Esc — отпустить мышь"
 	layer.add_child(hint)
@@ -148,20 +164,39 @@ func _ready() -> void:
 	crosshair.visible = walk_enabled
 	for label in [hint, interaction_hint, crosshair, status_hint]:
 		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var credit := Label.new()
-	credit.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	credit.position = Vector2(20, 675)
-	credit.text = "Контуры: © участники OpenStreetMap · ODbL 1.0 · Фасады и высоты — черновик"
-	credit.add_theme_font_size_override("font_size", 14)
-	layer.add_child(credit)
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--view="): preset = clampi(int(arg.substr(7)), 1, VIEWS.size())
 		elif arg.begins_with("--shot="): shot_path = arg.substr(7)
 		elif arg.begins_with("--frames="): shot_frames = maxi(1, int(arg.substr(9)))
+		elif arg.begins_with("--lamp-color="): lamp_color = clampi(int(arg.substr(13)), 0, 2)
+		elif arg.begins_with("--strip="): strip_mode = clampi(int(arg.substr(8)), 0, 2)
 	_set_view(preset)
 	for arg in args:
 		if arg.begins_with("--light="): _set_lighting(clampi(int(arg.substr(8)), 0, 2))
+	_update_accent_lighting()
 	if not shot_path.is_empty(): layer.hide()
+	if walk_enabled:
+		call_deferred("_verify_initial_spawn")
+		# Игра готова к ходьбе сразу, без переключения ракурса или первого клика.
+		# При Esc курсор освобождается для кнопки «Управление».
+		if DisplayServer.get_name() != "headless":
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+func _verify_initial_spawn() -> void:
+	# После физического тика коллизии импортированной GLB уже зарегистрированы.
+	# При начальном пересечении подбираем свободное место в проверенном проходе.
+	await get_tree().physics_frame
+	if player == null: return
+	if preset != 1 or player.global_position.distance_to(Vector3(1.05, 0.08, -1.6)) > 0.3: return
+	if player.can_stand_at(player.global_transform): return
+	for at in [Vector3(1.5, 0.08, -1.6), Vector3(2.2, 0.08, -1.6), Vector3(3.0, 0.08, -1.6)]:
+		var candidate := Transform3D(player.global_basis, at)
+		if player.can_stand_at(candidate):
+			player.global_position = at
+			player.velocity = Vector3.ZERO
+			push_warning("Стартовая точка была занята, игрок перемещён в свободный проход")
+			return
+	push_warning("Не найдена свободная начальная точка для капсулы; проверьте коллизии комнаты")
 
 func _fill_light(at: Vector3, energy: float, radius: float) -> void:
 	var light := OmniLight3D.new()
@@ -172,10 +207,26 @@ func _fill_light(at: Vector3, energy: float, radius: float) -> void:
 	daylight.append(light)
 
 func _window_light(at: Vector3) -> void:
+	if daylight_prototype_v2:
+		# Вместо круглого блика на откосе и потолке: мягкий направленный
+		# переотражённый свет внутрь комнаты. Солнечные тени остаются.
+		var window_bounce := SpotLight3D.new()
+		window_bounce.position = at
+		window_bounce.light_color = Color(1.0, 0.98, 0.94)
+		window_bounce.light_energy = 0.15
+		window_bounce.light_specular = 0.0
+		window_bounce.spot_range = 5.5
+		window_bounce.spot_angle = 65.0
+		window_bounce.spot_angle_attenuation = 1.0
+		window_bounce.shadow_enabled = false
+		add_child(window_bounce)
+		window_bounce.look_at(Vector3(1.2, 1.1, at.z), Vector3.UP)
+		daylight.append(window_bounce)
+		return
 	var light := OmniLight3D.new()
 	light.position = at
 	light.light_color = Color(1.0, 0.98, 0.94)
-	light.light_energy = 0.025
+	light.light_energy = 0.055 if daylight_prototype else 0.025
 	light.omni_range = 5.5
 	light.shadow_enabled = true
 	light.shadow_bias = 0.025
@@ -188,7 +239,9 @@ func _set_view(index: int) -> void:
 		var eye: Vector3 = VIEWS[index - 1][0]
 		var target: Vector3 = VIEWS[index - 1][1]
 		player.reset_posture()
-		player.position = Vector3(eye.x, 0.08, eye.z)
+		# Первый ракурс для пешей прогулки — середина свободного прохода.
+		# Координаты камеры осмотра/скриншота VIEWS не меняем.
+		player.position = Vector3(1.05, 0.08, -1.6) if index == 1 else Vector3(eye.x, 0.08, eye.z)
 		player.velocity = Vector3.ZERO
 		player.look_at(Vector3(target.x, player.position.y, target.z))
 		camera.position = Vector3(0, 1.62, 0)
@@ -202,15 +255,73 @@ func _set_lighting(mode: int) -> void:
 	for light in daylight: light.visible = lighting_mode == 0
 	ceiling_light.visible = lighting_mode == 1
 	bedside_light.visible = lighting_mode == 2
-	room_environment.ambient_light_energy = [0.28, 0.08, 0.015][lighting_mode]
+	var day_ambient := 0.18 if daylight_prototype else 0.28
+	room_environment.ambient_light_energy = [day_ambient, 0.08, 0.015][lighting_mode]
 	room_environment.background_mode = Environment.BG_SKY if lighting_mode == 0 else Environment.BG_COLOR
 	room_environment.background_color = Color(0.015, 0.02, 0.04)
+	_update_accent_lighting()
+
+func _build_accent_lighting() -> void:
+	# Готовые StandardMaterial3D и OmniLight3D Godot. Копии материалов только
+	# на экземпляре комнаты: импортированный GLB и общие ресурсы не меняются.
+	for mesh in loaded_room.find_children("*", "MeshInstance3D", true, false):
+		for surface in mesh.mesh.get_surface_count():
+			var material := mesh.get_active_material(surface) as StandardMaterial3D
+			if material == null or material.resource_name not in ["ночник", "лента", "лента_стол"]: continue
+			var key := material.resource_name
+			if not light_materials.has(key): light_materials[key] = material.duplicate()
+			mesh.set_surface_override_material(surface, light_materials[key])
+	# Горизонтальная лента за столом до кровати и лента над её щитом.
+	# Ограниченный радиус и тени оставляют углы и полку тёмными.
+	for at in [Vector3(1.65, 0.86, -0.10), Vector3(2.50, 0.86, -0.10), Vector3(3.60, 1.08, -0.08)]:
+		var light := OmniLight3D.new()
+		light.position = at
+		light.light_energy = 0.24
+		light.omni_range = 1.25
+		light.shadow_enabled = true
+		light.shadow_bias = 0.025
+		light.shadow_normal_bias = 0.08
+		add_child(light)
+		strip_lights.append(light)
+
+func _update_accent_lighting() -> void:
+	bedside_light.light_color = LAMP_COLORS[lamp_color]
+	for light in strip_lights:
+		light.visible = strip_mode != 0
+		light.light_color = STRIP_COLORS[strip_mode]
+	for key in light_materials:
+		var material := light_materials[key] as StandardMaterial3D
+		var is_lamp: bool = key == "ночник"
+		var enabled := lighting_mode == 2 if is_lamp else strip_mode != 0
+		var color: Color = LAMP_COLORS[lamp_color] if is_lamp else STRIP_COLORS[strip_mode]
+		material.emission_enabled = enabled
+		# Яркая середина рассеивателя почти белая на фото; окружающий свет цветной.
+		material.emission = color.lerp(Color.WHITE, 0.65) if is_lamp else color
+		material.emission_energy_multiplier = 2.8 if is_lamp else 2.0
+		material.albedo_color = Color(0.95, 0.95, 0.95) if is_lamp else (color if enabled else Color(0.45, 0.45, 0.43))
+
+func _cycle_lamp_color() -> void:
+	lamp_color = (lamp_color + 1) % LAMP_COLORS.size()
+	_update_accent_lighting()
+	_show_status("Цвет ночника: " + LAMP_NAMES[lamp_color] + (" · L — включить" if lighting_mode != 2 else ""))
+
+func _cycle_strip() -> void:
+	strip_mode = (strip_mode + 1) % STRIP_COLORS.size()
+	_update_accent_lighting()
+	_show_status("Подсветка: " + STRIP_NAMES[strip_mode])
 
 func _toggle_help() -> void:
 	hint.visible = not hint.visible
 	help_button.text = "Скрыть управление [H]" if hint.visible else "Управление [H]"
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.physical_keycode == KEY_N:
+			_cycle_lamp_color()
+			get_viewport().set_input_as_handled()
+		elif event.physical_keycode == KEY_B:
+			_cycle_strip()
+			get_viewport().set_input_as_handled()
 	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_L:
 		_set_lighting(lighting_mode + 1)
 		_show_status(["Дневной свет", "Вечерний свет", "Ночник"][lighting_mode])
@@ -277,7 +388,7 @@ func _build_collisions(room: Node) -> void:
 	var faces := PackedVector3Array()
 	var nodes := room.find_children("*", "MeshInstance3D", true, false)
 	if room is MeshInstance3D: nodes.append(room)
-	var bounds := AABB(Vector3(-3.8, -0.15, -3.6), Vector3(10.3, 3.1, 4.0))
+	var bounds := AABB(Vector3(-3.8, -0.15, -3.6), Vector3(10.7, 3.1, 4.0))
 	# Пакеты/бутылки у порога — мягкая бытовая мелочь, не непроходимая стена.
 	# Исключаем только их маленькую область; большие треугольники пола остаются.
 	var clutter := AABB(Vector3(-0.55, -0.05, -0.72), Vector3(0.60, 0.50, 0.72))
@@ -334,6 +445,8 @@ func save_walk(path: String = SAVE_PATH) -> Error:
 	var data := ConfigFile.new()
 	data.set_value("walk", "version", 1)
 	data.set_value("walk", "lighting", lighting_mode)
+	data.set_value("walk", "lamp_color", lamp_color)
+	data.set_value("walk", "strip_mode", strip_mode)
 	var curtains := {}
 	for control in room_controls:
 		if control.kind == "curtain": curtains[str(control.name)] = control.closed
@@ -366,6 +479,12 @@ func load_walk(path: String = SAVE_PATH) -> Error:
 		if not state.get("is_open") is bool or not state.get("is_locked") is bool: return ERR_INVALID_DATA
 	var saved_light = data.get_value("walk", "lighting", 0)
 	if not saved_light is int or saved_light < 0 or saved_light > 2: return ERR_INVALID_DATA
+	var saved_lamp = data.get_value("walk", "lamp_color", 0)
+	var saved_strip = data.get_value("walk", "strip_mode", 0)
+	if not saved_lamp is int or saved_lamp < 0 or saved_lamp >= LAMP_COLORS.size(): return ERR_INVALID_DATA
+	if not saved_strip is int or saved_strip < 0 or saved_strip >= STRIP_COLORS.size(): return ERR_INVALID_DATA
+	lamp_color = saved_lamp
+	strip_mode = saved_strip
 	_set_lighting(saved_light)
 	var curtains = data.get_value("walk", "curtains", {})
 	if curtains is Dictionary:
@@ -384,15 +503,15 @@ func _build_room_controls() -> void:
 	for entry in [
 		["Стул у стола", Vector3(2.0, 0.45, -0.85), Vector3(1.875, 1.15, 0.0), "chair", Vector3(0.50, 0.35, 0.50)],
 		["Стул у столика", Vector3(0.85, 0.45, -2.3), Vector3(0.85, 1.15, -3.2), "chair", Vector3(0.50, 0.35, 0.50)],
-		["Кровать у стола", Vector3(3.55, 0.45, -0.45), Vector3(1.6, 0.8, -0.45), "bed", Vector3(1.8, 0.18, 0.75)],
-		["Кровать у балкона", Vector3(2.75, 0.45, -2.75), Vector3(0.8, 0.8, -2.75), "bed", Vector3(1.8, 0.18, 0.75)]]:
+		["Кровать у стола", Vector3(3.35, 0.45, -0.45), Vector3(1.6, 0.8, -0.45), "bed", Vector3(1.8, 0.18, 0.75)],
+		["Кровать у балкона", Vector3(3.35, 0.45, -2.75), Vector3(0.8, 0.8, -2.75), "bed", Vector3(1.8, 0.18, 0.75)]]:
 		var control := _add_room_control(entry[0], entry[1], entry[4], entry[3])
 		control.rest_target = entry[2]
 	# Проёмы и размеры по существующей Blender-сцене, без новых внешних зависимостей.
 	_add_room_control("Выключатель", Vector3(0.34, 1.09, -0.02), Vector3(0.13, 0.14, 0.07), "light")
 	_add_room_control("Ночник", Vector3(4.35, 0.72, -1.375), Vector3(0.18, 0.25, 0.18), "lamp")
 	for index in range(2):
-		var control := _add_room_control("Штора_%s" % index, Vector3(4.46, 1.3, -0.36 if index == 0 else -2.85), Vector3(0.18, 2.5, 0.75), "curtain")
+		var control := _add_room_control("Штора_%s" % index, Vector3(4.49, 1.3, -0.36 if index == 0 else -2.85), Vector3(0.18, 2.5, 0.75), "curtain")
 		control.cloth = loaded_room.find_child("Curtain_%s" % index, true, false)
 		if control.cloth != null:
 			control.original_scale = control.cloth.scale
