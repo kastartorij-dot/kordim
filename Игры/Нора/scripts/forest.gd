@@ -100,7 +100,7 @@ func _деревья() -> void:
 		стволы.append(Transform3D(
 			Basis(Vector3.UP, поворот).scaled(Vector3(ширина, высота, ширина)),
 			Vector3(p.x, высота * 0.5, p.y)))
-		цвет_стволов.append(Color(0.29, 0.23, 0.19) * цвет)
+		цвет_стволов.append(Color(0.24, 0.19, 0.15) * цвет)
 		for j in range(3):
 			var ширина_кроны := высота * (0.125 - j * 0.019) * rng.randf_range(0.88, 1.08)
 			var длина := высота * (0.32 - j * 0.035)
@@ -110,7 +110,7 @@ func _деревья() -> void:
 					Vector3(ширина_кроны, длина, ширина_кроны)),
 				Vector3(p.x, центр, p.y)))
 			var тон := rng.randf_range(0.8, 1.05)
-			цвета_ярусов[j].append(Color(0.12, 0.19, 0.14) * тон)
+			цвета_ярусов[j].append(Color(0.085, 0.14, 0.10) * тон)
 		# Коллизии нужны только возле поляны: вдали достаточно рендера.
 		if Vector2(p.x, p.y).length_squared() < 23.0 * 23.0:
 			_коллизия_ствола(p, высота)
@@ -207,7 +207,7 @@ func _подлесок() -> void:
 			continue
 		if absf(z + 17.0) < 1.8:
 			continue
-		if _дистанция_до_тропы(x, z) < 0.9:
+		if _дистанция_до_тропы(x, z) < 1.65:
 			continue
 		if i % 3 == 0:
 			var размер := rng.randf_range(0.23, 0.75)
@@ -215,13 +215,13 @@ func _подлесок() -> void:
 				Basis(Vector3.UP, rng.randf_range(0.0, TAU)).scaled(
 					Vector3(размер * 1.5, размер * 0.52, размер)),
 				Vector3(x, размер * 0.17, z)))
-			цвета_камней.append(Color(0.34, 0.34, 0.32) * rng.randf_range(0.85, 1.15))
+			цвета_камней.append(Color(0.28, 0.29, 0.28) * rng.randf_range(0.85, 1.15))
 		else:
-			var масштаб := rng.randf_range(0.5, 1.45)
+			var масштаб := rng.randf_range(0.30, 0.74)
 			листья.append(Transform3D(
 				Basis(Vector3.UP, rng.randf_range(0.0, TAU)).scaled(
 					Vector3.ONE * масштаб), Vector3(x, 0.025, z)))
-			цвета_листьев.append(Color(0.22, 0.28, 0.14) * rng.randf_range(0.75, 1.05))
+			цвета_листьев.append(Color(0.16, 0.21, 0.11) * rng.randf_range(0.75, 1.05))
 	_множество("Камни_подлесок", камень, камни, цвета_камней)
 	_множество("Папоротник_подлесок", папоротник, листья, цвета_листьев)
 

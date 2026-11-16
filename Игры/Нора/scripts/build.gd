@@ -74,6 +74,36 @@ func _сруб_визуально() -> void:
 		return
 	модель.name = "Сруб_Модель"
 	add_child(модель)
+	_исправить_материалы_сруба(модель)
+
+# В glTF часть групп без корректной интерпретации COLOR_0 получалась почти
+# белой. Задаём явные оттенки в Godot; исходные цвета вершин сохраняют вариации.
+func _исправить_материалы_сруба(узел: Node) -> void:
+	var палитра := {
+		"Logs": Color(0.50, 0.45, 0.40),
+		"Endgrain": Color(0.56, 0.51, 0.43),
+		"Planks": Color(0.54, 0.47, 0.40),
+		"Shingles": Color(0.49, 0.48, 0.43),
+		"Moss": Color(0.57, 0.62, 0.44),
+		"Stone": Color(0.62, 0.60, 0.56),
+		"Iron": Color(0.46, 0.44, 0.43),
+		"Glass": Color(0.38, 0.46, 0.47, 0.65)
+	}
+	if узел is MeshInstance3D:
+		for группа in палитра:
+			if str(узел.name).begins_with(группа):
+				var mat := StandardMaterial3D.new()
+				mat.albedo_color = палитра[группа]
+				mat.vertex_color_use_as_albedo = true
+				mat.roughness = 0.94
+				mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+				if группа == "Glass":
+					mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+					mat.roughness = 0.27
+				узел.material_override = mat
+				break
+	for дочерний in узел.get_children():
+		_исправить_материалы_сруба(дочерний)
 
 func _process(_dt: float) -> void:
 	огонь.light_energy = 2.2 + 0.35 * sin(Time.get_ticks_msec() * 0.013) + randf() * 0.25
