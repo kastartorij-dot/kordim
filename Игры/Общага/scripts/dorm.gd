@@ -6,6 +6,7 @@ var hint: Label
 var help_button: Button
 var lighting_mode := 0
 var daylight_prototype := false
+var daylight_prototype_v2 := false # Отдельная проба направленного рассеянного света из окна.
 var room_environment: Environment
 var daylight: Array[Light3D] = []
 var ceiling_light: OmniLight3D
@@ -32,7 +33,8 @@ const VIEWS := [
 
 func _ready() -> void:
 	var args := OS.get_cmdline_user_args()
-	daylight_prototype = args.has("--daylight-prototype")
+	daylight_prototype_v2 = args.has("--daylight-prototype-v2")
+	daylight_prototype = args.has("--daylight-prototype") or daylight_prototype_v2
 	for arg in args:
 		if arg == "--inspect" or arg.begins_with("--shot="):
 			walk_enabled = false
@@ -75,7 +77,10 @@ func _ready() -> void:
 	# Основной рассеянный свет приходит от окна. Тени мебели нужны и в Compatibility.
 	_window_light(Vector3(4.15, 1.9, -1.15))
 	_window_light(Vector3(4.15, 1.9, -2.35))
-	_fill_light(Vector3(2.3, 2.4, -1.6), 0.09 if daylight_prototype else 0.22, 4)
+	var center_fill := 0.22
+	if daylight_prototype: center_fill = 0.09
+	if daylight_prototype_v2: center_fill = 0.12
+	_fill_light(Vector3(2.3, 2.4, -1.6), center_fill, 4)
 	_fill_light(Vector3(-1.3, 2.4, -1.9), 0.8, 3)
 	ceiling_light = OmniLight3D.new()
 	ceiling_light.position = Vector3(2.3, 2.45, -1.6)
@@ -174,6 +179,23 @@ func _fill_light(at: Vector3, energy: float, radius: float) -> void:
 	daylight.append(light)
 
 func _window_light(at: Vector3) -> void:
+	if daylight_prototype_v2:
+		# Ненаправленные источники близко к белой стене пересвечивают откос и потолок.
+		# Пробуем широкие мягкие пятна, направленные внутрь комнаты, без спекуляра:
+		# прямые тени по-прежнему даёт солнце, а этот свет имитирует переотражение.
+		var window_bounce := SpotLight3D.new()
+		window_bounce.position = at
+		window_bounce.light_color = Color(1.0, 0.98, 0.94)
+		window_bounce.light_energy = 0.15
+		window_bounce.light_specular = 0.0
+		window_bounce.spot_range = 5.5
+		window_bounce.spot_angle = 65.0
+		window_bounce.spot_angle_attenuation = 1.0
+		window_bounce.shadow_enabled = false
+		add_child(window_bounce)
+		window_bounce.look_at(Vector3(1.2, 1.1, at.z), Vector3.UP)
+		daylight.append(window_bounce)
+		return
 	var light := OmniLight3D.new()
 	light.position = at
 	light.light_color = Color(1.0, 0.98, 0.94)
