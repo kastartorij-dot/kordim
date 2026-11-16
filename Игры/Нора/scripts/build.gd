@@ -19,7 +19,7 @@ func _ready() -> void:
 	seed(1026)
 	_материалы()
 	_земля()
-	_сруб()
+	_сруб_визуально()
 	_внутри()
 	_снаружи()
 	_лес()
@@ -32,6 +32,28 @@ func _ready() -> void:
 	else:
 		игрок.position = Vector3(-1.5, 0.05, 13)
 		игрок.rotation.y = deg_to_rad(-8)
+
+# Используем игровой GLB для внешней оболочки дома, но сохраняем коллизии
+# чернового сруба, проёмов и открытой двери. Это не ломает перемещение и подписи.
+# При отсутствии GLB остаётся полностью работоспособная исходная заготовка.
+func _сруб_визуально() -> void:
+	if not ResourceLoader.exists("res://models/nora_shell.glb"):
+		_сруб()
+		return
+	var старые_узлы := get_children()
+	_сруб()
+	for узел in get_children():
+		if старые_узлы.has(узел):
+			continue
+		if узел is MeshInstance3D:
+			узел.visible = false
+		elif узел is StaticBody3D:
+			for дочерний in узел.get_children():
+				if дочерний is MeshInstance3D:
+					дочерний.visible = false
+	var модель: Node3D = load("res://models/nora_shell.glb").instantiate()
+	модель.name = "Сруб_Модель"
+	add_child(модель)
 
 func _process(_dt: float) -> void:
 	огонь.light_energy = 2.2 + 0.35 * sin(Time.get_ticks_msec() * 0.013) + randf() * 0.25
