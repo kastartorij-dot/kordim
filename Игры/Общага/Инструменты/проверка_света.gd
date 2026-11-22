@@ -29,6 +29,9 @@ func _run() -> void:
 	for mode in range(3):
 		scene._set_lighting(mode)
 		if not _check(scene.lighting_mode == mode, "Не переключился режим %d" % mode): return
+		if not _check(scene.room_environment.background_mode == Environment.BG_SKY
+				and scene.sky_material.get_shader_parameter("lighting_mode") == mode,
+				"Небо не переключилось вместе со светом"): return
 		for light in scene.daylight:
 			if not _check(light.visible == (mode == 0), "Дневной источник активен не в своём режиме"): return
 		if not _check(scene.ceiling_light.visible == (mode == 1), "Неверное состояние потолочного света"): return

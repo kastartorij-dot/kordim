@@ -8,6 +8,7 @@ var lighting_mode := 0
 var daylight_prototype := false
 var daylight_prototype_v2 := false # Флаг для сравнения, пока не вариант по умолчанию.
 var room_environment: Environment
+var sky_material: ShaderMaterial
 var daylight: Array[Light3D] = []
 var ceiling_light: OmniLight3D
 var bedside_light: OmniLight3D
@@ -64,9 +65,8 @@ func _ready() -> void:
 	var env := Environment.new()
 	env.background_mode = Environment.BG_SKY
 	var sky := Sky.new()
-	var sky_material := ProceduralSkyMaterial.new()
-	sky_material.sky_top_color = Color(0.42, 0.54, 0.65)
-	sky_material.sky_horizon_color = Color(0.78, 0.81, 0.81)
+	sky_material = ShaderMaterial.new()
+	sky_material.shader = preload("res://textures/courtyard_sky.gdshader")
 	sky.sky_material = sky_material
 	env.sky = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
@@ -258,8 +258,7 @@ func _set_lighting(mode: int) -> void:
 	bedside_light.visible = lighting_mode == 2
 	var day_ambient := 0.18 if daylight_prototype else 0.28
 	room_environment.ambient_light_energy = [day_ambient, 0.08, 0.015][lighting_mode]
-	room_environment.background_mode = Environment.BG_SKY if lighting_mode == 0 else Environment.BG_COLOR
-	room_environment.background_color = Color(0.015, 0.02, 0.04)
+	sky_material.set_shader_parameter("lighting_mode", lighting_mode)
 	_update_accent_lighting()
 
 func _build_accent_lighting() -> void:
