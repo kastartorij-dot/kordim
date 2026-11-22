@@ -10,6 +10,7 @@ var подсказка: Label
 var плашка: PanelContainer
 var прицел: Label
 var цель: CollisionObject3D
+var на_лестнице := false
 var g: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 func _ready() -> void:
@@ -76,7 +77,7 @@ func _unhandled_input(e: InputEvent) -> void:
 	if e is InputEventMouseButton and e.pressed:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	elif e is InputEventKey and e.pressed and not e.echo and e.physical_keycode == KEY_E:
-		if is_instance_valid(цель) and цель.has_meta("interact_kind"):
+		if not на_лестнице and is_instance_valid(цель) and цель.has_meta("interact_kind"):
 			get_tree().current_scene.interact(цель.get_meta("interact_kind"), self)
 	elif e is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-e.relative.x * 0.0025)
@@ -86,6 +87,9 @@ func _клавиша(a: Key, b: Key) -> float:
 	return 1.0 if Input.is_physical_key_pressed(a) or Input.is_physical_key_pressed(b) else 0.0
 
 func _physics_process(dt: float) -> void:
+	if на_лестнице:
+		_смотрю()
+		return
 	var вход := Vector2(_клавиша(KEY_D, KEY_RIGHT) - _клавиша(KEY_A, KEY_LEFT),
 		_клавиша(KEY_S, KEY_DOWN) - _клавиша(KEY_W, KEY_UP))
 	var куда := (transform.basis * Vector3(вход.x, 0, вход.y)).normalized()
@@ -104,12 +108,16 @@ func _смотрю() -> void:
 	var от := камера.global_position
 	var q := PhysicsRayQueryParameters3D.create(от, от - камера.global_basis.z * 3.0)
 	q.exclude = [get_rid()]
+	q.collision_mask = 3
+	q.collide_with_areas = true
 	var hit := get_world_3d().direct_space_state.intersect_ray(q)
 	цель = hit.get("collider") as CollisionObject3D
 	var захват := Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
 	прицел.visible = захват
 	if not захват:
 		подсказка.text = "Клик · взгляд     WASD · ходьба     E · действие     Esc · меню"
+	elif на_лестнице:
+		подсказка.text = ""
 	elif is_instance_valid(цель) and цель.has_meta("label"):
 		подсказка.text = цель.get_meta("label")
 	else:

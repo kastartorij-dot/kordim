@@ -27,6 +27,31 @@
 [ext_resource type="PackedScene" path="res://models/dressing/curtains.scn" id="Шерсть"]
 [ext_resource type="PackedScene" path="res://models/dressing/nook.scn" id="Угол_Арна"]
 
+[ext_resource type="PackedScene" path="res://models/dressing/porch-bench.scn" id="Лавка_бревно"]
+[ext_resource type="PackedScene" path="res://models/dressing/barrel.scn" id="Бочка_клёпки"]
+[ext_resource type="PackedScene" path="res://models/dressing/wash-station.scn" id="Умывальное_место"]
+[ext_resource type="PackedScene" path="res://models/dressing/return-gear.scn" id="Дорожные_вещи"]
+[ext_resource type="PackedScene" path="res://models/dressing/hatch.scn" id="Доски_люка"]
+[ext_resource type="PackedScene" path="res://models/dressing/hatch-frame.scn" id="Обвязка_люка"]
+[ext_resource type="PackedScene" path="res://models/dressing/cellar.scn" id="Запасы_погреба"]
+[ext_resource type="Shader" path="res://textures/cellar_ground.gdshader" id="Погреб_поверхность"]
+[ext_resource type="Texture2D" path="res://textures/forest/trail.res" id="earth_cellar"]
+[ext_resource type="Texture2D" path="res://textures/forest/trail_n.res" id="earth_n_cellar"]
+
+[sub_resource type="ShaderMaterial" id="CellarRock"]
+shader = ExtResource("Погреб_поверхность")
+shader_parameter/mineral = ExtResource("earth_cellar")
+shader_parameter/mineral_normal = ExtResource("earth_n_cellar")
+
+[sub_resource type="ShaderMaterial" id="CellarEarth"]
+shader = ExtResource("Погреб_поверхность")
+shader_parameter/mineral = ExtResource("earth_cellar")
+shader_parameter/mineral_normal = ExtResource("earth_n_cellar")
+shader_parameter/earthen = true
+
+[sub_resource type="BoxShape3D" id="HatchUseShape"]
+size = Vector3(0.84, 0.15, 0.76)
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_hewn_timber"]
 shader = ExtResource("timber_shader")
 shader_parameter/grain = ExtResource("timber_d")
@@ -56,14 +81,6 @@ shader_parameter/grain = ExtResource("timber_d")
 shader_parameter/grain_normal = ExtResource("timber_n")
 shader_parameter/tint = Color(0.80, 0.67, 0.51, 1)
 shader_parameter/length_on_z = true
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_wood_bench"]
-shader = ExtResource("1_wood")
-shader_parameter/wood_color = Color(0.435, 0.339, 0.242, 1)
-shader_parameter/long_axis = 0
-shader_parameter/seam_spacing = 0.16
-shader_parameter/grain_strength = 0.25
-shader_parameter/roughness = 0.9
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_wood_dark_x"]
 shader = ExtResource("1_wood")
@@ -101,14 +118,6 @@ shader_parameter/roughness = 0.92
 shader = ExtResource("1_wood")
 shader_parameter/wood_color = Color(0.46, 0.355, 0.243, 1)
 shader_parameter/long_axis = 0
-shader_parameter/seam_spacing = 0
-shader_parameter/grain_strength = 0.25
-shader_parameter/roughness = 0.88
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_wood_hatch"]
-shader = ExtResource("1_wood")
-shader_parameter/wood_color = Color(0.438, 0.339, 0.242, 1)
-shader_parameter/long_axis = 1
 shader_parameter/seam_spacing = 0
 shader_parameter/grain_strength = 0.25
 shader_parameter/roughness = 0.88
@@ -1098,9 +1107,6 @@ uv1_triplanar = true
 [sub_resource type="BoxMesh" id="BoxMesh_irert"]
 size = Vector3(1.1, 0.12, 0.35)
 
-[sub_resource type="BoxMesh" id="BoxMesh_gie15"]
-size = Vector3(8.8, 0.02, 6.8)
-
 [sub_resource type="BoxMesh" id="BoxMesh_6f4mp"]
 size = Vector3(1.28, 0.065, 0.12)
 
@@ -1739,13 +1745,6 @@ size = Vector3(0.95, 0.17, 1.69)
 albedo_color = Color(0.15, 0.15, 0.16, 1)
 roughness = 0.5
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_8jlrf"]
-top_radius = 0.018
-bottom_radius = 0.018
-height = 1.4000001
-radial_segments = 10
-rings = 1
-
 [sub_resource type="BoxShape3D" id="BoxShape3D_xeo21"]
 size = Vector3(0.82, 0.11, 1.66)
 
@@ -1934,12 +1933,6 @@ size = Vector3(0.105, 0.71, 0.1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_cu1h8"]
 size = Vector3(0.105, 0.71, 0.1)
-
-[sub_resource type="BoxMesh" id="BoxMesh_meqjj"]
-size = Vector3(1.98, 0.12, 0.07)
-
-[sub_resource type="BoxMesh" id="BoxMesh_skifw"]
-size = Vector3(1.98, 0.12, 0.07)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_y75bu"]
 size = Vector3(1.9, 0.064, 0.31)
@@ -2268,45 +2261,8 @@ height = 0.03
 radial_segments = 10
 rings = 1
 
-[sub_resource type="BoxMesh" id="BoxMesh_pkgyw"]
-size = Vector3(1.12, 0.055, 0.071)
-
-[sub_resource type="BoxMesh" id="BoxMesh_an3e8"]
-size = Vector3(1.12, 0.055, 0.071)
-
-[sub_resource type="BoxMesh" id="BoxMesh_pmnvn"]
-size = Vector3(0.068, 0.055, 0.92)
-
 [sub_resource type="BoxShape3D" id="BoxShape3D_hxgf5"]
 size = Vector3(1.002, 0.085, 0.902)
-
-[sub_resource type="BoxMesh" id="BoxMesh_kmbxh"]
-size = Vector3(1.002, 0.085, 0.902)
-
-[sub_resource type="BoxMesh" id="BoxMesh_1f8dn"]
-size = Vector3(0.194, 0.027, 0.866)
-
-[sub_resource type="BoxMesh" id="BoxMesh_no5ik"]
-size = Vector3(0.194, 0.027, 0.866)
-
-[sub_resource type="BoxMesh" id="BoxMesh_mcybu"]
-size = Vector3(0.194, 0.027, 0.866)
-
-[sub_resource type="BoxMesh" id="BoxMesh_m2vfb"]
-size = Vector3(0.194, 0.027, 0.866)
-
-[sub_resource type="BoxMesh" id="BoxMesh_1ejpk"]
-size = Vector3(0.194, 0.027, 0.866)
-
-[sub_resource type="BoxMesh" id="BoxMesh_53040"]
-size = Vector3(0.23, 0.026, 0.089)
-
-[sub_resource type="BoxMesh" id="BoxMesh_ajvsw"]
-size = Vector3(0.23, 0.026, 0.089)
-
-[sub_resource type="TorusMesh" id="TorusMesh_37mon"]
-inner_radius = 0.034
-outer_radius = 0.051
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_fpyi8"]
 size = Vector3(2.99, 0.16, 2.66)
@@ -2338,218 +2294,27 @@ size = Vector3(2.99, 2.1, 0.19)
 [sub_resource type="BoxMesh" id="BoxMesh_8jjta"]
 size = Vector3(2.99, 2.1, 0.19)
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_5qqtj"]
-top_radius = 0.035
-bottom_radius = 0.035
-height = 2.1227574
-radial_segments = 10
-rings = 1
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_1okb1"]
-top_radius = 0.035
-bottom_radius = 0.035
-height = 2.1227574
-radial_segments = 10
-rings = 1
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_gha87"]
-top_radius = 0.031
-bottom_radius = 0.031
-height = 0.55999994
-radial_segments = 10
-rings = 1
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_1i33n"]
-top_radius = 0.031
-bottom_radius = 0.031
-height = 0.55999994
-radial_segments = 10
-rings = 1
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_s6lrc"]
-top_radius = 0.031
-bottom_radius = 0.031
-height = 0.55999994
-radial_segments = 10
-rings = 1
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_jut7g"]
-top_radius = 0.031
-bottom_radius = 0.031
-height = 0.55999994
-radial_segments = 10
-rings = 1
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_i0snj"]
-top_radius = 0.031
-bottom_radius = 0.031
-height = 0.55999994
-radial_segments = 10
-rings = 1
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_l1ryn"]
-top_radius = 0.031
-bottom_radius = 0.031
-height = 0.55999994
-radial_segments = 10
-rings = 1
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_5qn2i"]
-top_radius = 0.031
-bottom_radius = 0.031
-height = 0.55999994
-radial_segments = 10
-rings = 1
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_8ovcd"]
-top_radius = 0.031
-bottom_radius = 0.031
-height = 0.55999994
-radial_segments = 10
-rings = 1
-
 [sub_resource type="BoxShape3D" id="BoxShape3D_fwxbc"]
 size = Vector3(0.34, 1.86, 0.63)
 
-[sub_resource type="BoxMesh" id="BoxMesh_0a30m"]
-size = Vector3(0.34, 1.86, 0.63)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_xq558"]
-size = Vector3(1.4, 0.066, 0.46)
-
-[sub_resource type="BoxMesh" id="BoxMesh_3bjo3"]
-size = Vector3(1.4, 0.066, 0.46)
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_lsb21"]
-top_radius = 0.1079
-bottom_radius = 0.13
-height = 0.1798
-radial_segments = 10
-rings = 1
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_p1m18"]
-top_radius = 0.052
-bottom_radius = 0.0624
-height = 0.1392
-radial_segments = 10
-rings = 1
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_8vjkg"]
-top_radius = 0.0585
-bottom_radius = 0.0585
-height = 0.024
-radial_segments = 10
-rings = 1
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_qplbs"]
-top_radius = 0.1079
-bottom_radius = 0.13
-height = 0.1798
-radial_segments = 10
-rings = 1
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_sgtty"]
-top_radius = 0.052
-bottom_radius = 0.0624
-height = 0.1392
-radial_segments = 10
-rings = 1
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_holam"]
-top_radius = 0.0585
-bottom_radius = 0.0585
-height = 0.024
-radial_segments = 10
-rings = 1
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_ors3b"]
-top_radius = 0.1079
-bottom_radius = 0.13
-height = 0.1798
-radial_segments = 10
-rings = 1
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_cc7a3"]
-top_radius = 0.052
-bottom_radius = 0.0624
-height = 0.1392
-radial_segments = 10
-rings = 1
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_pkyx3"]
-top_radius = 0.0585
-bottom_radius = 0.0585
-height = 0.024
-radial_segments = 10
-rings = 1
-
 [sub_resource type="BoxShape3D" id="BoxShape3D_nae08"]
-size = Vector3(1.64, 0.11, 0.33)
-
-[sub_resource type="BoxMesh" id="BoxMesh_l57mp"]
 size = Vector3(1.64, 0.11, 0.33)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_xg4n0"]
 size = Vector3(0.105, 0.35, 0.1)
 
-[sub_resource type="BoxMesh" id="BoxMesh_fucef"]
-size = Vector3(0.105, 0.35, 0.1)
-
 [sub_resource type="BoxShape3D" id="BoxShape3D_ai06u"]
-size = Vector3(0.105, 0.35, 0.1)
-
-[sub_resource type="BoxMesh" id="BoxMesh_i4y0f"]
 size = Vector3(0.105, 0.35, 0.1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_1mpgw"]
 size = Vector3(0.105, 0.35, 0.1)
 
-[sub_resource type="BoxMesh" id="BoxMesh_0appj"]
-size = Vector3(0.105, 0.35, 0.1)
-
 [sub_resource type="BoxShape3D" id="BoxShape3D_f0msr"]
 size = Vector3(0.105, 0.35, 0.1)
-
-[sub_resource type="BoxMesh" id="BoxMesh_trent"]
-size = Vector3(0.105, 0.35, 0.1)
-
-[sub_resource type="BoxMesh" id="BoxMesh_trwwd"]
-size = Vector3(1.48, 0.12, 0.07)
-
-[sub_resource type="BoxMesh" id="BoxMesh_becrg"]
-size = Vector3(1.48, 0.12, 0.07)
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_p7diw"]
 height = 0.78
 radius = 0.29
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_bdi5a"]
-top_radius = 0.265
-bottom_radius = 0.29
-height = 0.78
-radial_segments = 10
-rings = 1
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_4wyys"]
-top_radius = 0.294
-bottom_radius = 0.294
-height = 0.045
-radial_segments = 10
-rings = 1
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_jtqgq"]
-top_radius = 0.294
-bottom_radius = 0.294
-height = 0.045
-radial_segments = 10
-rings = 1
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_l6lri"]
-top_radius = 0.294
-bottom_radius = 0.294
-height = 0.045
-radial_segments = 10
-rings = 1
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_trsjy"]
 size = Vector3(0.47, 0.87, 1.56)
@@ -4303,12 +4068,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4, 0.06, 3.8)
 material_override = SubResource("StandardMaterial3D_t8611")
 mesh = SubResource("BoxMesh_irert")
 
-[node name="@MeshInstance3D@265" type="MeshInstance3D" parent="Стены" unique_id=681407169]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 0)
-material_override = SubResource("ShaderMaterial_worn_board")
-instance_shader_parameters/board_shift = -0.816
-mesh = SubResource("BoxMesh_gie15")
-
 [node name="@MeshInstance3D@274" type="MeshInstance3D" parent="Стены" unique_id=636680597]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 0.95, 3.5)
 material_override = SubResource("ShaderMaterial_worn_board")
@@ -4583,7 +4342,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.065, -1.28)
 shape = SubResource("BoxShape3D_5e1hg")
 
 [node name="@MeshInstance3D@313" type="MeshInstance3D" parent="Половицы/@StaticBody3D@314" unique_id=916981032]
-material_override = SubResource("ShaderMaterial_wood_dark_x")
+material_override = SubResource("ShaderMaterial_roof")
 instance_shader_parameters/board_shift = -0.980
 mesh = SubResource("BoxMesh_4ruon")
 
@@ -4882,7 +4641,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.065, 2.66)
 shape = SubResource("BoxShape3D_5y71i")
 
 [node name="@MeshInstance3D@364" type="MeshInstance3D" parent="Половицы/@StaticBody3D@365" unique_id=534237414]
-material_override = SubResource("ShaderMaterial_wood_dark_x")
+material_override = SubResource("ShaderMaterial_roof")
 instance_shader_parameters/board_shift = -0.673
 mesh = SubResource("BoxMesh_e15n0")
 
@@ -5001,7 +4760,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.435, -0.065, 1.38)
 shape = SubResource("BoxShape3D_bl1af")
 
 [node name="@MeshInstance3D@385" type="MeshInstance3D" parent="Половицы/@StaticBody3D@386" unique_id=1384743604]
-material_override = SubResource("ShaderMaterial_wood_dark_x")
+material_override = SubResource("ShaderMaterial_roof")
 instance_shader_parameters/board_shift = -0.429
 mesh = SubResource("BoxMesh_jpr48")
 
@@ -5072,7 +4831,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.545, -0.065, 1.38)
 shape = SubResource("BoxShape3D_uejl2")
 
 [node name="@MeshInstance3D@398" type="MeshInstance3D" parent="Половицы/@StaticBody3D@399" unique_id=211985133]
-material_override = SubResource("ShaderMaterial_wood_dark_x")
+material_override = SubResource("ShaderMaterial_roof")
 instance_shader_parameters/board_shift = -0.469
 mesh = SubResource("BoxMesh_2vbck")
 
@@ -5421,11 +5180,6 @@ shape = SubResource("BoxShape3D_11oag")
 visible = false
 mesh = SubResource("BoxMesh_wrgmr")
 
-[node name="@MeshInstance3D@545" type="MeshInstance3D" parent="Очаг" unique_id=1016186813]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0.43000007, 1.77, 0)
-material_override = SubResource("StandardMaterial3D_2yxcp")
-mesh = SubResource("CylinderMesh_8jlrf")
-
 [node name="Огонь" type="OmniLight3D" parent="Очаг" unique_id=1350327902]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, 0.49, 0)
 light_color = Color(1, 0.53, 0.26, 1)
@@ -5688,18 +5442,6 @@ shape = SubResource("BoxShape3D_bpxby")
 visible = false
 instance_shader_parameters/board_shift = -0.673
 mesh = SubResource("BoxMesh_cu1h8")
-
-[node name="@MeshInstance3D@657" type="MeshInstance3D" parent="Общий_стол" unique_id=585803587]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.644, -0.405)
-material_override = SubResource("ShaderMaterial_wood_dark_x")
-instance_shader_parameters/board_shift = 0.878
-mesh = SubResource("BoxMesh_meqjj")
-
-[node name="@MeshInstance3D@658" type="MeshInstance3D" parent="Общий_стол" unique_id=1553292807]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.644, 0.405)
-material_override = SubResource("ShaderMaterial_wood_dark_x")
-instance_shader_parameters/board_shift = 0.408
-mesh = SubResource("BoxMesh_skifw")
 
 [node name="Лавка_1" type="Node3D" parent="." unique_id=2107516844]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1, 0, -0.91)
@@ -6248,24 +5990,6 @@ mesh = SubResource("CylinderMesh_bwh7w")
 [node name="Люк" type="Node3D" parent="." unique_id=2096147394]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.89, 0, 1.38)
 
-[node name="@MeshInstance3D@851" type="MeshInstance3D" parent="Люк" unique_id=2024999052]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.038, -0.46000004)
-material_override = SubResource("ShaderMaterial_wood_hatch")
-instance_shader_parameters/board_shift = 0.082
-mesh = SubResource("BoxMesh_pkgyw")
-
-[node name="@MeshInstance3D@852" type="MeshInstance3D" parent="Люк" unique_id=131378519]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.038, 0.46000004)
-material_override = SubResource("ShaderMaterial_wood_hatch")
-instance_shader_parameters/board_shift = -0.388
-mesh = SubResource("BoxMesh_an3e8")
-
-[node name="@MeshInstance3D@853" type="MeshInstance3D" parent="Люк" unique_id=2052233998]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.51, 0.038, 0)
-material_override = SubResource("ShaderMaterial_wood_hatch")
-instance_shader_parameters/board_shift = -0.857
-mesh = SubResource("BoxMesh_pmnvn")
-
 [node name="Петля" type="Node3D" parent="Люк" unique_id=1196864164]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.51, 0.044, 0)
 
@@ -6277,56 +6001,6 @@ metadata/interact_kind = "hatch"
 [node name="@CollisionShape3D@854" type="CollisionShape3D" parent="Люк/Петля/Крышка" unique_id=298577300]
 shape = SubResource("BoxShape3D_hxgf5")
 
-[node name="@MeshInstance3D@855" type="MeshInstance3D" parent="Люк/Петля/Крышка" unique_id=1076083991]
-material_override = SubResource("ShaderMaterial_wood_hatch")
-instance_shader_parameters/board_shift = -0.714
-mesh = SubResource("BoxMesh_kmbxh")
-
-[node name="@MeshInstance3D@857" type="MeshInstance3D" parent="Люк/Петля" unique_id=1399081144]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.10200024, 0.015000001, 0)
-material_override = SubResource("ShaderMaterial_wood_hatch")
-instance_shader_parameters/board_shift = 0.837
-mesh = SubResource("BoxMesh_1f8dn")
-
-[node name="@MeshInstance3D@858" type="MeshInstance3D" parent="Люк/Петля" unique_id=1654853294]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.30600023, 0.015000001, 0)
-material_override = SubResource("ShaderMaterial_wood_hatch")
-instance_shader_parameters/board_shift = 0.367
-mesh = SubResource("BoxMesh_no5ik")
-
-[node name="@MeshInstance3D@859" type="MeshInstance3D" parent="Люк/Петля" unique_id=496745847]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5100001, 0.015000001, 0)
-material_override = SubResource("ShaderMaterial_wood_hatch")
-instance_shader_parameters/board_shift = -0.102
-mesh = SubResource("BoxMesh_mcybu")
-
-[node name="@MeshInstance3D@860" type="MeshInstance3D" parent="Люк/Петля" unique_id=2095127632]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7140001, 0.015000001, 0)
-material_override = SubResource("ShaderMaterial_wood_hatch")
-instance_shader_parameters/board_shift = -0.571
-mesh = SubResource("BoxMesh_m2vfb")
-
-[node name="@MeshInstance3D@861" type="MeshInstance3D" parent="Люк/Петля" unique_id=74262898]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9180001, 0.015000001, 0)
-material_override = SubResource("ShaderMaterial_wood_hatch")
-instance_shader_parameters/board_shift = 0.980
-mesh = SubResource("BoxMesh_1ejpk")
-
-[node name="@MeshInstance3D@862" type="MeshInstance3D" parent="Люк/Петля" unique_id=1312011939]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.10500002, 0.034, -0.2852)
-material_override = SubResource("StandardMaterial3D_2yxcp")
-mesh = SubResource("BoxMesh_53040")
-
-[node name="@MeshInstance3D@863" type="MeshInstance3D" parent="Люк/Петля" unique_id=1155596801]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.10500002, 0.034, 0.2852)
-material_override = SubResource("StandardMaterial3D_2yxcp")
-mesh = SubResource("BoxMesh_ajvsw")
-
-[node name="@MeshInstance3D@864" type="MeshInstance3D" parent="Люк/Петля" unique_id=1399979126]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0.05, 0)
-material_override = SubResource("StandardMaterial3D_2yxcp")
-mesh = SubResource("TorusMesh_37mon")
-
 [node name="Погреб" type="Node3D" parent="." unique_id=2074550451]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.24, 0, 1.08)
 
@@ -6337,7 +6011,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.15, 0)
 shape = SubResource("BoxShape3D_fpyi8")
 
 [node name="@MeshInstance3D@866" type="MeshInstance3D" parent="Погреб/@StaticBody3D@867" unique_id=1409502147]
-material_override = SubResource("StandardMaterial3D_t8611")
+material_override = SubResource("CellarEarth")
 mesh = SubResource("BoxMesh_sykwj")
 
 [node name="@StaticBody3D@870" type="StaticBody3D" parent="Погреб" unique_id=269413735]
@@ -6347,7 +6021,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4950001, -1.03, 0)
 shape = SubResource("BoxShape3D_m5u6m")
 
 [node name="@MeshInstance3D@869" type="MeshInstance3D" parent="Погреб/@StaticBody3D@870" unique_id=1023162124]
-material_override = SubResource("StandardMaterial3D_t8611")
+material_override = SubResource("CellarRock")
 mesh = SubResource("BoxMesh_ba2p0")
 
 [node name="@StaticBody3D@873" type="StaticBody3D" parent="Погреб" unique_id=2143604023]
@@ -6357,7 +6031,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.03, -1.33)
 shape = SubResource("BoxShape3D_cbkt0")
 
 [node name="@MeshInstance3D@872" type="MeshInstance3D" parent="Погреб/@StaticBody3D@873" unique_id=755646407]
-material_override = SubResource("StandardMaterial3D_t8611")
+material_override = SubResource("CellarRock")
 mesh = SubResource("BoxMesh_gkwim")
 
 [node name="@StaticBody3D@876" type="StaticBody3D" parent="Погреб" unique_id=1237434785]
@@ -6367,7 +6041,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.495, -1.03, 0)
 shape = SubResource("BoxShape3D_ch0gi")
 
 [node name="@MeshInstance3D@875" type="MeshInstance3D" parent="Погреб/@StaticBody3D@876" unique_id=314462815]
-material_override = SubResource("StandardMaterial3D_t8611")
+material_override = SubResource("CellarRock")
 mesh = SubResource("BoxMesh_1qsa7")
 
 [node name="@StaticBody3D@879" type="StaticBody3D" parent="Погреб" unique_id=897168975]
@@ -6377,147 +6051,16 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.03, 1.33)
 shape = SubResource("BoxShape3D_uyrkk")
 
 [node name="@MeshInstance3D@878" type="MeshInstance3D" parent="Погреб/@StaticBody3D@879" unique_id=121685157]
-material_override = SubResource("StandardMaterial3D_t8611")
+material_override = SubResource("CellarRock")
 mesh = SubResource("BoxMesh_8jjta")
-
-[node name="@MeshInstance3D@880" type="MeshInstance3D" parent="Погреб" unique_id=1970041196]
-transform = Transform3D(0.9892792, 0.14603643, 0, -0.14603643, 0.9892792, 0, 0, 0, 1, -0.29500008, -1.01, 0.01999998)
-material_override = SubResource("ShaderMaterial_wood_trim")
-instance_shader_parameters/board_shift = -0.327
-mesh = SubResource("CylinderMesh_5qqtj")
-
-[node name="@MeshInstance3D@881" type="MeshInstance3D" parent="Погреб" unique_id=1190988147]
-transform = Transform3D(0.9892792, 0.14603643, 0, -0.14603643, 0.9892792, 0, 0, 0, 1, -0.29500008, -1.01, 0.5799999)
-material_override = SubResource("ShaderMaterial_wood_trim")
-instance_shader_parameters/board_shift = -0.796
-mesh = SubResource("CylinderMesh_1okb1")
-
-[node name="@MeshInstance3D@882" type="MeshInstance3D" parent="Погреб" unique_id=1636321526]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -0.408, -1.91, 0.29999995)
-material_override = SubResource("ShaderMaterial_wood_trim")
-instance_shader_parameters/board_shift = 0.755
-mesh = SubResource("CylinderMesh_gha87")
-
-[node name="@MeshInstance3D@883" type="MeshInstance3D" parent="Погреб" unique_id=539991339]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -0.3770001, -1.67, 0.29999995)
-material_override = SubResource("ShaderMaterial_wood_trim")
-instance_shader_parameters/board_shift = 0.286
-mesh = SubResource("CylinderMesh_1i33n")
-
-[node name="@MeshInstance3D@884" type="MeshInstance3D" parent="Погреб" unique_id=828136593]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -0.34599996, -1.43, 0.29999995)
-material_override = SubResource("ShaderMaterial_wood_trim")
-instance_shader_parameters/board_shift = -0.184
-mesh = SubResource("CylinderMesh_s6lrc")
-
-[node name="@MeshInstance3D@885" type="MeshInstance3D" parent="Погреб" unique_id=926507248]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -0.31500006, -1.1899999, 0.29999995)
-material_override = SubResource("ShaderMaterial_wood_trim")
-instance_shader_parameters/board_shift = -0.653
-mesh = SubResource("CylinderMesh_jut7g")
-
-[node name="@MeshInstance3D@886" type="MeshInstance3D" parent="Погреб" unique_id=58650816]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -0.28400016, -0.9499999, 0.29999995)
-material_override = SubResource("ShaderMaterial_wood_trim")
-instance_shader_parameters/board_shift = 0.898
-mesh = SubResource("CylinderMesh_i0snj")
-
-[node name="@MeshInstance3D@887" type="MeshInstance3D" parent="Погреб" unique_id=691626731]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -0.25300002, -0.7099999, 0.29999995)
-material_override = SubResource("ShaderMaterial_wood_trim")
-instance_shader_parameters/board_shift = 0.429
-mesh = SubResource("CylinderMesh_l1ryn")
-
-[node name="@MeshInstance3D@888" type="MeshInstance3D" parent="Погреб" unique_id=1454939084]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -0.22200012, -0.4699999, 0.29999995)
-material_override = SubResource("ShaderMaterial_wood_trim")
-instance_shader_parameters/board_shift = -0.041
-mesh = SubResource("CylinderMesh_5qn2i")
-
-[node name="@MeshInstance3D@889" type="MeshInstance3D" parent="Погреб" unique_id=7881083]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -0.19099998, -0.2299999, 0.29999995)
-material_override = SubResource("ShaderMaterial_wood_trim")
-instance_shader_parameters/board_shift = -0.510
-mesh = SubResource("CylinderMesh_8ovcd")
 
 [node name="@StaticBody3D@892" type="StaticBody3D" parent="Погреб" unique_id=775336943]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.29999995, -1.0999999, 0.29999995)
-metadata/label = "Лестница погреба. E — подняться или спуститься."
+metadata/label = "Лестница погреба. E — подняться."
 metadata/interact_kind = "ladder"
 
 [node name="@CollisionShape3D@890" type="CollisionShape3D" parent="Погреб/@StaticBody3D@892" unique_id=2035714320]
 shape = SubResource("BoxShape3D_fwxbc")
-
-[node name="@MeshInstance3D@891" type="MeshInstance3D" parent="Погреб/@StaticBody3D@892" unique_id=2124833732]
-visible = false
-material_override = SubResource("ShaderMaterial_wood_dark_y")
-instance_shader_parameters/board_shift = 0.102
-mesh = SubResource("BoxMesh_0a30m")
-
-[node name="@StaticBody3D@895" type="StaticBody3D" parent="Погреб" unique_id=671225703]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.22000003, -1.45, -0.94)
-
-[node name="@CollisionShape3D@893" type="CollisionShape3D" parent="Погреб/@StaticBody3D@895" unique_id=1721793688]
-shape = SubResource("BoxShape3D_xq558")
-
-[node name="@MeshInstance3D@894" type="MeshInstance3D" parent="Погреб/@StaticBody3D@895" unique_id=1335896947]
-material_override = SubResource("ShaderMaterial_wood_dark_x")
-instance_shader_parameters/board_shift = 0.714
-mesh = SubResource("BoxMesh_3bjo3")
-
-[node name="@MeshInstance3D@896" type="MeshInstance3D" parent="Погреб" unique_id=2123832245]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.19000006, -1.3201, -0.94)
-material_override = SubResource("StandardMaterial3D_dta6y")
-mesh = SubResource("CylinderMesh_lsb21")
-
-[node name="@MeshInstance3D@897" type="MeshInstance3D" parent="Погреб" unique_id=1963404059]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.19000006, -1.1925, -0.94)
-material_override = SubResource("StandardMaterial3D_dta6y")
-mesh = SubResource("CylinderMesh_p1m18")
-
-[node name="@MeshInstance3D@898" type="MeshInstance3D" parent="Погреб" unique_id=711903241]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.19000006, -1.12, -0.94)
-material_override = SubResource("ShaderMaterial_wood_dark_x")
-instance_shader_parameters/board_shift = -0.694
-mesh = SubResource("CylinderMesh_8vjkg")
-
-[node name="@MeshInstance3D@899" type="MeshInstance3D" parent="Погреб" unique_id=870651936]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.20000005, -1.3201, -0.94)
-material_override = SubResource("StandardMaterial3D_dta6y")
-mesh = SubResource("CylinderMesh_qplbs")
-
-[node name="@MeshInstance3D@900" type="MeshInstance3D" parent="Погреб" unique_id=2085859035]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.20000005, -1.1925, -0.94)
-material_override = SubResource("StandardMaterial3D_dta6y")
-mesh = SubResource("CylinderMesh_sgtty")
-
-[node name="@MeshInstance3D@901" type="MeshInstance3D" parent="Погреб" unique_id=1722214154]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.20000005, -1.12, -0.94)
-material_override = SubResource("ShaderMaterial_wood_dark_x")
-instance_shader_parameters/board_shift = -0.082
-mesh = SubResource("CylinderMesh_holam")
-
-[node name="@MeshInstance3D@902" type="MeshInstance3D" parent="Погреб" unique_id=2057119757]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5899999, -1.3201, -0.94)
-material_override = SubResource("StandardMaterial3D_dta6y")
-mesh = SubResource("CylinderMesh_ors3b")
-
-[node name="@MeshInstance3D@903" type="MeshInstance3D" parent="Погреб" unique_id=1228361756]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5899999, -1.1925, -0.94)
-material_override = SubResource("StandardMaterial3D_dta6y")
-mesh = SubResource("CylinderMesh_cc7a3")
-
-[node name="@MeshInstance3D@904" type="MeshInstance3D" parent="Погреб" unique_id=1530056893]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5899999, -1.12, -0.94)
-material_override = SubResource("ShaderMaterial_wood_dark_x")
-instance_shader_parameters/board_shift = 0.531
-mesh = SubResource("CylinderMesh_pkyx3")
-
-[node name="@OmniLight3D@905" type="OmniLight3D" parent="Погреб" unique_id=2128881744]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.06, -1.16, -0.25)
-light_color = Color(0.86, 0.65, 0.42, 1)
-light_energy = 0.58
-omni_range = 3.4
 
 [node name="Лавка_у_порога" type="Node3D" parent="." unique_id=1600103751]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 0, 3.98)
@@ -6529,21 +6072,11 @@ metadata/label = "Лавка из расколотого бревна у пор�
 [node name="@CollisionShape3D@906" type="CollisionShape3D" parent="Лавка_у_порога/@StaticBody3D@908" unique_id=1787276537]
 shape = SubResource("BoxShape3D_nae08")
 
-[node name="@MeshInstance3D@907" type="MeshInstance3D" parent="Лавка_у_порога/@StaticBody3D@908" unique_id=1349200356]
-material_override = SubResource("ShaderMaterial_wood_bench")
-instance_shader_parameters/board_shift = 0.204
-mesh = SubResource("BoxMesh_l57mp")
-
 [node name="@StaticBody3D@911" type="StaticBody3D" parent="Лавка_у_порога" unique_id=319058034]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7149999, 0.175, -0.059999943)
 
 [node name="@CollisionShape3D@909" type="CollisionShape3D" parent="Лавка_у_порога/@StaticBody3D@911" unique_id=1675853202]
 shape = SubResource("BoxShape3D_xg4n0")
-
-[node name="@MeshInstance3D@910" type="MeshInstance3D" parent="Лавка_у_порога/@StaticBody3D@911" unique_id=1481779467]
-material_override = SubResource("ShaderMaterial_wood_dark_y")
-instance_shader_parameters/board_shift = 0.816
-mesh = SubResource("BoxMesh_fucef")
 
 [node name="@StaticBody3D@914" type="StaticBody3D" parent="Лавка_у_порога" unique_id=193565282]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7149999, 0.175, 0.059999943)
@@ -6551,44 +6084,17 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7149999, 0.175, 0.05999994
 [node name="@CollisionShape3D@912" type="CollisionShape3D" parent="Лавка_у_порога/@StaticBody3D@914" unique_id=1563909753]
 shape = SubResource("BoxShape3D_ai06u")
 
-[node name="@MeshInstance3D@913" type="MeshInstance3D" parent="Лавка_у_порога/@StaticBody3D@914" unique_id=385812520]
-material_override = SubResource("ShaderMaterial_wood_dark_y")
-instance_shader_parameters/board_shift = -0.592
-mesh = SubResource("BoxMesh_i4y0f")
-
 [node name="@StaticBody3D@917" type="StaticBody3D" parent="Лавка_у_порога" unique_id=906449730]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7149999, 0.175, -0.059999943)
 
 [node name="@CollisionShape3D@915" type="CollisionShape3D" parent="Лавка_у_порога/@StaticBody3D@917" unique_id=1253617958]
 shape = SubResource("BoxShape3D_1mpgw")
 
-[node name="@MeshInstance3D@916" type="MeshInstance3D" parent="Лавка_у_порога/@StaticBody3D@917" unique_id=261031749]
-material_override = SubResource("ShaderMaterial_wood_dark_y")
-instance_shader_parameters/board_shift = 0.020
-mesh = SubResource("BoxMesh_0appj")
-
 [node name="@StaticBody3D@920" type="StaticBody3D" parent="Лавка_у_порога" unique_id=250056346]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7149999, 0.175, 0.059999943)
 
 [node name="@CollisionShape3D@918" type="CollisionShape3D" parent="Лавка_у_порога/@StaticBody3D@920" unique_id=1323292592]
 shape = SubResource("BoxShape3D_f0msr")
-
-[node name="@MeshInstance3D@919" type="MeshInstance3D" parent="Лавка_у_порога/@StaticBody3D@920" unique_id=1832958976]
-material_override = SubResource("ShaderMaterial_wood_dark_y")
-instance_shader_parameters/board_shift = 0.633
-mesh = SubResource("BoxMesh_trent")
-
-[node name="@MeshInstance3D@921" type="MeshInstance3D" parent="Лавка_у_порога" unique_id=1964415226]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.284, -0.07500005)
-material_override = SubResource("ShaderMaterial_wood_dark_x")
-instance_shader_parameters/board_shift = 0.163
-mesh = SubResource("BoxMesh_trwwd")
-
-[node name="@MeshInstance3D@922" type="MeshInstance3D" parent="Лавка_у_порога" unique_id=1950621603]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.284, 0.07499981)
-material_override = SubResource("ShaderMaterial_wood_dark_x")
-instance_shader_parameters/board_shift = -0.306
-mesh = SubResource("BoxMesh_becrg")
 
 [node name="Бочка" type="Node3D" parent="." unique_id=1575005578]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.12, 0, 3.99)
@@ -6599,26 +6105,6 @@ metadata/label = "Бочка у входа."
 
 [node name="@CollisionShape3D@923" type="CollisionShape3D" parent="Бочка/@StaticBody3D@925" unique_id=1432703583]
 shape = SubResource("CylinderShape3D_p7diw")
-
-[node name="@MeshInstance3D@924" type="MeshInstance3D" parent="Бочка/@StaticBody3D@925" unique_id=1689104426]
-material_override = SubResource("ShaderMaterial_wood_dark_x")
-instance_shader_parameters/board_shift = -0.163
-mesh = SubResource("CylinderMesh_bdi5a")
-
-[node name="@MeshInstance3D@926" type="MeshInstance3D" parent="Бочка" unique_id=1882599016]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.18, 0)
-material_override = SubResource("StandardMaterial3D_2yxcp")
-mesh = SubResource("CylinderMesh_4wyys")
-
-[node name="@MeshInstance3D@927" type="MeshInstance3D" parent="Бочка" unique_id=1417739212]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.44, 0)
-material_override = SubResource("StandardMaterial3D_2yxcp")
-mesh = SubResource("CylinderMesh_jtqgq")
-
-[node name="@MeshInstance3D@928" type="MeshInstance3D" parent="Бочка" unique_id=653780580]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
-material_override = SubResource("StandardMaterial3D_2yxcp")
-mesh = SubResource("CylinderMesh_l6lri")
 
 [node name="Поленница" type="Node3D" parent="." unique_id=106567232]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.9, 0, 0.84)
@@ -7318,6 +6804,49 @@ position = Vector3(-4.03, 5.13, 0.53)
 
 [node name="У_топчана_Арна" parent="Топчан_Арна" instance=ExtResource("Угол_Арна")]
 
+[node name="Лавка_из_полубревна" parent="Лавка_у_порога" instance=ExtResource("Лавка_бревно")]
+
+[node name="Клёпки_и_обручи" parent="Бочка" instance=ExtResource("Бочка_клёпки")]
+
+[node name="Умывальное_место" parent="." instance=ExtResource("Умывальное_место")]
+position = Vector3(-1.79, 0.03, 3.116)
+
+[node name="Дорожные_вещи" parent="." instance=ExtResource("Дорожные_вещи")]
+position = Vector3(-1.97, 0.03, -3.12)
+
+[node name="Обвязка" parent="Люк" instance=ExtResource("Обвязка_люка")]
+
+[node name="Доски_и_скобы" parent="Люк/Петля" instance=ExtResource("Доски_люка")]
+
+[node name="Спуск" type="Area3D" parent="Люк"]
+position = Vector3(0, -0.225, 0)
+collision_layer = 0
+collision_mask = 0
+monitoring = false
+monitorable = false
+metadata/label = "Лестница в погреб. E — спуститься."
+metadata/interact_kind = "ladder"
+
+[node name="Проём" type="CollisionShape3D" parent="Люк/Спуск"]
+shape = SubResource("HatchUseShape")
+
+[node name="Свет_сверху" type="SpotLight3D" parent="Люк"]
+visible = false
+position = Vector3(0.15, -0.021, 0)
+rotation = Vector3(-1.570796, 0, 0)
+light_color = Color(0.89, 0.65, 0.44, 1)
+light_energy = 0.77
+spot_range = 3.45
+spot_angle = 38.0
+shadow_enabled = true
+
+[node name="Лестница_и_полки" parent="Погреб" instance=ExtResource("Запасы_погреба")]
+
+[editable path="Лавка_у_порога/Лавка_из_полубревна"]
+[editable path="Бочка/Клёпки_и_обручи"]
+[editable path="Умывальное_место"]
+[editable path="Дорожные_вещи"]
+[editable path="Погреб/Лестница_и_полки"]
 [editable path="Крыша/Дранка"]
 [editable path="Занавески_Арна/Ткань"]
 [editable path="Топчан_Арна/У_топчана_Арна"]

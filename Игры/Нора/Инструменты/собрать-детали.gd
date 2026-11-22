@@ -38,6 +38,13 @@ func _build() -> void:
 	var assets := {
 		"table": _table(),
 		"bench": _bench_frame(),
+		"porch-bench": _porch_bench(),
+		"barrel": _barrel(),
+		"wash-station": _wash_station(),
+		"return-gear": _return_gear(),
+		"hatch": _hatch_skin(),
+		"hatch-frame": _hatch_frame(),
+		"cellar": _cellar_dressing(),
 		"alchemy": _alchemy(),
 		"workbench": _workbench(),
 		"grace-bed": _bedding(Color(.39,.33,.254),Color(.234,.174,.135),0.12),
@@ -594,11 +601,7 @@ func _hearth() -> Node3D:
 		ring.ring_segments = 7
 		var link := _mesh(root,"Звено",ring,iron,Vector3(.128,.952+i*.031,0))
 		link.rotation = Vector3(PI*.5,i%2*PI*.5,0)
-	var meat := _mat(Color(.293,.121,.077),.84)
-	for i in 8:
-		var p := Vector3(.421,1.664,-.57+i*.160)
-		var strip := _mesh(root,"Вяленая_зайчатина",_block(Vector3(.027,.211+i%3*.019,.081+(i%2)*.013),.011,Color.WHITE,i,.009),meat,p)
-		strip.rotation = Vector3(.14*sin(float(i)),i*.45,.12)
+	_rabbit_rack(root)
 	_candle(root,Vector3(.30,1.433,-.644),.059,.15)
 	return root
 
@@ -861,32 +864,388 @@ func _river_rock() -> Node3D:
 	_mesh(root,"Мох",crust,lichen,Vector3(.11,.333,.067)).rotation.y = -.624
 	return root
 
-func _table_frame(root: Node3D) -> void:
-	var dark := board.duplicate() as ShaderMaterial
-	dark.set_shader_parameter("wood_color",Color(.315,.239,.164))
-	dark.set_shader_parameter("long_axis",2)
-	var top := board.duplicate() as ShaderMaterial
-	top.set_shader_parameter("wood_color",Color(.47,.358,.243))
+func _furniture_finish(tint: Color, upright := false) -> ShaderMaterial:
+	var old := _aged_board(tint)
+	old.set_shader_parameter("furniture_wear",true)
+	old.set_shader_parameter("vertical_grain",upright)
+	return old
+
+func _hatch_skin() -> Node3D:
+	var root := _group(null,"Доски_и_скобы_люка")
+	var oak := _furniture_finish(Color(.83,.68,.49))
+	oak.set_shader_parameter("length_on_z",true)
+	var brace := _furniture_finish(Color(.73,.61,.45))
+	for i in 5:
+		var x := .105+i*.202
+		var skin := _mesh(root,"Тёсаная_доска",_block(Vector3(.199,.062,.90-.006*(i%2)),.009,Color.WHITE,i*1.41,.003),
+			oak,Vector3(x,-.013,0))
+		skin.set_instance_shader_parameter("board_shift",.57*sin(i*2.34))
+	for z in [-.300,.300]:
+		_mesh(root,"Поперечина_снизу",_block(Vector3(.865,.043,.105),.010,Color.WHITE,z,.003),
+			brace,Vector3(.502,-.056,z))
+		_mesh(root,"Полоса_петли",_block(Vector3(.318,.014,.056),.005,Color.WHITE,z),iron,Vector3(.159,.026,z))
+		for x in [.055,.283]:
+			_mesh(root,"Шляпка",_block(Vector3(.020,.012,.021),.004,Color.WHITE,z),iron,Vector3(x,.037,z))
+	var plate := _block(Vector3(.086,.011,.099),.010,Color.WHITE,3.8)
+	_mesh(root,"Накладка_под_кольцом",plate,iron,Vector3(.785,.025,.012))
+	var ring := TorusMesh.new()
+	ring.inner_radius = .034
+	ring.outer_radius = .049
+	ring.rings = 23
+	ring.ring_segments = 9
+	var handle := _mesh(root,"Кованое_кольцо",ring,iron,Vector3(.803,.037,.014))
+	handle.rotation.z = -.22
+	_mesh(root,"Скоба_кольца",_tube(PackedVector3Array([Vector3(.754,.028,-.016),Vector3(.754,.054,-.006),
+		Vector3(.751,.056,.023),Vector3(.756,.027,.031)]),.009,8),iron,Vector3.ZERO)
+	return root
+
+func _hatch_frame() -> Node3D:
+	var root := _group(null,"Обвязка_и_внутренний_край")
+	var oak := _furniture_finish(Color(.774,.65,.48))
+	var upright := _furniture_finish(Color(.73,.61,.46),true)
+	for side in [-1.0,1.0]:
+		_mesh(root,"Поперечная_обвязка",_block(Vector3(1.11,.064,.084),.008,Color.WHITE,side,.002),oak,Vector3(0,.017,.489*side))
+		_mesh(root,"Боковая_обвязка",_block(Vector3(.094,.318,.919),.010,Color.WHITE,side*3.7,.003),upright,Vector3(side*.550,-.123,0))
+		_mesh(root,"Стенка_проёма",_block(Vector3(1.11,.275,.068),.010,Color.WHITE,side*5.1,.004),oak,Vector3(0,-.134,.493*side))
+		if side > 0.0:
+			_mesh(root,"Порожек",_block(Vector3(.079,.057,.924),.010,Color.WHITE,side,.002),oak,Vector3(.546,.019,0))
+	for z in [-.300,.300]:
+		_mesh(root,"Штырь_петли",_tube(PackedVector3Array([Vector3(-.511,.031,z-.040),Vector3(-.511,.033,z+.040)]),.014,9),iron,Vector3.ZERO)
+	return root
+
+func _cellar_dressing() -> Node3D:
+	var root := _group(null,"Запасы_погреба")
+	var oak := _furniture_finish(Color(.72,.62,.50))
+	var uprights := _furniture_finish(Color(.68,.58,.46),true)
+	var canvas := _fabric(Color(.438,.395,.293),Color(.257,.215,.158),.71)
+	var w := Vector3(0,-2.061,0)
+	for x in [-1.20,1.07]:
+		for z in [-1.213,-.773]:
+			_mesh(root,"Стойка_полок",_block(Vector3(.079,1.608,.078),.013,Color.WHITE,x+z,.003),uprights,w+Vector3(x,.804,z))
+	for level in [.16,.77,1.35]:
+		var at := w+Vector3(-.069,level,-.994)
+		for i in 3:
+			var shelf := _mesh(root,"Наборная_полка",_block(Vector3(2.32,.045,.167),.009,Color.WHITE,2.3+i,.003),
+				oak,at+Vector3(0,0,-.164+i*.165))
+			shelf.set_instance_shader_parameter("board_shift",level*.52+i*.15)
+	_solid(root,"Стеллаж_припасов",w+Vector3(-.069,.791,-.992),Vector3(2.30,1.568,.510),"Полки с запасами на несколько недель.")
+	_coopered_barrel(root,w+Vector3(-1.101,0,.615),.86)
+	_solid(root,"Бочонок",w+Vector3(-1.101,.34,.615),Vector3(.45,.68,.45),"Бочонок в погребе.")
+	_sack(root,"Мешок_зерна",w+Vector3(-.810,.18,-.982),Vector2(.136,.439),canvas)
+	_sack(root,"Мешок_сухарей",w+Vector3(-.488,.18,-1.021),Vector2(.138,.375),canvas)
+	_sack(root,"Мешок_муки",w+Vector3(-1.014,.194,-.203),Vector2(.204,.548),canvas)
+	var bin := w+Vector3(.57,.187,-.986)
+	for side in [-1.0,1.0]:
+		_mesh(root,"Доска_ящика",_block(Vector3(.73,.199,.029),.008,Color.WHITE,side*2.9,.004),oak,bin+Vector3(0,.092,side*.187))
+		_mesh(root,"Торец_ящика",_block(Vector3(.028,.209,.352),.008,Color.WHITE,side*-2.9,.004),uprights,bin+Vector3(side*.353,.096,0))
+		for x in [-.22,-.06,.115,.255]:
+			var vegetable := _mat(Color(.373,.273,.175).lerp(Color(.41,.346,.159),absf(sin(x*18.1))),.94)
+			var profile := [Vector2(0,0),Vector2(.045,.006),Vector2(.056,.042),Vector2(.037,.072),Vector2(0,.074)]
+			_mesh(root,"Репа_в_ящике",_lathe(profile,12,0,x*51.4),vegetable,bin+Vector3(x,.151,side*.075))
+	for i in 5:
+		var x := -.95+i*.398
+		var w_jar := .086+.029*sin(i*6.71+1.0)
+		var y_jar := .222+.061*sin(i*4.7+.2)
+		var location := w+Vector3(x,.793,-.965+.05*sin(i*2.7))
+		var profile := [Vector2(0,0),Vector2(w_jar*.58,.002),Vector2(w_jar*.93,.026),
+			Vector2(w_jar,y_jar*.61),Vector2(w_jar*.67,y_jar*.85),Vector2(w_jar*.63,y_jar*.96),
+			Vector2(w_jar*.74,y_jar),Vector2(w_jar*.52,y_jar),Vector2(0,y_jar*.96)]
+		var ceramic := clay if i%2==0 else slip
+		_mesh(root,"Глиняный_горшок",_lathe(profile,25,0,float(i)),ceramic,location)
+		var seal := _lathe([Vector2(0,0),Vector2(w_jar*.74,.0),Vector2(w_jar*.60,.022),Vector2(0,.025)],19)
+		_mesh(root,"Крышка",seal,canvas,location+Vector3.UP*(y_jar-.002))
+	_sack(root,"Мешочек_соли",w+Vector3(.965,.795,-1.01),Vector2(.083,.202),canvas)
+	_sack(root,"Мешочек_сухих_трав",w+Vector3(-.68,1.376,-1.08),Vector2(.102,.199),canvas)
+	_sack(root,"Запас_крупы",w+Vector3(-.736,.029,.941),Vector2(.184,.478),canvas)
+	for z in [-1.08,1.09]:
+		_hewn_member(root,"Балка_под_половицами",Vector3(-1.43,-.169,z),Vector3(1.44,-.169,z),Vector2(.135,.123),oak)
+	_ladder(root,oak)
+	_cellar_lamp(root,canvas)
+	return root
+
+func _ladder(root: Node3D, oak: Material) -> void:
+	for z in [.014,.586]:
+		_hewn_member(root,"Тетива",Vector3(-.611,-2.068,z),Vector3(-.197,-.013,z),Vector2(.076,.093),oak)
+	for i in 8:
+		var y := -1.891+i*.236
+		var x := -.611 + (.414/2.055)*(y+2.068)
+		_hewn_member(root,"Ступень",Vector3(x,y,-.020),Vector3(x+.012,y,.622),Vector2(.047,.061),oak)
+		for z in [.014,.586]:
+			_mesh(root,"Нагель_ступени",_block(Vector3(.025,.023,.026),.005,Color.WHITE,i),board,Vector3(x+.05,y,z))
+
+func _cellar_lamp(root: Node3D, shade: Material) -> void:
+	var at := Vector3(.722,-1.025,-.935)
+	var cage := _group(root,"Фонарь_под_полкой",at)
+	var plate := _lathe([Vector2(0,0),Vector2(.071,0),Vector2(.082,.018),Vector2(.070,.032),Vector2(0,.032)],24)
+	_mesh(cage,"Поддон",plate,iron,Vector3.ZERO)
+	_mesh(cage,"Крышка_фонаря",_lathe([Vector2(0,0),Vector2(.081,0),Vector2(.081,.012),Vector2(.053,.054),Vector2(0,.071)],24),iron,Vector3.UP*.193)
 	for i in 4:
-		var plank := _mesh(root,"Доска_столешницы",_block(Vector3(2.14,.088,.244),.011,Color.WHITE,1.4+i*.34,.003),
-			top,Vector3(0,.736,-.373+i*.249))
-		plank.set_instance_shader_parameter("board_shift",-.21+i*.133)
+		var a := TAU*i/4.0+PI*.25
+		var foot := Vector3(.068*cos(a),.016,.068*sin(a))
+		_mesh(cage,"Стойка",_tube(PackedVector3Array([foot,foot+Vector3.UP*.188]),.006,7),iron,Vector3.ZERO)
+	var arm := PackedVector3Array([Vector3(0,.245,0),Vector3(.021,.326,0),Vector3(0,.352,-.074),Vector3(0,.345,-.307)])
+	_mesh(cage,"Крюк",_tube(arm,.011,8),iron,Vector3.ZERO)
+	_mesh(cage,"Язычок",_cloth(Vector2(.103,.128),.009,.18),shade,Vector3(0,.04,-.012))
+	_flame(cage,Vector3(0,.084,0),Vector2(.061,.096),.78,.3)
+	var lamp := OmniLight3D.new()
+	lamp.name = "Свет_фонаря"
+	lamp.position = Vector3(.008,.136,.032)
+	lamp.light_color = Color(.95,.75,.51)
+	lamp.light_energy = 1.12
+	lamp.omni_range = 3.2
+	lamp.omni_attenuation = .98
+	cage.add_child(lamp)
+
+func _wash_station() -> Node3D:
+	var root := _group(null,"Таз_и_вода")
+	var oak := _furniture_finish(Color(.79,.68,.52))
+	var legs := _furniture_finish(Color(.68,.56,.43),true)
+	var stand := Vector3(0,.411,0)
+	_mesh(root,"Подставка_под_таз",_block(Vector3(.98,.061,.338),.013,Color.WHITE,.71,.004),oak,stand)
+	_solid(root,"Подставка",stand,Vector3(.98,.12,.338),"Таз и вода у окна. Здесь Арн промывает тряпки.")
+	for x in [-.388,.388]:
+		for z in [-.123,.123]:
+			_mesh(root,"Ножка",_block(Vector3(.066,.382,.063),.009,Color.WHITE,x+z,.002),legs,Vector3(x,.198,z))
+	var wet_wood := _mat(Color(.369,.252,.147),.92)
+	_bowl(root,"Деревянный_таз",Vector3(-.225,.445,-.006),.145,.090,wet_wood,2.9)
+	var wet_linen := _fabric(Color(.452,.42,.342),Color(.285,.25,.174),.75)
+	var rag := _mesh(root,"Тряпка_для_воды",_cloth(Vector2(.281,.273),.071,1.7),wet_linen,Vector3(.185,.447,-.095))
+	rag.rotation.y = .15
+	var bucket := _group(root,"Ведро_у_стены",Vector3(.24,.028,-.073))
+	_mesh(bucket,"Деревянное_ведёрко",_lathe([Vector2(0,0),Vector2(.119,0),Vector2(.136,.037),Vector2(.161,.284),
+		Vector2(.148,.289),Vector2(.139,.068),Vector2(0,.052)],20),wet_wood,Vector3.ZERO)
+	_mesh(bucket,"Дужка",_tube(PackedVector3Array([Vector3(-.158,.259,0),Vector3(-.111,.351,.004),Vector3(0,.390,.010),
+		Vector3(.108,.352,.003),Vector3(.158,.262,0)]),.009,8),iron,Vector3.ZERO)
+	return root
+
+func _return_gear() -> Node3D:
+	var root := _group(null,"Вещи_с_дороги")
+	var oak := _furniture_finish(Color(.77,.66,.53))
+	var legs := _furniture_finish(Color(.70,.58,.45),true)
+	var canvas := _fabric(Color(.42,.364,.267),Color(.257,.212,.138),.48)
+	var cloak := _fabric(Color(.335,.341,.260),Color(.207,.215,.14),.72)
+	var rope := _mat(Color(.506,.408,.263),.98)
+	_mesh(root,"Полка_для_вещей",_block(Vector3(1.34,.061,.363),.013,Color.WHITE,-.9,.004),oak,Vector3(0,.423,0))
+	_solid(root,"Полка",Vector3(0,.228,0),Vector3(1.31,.453,.36),"Сухая полка. Свёртки и припасы с дороги.")
+	for x in [-.535,.535]:
+		_mesh(root,"Опора",_block(Vector3(.103,.416,.266),.012,Color.WHITE,x,.004),legs,Vector3(x,.219,0))
+	_mesh(root,"Вешалка",_block(Vector3(1.27,.108,.048),.012,Color.WHITE,4.10,.004),oak,Vector3(0,1.435,-.210))
+	for i in 6:
+		var at := Vector3(-.53+i*.21,1.428,-.184)
+		_mesh(root,"Деревянный_крюк",_tube(PackedVector3Array([at,at+Vector3(0,.014,.076),at+Vector3(0,.039,.088)]),.011,8),oak,Vector3.ZERO)
+	var rolled := _mesh(root,"Свёрнутая_рогожа",_lathe([Vector2(0,.0),Vector2(.078,.006),Vector2(.096,.054),
+		Vector2(.102,.450),Vector2(.080,.472),Vector2(0,.473)],24),cloak,Vector3(-.522,.540,.016))
+	rolled.rotation.z = -PI*.5+.06
+	for x in [-.410,-.154]:
+		var tie := TorusMesh.new()
+		tie.inner_radius = .092
+		tie.outer_radius = .102
+		tie.rings = 24
+		tie.ring_segments = 7
+		_mesh(root,"Перевязь_свёртка",tie,rope,Vector3(x,.536,.019)).rotation.z = PI*.5
+	_sack(root,"Соль_в_мешочке",Vector3(.456,.454,-.036),Vector2(.105,.27),canvas)
+	var pack := _mesh(root,"Походная_сумка",_block(Vector3(.30,.32,.123),.051,Color.WHITE,1.2,.007),cloak,Vector3(.328,1.049,-.094))
+	pack.rotation.z = -.12
+	var sling := PackedVector3Array([Vector3(.224,1.155,-.055),Vector3(.242,1.459,-.097),Vector3(.328,1.451,-.090),Vector3(.422,1.161,-.061)])
+	_mesh(root,"Лямка",_tube(sling,.014,9),rope,Vector3.ZERO)
+	var bundle := _mesh(root,"Льняной_свёрток",_cloth(Vector2(.34,.29),.058,3.1),canvas,Vector3(.075,.478,.035))
+	bundle.rotation.y = -.28
+	return root
+
+func _solid(root: Node3D, title: String, at: Vector3, size: Vector3, label := "") -> void:
+	var body := StaticBody3D.new()
+	body.name = title
+	body.position = at
+	if not label.is_empty():
+		body.set_meta("label",label)
+	var bounds := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = size
+	bounds.shape = box
+	body.add_child(bounds)
+	root.add_child(body,true)
+
+func _sack(root: Node3D, title: String, at: Vector3, size: Vector2, skin: Material) -> void:
+	var w := size.x
+	var h := size.y
+	var bag := _lathe([Vector2(0,0),Vector2(w*.71,0),Vector2(w*.98,h*.18),Vector2(w,h*.45),
+		Vector2(w*.84,h*.71),Vector2(w*.36,h*.83),Vector2(w*.27,h*.90),Vector2(w*.38,h*.99),Vector2(0,h)],20,0,w*9.0)
+	_mesh(root,title,bag,skin,at)
+	var tie := TorusMesh.new()
+	tie.inner_radius = w*.25
+	tie.outer_radius = w*.34
+	tie.rings = 16
+	tie.ring_segments = 7
+	_mesh(root,"Перевязь_мешка",tie,board,at+Vector3.UP*h*.89)
+
+func _rabbit_rack(root: Node3D) -> void:
+	var wood := _furniture_finish(Color(.67,.55,.42))
+	var rack := _group(root,"Сушилка_вяленой_зайчатины")
+	for side in [-1.0,1.0]:
+		var rest := Vector3(.442,1.799,side*.687)
+		_mesh(rack,"Кронштейн",_tube(PackedVector3Array([rest-Vector3.RIGHT*.158,rest,rest+Vector3.DOWN*.037]),.017,8),iron,Vector3.ZERO)
+	_hewn_member(rack,"Жердь_над_очагом",Vector3(.427,1.800,-.706),Vector3(.427,1.802,.705),Vector2(.039,.043),wood)
+	var dry_meat := _mat(Color(.48,.304,.229),.96)
+	dry_meat.vertex_color_use_as_albedo = true
+	dry_meat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	for i in 8:
+		var z := -.579+i*.167+.012*sin(i*4.10)
+		var hook := PackedVector3Array([Vector3(.437,1.750,z),Vector3(.397,1.780,z),Vector3(.413,1.827,z),
+			Vector3(.453,1.825,z),Vector3(.464,1.776,z),Vector3(.469,1.736,z),
+			Vector3(.492,1.723,z),Vector3(.504,1.746,z)])
+		_mesh(rack,"Кованый_крючок",_tube(hook,.006,8),iron,Vector3.ZERO)
+		_mesh(rack,"Полоса_вяленой_зайчатины",_dry_strip(i),dry_meat,Vector3(.480,1.739,z))
+
+func _dry_strip(seed: int) -> ArrayMesh:
+	var surface := SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var vertices := PackedVector3Array()
+	var height := .128+.069*(.5+.5*sin(seed*3.1))
+	for row in 10:
+		var v := row/9.0
+		var width := (.021+.017*sin(v*PI))*(.8+.30*sin(seed*2.3+v*4.0))
+		var mid := .019*sin(seed*3.21+v*2.9)*v
+		for side in 11:
+			var a := TAU*side/10.0
+			var roughness := .80+.20*cos(seed*2.81+v*13.0+a*3.2)
+			var x := .008*cos(a)*roughness+.022*sin(v*3.4)*sin(seed*3.51) + .016*v
+			vertices.append(Vector3(x,-height*v+.011*sin(a*2.0+seed)*v*v,mid+sin(a)*width*roughness))
+	for row in 9:
+		for side in 10:
+			var a := row*11+side
+			for j in [a,a+11,a+1,a+1,a+11,a+12]:
+				var shade := .63+.22*sin(float(j%11)*2.13+seed)+.09*cos(j*3.4)
+				_point(surface,vertices[j],Color(shade,shade*.73,shade*.57))
+	surface.index()
+	surface.generate_normals()
+	return surface.commit()
+
+func _table_frame(root: Node3D) -> void:
+	var legs := _furniture_finish(Color(.76,.65,.52),true)
+	var top := _furniture_finish(Color(.89,.77,.60))
+	var widths := [.238,.255,.211,.261]
+	var z := -.493
+	for i in 4:
+		var w: float = widths[i]
+		var run := 2.13 - float(i%3)*.022
+		var plank := _mesh(root,"Тёсаная_доска",_block(Vector3(run,.089,w),.014,Color.WHITE,1.4+i*.34,.006),
+			top,Vector3(.012*sin(i*2.58),.733+.004*sin(i*1.64),z+w*.5))
+		plank.set_instance_shader_parameter("board_shift",-.48+i*.270)
+		plank.rotation.y = .002*sin(i*2.7)
+		for end in [-1.0,1.0]:
+			var at := Vector3(end*(.864+.016*sin(i)),.782,z+w*.5+.017*sin(i*2.0))
+			var dowel := _lathe([Vector2(0,-.005),Vector2(.012,-.005),Vector2(.013,0),Vector2(0,.002)],12)
+			_mesh(root,"Утопленный_нагель",dowel,legs,at)
+		z += w+.007
 	for x in [-.963,.963]:
-		for z in [-.389,.389]:
-			var leg := _block(Vector3(.119,.684,.117),.013,Color.WHITE,x+z*2.1,.007)
-			_mesh(root,"Ножка",leg,dark,Vector3(x,.354,z))
+		for z_side in [-.389,.389]:
+			var leg := _block(Vector3(.119,.684,.117),.015,Color.WHITE,x+z_side*2.1,.008)
+			_mesh(root,"Ножка",leg,legs,Vector3(x,.354,z_side))
+	_mesh(root,"Подпорка",_block(Vector3(1.83,.101,.097),.012,Color.WHITE,4.5,.003),top,Vector3(0,.213,.015))
 
 func _bench_frame() -> Node3D:
 	var root := _group(null,"Скамья_из_досок")
-	var trim := board.duplicate() as ShaderMaterial
-	trim.set_shader_parameter("wood_color",Color(.419,.325,.225))
-	var legs := board.duplicate() as ShaderMaterial
-	legs.set_shader_parameter("wood_color",Color(.295,.222,.153))
-	legs.set_shader_parameter("long_axis",2)
+	var trim := _furniture_finish(Color(.85,.72,.55))
+	var legs := _furniture_finish(Color(.73,.61,.49),true)
 	for side in [-1.0,1.0]:
-		var plank := _block(Vector3(1.895,.062,.154),.012,Color.WHITE,side*.82,.004)
-		_mesh(root,"Доска_сиденья",plank,trim,Vector3(0,.397,side*.079))
+		var span: float = 1.886+side*.011
+		var plank := _block(Vector3(span,.067,.148+side*.008),.016,Color.WHITE,side*.82,.006)
+		var seat := _mesh(root,"Доска_сиденья",plank,trim,Vector3(.006*side,.394+side*.003,side*.080))
+		seat.set_instance_shader_parameter("board_shift",side*.337)
 		for end in [-1.0,1.0]:
-			var leg := _block(Vector3(.112,.365,.097),.013,Color.WHITE,end+side*1.4,.006)
+			var leg := _block(Vector3(.114,.365,.099),.014,Color.WHITE,end+side*1.4,.006)
 			_mesh(root,"Ножка",leg,legs,Vector3(end*.847,.190,side*.072))
+	_mesh(root,"Связь_ножек",_block(Vector3(1.72,.067,.080),.010,Color.WHITE,3.1,.003),trim,Vector3(0,.174,0))
 	return root
+
+func _porch_bench() -> Node3D:
+	var root := _group(null,"Лавка_из_полубревна")
+	var aged := _furniture_finish(Color(.77,.68,.55))
+	var feet := _furniture_finish(Color(.67,.56,.45),true)
+	var surface := SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for side in 12:
+		var angle_a := side*PI/12.0
+		var angle_b := (side+1)*PI/12.0
+		var a := Vector3(0,-.139*sin(angle_a),.166*cos(angle_a))
+		var b := Vector3(0,-.139*sin(angle_b),.166*cos(angle_b))
+		var left := -.83+.013*sin(side*3.6)
+		var right := .822-.014*cos(side*2.5)
+		var corners := [a+Vector3.RIGHT*left,b+Vector3.RIGHT*left,a+Vector3.RIGHT*right,b+Vector3.RIGHT*right]
+		for index in [0,2,1,1,2,3]:
+			_point(surface,corners[index],Color(.52,.50,.46))
+		for end in [-1.0,1.0]:
+			var x: float = left if end < 0 else right
+			for p in ([Vector3.ZERO,a,b] if end < 0 else [Vector3.ZERO,b,a]):
+				_point(surface,p+Vector3.RIGHT*x,Color(.83,.77,.67))
+	for p in [Vector3(-.821,0,-.166),Vector3(.819,0,-.166),Vector3(-.821,0,.166),
+		Vector3(-.821,0,.166),Vector3(.819,0,-.166),Vector3(.819,0,.166)]:
+		_point(surface,p,Color(.87,.82,.78))
+	surface.generate_normals()
+	_mesh(root,"Расколотое_старое_бревно",surface.commit(),aged,Vector3.UP*.408)
+	for x in [-.68,.68]:
+		for z in [-.105,.105]:
+			var from := Vector3(x,.012,z)
+			var to := Vector3(x*.94,.388,z*.61)
+			var foot := _block(Vector3(.094,.375,.099),.017,Color(.79,.71,.59),x+z,.006)
+			var leg := _mesh(root,"Раскосая_ножка",foot,feet,(from+to)*.5)
+			leg.quaternion = Quaternion(Vector3.UP,(to-from).normalized())
+	return root
+
+func _barrel() -> Node3D:
+	var root := _group(null,"Дубовая_бочка")
+	_coopered_barrel(root,Vector3.ZERO,1.0)
+	return root
+
+func _barrel_radius(y: float) -> float:
+	return .231+.057*pow(maxf(0.0,sin(PI*y/.805)),.88)
+
+func _coopered_barrel(root: Node3D, center: Vector3, size: float) -> void:
+	var woodwork := _group(root,"Бочка_из_клёпок",center)
+	woodwork.scale = Vector3.ONE*size
+	var grain := _furniture_finish(Color(.73,.65,.52),true)
+	var lid := _furniture_finish(Color(.82,.72,.56))
+	var back := _mat(Color(.102,.075,.053),.95)
+	_mesh(woodwork,"Внутренний_паз",_lathe([Vector2(.229,.028),Vector2(.263,.207),Vector2(.281,.404),
+		Vector2(.263,.604),Vector2(.229,.771)],28),back,Vector3.ZERO)
+	for stave in 17:
+		var surface := SurfaceTool.new()
+		surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+		var strip := PackedVector3Array()
+		var jitter := .005*sin(stave*3.77)
+		for row in 6:
+			var y := .029 + row*.154 + jitter
+			var r := _barrel_radius(y)+.002*sin(stave*2.69+row)
+			for offset in [.010,.058,.311,.358]:
+				var angle: float = TAU*stave/17.0 + offset
+				var bevel := .008 if offset == .010 or offset == .358 else 0.0
+				strip.append(Vector3(cos(angle)*(r-bevel),y,sin(angle)*(r-bevel)))
+		var tone := .65+.22*sin(stave*4.56+.23)
+		for row in 5:
+			for col in 3:
+				var a := row*4+col
+				for j in [a,a+1,a+4,a+1,a+5,a+4]:
+					_point(surface,strip[j],Color(tone,tone*.97,tone*.91))
+		surface.generate_normals()
+		var part := _mesh(woodwork,"Дубовая_клёпка",surface.commit(),grain,Vector3.ZERO)
+		part.set_instance_shader_parameter("board_shift",.44*sin(stave*3.3))
+	var rusty := _mat(Color(.207,.177,.142),.85,.54)
+	for y in [.104,.265,.568,.721]:
+		var r := _barrel_radius(y)+.005
+		var hoop := _lathe([Vector2(r-.003,y-.024),Vector2(r+.006,y-.021),Vector2(r+.009,y+.021),Vector2(r-.003,y+.023)],46,0,y*9.3)
+		_mesh(woodwork,"Железный_обруч",hoop,rusty,Vector3.ZERO)
+		for z in [-.033,.033]:
+			var peg := _block(Vector3(.018,.014,.017),.004,Color.WHITE,y*17.0)
+			_mesh(woodwork,"Заклёпка",peg,rusty,Vector3(r+.006,y,z))
+	for row in 5:
+		var z := -.169+row*.084
+		var length := sqrt(maxf(0.0,.221*.221 - pow(absf(z)+.041,2.0)))*2.0
+		var slat := _block(Vector3(length,.027,.081),.006,Color.WHITE,row*3.7,.002)
+		var plank := _mesh(woodwork,"Доска_крышки",slat,lid,Vector3(0,.782,z))
+		plank.set_instance_shader_parameter("board_shift",.61*sin(row*2.7+.7))
+	var rope := _mat(Color(.42,.321,.188),.97)
+	var bow := PackedVector3Array()
+	for i in 16:
+		var t := i*PI/15.0
+		bow.append(Vector3(-.105*cos(t),.790+.073*sin(t),.027*sin(t*2)))
+	_mesh(woodwork,"Верёвочная_ручка",_tube(bow,.014,9),rope,Vector3.ZERO)

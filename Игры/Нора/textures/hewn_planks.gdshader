@@ -4,6 +4,8 @@ uniform sampler2D grain : source_color, filter_linear_mipmap_anisotropic, repeat
 uniform sampler2D grain_normal : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform bool roof_deck = false;
 uniform bool floor_wear = false;
+uniform bool furniture_wear = false;
+uniform bool vertical_grain = false;
 uniform bool length_on_z = false;
 uniform vec4 tint : source_color = vec4(.83,.68,.51,1.0);
 instance uniform float board_shift = 0.0;
@@ -31,6 +33,10 @@ void fragment() {
 	float side_face = 1.0-smoothstep(.34,.85,abs(wood_face.y));
 	across = mix(across,across*.75+wood_point.y*1.07,side_face);
 	along = mix(along,wood_point.y*.97+across*.48,transverse_face);
+	if (vertical_grain) {
+		along = wood_point.y;
+		across = abs(wood_face.x) > abs(wood_face.z) ? wood_point.z : wood_point.x;
+	}
 	vec2 grain_uv = vec2(across*.92+seed*.71,along*.69+seed*.33);
 	vec3 surface = texture(grain,grain_uv).rgb * tint.rgb;
 	float edge = 1.0-smoothstep(.008,.027+fwidth(lane),min(fract(lane),1.0-fract(lane)));
@@ -41,7 +47,16 @@ void fragment() {
 	float threshold = smoothstep(2.38,3.24,world_point.z)*(1.0-smoothstep(.45,1.28,abs(world_point.x-1.43)));
 	float wall_soot = 1.0-smoothstep(.48,1.95,length((world_point.xz-vec2(-3.77,.55))*vec2(.97,.77)));
 	float wear = roof_deck ? 1.0-.52*edge-.29*end_gap : (floor_wear ? 1.0 + .17*rubbed - .16*threshold - .26*wall_soot : 1.0);
-	ALBEDO = surface * (wear + (scuff-.36)*.15 + seed*.145) * mix(vec3(.88),COLOR.rgb,.36);
+	if (furniture_wear) {
+		float used = exp(-pow(across*7.2,2.0)) * smoothstep(.28,.90,abs(wood_face.y));
+		float scratch = texture(grain,grain_uv*vec2(3.75,.67)+vec2(.13,.37)).r;
+		float scraped = smoothstep(.035,.27,scratch);
+		wear += .105*used-.205*(1.0-scraped) - .09*side_face;
+		vec2 radial = vec2(wood_point.y, length_on_z ? wood_point.x : wood_point.z);
+		float rings = sin(length(radial*vec2(1.31,.94)+vec2(.019,-.021))*177.0+scratch*1.4);
+		surface *= mix(vec3(1.0),vec3(.90+(.085*rings)),transverse_face);
+	}
+	ALBEDO = surface * (wear + (scuff-.36)*.15 + seed*.145) * mix(vec3(.88),COLOR.rgb,.45);
 	NORMAL_MAP = texture(grain_normal,grain_uv).rgb;
 	NORMAL_MAP_DEPTH = roof_deck ? .54 : .37;
 	ROUGHNESS = roof_deck ? .94 : .87 + (floor_wear ? .08*threshold : 0.0);
