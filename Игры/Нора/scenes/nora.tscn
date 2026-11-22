@@ -5,10 +5,10 @@
 [ext_resource type="PackedScene" path="res://scenes/nora-house.tscn" id="2_house"]
 
 [sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
-sky_top_color = Color(0.155, 0.245, 0.372, 1)
-sky_horizon_color = Color(0.48, 0.53, 0.58, 1)
-ground_horizon_color = Color(0.48, 0.53, 0.58, 1)
-ground_bottom_color = Color(0.30, 0.34, 0.37, 1)
+sky_top_color = Color(0.164, 0.178, 0.20, 1)
+sky_horizon_color = Color(0.354, 0.347, 0.330, 1)
+ground_horizon_color = Color(0.354, 0.347, 0.330, 1)
+ground_bottom_color = Color(0.214, 0.209, 0.193, 1)
 
 [sub_resource type="Sky" id="sky"]
 sky_material = SubResource("sky_mat")
@@ -17,10 +17,10 @@ sky_material = SubResource("sky_mat")
 background_mode = 2
 sky = SubResource("sky")
 ambient_light_source = 2
-ambient_light_color = Color(0.68, 0.72, 0.79, 1)
-ambient_light_energy = 0.53
+ambient_light_color = Color(0.66, 0.67, 0.66, 1)
+ambient_light_energy = 0.45
 tonemap_mode = 3
-tonemap_exposure = 1.12
+tonemap_exposure = 1.09
 glow_enabled = true
 glow_intensity = 0.54
 glow_strength = 0.79
@@ -29,14 +29,14 @@ glow_hdr_threshold = 1.05
 ssao_enabled = true
 fog_enabled = true
 fog_mode = 1
-fog_light_color = Color(0.40, 0.47, 0.55, 1)
-fog_sun_scatter = 0.15
-fog_density = 0.86
-fog_depth_begin = 4.3
-fog_depth_end = 49.0
-fog_depth_curve = 1.16
+fog_light_color = Color(0.347, 0.354, 0.352, 1)
+fog_sun_scatter = 0.118
+fog_density = 0.93
+fog_depth_begin = 5.2
+fog_depth_end = 42.0
+fog_depth_curve = 1.05
 volumetric_fog_enabled = true
-volumetric_fog_density = 0.0
+volumetric_fog_density = 0.008
 volumetric_fog_length = 46.0
 volumetric_fog_anisotropy = 0.28
 
@@ -47,9 +47,10 @@ script = ExtResource("1")
 environment = SubResource("env")
 
 [node name="Солнце" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.781, 0, -0.625, -0.48, 0.641, -0.60, 0.40, 0.768, 0.50, 0, 10, 0)
-light_color = Color(1, 0.83, 0.65, 1)
-light_energy = 0.62
+transform = Transform3D(-0.575, 0, -0.818, -0.278, 0.938, 0.195, 0.768, 0.340, -0.539, 0, 10, 0)
+light_color = Color(1, 0.825, 0.633, 1)
+light_energy = 0.73
+light_volumetric_fog_energy = 0.51
 shadow_enabled = true
 
 [node name="Сруб" parent="." instance=ExtResource("2_house")]

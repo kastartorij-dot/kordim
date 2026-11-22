@@ -24,6 +24,7 @@ func populate(parent: Node3D, height_at: Callable) -> void:
 			points.append(Vector2(point[0], point[1]))
 		paths.append(points)
 	_build_trees()
+	_build_bare_trees()
 	_build_understory()
 
 func _ground(p: Vector2) -> Vector3:
@@ -99,13 +100,16 @@ func _build_trees() -> void:
 		var angle := rng.randf() * TAU
 		for i in count:
 			var level := float(i)/count
-			var altitude := lerpf(start,.985,level)
+			var offset := sin(i*9.46+tree*2.75)*(.041 if small else .034)
+			var altitude := clampf(lerpf(start,.985,level)+offset,start,.989)
 			var origin := p.lerp(top,altitude)
 			angle += 2.399963 + rng.randf_range(-.41,.41)
 			var radial := Vector3(cos(angle),0,sin(angle))
 			var reach := h * rng.randf_range(.18,.257) * (1.0-level*.84) if small else h * rng.randf_range(.125,.215) * (1.0-level*.81)
-			var elbow := origin + radial * reach * .55 + Vector3.UP * reach * .10
-			var tip := origin + radial * reach + Vector3.UP * reach * rng.randf_range(-.045,.24)
+			reach *= .84+.25*cos(angle+tree*1.66)+.13*sin(i*4.32+tree)
+			var side := Vector3(-radial.z,0,radial.x) * reach * (.14*sin(i*5.51+tree*1.39))
+			var elbow := origin + radial * reach * .55 + Vector3.UP * reach * .10 + side
+			var tip := origin + radial * reach + Vector3.UP * reach * rng.randf_range(-.15,.27) - side*.5
 			branches.append(_segment(origin,elbow,maxf(.022,r * (.43-level*.26))))
 			branches.append(_segment(elbow,tip,maxf(.011,r*.19)))
 			if not dead and rng.randf() > .105 and reach > .23:
@@ -146,6 +150,68 @@ func _add_trunk_collision(p: Vector3, radius: float, height: float) -> void:
 	body.add_child(shape)
 	world.add_child(body)
 
+func _build_bare_trees() -> void:
+	var stems: Array[Transform3D] = []
+	var limbs: Array[Transform3D] = []
+	var anchors := [[-6.93,7.63],[-4.52,8.28],[-8.38,4.96],[11.25,8.02],
+		[11.4,.28],[10.96,-6.72],[6.17,-12.0],[-5.95,-10.25],[-7.48,-15.25],
+		[-7.11,-20.89],[-9.64,-23.26],[3.35,-22.98],[7.73,-23.95],[12.9,-20.75],
+		[17.2,-23.5],[-14.95,-18.82],[-18.45,-8.30],[-9.78,-4.28]]
+	for i in anchors.size():
+		var position := Vector2(anchors[i][0],anchors[i][1])
+		if _path_distance_squared(position)<1.42:
+			continue
+		var p := _ground(position)
+		var angle := i*2.109
+		var tilt := Vector3(cos(angle),0,sin(angle))
+		var h := 7.85 + sin(i*1.61)*2.58 + i%4*.37
+		var mid := p+Vector3.UP*h*.46+tilt*.17
+		var fork := p+Vector3.UP*h*.74+tilt*.63
+		var top := p+Vector3.UP*h+tilt*.52+Vector3(.18,0,.06)
+		var base := .129+(i%5)*.017
+		stems.append(_segment(p,mid,base))
+		stems.append(_segment(mid,fork,base*.72))
+		stems.append(_segment(fork,top,base*.42))
+		_add_trunk_collision(p,base,h)
+		for j in 10:
+			var a := angle + j*2.399963
+			var root := mid.lerp(fork,j/8.0) if j<8 else fork.lerp(top,(j-7)*.29)
+			var length := h*(.24-j*.014)*(1.0 + .16*sin(j*2.4+i))
+			var sweep := Vector3(cos(a),.48+.20*cos(i+j*1.20),sin(a))
+			_bare_fork(limbs,root,sweep,length,.051-j*.0031,j+i*11,2)
+	var bark := ShaderMaterial.new()
+	bark.shader = BARK_SHADER
+	bark.set_shader_parameter("pine_bark",BARK)
+	bark.set_shader_parameter("desaturate",.69)
+	var trunk := CylinderMesh.new()
+	trunk.height = 1.0
+	trunk.bottom_radius = 1.0
+	trunk.top_radius = .62
+	trunk.radial_segments = 8
+	trunk.rings = 0
+	var twig := CylinderMesh.new()
+	twig.height = 1.0
+	twig.bottom_radius = 1.0
+	twig.top_radius = .34
+	twig.radial_segments = 5
+	twig.rings = 0
+	_instances("Осенний_сухостой",trunk,bark,stems)
+	_instances("Развилки_сухих_веток",twig,bark,limbs)
+
+func _bare_fork(limbs: Array[Transform3D], at: Vector3, bend: Vector3, reach: float, width: float, seed: int, depth: int) -> void:
+	var horizontal := Vector3(bend.x,0,bend.z)
+	var first := at+(horizontal*.56 + Vector3.UP*bend.y*.37)*reach
+	var tip := at+(horizontal+Vector3.UP*bend.y)*reach
+	limbs.append(_segment(at,first,width))
+	limbs.append(_segment(first,tip,maxf(.006,width*.53)))
+	if depth==0 or reach<.32:
+		return
+	for side in [-1.0,1.0]:
+		var a := float(side)*(.47+.17*sin(seed*1.9))
+		var turn := horizontal.rotated(Vector3.UP,a)*.83+Vector3.UP*(bend.y*.69+.34)
+		var t := .11 if side<0.0 else .58
+		_bare_fork(limbs,first.lerp(tip,t),turn,reach*(.49+t*.15),width*.45,seed+depth*7,depth-1)
+
 func _needle_mesh() -> ArrayMesh:
 	var surface := SurfaceTool.new()
 	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -180,8 +246,8 @@ func _build_understory() -> void:
 	var fern_tints: Array[PackedColorArray] = [PackedColorArray(),PackedColorArray(),PackedColorArray(),PackedColorArray()]
 	var litter: Array[Transform3D] = []
 	var litter_colors := PackedColorArray()
-	var dry := Color(.78,.71,.58)
-	var green := Color(.54,.64,.43)
+	var dry := Color(.86,.80,.65)
+	var green := Color(.61,.67,.48)
 	for i in 8450:
 		var close := i > 3800
 		var margin := 14.6 if close else 37.0
@@ -196,14 +262,15 @@ func _build_understory() -> void:
 		var angle := rng.randf()*TAU
 		var basis := Basis(Vector3.UP,angle)
 		if path_squared > .32 and damp > -.48 and i%3 != 0:
-			var h := rng.randf_range(.16,.515) * (1.0+damp*.39)
-			grasses.append(Transform3D(basis.scaled_local(Vector3(h*.77,h,h*.76)),floor_point))
+			var h := rng.randf_range(.10,.42) * (1.0+damp*.44)
+			var spread := .30 + h*.22
+			grasses.append(Transform3D(basis.scaled_local(Vector3(spread,h,spread*.79)),floor_point))
 			grass_colors.append(dry.lerp(green,rng.randf_range(.04,.90)))
 			if i%17==0 and path_squared > .64:
 				var size := rng.randf_range(.48,1.26)
 				_add_fern(fern_points,fern_tints,floor_point,basis,Vector3.ONE*size)
 		elif path_squared > .16 and i%3 == 0:
-			var size := rng.randf_range(.047,.183)
+			var size := rng.randf_range(.036,.110)
 			litter.append(Transform3D(basis.scaled_local(Vector3(size,size*.34,size)),floor_point+Vector3.UP*.024))
 			litter_colors.append(Color(.28,.190,.083).lerp(Color(.59,.38,.18),rng.randf()))
 

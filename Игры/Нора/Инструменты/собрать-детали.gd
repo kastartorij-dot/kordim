@@ -46,8 +46,13 @@ func _build() -> void:
 		"river-rock": _river_rock(),
 	}
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://models/dressing"))
+	var selection := OS.get_cmdline_user_args()
+	var saved := 0
 	for id in assets:
 		var root: Node3D = assets[id]
+		if not selection.is_empty() and not id in selection:
+			root.free()
+			continue
 		_own(root,root)
 		var packed := PackedScene.new()
 		var error := packed.pack(root)
@@ -58,7 +63,8 @@ func _build() -> void:
 			printerr(id,": ",error)
 			quit(error)
 			return
-	print("Собрано моделей: ",assets.size())
+		saved += 1
+	print("Собрано моделей: ",saved)
 	quit()
 
 func _own(root: Node, parent: Node) -> void:
@@ -484,28 +490,35 @@ func _smoke() -> Node3D:
 	var root := _group(null,"Дым")
 	var effect := GPUParticles3D.new()
 	effect.name = "Дым_над_трубой"
-	effect.amount = 29
-	effect.lifetime = 7.2
+	effect.amount = 43
+	effect.lifetime = 7.5
 	effect.preprocess = 5.0
 	effect.visibility_aabb = AABB(Vector3(-6,-1,-5),Vector3(13,9,12))
 	effect.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var drift := ParticleProcessMaterial.new()
-	drift.direction = Vector3(.53,1.0,.11)
-	drift.spread = 16.0
+	drift.direction = Vector3(.70,1.0,.28)
+	drift.spread = 12.0
 	drift.gravity = Vector3(.083,.013,.011)
-	drift.initial_velocity_min = .42
-	drift.initial_velocity_max = .58
-	drift.scale_min = .46
-	drift.scale_max = 1.16
+	drift.initial_velocity_min = .37
+	drift.initial_velocity_max = .53
+	drift.scale_min = .72
+	drift.scale_max = 1.02
+	var spread := Curve.new()
+	spread.add_point(Vector2(0.0,.37))
+	spread.add_point(Vector2(.42,.69))
+	spread.add_point(Vector2(1.0,1.0))
+	var growth := CurveTexture.new()
+	growth.curve = spread
+	drift.scale_curve = growth
 	var fade := Gradient.new()
-	fade.offsets = PackedFloat32Array([0.0,.10,.56,1.0])
-	fade.colors = PackedColorArray([Color(1,1,1,0),Color(1,1,1,.75),Color(1,1,1,.51),Color(1,1,1,0)])
+	fade.offsets = PackedFloat32Array([0.0,.07,.57,1.0])
+	fade.colors = PackedColorArray([Color(1,1,1,0),Color(1,1,1,.48),Color(1,1,1,.29),Color(1,1,1,0)])
 	var texture := GradientTexture1D.new()
 	texture.gradient = fade
 	drift.color_ramp = texture
 	effect.process_material = drift
 	var quad := QuadMesh.new()
-	quad.size = Vector2(1.29,1.43)
+	quad.size = Vector2(1.32,1.57)
 	quad.material = _shader(SMOKE)
 	effect.draw_pass_1 = quad
 	root.add_child(effect)
@@ -549,7 +562,10 @@ func _rafters() -> Node3D:
 	return root
 
 func _joinery() -> Node3D:
-	var root := _group(null,"Подоконники")
+	var root := _group(null,"Оконные_и_дверные_притолоки")
+	var weather := _shader(preload("res://textures/weathered_boards.gdshader"))
+	weather.set_shader_parameter("plank",preload("res://textures/weathered/weathered_planks_d.res"))
+	weather.set_shader_parameter("plank_normal",preload("res://textures/weathered/weathered_planks_n.res"))
 	for window in [
 		[Vector3(-1.8,.835,3.48), Vector3(1.31,.259,.23), Vector3(1.36,.052,.333),.968],
 		[Vector3(3.30,.937,3.48), Vector3(.72,.228,.23), Vector3(.77,.052,.325),1.056],
@@ -562,6 +578,16 @@ func _joinery() -> Node3D:
 		_mesh(root,"Оконный_косяк",_block(size,.018,Color(.69,.65,.59),center.x,.004),board,center)
 		_mesh(root,"Полка_подоконника",_block(top_size,.014,Color(.79,.71,.63),center.z,.003),board,
 			Vector3(center.x,window[3],center.z))
+	for trim in [
+		[Vector3(-1.80,1.819,3.48),Vector3(1.35,.146,.267)],
+		[Vector3(3.30,1.714,3.48),Vector3(.76,.174,.262)],
+		[Vector3(2.60,1.817,-3.48),Vector3(.98,.131,.264)],
+		[Vector3(4.48,1.729,-1.25),Vector3(.249,.146,.862)],
+		[Vector3(1.40,1.997,3.49),Vector3(1.19,.144,.264)],
+	]:
+		var at: Vector3 = trim[0]
+		var size: Vector3 = trim[1]
+		_mesh(root,"Притолока",_block(size,.019,Color.WHITE,at.x,.007),weather,at)
 	return root
 
 func _river_rock() -> Node3D:

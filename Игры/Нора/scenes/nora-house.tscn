@@ -1,5 +1,12 @@
 [gd_scene format=3]
 
+[ext_resource type="Shader" path="res://textures/hewn_timber.gdshader" id="timber_shader"]
+[ext_resource type="Shader" path="res://textures/weathered_boards.gdshader" id="worn_board_shader"]
+[ext_resource type="Texture2D" path="res://textures/weathered/rough_wood_d.res" id="timber_d"]
+[ext_resource type="Texture2D" path="res://textures/weathered/rough_wood_n.res" id="timber_n"]
+[ext_resource type="Texture2D" path="res://textures/weathered/weathered_planks_d.res" id="shake_d"]
+[ext_resource type="Texture2D" path="res://textures/weathered/weathered_planks_n.res" id="shake_n"]
+
 [ext_resource type="PackedScene" path="res://models/dressing/rafters.scn" id="Стропила"]
 [ext_resource type="PackedScene" path="res://models/dressing/joinery.scn" id="Косяки"]
 [ext_resource type="PackedScene" path="res://models/dressing/bench.scn" id="Доски_лавки"]
@@ -16,6 +23,16 @@
 [ext_resource type="Shader" path="res://textures/wood_grain.gdshader" id="1_wood"]
 [ext_resource type="Shader" path="res://textures/stone_courses.gdshader" id="2_stone"]
 [ext_resource type="Shader" path="res://textures/moss_shakes.gdshader" id="3_roof"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hewn_timber"]
+shader = ExtResource("timber_shader")
+shader_parameter/grain = ExtResource("timber_d")
+shader_parameter/grain_normal = ExtResource("timber_n")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_worn_board"]
+shader = ExtResource("worn_board_shader")
+shader_parameter/plank = ExtResource("shake_d")
+shader_parameter/plank_normal = ExtResource("shake_n")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_wood_floor"]
 shader = ExtResource("1_wood")
@@ -99,6 +116,8 @@ shader_parameter/roughness = 0.88
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_roof"]
 shader = ExtResource("3_roof")
+shader_parameter/shake_wood = ExtResource("shake_d")
+shader_parameter/shake_normal = ExtResource("shake_n")
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_nnqsr"]
 height = 5.65
@@ -1021,7 +1040,10 @@ size = Vector3(0.24, 0.21, 7)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4c2j6"]
 transparency = 1
-albedo_color = Color(0.58, 0.62, 0.67, 0.36)
+albedo_color = Color(0.55, 0.47, 0.33, 0.50)
+emission_enabled = true
+emission = Color(0.87, 0.52, 0.25, 1)
+emission_energy_multiplier = 0.17
 roughness = 0.2
 
 [sub_resource type="BoxMesh" id="BoxMesh_xcodk"]
@@ -3422,7 +3444,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -1.9
 shape = SubResource("CylinderShape3D_nnqsr")
 
 [node name="@MeshInstance3D@3" type="MeshInstance3D" parent="Стены/@StaticBody3D@4" unique_id=723277630]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.469
 mesh = SubResource("CylinderMesh_20jll")
 
@@ -3433,7 +3455,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 3.32
 shape = SubResource("CylinderShape3D_ctj7w")
 
 [node name="@MeshInstance3D@6" type="MeshInstance3D" parent="Стены/@StaticBody3D@7" unique_id=961366547]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.939
 mesh = SubResource("CylinderMesh_s680f")
 
@@ -3444,7 +3466,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -1.9
 shape = SubResource("CylinderShape3D_4ilyi")
 
 [node name="@MeshInstance3D@9" type="MeshInstance3D" parent="Стены/@StaticBody3D@10" unique_id=1081659484]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.327
 mesh = SubResource("CylinderMesh_pvve3")
 
@@ -3455,7 +3477,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 3.32
 shape = SubResource("CylinderShape3D_5anxt")
 
 [node name="@MeshInstance3D@12" type="MeshInstance3D" parent="Стены/@StaticBody3D@13" unique_id=722345881]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.286
 mesh = SubResource("CylinderMesh_4kd7s")
 
@@ -3466,7 +3488,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -1.9
 shape = SubResource("CylinderShape3D_uxc45")
 
 [node name="@MeshInstance3D@15" type="MeshInstance3D" parent="Стены/@StaticBody3D@16" unique_id=42171026]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.898
 mesh = SubResource("CylinderMesh_pbhw2")
 
@@ -3477,7 +3499,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 3.32
 shape = SubResource("CylinderShape3D_rlbic")
 
 [node name="@MeshInstance3D@18" type="MeshInstance3D" parent="Стены/@StaticBody3D@19" unique_id=1465317703]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.510
 mesh = SubResource("CylinderMesh_wr6cf")
 
@@ -3488,7 +3510,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -1.9
 shape = SubResource("CylinderShape3D_xlic7")
 
 [node name="@MeshInstance3D@21" type="MeshInstance3D" parent="Стены/@StaticBody3D@22" unique_id=827692364]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.102
 mesh = SubResource("CylinderMesh_tolja")
 
@@ -3499,7 +3521,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 3.32
 shape = SubResource("CylinderShape3D_f2yoi")
 
 [node name="@MeshInstance3D@24" type="MeshInstance3D" parent="Стены/@StaticBody3D@25" unique_id=1476368299]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.714
 mesh = SubResource("CylinderMesh_pp1p0")
 
@@ -3510,7 +3532,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -3.5
 shape = SubResource("CylinderShape3D_6s8l3")
 
 [node name="@MeshInstance3D@27" type="MeshInstance3D" parent="Стены/@StaticBody3D@28" unique_id=1062077576]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.694
 mesh = SubResource("CylinderMesh_686hu")
 
@@ -3521,7 +3543,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -0.1
 shape = SubResource("CylinderShape3D_nkfxy")
 
 [node name="@MeshInstance3D@30" type="MeshInstance3D" parent="Стены/@StaticBody3D@31" unique_id=1152416995]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.082
 mesh = SubResource("CylinderMesh_n0j1p")
 
@@ -3532,7 +3554,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 2.45
 shape = SubResource("CylinderShape3D_idwsk")
 
 [node name="@MeshInstance3D@33" type="MeshInstance3D" parent="Стены/@StaticBody3D@34" unique_id=1864425548]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.531
 mesh = SubResource("CylinderMesh_5b7ob")
 
@@ -3543,7 +3565,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 4.17
 shape = SubResource("CylinderShape3D_0u7mo")
 
 [node name="@MeshInstance3D@36" type="MeshInstance3D" parent="Стены/@StaticBody3D@37" unique_id=1708297555]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.878
 mesh = SubResource("CylinderMesh_ybd2n")
 
@@ -3554,7 +3576,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -3.5
 shape = SubResource("CylinderShape3D_sxt7g")
 
 [node name="@MeshInstance3D@39" type="MeshInstance3D" parent="Стены/@StaticBody3D@40" unique_id=1579761960]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.265
 mesh = SubResource("CylinderMesh_as8we")
 
@@ -3565,7 +3587,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -0.1
 shape = SubResource("CylinderShape3D_h3dmi")
 
 [node name="@MeshInstance3D@42" type="MeshInstance3D" parent="Стены/@StaticBody3D@43" unique_id=894683190]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.347
 mesh = SubResource("CylinderMesh_jxmcm")
 
@@ -3576,7 +3598,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 2.45
 shape = SubResource("CylinderShape3D_q1t7j")
 
 [node name="@MeshInstance3D@45" type="MeshInstance3D" parent="Стены/@StaticBody3D@46" unique_id=151187064]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.959
 mesh = SubResource("CylinderMesh_b4nrc")
 
@@ -3587,7 +3609,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 4.17
 shape = SubResource("CylinderShape3D_nu468")
 
 [node name="@MeshInstance3D@48" type="MeshInstance3D" parent="Стены/@StaticBody3D@49" unique_id=274429556]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.449
 mesh = SubResource("CylinderMesh_dky1l")
 
@@ -3598,7 +3620,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -3.5
 shape = SubResource("CylinderShape3D_mwu2h")
 
 [node name="@MeshInstance3D@51" type="MeshInstance3D" parent="Стены/@StaticBody3D@52" unique_id=1701655008]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.163
 mesh = SubResource("CylinderMesh_6l0pm")
 
@@ -3609,7 +3631,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -0.1
 shape = SubResource("CylinderShape3D_mbdrf")
 
 [node name="@MeshInstance3D@54" type="MeshInstance3D" parent="Стены/@StaticBody3D@55" unique_id=2138403341]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.776
 mesh = SubResource("CylinderMesh_tv64o")
 
@@ -3620,7 +3642,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 2.45
 shape = SubResource("CylinderShape3D_kuuij")
 
 [node name="@MeshInstance3D@57" type="MeshInstance3D" parent="Стены/@StaticBody3D@58" unique_id=677063078]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.633
 mesh = SubResource("CylinderMesh_wgs25")
 
@@ -3631,7 +3653,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 4.17
 shape = SubResource("CylinderShape3D_co3hv")
 
 [node name="@MeshInstance3D@60" type="MeshInstance3D" parent="Стены/@StaticBody3D@61" unique_id=1416345848]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.020
 mesh = SubResource("CylinderMesh_uhb3u")
 
@@ -3642,7 +3664,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -3.5
 shape = SubResource("CylinderShape3D_7vsmc")
 
 [node name="@MeshInstance3D@63" type="MeshInstance3D" parent="Стены/@StaticBody3D@64" unique_id=2106291705]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.592
 mesh = SubResource("CylinderMesh_6yosj")
 
@@ -3653,7 +3675,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -0.1
 shape = SubResource("CylinderShape3D_m23my")
 
 [node name="@MeshInstance3D@66" type="MeshInstance3D" parent="Стены/@StaticBody3D@67" unique_id=1557909437]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.816
 mesh = SubResource("CylinderMesh_kisyx")
 
@@ -3664,7 +3686,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 2.45
 shape = SubResource("CylinderShape3D_68qwv")
 
 [node name="@MeshInstance3D@69" type="MeshInstance3D" parent="Стены/@StaticBody3D@70" unique_id=1860378421]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.204
 mesh = SubResource("CylinderMesh_1x4xm")
 
@@ -3675,7 +3697,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 4.17
 shape = SubResource("CylinderShape3D_rsg31")
 
 [node name="@MeshInstance3D@72" type="MeshInstance3D" parent="Стены/@StaticBody3D@73" unique_id=2082189531]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.408
 mesh = SubResource("CylinderMesh_uax4s")
 
@@ -3686,7 +3708,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -1.9
 shape = SubResource("CylinderShape3D_rm4qt")
 
 [node name="@MeshInstance3D@75" type="MeshInstance3D" parent="Стены/@StaticBody3D@76" unique_id=998291536]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -1.000
 mesh = SubResource("CylinderMesh_h0hn7")
 
@@ -3697,7 +3719,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 3.32
 shape = SubResource("CylinderShape3D_0i0by")
 
 [node name="@MeshInstance3D@78" type="MeshInstance3D" parent="Стены/@StaticBody3D@79" unique_id=2105605495]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.388
 mesh = SubResource("CylinderMesh_ygh0q")
 
@@ -3708,7 +3730,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0, 2
 shape = SubResource("CylinderShape3D_jq0mm")
 
 [node name="@MeshInstance3D@81" type="MeshInstance3D" parent="Стены/@StaticBody3D@82" unique_id=1678885694]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.224
 mesh = SubResource("CylinderMesh_dthou")
 
@@ -3719,7 +3741,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0, 2
 shape = SubResource("CylinderShape3D_tqfo8")
 
 [node name="@MeshInstance3D@84" type="MeshInstance3D" parent="Стены/@StaticBody3D@85" unique_id=1901095615]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.837
 mesh = SubResource("CylinderMesh_q1kmj")
 
@@ -3730,7 +3752,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0, 0
 shape = SubResource("CylinderShape3D_bi4jg")
 
 [node name="@MeshInstance3D@87" type="MeshInstance3D" parent="Стены/@StaticBody3D@88" unique_id=1853627986]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.571
 mesh = SubResource("CylinderMesh_v1fsi")
 
@@ -3741,7 +3763,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0, 0
 shape = SubResource("CylinderShape3D_gk2a2")
 
 [node name="@MeshInstance3D@90" type="MeshInstance3D" parent="Стены/@StaticBody3D@91" unique_id=1637753444]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.041
 mesh = SubResource("CylinderMesh_q7fco")
 
@@ -3752,7 +3774,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0, 0
 shape = SubResource("CylinderShape3D_nhfn7")
 
 [node name="@MeshInstance3D@93" type="MeshInstance3D" parent="Стены/@StaticBody3D@94" unique_id=1422620107]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.653
 mesh = SubResource("CylinderMesh_o1sat")
 
@@ -3763,7 +3785,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0, 0
 shape = SubResource("CylinderShape3D_dl82d")
 
 [node name="@MeshInstance3D@96" type="MeshInstance3D" parent="Стены/@StaticBody3D@97" unique_id=1885642009]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.755
 mesh = SubResource("CylinderMesh_5w4pq")
 
@@ -3774,7 +3796,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -1.2
 shape = SubResource("CylinderShape3D_q1d3k")
 
 [node name="@MeshInstance3D@99" type="MeshInstance3D" parent="Стены/@StaticBody3D@100" unique_id=2147294013]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.143
 mesh = SubResource("CylinderMesh_xf4vu")
 
@@ -3785,7 +3807,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 3.87
 shape = SubResource("CylinderShape3D_u5eo6")
 
 [node name="@MeshInstance3D@102" type="MeshInstance3D" parent="Стены/@StaticBody3D@103" unique_id=740035436]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.469
 mesh = SubResource("CylinderMesh_l008n")
 
@@ -3796,7 +3818,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -1.2
 shape = SubResource("CylinderShape3D_lnqk0")
 
 [node name="@MeshInstance3D@105" type="MeshInstance3D" parent="Стены/@StaticBody3D@106" unique_id=1621126272]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.939
 mesh = SubResource("CylinderMesh_85mys")
 
@@ -3807,7 +3829,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 3.87
 shape = SubResource("CylinderShape3D_tvepq")
 
 [node name="@MeshInstance3D@108" type="MeshInstance3D" parent="Стены/@StaticBody3D@109" unique_id=1446695301]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.327
 mesh = SubResource("CylinderMesh_nitec")
 
@@ -3818,7 +3840,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -1.2
 shape = SubResource("CylinderShape3D_e6hns")
 
 [node name="@MeshInstance3D@111" type="MeshInstance3D" parent="Стены/@StaticBody3D@112" unique_id=1180084032]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.286
 mesh = SubResource("CylinderMesh_5veje")
 
@@ -3829,7 +3851,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 3.87
 shape = SubResource("CylinderShape3D_j8xct")
 
 [node name="@MeshInstance3D@114" type="MeshInstance3D" parent="Стены/@StaticBody3D@115" unique_id=119325403]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.898
 mesh = SubResource("CylinderMesh_5sk6c")
 
@@ -3840,7 +3862,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -1.2
 shape = SubResource("CylinderShape3D_st2wh")
 
 [node name="@MeshInstance3D@117" type="MeshInstance3D" parent="Стены/@StaticBody3D@118" unique_id=1365935075]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.510
 mesh = SubResource("CylinderMesh_h8wx6")
 
@@ -3851,7 +3873,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 3.87
 shape = SubResource("CylinderShape3D_my3ym")
 
 [node name="@MeshInstance3D@120" type="MeshInstance3D" parent="Стены/@StaticBody3D@121" unique_id=1927576909]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.102
 mesh = SubResource("CylinderMesh_n4iey")
 
@@ -3862,7 +3884,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0, 1
 shape = SubResource("CylinderShape3D_47pr6")
 
 [node name="@MeshInstance3D@123" type="MeshInstance3D" parent="Стены/@StaticBody3D@124" unique_id=1839176184]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.714
 mesh = SubResource("CylinderMesh_l7kc5")
 
@@ -3873,7 +3895,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0, 2
 shape = SubResource("CylinderShape3D_mu4ud")
 
 [node name="@MeshInstance3D@126" type="MeshInstance3D" parent="Стены/@StaticBody3D@127" unique_id=1321564853]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.694
 mesh = SubResource("CylinderMesh_ju7f4")
 
@@ -3884,7 +3906,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0, 2
 shape = SubResource("CylinderShape3D_ceu8e")
 
 [node name="@MeshInstance3D@129" type="MeshInstance3D" parent="Стены/@StaticBody3D@130" unique_id=93896056]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.082
 mesh = SubResource("CylinderMesh_fcq6y")
 
@@ -3895,7 +3917,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -4.5
 shape = SubResource("CylinderShape3D_sme4q")
 
 [node name="@MeshInstance3D@132" type="MeshInstance3D" parent="Стены/@StaticBody3D@133" unique_id=592901456]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.531
 mesh = SubResource("CylinderMesh_xlq6t")
 
@@ -3906,7 +3928,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -4.5
 shape = SubResource("CylinderShape3D_au6jo")
 
 [node name="@MeshInstance3D@135" type="MeshInstance3D" parent="Стены/@StaticBody3D@136" unique_id=1724268009]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.878
 mesh = SubResource("CylinderMesh_n4ox5")
 
@@ -3917,7 +3939,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -4.5
 shape = SubResource("CylinderShape3D_7aj30")
 
 [node name="@MeshInstance3D@138" type="MeshInstance3D" parent="Стены/@StaticBody3D@139" unique_id=240850263]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.265
 mesh = SubResource("CylinderMesh_s3tog")
 
@@ -3928,7 +3950,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -4.5
 shape = SubResource("CylinderShape3D_yay11")
 
 [node name="@MeshInstance3D@141" type="MeshInstance3D" parent="Стены/@StaticBody3D@142" unique_id=264688167]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.347
 mesh = SubResource("CylinderMesh_004cg")
 
@@ -3939,7 +3961,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -4.5
 shape = SubResource("CylinderShape3D_lv3wi")
 
 [node name="@MeshInstance3D@144" type="MeshInstance3D" parent="Стены/@StaticBody3D@145" unique_id=104374839]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.959
 mesh = SubResource("CylinderMesh_8vcbx")
 
@@ -3950,7 +3972,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -4.5
 shape = SubResource("CylinderShape3D_fgpq4")
 
 [node name="@MeshInstance3D@147" type="MeshInstance3D" parent="Стены/@StaticBody3D@148" unique_id=894508888]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.449
 mesh = SubResource("CylinderMesh_ahs26")
 
@@ -3961,7 +3983,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -4.5
 shape = SubResource("CylinderShape3D_qtgkj")
 
 [node name="@MeshInstance3D@150" type="MeshInstance3D" parent="Стены/@StaticBody3D@151" unique_id=533308387]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.163
 mesh = SubResource("CylinderMesh_wu861")
 
@@ -3972,7 +3994,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -4.5
 shape = SubResource("CylinderShape3D_m2atb")
 
 [node name="@MeshInstance3D@153" type="MeshInstance3D" parent="Стены/@StaticBody3D@154" unique_id=1940541378]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.776
 mesh = SubResource("CylinderMesh_0b7sg")
 
@@ -3983,7 +4005,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -4.5
 shape = SubResource("CylinderShape3D_ub0d4")
 
 [node name="@MeshInstance3D@156" type="MeshInstance3D" parent="Стены/@StaticBody3D@157" unique_id=1472492679]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.633
 mesh = SubResource("CylinderMesh_i5761")
 
@@ -3994,7 +4016,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -4.5
 shape = SubResource("CylinderShape3D_120h0")
 
 [node name="@MeshInstance3D@159" type="MeshInstance3D" parent="Стены/@StaticBody3D@160" unique_id=1020235324]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.020
 mesh = SubResource("CylinderMesh_6cgv6")
 
@@ -4005,7 +4027,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 4.5,
 shape = SubResource("CylinderShape3D_othpl")
 
 [node name="@MeshInstance3D@162" type="MeshInstance3D" parent="Стены/@StaticBody3D@163" unique_id=752081953]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.592
 mesh = SubResource("CylinderMesh_jkrtu")
 
@@ -4016,7 +4038,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 4.5,
 shape = SubResource("CylinderShape3D_pa8w7")
 
 [node name="@MeshInstance3D@165" type="MeshInstance3D" parent="Стены/@StaticBody3D@166" unique_id=2099276974]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.816
 mesh = SubResource("CylinderMesh_x7y8t")
 
@@ -4027,7 +4049,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 4.5,
 shape = SubResource("CylinderShape3D_evg4n")
 
 [node name="@MeshInstance3D@168" type="MeshInstance3D" parent="Стены/@StaticBody3D@169" unique_id=1650010441]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.204
 mesh = SubResource("CylinderMesh_yac3v")
 
@@ -4038,7 +4060,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 4.5,
 shape = SubResource("CylinderShape3D_hsn2h")
 
 [node name="@MeshInstance3D@171" type="MeshInstance3D" parent="Стены/@StaticBody3D@172" unique_id=296662333]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.408
 mesh = SubResource("CylinderMesh_f05ly")
 
@@ -4049,7 +4071,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 4.5,
 shape = SubResource("CylinderShape3D_3dit1")
 
 [node name="@MeshInstance3D@174" type="MeshInstance3D" parent="Стены/@StaticBody3D@175" unique_id=21200748]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -1.000
 mesh = SubResource("CylinderMesh_66hgq")
 
@@ -4060,7 +4082,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 4.5,
 shape = SubResource("CylinderShape3D_kpdlw")
 
 [node name="@MeshInstance3D@177" type="MeshInstance3D" parent="Стены/@StaticBody3D@178" unique_id=432539512]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.388
 mesh = SubResource("CylinderMesh_o61rs")
 
@@ -4071,7 +4093,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 4.5,
 shape = SubResource("CylinderShape3D_6w1vv")
 
 [node name="@MeshInstance3D@180" type="MeshInstance3D" parent="Стены/@StaticBody3D@181" unique_id=2145924805]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.224
 mesh = SubResource("CylinderMesh_blrvu")
 
@@ -4082,7 +4104,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 4.5,
 shape = SubResource("CylinderShape3D_b3bo5")
 
 [node name="@MeshInstance3D@183" type="MeshInstance3D" parent="Стены/@StaticBody3D@184" unique_id=397276522]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.837
 mesh = SubResource("CylinderMesh_2hsw5")
 
@@ -4093,7 +4115,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 4.5,
 shape = SubResource("CylinderShape3D_ty7g2")
 
 [node name="@MeshInstance3D@186" type="MeshInstance3D" parent="Стены/@StaticBody3D@187" unique_id=1980577519]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.571
 mesh = SubResource("CylinderMesh_vf4ol")
 
@@ -4104,7 +4126,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 4.5,
 shape = SubResource("CylinderShape3D_vbiww")
 
 [node name="@MeshInstance3D@189" type="MeshInstance3D" parent="Стены/@StaticBody3D@190" unique_id=1989486399]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.041
 mesh = SubResource("CylinderMesh_xddqd")
 
@@ -4115,7 +4137,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 4.5,
 shape = SubResource("CylinderShape3D_xysww")
 
 [node name="@MeshInstance3D@192" type="MeshInstance3D" parent="Стены/@StaticBody3D@193" unique_id=905951035]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.653
 mesh = SubResource("CylinderMesh_u5y10")
 
@@ -4126,7 +4148,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 4.5,
 shape = SubResource("CylinderShape3D_lpc0x")
 
 [node name="@MeshInstance3D@195" type="MeshInstance3D" parent="Стены/@StaticBody3D@196" unique_id=439871209]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.755
 mesh = SubResource("CylinderMesh_yckh2")
 
@@ -4137,7 +4159,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 4.5,
 shape = SubResource("CylinderShape3D_1faaq")
 
 [node name="@MeshInstance3D@198" type="MeshInstance3D" parent="Стены/@StaticBody3D@199" unique_id=769784559]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.143
 mesh = SubResource("CylinderMesh_kp71t")
 
@@ -4148,7 +4170,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 4.5,
 shape = SubResource("CylinderShape3D_l0hfk")
 
 [node name="@MeshInstance3D@201" type="MeshInstance3D" parent="Стены/@StaticBody3D@202" unique_id=421089385]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.469
 mesh = SubResource("CylinderMesh_tg65h")
 
@@ -4159,7 +4181,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -4.5
 shape = SubResource("CylinderShape3D_4r2av")
 
 [node name="@MeshInstance3D@204" type="MeshInstance3D" parent="Стены/@StaticBody3D@205" unique_id=789695424]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.939
 mesh = SubResource("CylinderMesh_jn2dy")
 
@@ -4170,7 +4192,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -4.5
 shape = SubResource("CylinderShape3D_gtw8q")
 
 [node name="@MeshInstance3D@207" type="MeshInstance3D" parent="Стены/@StaticBody3D@208" unique_id=1329614406]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.327
 mesh = SubResource("CylinderMesh_xo2k6")
 
@@ -4181,7 +4203,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -4.5
 shape = SubResource("CylinderShape3D_oj10l")
 
 [node name="@MeshInstance3D@210" type="MeshInstance3D" parent="Стены/@StaticBody3D@211" unique_id=1003505591]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.286
 mesh = SubResource("CylinderMesh_w8804")
 
@@ -4192,7 +4214,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -4.5
 shape = SubResource("CylinderShape3D_wtr0r")
 
 [node name="@MeshInstance3D@213" type="MeshInstance3D" parent="Стены/@StaticBody3D@214" unique_id=74840209]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.898
 mesh = SubResource("CylinderMesh_akyyd")
 
@@ -4203,7 +4225,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -4.5
 shape = SubResource("CylinderShape3D_uiio5")
 
 [node name="@MeshInstance3D@216" type="MeshInstance3D" parent="Стены/@StaticBody3D@217" unique_id=829449350]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.510
 mesh = SubResource("CylinderMesh_4ke1m")
 
@@ -4214,7 +4236,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -4.5
 shape = SubResource("CylinderShape3D_mheea")
 
 [node name="@MeshInstance3D@219" type="MeshInstance3D" parent="Стены/@StaticBody3D@220" unique_id=1541103346]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.102
 mesh = SubResource("CylinderMesh_yosl6")
 
@@ -4225,7 +4247,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -4.5
 shape = SubResource("CylinderShape3D_ex3n5")
 
 [node name="@MeshInstance3D@222" type="MeshInstance3D" parent="Стены/@StaticBody3D@223" unique_id=140951510]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.714
 mesh = SubResource("CylinderMesh_l4oql")
 
@@ -4236,7 +4258,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -4.5
 shape = SubResource("CylinderShape3D_4g2l3")
 
 [node name="@MeshInstance3D@225" type="MeshInstance3D" parent="Стены/@StaticBody3D@226" unique_id=979986825]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.694
 mesh = SubResource("CylinderMesh_203fr")
 
@@ -4247,7 +4269,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 4.5,
 shape = SubResource("CylinderShape3D_sr5n7")
 
 [node name="@MeshInstance3D@228" type="MeshInstance3D" parent="Стены/@StaticBody3D@229" unique_id=129961862]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.082
 mesh = SubResource("CylinderMesh_oadx0")
 
@@ -4258,7 +4280,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 4.5,
 shape = SubResource("CylinderShape3D_0n7f1")
 
 [node name="@MeshInstance3D@231" type="MeshInstance3D" parent="Стены/@StaticBody3D@232" unique_id=1043380886]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.531
 mesh = SubResource("CylinderMesh_0n4jr")
 
@@ -4269,7 +4291,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 4.5,
 shape = SubResource("CylinderShape3D_8j12v")
 
 [node name="@MeshInstance3D@234" type="MeshInstance3D" parent="Стены/@StaticBody3D@235" unique_id=1640642402]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.878
 mesh = SubResource("CylinderMesh_w5cg2")
 
@@ -4280,7 +4302,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 4.5,
 shape = SubResource("CylinderShape3D_tgqx5")
 
 [node name="@MeshInstance3D@237" type="MeshInstance3D" parent="Стены/@StaticBody3D@238" unique_id=450892770]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.265
 mesh = SubResource("CylinderMesh_yoqy2")
 
@@ -4291,7 +4313,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 4.5,
 shape = SubResource("CylinderShape3D_q6i57")
 
 [node name="@MeshInstance3D@240" type="MeshInstance3D" parent="Стены/@StaticBody3D@241" unique_id=888124427]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.347
 mesh = SubResource("CylinderMesh_5n76i")
 
@@ -4302,7 +4324,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 4.5,
 shape = SubResource("CylinderShape3D_yli4f")
 
 [node name="@MeshInstance3D@243" type="MeshInstance3D" parent="Стены/@StaticBody3D@244" unique_id=1159117290]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.959
 mesh = SubResource("CylinderMesh_f5mrq")
 
@@ -4313,7 +4335,7 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 4.5,
 shape = SubResource("CylinderShape3D_hs1al")
 
 [node name="@MeshInstance3D@246" type="MeshInstance3D" parent="Стены/@StaticBody3D@247" unique_id=1877701972]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = -0.449
 mesh = SubResource("CylinderMesh_r8uda")
 
@@ -4324,19 +4346,19 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 4.5,
 shape = SubResource("CylinderShape3D_yxdcc")
 
 [node name="@MeshInstance3D@249" type="MeshInstance3D" parent="Стены/@StaticBody3D@250" unique_id=1306780995]
-material_override = SubResource("ShaderMaterial_wood_log")
+material_override = SubResource("ShaderMaterial_hewn_timber")
 instance_shader_parameters/board_shift = 0.163
 mesh = SubResource("CylinderMesh_2unw6")
 
 [node name="@MeshInstance3D@251" type="MeshInstance3D" parent="Стены" unique_id=161651805]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2.413, 0)
-material_override = SubResource("ShaderMaterial_wood_dark_x")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = -0.306
 mesh = SubResource("BoxMesh_x70f6")
 
 [node name="@MeshInstance3D@252" type="MeshInstance3D" parent="Стены" unique_id=1486816149]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 2.413, 0)
-material_override = SubResource("ShaderMaterial_wood_dark_x")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = -0.776
 mesh = SubResource("BoxMesh_dyfku")
 
@@ -4347,13 +4369,13 @@ mesh = SubResource("BoxMesh_xcodk")
 
 [node name="@MeshInstance3D@254" type="MeshInstance3D" parent="Стены" unique_id=1435308160]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.65, 1.35, 3.68)
-material_override = SubResource("ShaderMaterial_wood_dark_y")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = 0.306
 mesh = SubResource("BoxMesh_ou847")
 
 [node name="@MeshInstance3D@255" type="MeshInstance3D" parent="Стены" unique_id=1036744559]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.95, 1.35, 3.68)
-material_override = SubResource("ShaderMaterial_wood_dark_y")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = -0.163
 mesh = SubResource("BoxMesh_cpl3t")
 
@@ -4364,13 +4386,13 @@ mesh = SubResource("BoxMesh_jhbrj")
 
 [node name="@MeshInstance3D@257" type="MeshInstance3D" parent="Стены" unique_id=422254265]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.75, 1.35, 3.68)
-material_override = SubResource("ShaderMaterial_wood_dark_y")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = 0.918
 mesh = SubResource("BoxMesh_mpx8h")
 
 [node name="@MeshInstance3D@258" type="MeshInstance3D" parent="Стены" unique_id=481860149]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.85, 1.35, 3.68)
-material_override = SubResource("ShaderMaterial_wood_dark_y")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = 0.449
 mesh = SubResource("BoxMesh_24vge")
 
@@ -4392,7 +4414,7 @@ metadata/label = "Дверь. Подходят к ней обходом, по к
 shape = SubResource("BoxShape3D_o4tdb")
 
 [node name="@MeshInstance3D@262" type="MeshInstance3D" parent="Стены/@StaticBody3D@263" unique_id=142438193]
-material_override = SubResource("ShaderMaterial_wood_dark_y")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = 0.122
 mesh = SubResource("BoxMesh_ho63t")
 
@@ -4403,37 +4425,37 @@ mesh = SubResource("BoxMesh_irert")
 
 [node name="@MeshInstance3D@265" type="MeshInstance3D" parent="Стены" unique_id=681407169]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 0)
-material_override = SubResource("ShaderMaterial_wood_dark_x")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = -0.816
 mesh = SubResource("BoxMesh_gie15")
 
 [node name="@MeshInstance3D@274" type="MeshInstance3D" parent="Стены" unique_id=636680597]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 0.95, 3.5)
-material_override = SubResource("ShaderMaterial_wood_trim")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = 0.735
 mesh = SubResource("BoxMesh_6f4mp")
 
 [node name="@MeshInstance3D@275" type="MeshInstance3D" parent="Стены" unique_id=663913979]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 1.75, 3.5)
-material_override = SubResource("ShaderMaterial_wood_trim")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = 0.265
 mesh = SubResource("BoxMesh_xv5d2")
 
 [node name="@MeshInstance3D@276" type="MeshInstance3D" parent="Стены" unique_id=1607785006]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 1.35, 3.5)
-material_override = SubResource("ShaderMaterial_wood_dark_y")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = -0.204
 mesh = SubResource("BoxMesh_jo3vp")
 
 [node name="@MeshInstance3D@277" type="MeshInstance3D" parent="Стены" unique_id=829704363]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 1.35, 3.5)
-material_override = SubResource("ShaderMaterial_wood_dark_y")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = -0.673
 mesh = SubResource("BoxMesh_fwt4b")
 
 [node name="@MeshInstance3D@278" type="MeshInstance3D" parent="Стены" unique_id=1618729425]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1999999, 1.35, 3.5)
-material_override = SubResource("ShaderMaterial_wood_dark_y")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = 0.878
 mesh = SubResource("BoxMesh_tfkjs")
 
@@ -4463,31 +4485,31 @@ mesh = SubResource("CylinderMesh_vnw8u")
 
 [node name="@MeshInstance3D@283" type="MeshInstance3D" parent="Стены" unique_id=959591663]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.3, 1.05, 3.5)
-material_override = SubResource("ShaderMaterial_wood_trim")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = 0.551
 mesh = SubResource("BoxMesh_xuj8s")
 
 [node name="@MeshInstance3D@284" type="MeshInstance3D" parent="Стены" unique_id=368258046]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.3, 1.65, 3.5)
-material_override = SubResource("ShaderMaterial_wood_trim")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = 0.082
 mesh = SubResource("BoxMesh_w8oaw")
 
 [node name="@MeshInstance3D@285" type="MeshInstance3D" parent="Стены" unique_id=1908690423]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 1.3499999, 3.5)
-material_override = SubResource("ShaderMaterial_wood_dark_y")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = -0.388
 mesh = SubResource("BoxMesh_s44qe")
 
 [node name="@MeshInstance3D@286" type="MeshInstance3D" parent="Стены" unique_id=1008454357]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.3, 1.3499999, 3.5)
-material_override = SubResource("ShaderMaterial_wood_dark_y")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = -0.857
 mesh = SubResource("BoxMesh_r1f5b")
 
 [node name="@MeshInstance3D@287" type="MeshInstance3D" parent="Стены" unique_id=257660305]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.6, 1.3499999, 3.5)
-material_override = SubResource("ShaderMaterial_wood_dark_y")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = 0.694
 mesh = SubResource("BoxMesh_s2v28")
 
@@ -4517,31 +4539,31 @@ mesh = SubResource("CylinderMesh_x57iy")
 
 [node name="@MeshInstance3D@292" type="MeshInstance3D" parent="Стены" unique_id=1130887187]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 1.1, -3.5)
-material_override = SubResource("ShaderMaterial_wood_trim")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = 0.367
 mesh = SubResource("BoxMesh_ky5bw")
 
 [node name="@MeshInstance3D@293" type="MeshInstance3D" parent="Стены" unique_id=1617330609]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 1.75, -3.5)
-material_override = SubResource("ShaderMaterial_wood_trim")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = -0.102
 mesh = SubResource("BoxMesh_tvq24")
 
 [node name="@MeshInstance3D@294" type="MeshInstance3D" parent="Стены" unique_id=105341609]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.1999998, 1.425, -3.5)
-material_override = SubResource("ShaderMaterial_wood_dark_y")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = -0.571
 mesh = SubResource("BoxMesh_xo7h0")
 
 [node name="@MeshInstance3D@295" type="MeshInstance3D" parent="Стены" unique_id=1721021144]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 1.425, -3.5)
-material_override = SubResource("ShaderMaterial_wood_dark_y")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = 0.980
 mesh = SubResource("BoxMesh_o5mmt")
 
 [node name="@MeshInstance3D@296" type="MeshInstance3D" parent="Стены" unique_id=1556644080]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 1.425, -3.5)
-material_override = SubResource("ShaderMaterial_wood_dark_y")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = 0.510
 mesh = SubResource("BoxMesh_eo5s3")
 
@@ -4571,31 +4593,31 @@ mesh = SubResource("CylinderMesh_yndfy")
 
 [node name="@MeshInstance3D@301" type="MeshInstance3D" parent="Стены" unique_id=193577880]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 1.1, -1.25)
-material_override = SubResource("ShaderMaterial_wood_dark_z")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = 0.184
 mesh = SubResource("BoxMesh_misuj")
 
 [node name="@MeshInstance3D@302" type="MeshInstance3D" parent="Стены" unique_id=694454517]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 1.7, -1.25)
-material_override = SubResource("ShaderMaterial_wood_dark_z")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = -0.286
 mesh = SubResource("BoxMesh_bitc5")
 
 [node name="@MeshInstance3D@303" type="MeshInstance3D" parent="Стены" unique_id=921377716]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 1.4000001, -1.6)
-material_override = SubResource("ShaderMaterial_wood_dark_y")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = -0.755
 mesh = SubResource("BoxMesh_y7x3m")
 
 [node name="@MeshInstance3D@304" type="MeshInstance3D" parent="Стены" unique_id=1506927572]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 1.4000001, -1.25)
-material_override = SubResource("ShaderMaterial_wood_dark_y")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = 0.796
 mesh = SubResource("BoxMesh_2leod")
 
 [node name="@MeshInstance3D@305" type="MeshInstance3D" parent="Стены" unique_id=165474488]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 1.4000001, -0.9)
-material_override = SubResource("ShaderMaterial_wood_dark_y")
+material_override = SubResource("ShaderMaterial_worn_board")
 instance_shader_parameters/board_shift = 0.327
 mesh = SubResource("BoxMesh_81tuh")
 
