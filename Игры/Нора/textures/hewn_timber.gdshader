@@ -13,6 +13,13 @@ float hash2(vec2 p) {
 	return fract(sin(dot(p,vec2(127.1,263.7)))*43758.5453);
 }
 
+float soft_noise(vec2 p) {
+	vec2 cell = floor(p);
+	vec2 t = smoothstep(vec2(0.0),vec2(1.0),fract(p));
+	return mix(mix(hash2(cell),hash2(cell+vec2(1,0)),t.x),
+		mix(hash2(cell+vec2(0,1)),hash2(cell+vec2(1,1)),t.x),t.y);
+}
+
 void vertex() {
 	log_seed = hash2(vec2(MODEL_MATRIX[3].x*.86+MODEL_MATRIX[3].z,MODEL_MATRIX[3].y*4.61));
 	float t = VERTEX.y+log_seed*2.7;
@@ -43,9 +50,15 @@ void fragment() {
 	end_tone = mix(end_tone,old_grain*vec3(.73,.66,.54),.37);
 	vec3 tone = mix(old_grain*log_tone,end_tone,edge_wood);
 	vec3 weather = mix(vec3(1.0),vec3(.60,.67,.55),damp*.68);
-	ALBEDO = tone * weather * shelter;
+	vec2 wall = vec2(world_point.x+world_point.z*1.17,world_point.y);
+	float damp_pockets = .63*soft_noise(wall*vec2(2.3,2.8))+.37*soft_noise(wall*vec2(7.9,11.2));
+	float spores = soft_noise(wall*vec2(49.7,58.4));
+	float moss = (1.0-smoothstep(.17,1.21,world_point.y)) * outside * (1.0-edge_wood);
+	moss *= smoothstep(.43,.77,damp_pockets+max(world_face.y,0.0)*.105+spores*.12);
+	vec3 moss_color = mix(vec3(.063,.074,.034),vec3(.171,.197,.078),spores*damp_pockets);
+	ALBEDO = mix(tone * weather * shelter,moss_color,moss*.83);
 	NORMAL_MAP = mix(texture(grain_normal,timber_uv).rgb,vec3(.5,.5,1),edge_wood);
-	NORMAL_MAP_DEPTH = mix(.29,.63,outside);
+	NORMAL_MAP_DEPTH = mix(mix(.29,.63,outside),.34,moss);
 	ROUGHNESS = .94;
 	SPECULAR = .18;
 }

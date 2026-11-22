@@ -1,6 +1,6 @@
 extends CharacterBody3D
 # Ходьба от первого лица. WASD/стрелки — идти, Shift — бегом, пробел — прыжок,
-# мышь — смотреть, клик — захватить мышь, Esc — отпустить.
+# мышь — смотреть, клик — захватить мышь, Esc — меню паузы.
 
 const ШАГ := 2.6
 const БЕГ := 5.0
@@ -75,8 +75,6 @@ func _разместить_подсказку() -> void:
 func _unhandled_input(e: InputEvent) -> void:
 	if e is InputEventMouseButton and e.pressed:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	elif e is InputEventKey and e.pressed and e.physical_keycode == KEY_ESCAPE:
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	elif e is InputEventKey and e.pressed and not e.echo and e.physical_keycode == KEY_E:
 		if is_instance_valid(цель) and цель.has_meta("interact_kind"):
 			get_tree().current_scene.interact(цель.get_meta("interact_kind"), self)
@@ -111,7 +109,7 @@ func _смотрю() -> void:
 	var захват := Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
 	прицел.visible = захват
 	if not захват:
-		подсказка.text = "Клик · взгляд     WASD · ходьба     E · действие"
+		подсказка.text = "Клик · взгляд     WASD · ходьба     E · действие     Esc · меню"
 	elif is_instance_valid(цель) and цель.has_meta("label"):
 		подсказка.text = цель.get_meta("label")
 	else:

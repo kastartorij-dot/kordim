@@ -21,6 +21,7 @@ func setup(player: CharacterBody3D, hearth_position: Vector3) -> void:
 	last_position = listener.global_position
 	wind_player = AudioStreamPlayer.new()
 	wind_player.name = "Ветер"
+	wind_player.process_mode = Node.PROCESS_MODE_ALWAYS
 	wind_player.stream = WIND
 	wind_player.volume_db = -21.0
 	add_child(wind_player)
@@ -35,6 +36,7 @@ func setup(player: CharacterBody3D, hearth_position: Vector3) -> void:
 func _sound(title: String, data: AudioStream, at: Vector3, volume: float, reach: float) -> AudioStreamPlayer3D:
 	var audio := AudioStreamPlayer3D.new()
 	audio.name = title
+	audio.process_mode = Node.PROCESS_MODE_ALWAYS
 	audio.stream = data
 	audio.volume_db = volume
 	audio.max_distance = reach

@@ -33,6 +33,9 @@ func _ready() -> void:
 	else:
 		игрок.position = Vector3(6.45, terrain.height_at(6.45, 7.80)+.055, 7.80)
 		игрок.rotation.y = deg_to_rad(50)
+	var меню := preload("res://scripts/pause_menu.gd").new()
+	меню.name = "Меню_паузы"
+	add_child(меню)
 	if DisplayServer.get_name() != "headless":
 		var звуки := preload("res://scripts/ambience.gd").new()
 		звуки.name = "Звуки_Норы"
