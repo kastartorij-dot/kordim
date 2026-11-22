@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Интерактивный чертёж Норы: комната, четыре фасада и участок до ручья.">
+  <title>Нора — план сруба и участка</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="plan.js" defer></script>
+</head>
+<body>
+  <header class="masthead">
+    <div class="shell masthead-inner">
+      <a class="wordmark" href="#top"><span class="mark" aria-hidden="true">◇</span> Кордим <span> / </span> Атлас мест</a>
+      <a href="#sources">Источники</a>
+    </div>
+  </header>
+  <main class="shell" id="top">
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Лес между Портом Теней и Ручейным</p>
+        <h1>Нора</h1>
+        <p class="intro">Охотничий сруб Арна. Одна комната, поляна над ручьём и коновязь, скрытая от тропы.</p>
+        <ul class="facts" aria-label="О месте">
+          <li>≈ 9 × 7 м</li>
+          <li>1 этаж и погреб</li>
+          <li>1026 год</li>
+        </ul>
+      </div>
+      <figure class="hero-image">
+        <img src="../Документы/Референсы/01-exterior-front-left.png" alt="Старый бревенчатый сруб на лесной поляне, с мхом на крыше и каменной трубой">
+        <figcaption>Референс для Godot</figcaption>
+      </figure>
+    </header>
+
+    <section class="atlas" aria-label="Чертежи Норы">
+      <div class="toolbar">
+        <div class="tabs" role="tablist" aria-label="Выбрать чертёж">
+          <button type="button" id="tab-room" role="tab" aria-controls="drawing-panel" aria-selected="true" data-view="room">Помещение</button>
+          <button type="button" id="tab-site" role="tab" aria-controls="drawing-panel" aria-selected="false" tabindex="-1" data-view="site">Участок</button>
+          <button type="button" id="tab-faces" role="tab" aria-controls="drawing-panel" aria-selected="false" tabindex="-1" data-view="faces">Фасады</button>
+        </div>
+        <label class="period">Состояние дома
+          <select id="period">
+            <option value="spring">Первая встреча · весна</option>
+            <option value="autumn" selected>Обжитая Нора · ранняя осень</option>
+            <option value="late">После Ошерска · поздняя осень</option>
+          </select>
+        </label>
+      </div>
+      <div id="drawing-panel" role="tabpanel" aria-labelledby="tab-room" class="workspace">
+        <figure class="board">
+          <div class="board-heading">
+            <div>
+              <p class="eyebrow" id="view-type">Вид сверху</p>
+              <h2 id="view-title">План помещения</h2>
+            </div>
+            <div class="drawing-controls">
+              <label class="overlay" id="overlay-label"><input type="checkbox" id="overlay" checked><span id="overlay-name">Люк и погреб</span></label>
+              <button class="zoom" type="button" aria-controls="drawing" aria-pressed="false">Крупнее</button>
+            </div>
+          </div>
+          <div id="drawing" class="drawing"></div>
+          <figcaption class="board-footer">
+            <span id="caption"></span>
+            <span class="legend"><i></i> Описано в источниках <i></i> Рабочая геометрия</span>
+          </figcaption>
+        </figure>
+        <aside class="inspector" aria-label="Описание объектов на чертеже">
+          <section id="object" aria-live="polite"></section>
+          <section class="object-index" aria-labelledby="index-heading">
+            <h3 id="index-heading">На чертеже</h3>
+            <div id="object-list"></div>
+          </section>
+        </aside>
+      </div>
+      <p class="phase-note" id="phase-note"></p>
+      <noscript>Для интерактивного чертежа нужен JavaScript. Доступны исходные PNG: <a href="../Документы/Референсы/04-plan.png">комната</a>, <a href="../Документы/Референсы/05-elevations.png">фасады</a>, <a href="../Документы/Референсы/06-site.png">участок</a>.</noscript>
+    </section>
+
+    <section class="sources" id="sources" aria-labelledby="sources-title">
+      <div>
+        <p class="eyebrow">Канон и рабочие материалы</p>
+        <h2 id="sources-title">Источники чертежа</h2>
+      </div>
+      <div class="source-grid">
+        <article>
+          <h3>Дом и его обитатели</h3>
+          <p>Запись 24 задаёт размер, назначение и взаимное положение предметов. Запись об Арне описывает повседневный уход за домом. От Ручейного сюда около двух часов пешком, от Порта Теней — два-три часа верхом.</p>
+          <p class="source-links"><a href="../../../Канон/Записи/24-нора-база-героев.md">Запись 24</a><a href="../../../Канон/Записи/38-арн.md">Арн</a><a href="../../../Канон/Записи/15-дороги-и-время-в-пути.md">Дороги</a></p>
+        </article>
+        <article>
+          <h3>Весна и первые лошади</h3>
+          <p>Главы II–IV описывают подход, дверь и первый вечер с одним топчаном. В VI главе герои идут к ивняку за корой, в VII чинят петлю люка. В XI появляется место для двух лошадей у ручья.</p>
+          <p class="source-links"><a href="../../../Проза/nora-arc.md">Как появилась Нора</a></p>
+        </article>
+        <article>
+          <h3>После Ошерска</h3>
+          <p>Последний отрезок пути проходят без телеги. У двери видна новая скоба засова, над топчаном Грейс остаётся пустой крюк. В «Хвате» добавляются табурет у топчана Никто и ведро у порога в дождь.</p>
+          <p class="source-links"><a href="../../../Проза/Ошерская_история.md">Ошерская история</a><a href="../../../Проза/Хват_и_три_ножа.md">Хват и три ножа</a></p>
+        </article>
+        <article>
+          <h3>Размеры для моделирования</h3>
+          <p>Координаты, размеры мебели и проёмов, скаты, отметки склона и расстояния у ручья взяты из рабочих чертежей Godot. Оси X и Z ориентированы по входному фасаду. План использует условный вид предметов сверху.</p>
+          <p class="source-links"><a href="../Документы/Референсы/README.md">Референсы Godot</a><a href="../scripts/build.gd">Геометрия прототипа</a><a href="../../Сайт/Приложение/Данные/places.js">Профиль места</a></p>
+        </article>
+      </div>
+      <details>
+        <summary>Расхождения и открытые места</summary>
+        <p>На авторской картинке снаружи жердь стоит у дома, а на картинке комнаты люк виден перед столом. Запись 24 помещает коновязь у ручья, люк — под столом. В финале «Хвата» очаг описан между героями у топчанов. На чертеже он у левой стены согласно записи 24.</p>
+        <p>Первый топчан описан у стены, без точного места. Весенний чертёж показывает его у правой стены условно. Стороны света, точные размеры погреба и положение дороги, где оставили телегу, открыты. В VII главе Арн стреляет по чурке у края поляны, а его шесть силков образуют кольцо примерно в получасе ходьбы от дома. Положение чурки в тексте открыто, силки лежат за пределами плана. Конюшня, второй выход и сигнализация остаются планами в записи 24. «Новый арбалет» находится на стадии чернового плана.</p>
+        <p class="source-links"><a href="../../Сайт/Изображения/Места/nora-exterior.png">Авторский референс снаружи</a><a href="../../Сайт/Изображения/Места/nora-plan.png">Авторский референс комнаты</a><a href="../../../Черновики/Арка_Новый_арбалет_скелет.md">Новый арбалет</a></p>
+      </details>
+    </section>
+  </main>
+  <footer class="footer shell"><span>Кордим · Нора</span><a href="#top">К плану</a></footer>
+</body>
+</html>
