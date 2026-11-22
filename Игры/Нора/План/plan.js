@@ -1,3 +1,4 @@
+const layout = globalThis.NORA_LAYOUT;
 const sources = {
   canon: ['Запись 24', '../../../Канон/Записи/24-нора-база-героев.md'],
   origin: ['Как появилась Нора', '../../../Проза/nora-arc.md'],
@@ -14,7 +15,7 @@ const phases = {
 
 const viewSpecs = {
   room: {
-    kind: 'Вид сверху', title: 'План помещения', overlay: 'Люк и погреб',
+    kind: 'Вид сверху', title: 'План помещения', overlay: 'Контур погреба',
     caption: 'Масштабная сетка 1 м · фасад внизу',
   },
   site: {
@@ -56,40 +57,43 @@ function roomEntries() {
       isLate ? 'return' : 'origin'),
     entry('hearth', 'Каменный очаг', 'Запись 24',
       'Стоит у левой стены. Котелок висит на цепи, над очагом на крюках вялится зайчатина. Труба выходит через передний скат ближе к левому торцу.',
-      'Пятно очага около 0,95 × 1,70 м. Труба привязана к тому же узлу.', 'canon'),
+      'Пятно очага около 1,23 × 1,85 м. Труба привязана к тому же узлу.', 'canon'),
     entry('table', 'Общий стол', 'Запись 24',
       isSpring ? 'Тяжёлый стол стоит посреди комнаты. На него кладут арбалет в рогоже, инструмент и огарок.' :
         'Тяжёлый прямоугольный стол с двумя лавками. За ним едят, разбирают привезённое и чинят снаряжение.',
-      'Столешница 1,90 × 0,90 м, лавки по 1,70 × 0,28 м.', isSpring ? 'origin' : 'canon'),
+      'Столешница 2,14 × 0,99 м, лавки по 1,90 × 0,31 м.', isSpring ? 'origin' : 'canon'),
     entry('cellar', 'Люк в погреб', isSpring ? 'Как появилась Нора' : 'Запись 24',
       isSpring ? 'Петля сломана, крышка подпёрта поленом. Никто чинит петлю в главе VII.' :
-        'Кованое кольцо в крышке люка под общим столом. В погребе держат соль, железо и запасы на несколько недель.',
-      'Крышка 0,80 × 0,80 м. Для полного открытия в модели стол нужно сдвинуть. Размеры самого погреба открыты.',
+        'Кованое кольцо в крышке люка. Он перед столом и левее, в свободном полу между входом и очагом. В погребе держат соль, железо и запасы на несколько недель.',
+      'Крышка 1,02 × 0,92 м. Петля с левой стороны, проход для спуска перед столом. Размеры самого погреба рабочие.',
       isSpring ? 'origin' : 'canon'),
   ];
   if (!isSpring) {
     objects.push(
-      entry('workbench', 'Стол Никто', 'Запись 24',
-        'Маленький рабочий стол за очагом, в дальнем левом углу. Здесь склянки, мешочки с порошками и огарок.',
-        'Стол 1,40 × 0,60 м. Узкая полка со склянками показана над столом по прототипу.', 'canon'),
+      entry('workbench', 'Верстак', 'Запись 24',
+        'Тяжёлый верстак с пилой, деревянными заготовками и инструментом вдоль левой стены за очагом.',
+        'Столешница 0,82 × 1,66 м. Над ней полки и подвесы по концепту.', 'canon'),
+      entry('alchemy', 'Алхимический стол', 'Запись 24',
+        'Отдельный низкий стол Никто у входной стены слева. На нём склянки, мешочки с порошками и огарок.',
+        'Столешница 1,44 × 0,67 м.', 'canon'),
       entry('grace', 'Топчан Грейс', isLate ? 'После Ошерска' : 'Запись 24',
         isLate ? 'Крюк над топчаном пуст. Оборванный ремень Грейс положила в сундук.' :
           'Один из двух топчанов в дальнем правом углу. Арбалет Грейс висит на крюке над изголовьем.',
-        'Топчан 0,85 × 1,90 м. Изголовье к задней стене.', isLate ? 'return' : 'canon'),
+        'Топчан 0,88 × 2,06 м. Стоит вдоль задней стены, изголовьем к углу.', isLate ? 'return' : 'canon'),
       entry('nikto', 'Топчан Никто', isLate ? 'Хват и три ножа' : 'Запись 24',
         isLate ? 'У изголовья ставят табурет. На нём лежат перевязи, до которых Никто может дотянуться с топчана.' :
           'Второй топчан в дальнем правом углу. Между двумя топчанами стоит сундук.',
-        'Топчан 0,85 × 1,90 м. Положение табурета условное.', isLate ? 'hvat' : 'canon'),
+        'Топчан 0,88 × 2,04 м. Стоит вдоль торца, под прямым углом к топчану Грейс. Положение табурета условное.', isLate ? 'hvat' : 'canon'),
       entry('chest', 'Сундук', 'Запись 24',
         'Стоит между топчанами. В нём Никто хранит два кожаных рулона для ножей.',
-        'Сундук 0,75 × 0,45 м.', 'canon'),
+        'Сундук 0,78 × 0,48 м. Выдвинут к центру, крышка доступна из комнаты.', 'canon'),
     );
   }
   objects.push(entry('arn', isSpring ? 'Единственный топчан' : 'Угол Арна', isSpring ? 'Как появилась Нора' : 'Запись 24',
     isSpring ? 'Один топчан у стены, застеленный шкурами. При первой встрече Арн уступает его раненой Грейс.' :
       'У правой стены шерстяная занавеска отделяет узкий топчан Арна. Над ним полка. В остальной комнате перегородок нет.',
     isSpring ? 'Точное место первого топчана не задано. Положение и габарит показаны по поздней планировке условно.' :
-      'Топчан 0,75 × 1,80 м. Занавеска около 1,9 м длиной, проход вокруг края.', isSpring ? 'origin' : 'canon'));
+      'Топчан 0,85 × 1,85 м. Две ветви занавески на деревянных стойках, проход между полотнами со стороны комнаты.', isSpring ? 'origin' : 'canon'));
   return objects;
 }
 
@@ -192,17 +196,23 @@ function dimension(x1, y1, x2, y2, name) {
 }
 
 function drawRoom(objects) {
+  const room = layout.room;
   const x = m => 400 + m * 66;
-  const z = m => 290 + m * 66;
-  const box = (cx, cz, w, d, cls, attrs) => rect(x(cx - w / 2), z(cz - d / 2), w * 66, d * 66, cls, attrs);
+  const z = m => 289 + m * 66;
+  const box = ([cx, cz, w, d], cls = '', attrs = '') => rect(x(cx - w / 2), z(cz - d / 2), w * 66, d * 66, cls, attrs);
   const edge = (x1, z1, x2, z2, cls, attrs) => line(x(x1), z(z1), x(x2), z(z2), cls, attrs);
   const dot = (id, mx, mz) => badge(id, x(mx), z(mz), objects);
-  const bed = (cx, cz, w, d) => [
-    box(cx, cz, w, d, 'furniture', 'rx="2"'),
-    box(cx, cz + .13, w - .12, d - .36, 'bedspread', 'rx="4"'),
-    box(cx, cz - d / 2 + .22, w - .18, .29, 'bedspread', 'rx="5" style="fill:#b39d7b"'),
-    edge(cx - w / 2 + .13, cz + .31, cx + w / 2 - .13, cz + .31, 'fine known', 'opacity=".48"'),
-  ].join('');
+  const select = (id, [mx,mz,w,d]) => outline(id, box([mx,mz,w+.10,d+.10]));
+  const obj = (id, position, shape, mark = position) => shape + select(id, position) + dot(id, mark[0], mark[1]);
+  const bench = position => box(position, 'furniture', 'rx="2"');
+  const bed = ([mx,mz,w,d], horizontal = false) => {
+    const pillow = horizontal ? [mx+w/2-.24,mz,.29,d-.18] : [mx,mz-d/2+.24,w-.18,.29];
+    const furs = horizontal ? [mx-.11,mz,w-.37,d-.11] : [mx,mz+.10,w-.11,d-.37];
+    return box([mx,mz,w,d],'furniture','rx="2"') +
+      box(furs,'bedspread','rx="4"') +
+      box(furs,'','fill="url(#fur-weave)" rx="4"') +
+      box(pillow,'bedspread','rx="4" style="fill:#b9a88c"');
+  };
   const walls = [
     [-4.5,-3.5,2.2,-3.5], [3,-3.5,4.5,-3.5], [-4.5,-3.5,-4.5,3.5],
     [4.5,-3.5,4.5,-1.6], [4.5,-.9,4.5,3.5], [-4.5,3.5,-2.4,3.5],
@@ -216,92 +226,100 @@ function drawRoom(objects) {
       edge(a-.38,3.67,a,3.67,'fine known'), edge(b,3.67,b+.38,3.67,'fine known'),
     ]),
   ].join('');
-  const hatch = overlays.room ? [
-    box(.1,.05,.8,.8,'working','fill="#2c3430" fill-opacity=".65" stroke-width="2"'),
-    circle(x(.1),z(.29),4,'fill="none" stroke="#c9d6bd" stroke-width="1.5"'),
-    edge(-.27,-.31,.47,-.31,'working fine'),
-    path(`M${x(-.30)} ${z(.26)}L${x(-1.05)} ${z(.52)}H${x(-1.42)}`,'working fine'),
-    label(x(-1.49),z(.58),'Люк под столом','note','end'),
-  ].join('') : '';
-  const livedIn = period === 'spring' ? '' : [
-    box(-3.5,-3,1.4,.6,'furniture'),
-    box(-3.49,-3.23,1.27,.17,'furniture','style="fill:#393426"'),
-    ...[-3.96,-3.77,-3.58].map(mx => circle(x(mx),z(-2.97),4,'fill="#92a99d" stroke="#b6c3b5"')),
-    ...[-3.38,-3.19].map(mx => circle(x(mx),z(-2.97),5,'fill="#9b8562"')),
-    circle(x(-3.05),z(-2.85),3,'fill="#f1d19a"'),
-    bed(1.4,-2.45,.85,1.9), bed(3.7,-2.45,.85,1.9),
-    box(2.55,-3,.75,.45,'furniture','style="fill:#624b35"'),
-    edge(2.22,-3.04,2.88,-3.04,'fine known'),
-    circle(x(2.55),z(-2.92),2,'fill="#d5af78"'),
-    period === 'late'
-      ? path(`M${x(1.4)} ${z(-3.40)}v8q0 5 5 4`,'fine known')
-      : edge(1.1,-3.36,1.7,-3.36,'fine known') + edge(1.4,-3.43,1.4,-3.17,'fine known'),
-    edge(3.4,.05,3.4,1.95,'working fine'),
-    path(`M${x(3.4)} ${z(.05)}${Array.from({length:12}, (_, i) => `l${i % 2 ? -3 : 3} 10`).join('')}`,'fine known','stroke-width="2"'),
-    box(4.25,1.3,.30,1.0,'working','fill="#625238"'),
-    outline('workbench',box(-3.5,-3,1.52,.73,'')),
-    outline('grace',box(1.4,-2.45,.98,2.0,'')),
-    outline('nikto',box(3.7,-2.45,.98,2.0,'')),
-    outline('chest',box(2.55,-3,.9,.62,'')),
-    edge(-3.5,-2.7,-3.5,-2.24,'callout-line'),
-    edge(1.4,-1.5,1.4,-1.14,'callout-line'),
-    edge(3.7,-1.5,3.7,-1.14,'callout-line'),
-    dot('workbench',-3.5,-2.18), dot('grace',1.4,-1.07),
-    dot('nikto',3.7,-1.07), dot('chest',2.55,-3),
+  const [hx,hz,hw,hd] = room.hatch;
+  const hatch = obj('cellar', room.hatch, box(room.hatch,'furniture','fill="url(#lid)"') +
+    box(room.hatch,'','fill="url(#lid)" stroke="#e1bb83" stroke-width="1"') +
+    edge(hx-hw/2+.08,hz-hd/2,hx-hw/2+.08,hz+hd/2,'fine known') +
+    circle(x(hx+.31),z(hz),4,'fill="none" stroke="#ecd5aa" stroke-width="1.5"'),
+    [hx,hz-.67]);
+  const [fx,fz,fw,fd] = room.hearth;
+  const fireplace = obj('hearth', room.hearth, box(room.hearth,'stone') +
+    box(room.hearth,'','fill="url(#masonry)"') +
+    box([fx+.22,fz,fw-.42,fd-.53],'','fill="#382b22"') +
+    circle(x(fx+.23),z(fz),18,'fill="#b7713e"') +
+    circle(x(fx+.24),z(fz),9,'fill="#f0bf75"') +
+    edge(fx+fw/2,fz,fx+fw/2+.31,fz,'callout-line'),[fx+fw/2+.47,fz]);
+  const tableSetting = [
+    ...[[-.67,-.22],[-.44,.18],[.52,.25],[.78,-.14]].map(([mx,mz],i) =>
+      circle(x(mx),z(mz),i % 2 ? 5 : 7,'fill="#9e6b45" stroke="#c89e70"')),
+    circle(x(.28),z(.01),4,'fill="#f0c086"'),
   ].join('');
+  const table = room.benches.map(bench).join('') +
+    obj('table',room.table,box(room.table,'furniture','rx="2"') +
+      edge(-.92,-.19,1.11,-.19,'fine known','opacity=".34"') +
+      edge(-.92,.20,1.11,.20,'fine known','opacity=".34"') + tableSetting);
+  const [wx,wz] = room.workbench;
+  const [ax,az] = room.alchemy;
+  const workbench = obj('workbench',room.workbench,box(room.workbench,'furniture') +
+    box([wx-.22,wz-.04,.18,1.47],'furniture','style="fill:#3e3527"') +
+    box([wx+.08,wz-.46,.32,.28],'furniture','style="fill:#886f4c"') +
+    edge(wx+.01,wz-.20,wx+.19,wz+.27,'fine known','style="stroke-width:3"') +
+    box([wx+.26,wz+.53,.24,.26],'stone'),[wx+.70,wz]);
+  const alchemy = obj('alchemy',room.alchemy,box(room.alchemy,'furniture') +
+    [[-.42,-.09,5],[-.19,.12,6],[.05,-.11,4],[.27,.11,5],[.51,-.04,3]].map(([dx,dz,r]) => circle(x(ax+dx),z(az+dz),r,'fill="#b8bba1" stroke="#5a5948"')).join(''),[ax,az-.63]);
+  const { x:cx, back, front, end, openFrom, openTo } = room.curtain;
+  const curtain = (x1,z1,x2,z2) => edge(x1,z1,x2,z2,'fine known','style="stroke-width:6;opacity:.7"') +
+    edge(x1,z1,x2,z2,'fine','stroke="#373028" stroke-dasharray="1 5"');
+  const alcove = [
+    edge(cx,back,cx,front,'working fine'),
+    curtain(cx,back,end,back), curtain(cx,back,cx,openFrom), curtain(cx,openTo,cx,front),
+    ...[[cx,back],[cx,front],[end,back]].map(([mx,mz]) => box([mx,mz,.13,.13],'furniture')),
+    box([4.23,1.33,.23,.74],'working','fill="#6b5336"'),
+  ].join('');
+  const [gx,gz,gw,gd] = room.grace;
+  const hook = path(`M${x(gx+.29)} ${z(gz-gd/2-.05)}v5q0 4 5 3`,'fine known');
+  const roomDetails = period === 'spring' ? '' : [
+    workbench, alchemy,
+    obj('grace',room.grace,bed(room.grace,true) + hook + (period === 'late' ? '' :
+      edge(gx-.24,gz-gd/2-.05,gx+.47,gz-gd/2-.05,'fine known','style="stroke-width:3"') +
+      edge(gx+.26,gz-gd/2-.18,gx+.26,gz-gd/2+.14,'fine known')),[gx-.30,gz+.67]),
+    obj('nikto',room.nikto,bed(room.nikto),[3.91,-1.30]),
+    obj('chest',room.chest,box(room.chest,'furniture','rx="3" style="fill:#624b35"') +
+      box([2.85,-1.79,.63,.30],'','fill="url(#lid)"') +
+      edge(2.80,-1.55,2.90,-1.55,'fine known')),
+    alcove,
+  ].join('');
+  const cellarFootprint = overlays.room
+    ? box(room.cellar,'working','fill="none" stroke-opacity=".74"') +
+      edge(hx-.34,hz-.32,hx-.34,hz+.32,'fine working') +
+      [-.22,0,.22].map(d => edge(hx-.44,hz+d,hx-.30,hz+d,'fine working')).join('') +
+      label(x(hx-.43),z(2.47),'Погреб внизу','note')
+    : '';
+  const arn = obj('arn',room.arn,bed(room.arn),period === 'spring' ? [3.89,1.48] : [3.31,1.46]);
 
   return svg(`
     <defs>
-      <pattern id="room-grid" width="66" height="66" patternUnits="userSpaceOnUse" x="${x(0)}" y="${z(0)}"><path d="M66 0H0V66" fill="none" stroke="#66715d" opacity=".36"/></pattern>
-      <pattern id="floorboards" width="93" height="13" patternUnits="userSpaceOnUse"><path d="M0 12.5h93 M24 0v12 M68 12v1" fill="none" stroke="#766349" opacity=".34"/></pattern>
-      <pattern id="masonry" width="19" height="18" patternUnits="userSpaceOnUse"><path d="M0 1h19 M0 9h19 M5 1v8 M14 9v9" fill="none" stroke="#b4ab97" opacity=".42"/></pattern>
+      <pattern id="room-grid" width="66" height="66" patternUnits="userSpaceOnUse" x="${x(0)}" y="${z(0)}"><path d="M66 0H0V66" fill="none" stroke="#66715d" opacity=".35"/></pattern>
+      <pattern id="floorboards" width="103" height="16" patternUnits="userSpaceOnUse"><path d="M0 15.5h103 M26 0v15 M64 15v1" fill="none" stroke="#9a7953" opacity=".33"/></pattern>
+      <pattern id="masonry" width="19" height="18" patternUnits="userSpaceOnUse"><path d="M0 1h19 M0 9h19 M5 1v8 M14 9v9" fill="none" stroke="#b4ab97" opacity=".59"/></pattern>
+      <pattern id="lid" width="12" height="45" patternUnits="userSpaceOnUse"><rect width="12" height="45" fill="#624e36"/><path d="M1 0v45" stroke="#a58a65"/></pattern>
+      <pattern id="fur-weave" width="13" height="11" patternUnits="userSpaceOnUse"><path d="M3 4l3 1m3 3l2 1" stroke="#be9d71" opacity=".5"/></pattern>
     </defs>
     ${rect(22,16,756,568,'','fill="url(#room-grid)" opacity=".45"')}
-    ${box(0,0,9,7,'','fill="#373326"')}
-    ${box(0,0,9,7,'','fill="url(#floorboards)"')}
-    ${box(0,0,9,7,'','fill="url(#room-grid)"')}
+    ${box([0,0,9,7],'','fill="#403628"')}
+    ${box([0,0,9,7],'','fill="url(#floorboards)"')}
+    ${box([0,0,9,7],'','fill="url(#room-grid)"')}
     ${dimension(x(-4.5),32,x(4.5),32,'≈ 9,00 м')}
     ${dimension(68,z(-3.5),68,z(3.5),'≈ 7,00 м')}
     ${edge(-4.5,-3.96,-4.5,-3.56,'measure')}${edge(4.5,-3.96,4.5,-3.56,'measure')}
     ${line(66,z(-3.5),x(-4.6),z(-3.5),'measure')}${line(66,z(3.5),x(-4.6),z(3.5),'measure')}
-    ${walls} ${windows}
+    ${cellarFootprint} ${walls} ${windows}
     ${edge(.9,3.5,.9,2.5,'fine known','stroke-width="3"')}
     ${path(`M${x(.9)} ${z(2.5)}A66 66 0 0 1 ${x(1.9)} ${z(3.5)}`,'fine working')}
-    ${box(1.4,3.76,1.1,.27,'stone')}
-    ${box(-1.8,3.98,1.6,.32,'furniture','rx="6"')}
+    ${box([1.4,3.76,1.1,.27],'stone')}
+    ${box([-1.8,3.98,1.6,.32],'furniture','rx="6"')}
     ${circle(x(-3.1),z(4),19,'class="furniture"')}
     ${circle(x(-3.1),z(4),13,'fill="none" stroke="#a6865c"')}
-    ${box(4.87,.85,.50,1.5,'furniture')}
+    ${box([4.89,.85,.50,1.5],'furniture')}
     ${[-.54,-.27,0,.27,.54].map(d => edge(4.65,.85+d,5.09,.85+d,'fine known')).join('')}
-    ${box(-4,.9,.95,1.7,'stone')}
-    ${box(-4,.9,.95,1.7,'','fill="url(#masonry)"')}
-    ${box(-3.93,.9,.59,1.08,'','fill="#382d23"')}
-    ${circle(x(-3.90),z(.9),14,'fill="#b06e3b" opacity=".76"')}
-    ${circle(x(-3.90),z(.9),8,'fill="#e9b977"')}
-    ${box(0,-.8,1.7,.28,'furniture','rx="2"')}
-    ${box(0,.8,1.7,.28,'furniture','rx="2"')}
-    ${box(0,0,1.9,.9,'furniture','rx="2"')}
-    ${edge(-.86,-.18,.86,-.18,'fine known','opacity=".35"')}
-    ${edge(-.86,.17,.86,.17,'fine known','opacity=".35"')}
-    ${hatch}
-    ${bed(4,1.3,.75,1.8)}
-    ${livedIn}
-    ${period === 'late' ? box(3.08,-2.94,.34,.34,'furniture') + circle(x(2.33),z(3.07),8,'class="furniture"') : ''}
-    ${outline('door',box(1.4,3.39,1.2,.35,''))}
-    ${outline('hearth',box(-4,.9,1.03,1.84,''))}
-    ${outline('table',box(0,0,2,1.92,''))}
-    ${overlays.room ? outline('cellar',box(.1,.05,.9,.9,'')) : ''}
-    ${outline('arn',box(4,1.3,.95,1.99,''))}
-    ${edge(-3.51,.9,-3.12,.9,'callout-line')} ${dot('hearth',-2.95,.9)}
-    ${edge(0,-.98,0,-1.19,'callout-line')} ${dot('table',0,-1.35)}
-    ${overlays.room ? dot('cellar',.10,.04) : ''}
-    ${edge(3.4,1.32,3.14,1.32,'callout-line')} ${dot('arn',2.98,1.32)}
-    ${dot('door',1.4,3.91)}
+    ${fireplace} ${table} ${roomDetails} ${arn} ${hatch}
+    ${period === 'late' ? box(room.stool,'furniture') + circle(x(2.33),z(3.07),8,'class="furniture"') : ''}
+    ${select('door',[1.4,3.39,1.2,.35])} ${dot('door',1.4,3.91)}
     ${label(x(1.4),z(4.27),'Вход','note')}
     ${label(x(-1.8),z(4.42),'Лавка и бочка','note')}
-    ${label(747,z(.85),'Дрова','note')}
+    ${label(749,z(.85),'Дрова','note')}
     ${dimension(614,571,680,571,'1 м')}
-  `, 'План единственной комнаты Норы с мебелью и входом');
+  `,'План комнаты Норы с верстаком, отдельным алхимическим столом и свободным люком');
 }
 
 function drawSite(objects) {
@@ -318,11 +336,8 @@ function drawSite(objects) {
     circle(x(mx),z(mz),1.3,'fill="#bea278"'),
   ].join('');
   const clearing = [[-6.5,-4],[-5.2,-6.1],[-2.3,-6.6],[3.6,-5.4],[5.4,-4.4],[6.3,-2.8],[6.8,2.9],[5.4,6.6],[2.8,7.8],[-3.5,6.2],[-6.9,3.1]];
-  const upper = [[-18,-19.9],[-13,-19.5],[-7,-18.8],[-3,-18.15],[2,-18.3],[7,-18.05],[11,-18.85],[15,-19.3],[19,-18.85]];
-  const lower = [[-18,-17.25],[-13,-16.9],[-7,-16.3],[-3,-15.6],[2,-15.9],[7,-15.55],[11,-16.1],[15,-16.75],[19,-16.25]];
-  const trail = [[1.42,3.7],[1.48,5.35],[1.35,7.15],[3.6,8.2],[6.75,7.75],[8.05,5.5],[8.5,1.5],[8.5,-2.6],[8.15,-5.7],[7.25,-7.15],[4.95,-9],[2.1,-10.05],[-.2,-11.25],[-2.05,-13.25],[-3,-15.45]];
+  const { upper, lower, trail, screen, access } = layout.site;
   const dryGround = [[5.7,-14.65],[8.2,-14.85],[10.6,-14.45],[11.3,-12.7],[10.8,-10.4],[8.7,-10.2],[6.3,-10.55],[5.55,-12.5]];
-  const screen = [[5,-10.15],[3.55,-10.7],[3.25,-11.8],[3.8,-12.9],[4.6,-13.65],[4.7,-14.6],[5.3,-15],[11.15,-15.1],[12,-13.45],[11.75,-11.3]];
   const rows = [[-6.1,'−0,50'],[-8.3,'−1,00'],[-10.5,'−1,50'],[-13.15,'−2,00']];
   const contour = h => [[-18,h+1.3],[-13,h+.35],[-7,h-.3],[-2,h-1.2],[3,h-.7],[7,h+.4],[12,h+1.8],[19,h+1.2]];
   let seed = 1026;
@@ -342,11 +357,11 @@ function drawSite(objects) {
   const stony = [[-3,-15.95],[-3.28,-16.54],[-2.91,-17.24],[-2.63,-17.85],[-.7,10.45],[5.65,9],[-4.15,-6.2],[11.6,-6.7]];
   const rail = period === 'spring' ? '' : [
     polygon(dryGround, 'fill="#5a513b" stroke="#b6a680" stroke-width="1.4" stroke-dasharray="5 3"'),
-    track([[4.95,-9],[5.85,-9.8],[6.25,-10.55]],'fine working'),
+    track(access,'fine working'),
     screen.map(([mx,mz]) => fir(mx,mz,.55,'#60704b','#a2ae80')).join(''),
     track([[3.65,-12.4],[4,-12.75],[4.37,-12.91]],'fine working','stroke-width="3"'),
     fir(7,-14,.64,'#4b5e41','#bac59e'), fir(9.6,-14.2,.64,'#4b5e41','#bac59e'),
-    track([[7,-14],[9.6,-14.2]],'fine known','style="stroke-width:3.5"'),
+    track(layout.site.rail,'fine known','style="stroke-width:3.5"'),
     groundRect(7.35,-13.82,.78,2.40,'working','fill="none"'),
     groundRect(8.72,-13.82,.78,2.40,'working','fill="none"'),
     track([[10.6,-13.9],[12.0,-13.0],[13.3,-13.0]],'callout-line'),
@@ -381,7 +396,7 @@ function drawSite(objects) {
     ${circle(x(-3.1),z(4),4,'class="furniture"')}
     ${track([[.9,3.5],[1.9,3.5]],'fine known','style="stroke-width:3"')}
     ${groundRect(4.64,.10,.50,1.50,'furniture')}
-    ${track([[-2.7,-5.2],[-.8,-5.2]],'fine known','style="stroke-width:2.8"')}
+    ${track(layout.site.rack,'fine known','style="stroke-width:2.8"')}
     ${track([[-2.7,-4.88],[-.8,-4.88]],'fine known')}
     ${circle(x(-2.7),z(-5.2),2.4,'fill="#d7b480"')}
     ${circle(x(-.8),z(-5.2),2.4,'fill="#d7b480"')}

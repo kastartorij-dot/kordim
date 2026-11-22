@@ -7,6 +7,7 @@ const БЕГ := 5.0
 const ПРЫЖОК := 3.6
 var камера: Camera3D
 var подсказка: Label
+var цель: CollisionObject3D
 var g: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 func _ready() -> void:
@@ -34,7 +35,7 @@ func _ready() -> void:
 	подсказка.add_theme_color_override("font_shadow_color", Color.BLACK)
 	подсказка.add_theme_constant_override("shadow_offset_x", 2)
 	подсказка.add_theme_constant_override("shadow_offset_y", 2)
-	подсказка.text = "Клик — управлять мышью. WASD — идти, Shift — бегом, Esc — отпустить мышь."
+	подсказка.text = "Клик — управлять мышью. WASD — идти, Shift — бегом, E — люк или лестница, Esc — отпустить мышь."
 	слой.add_child(подсказка)
 	var прицел := Label.new()
 	прицел.text = "·"
@@ -47,6 +48,9 @@ func _unhandled_input(e: InputEvent) -> void:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	elif e is InputEventKey and e.pressed and e.physical_keycode == KEY_ESCAPE:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	elif e is InputEventKey and e.pressed and not e.echo and e.physical_keycode == KEY_E:
+		if is_instance_valid(цель) and цель.has_meta("interact_kind"):
+			get_tree().current_scene.interact(цель.get_meta("interact_kind"), self)
 	elif e is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-e.relative.x * 0.0025)
 		камера.rotation.x = clamp(камера.rotation.x - e.relative.y * 0.0025, -1.45, 1.45)
@@ -74,7 +78,8 @@ func _смотрю() -> void:
 	var q := PhysicsRayQueryParameters3D.create(от, от - камера.global_basis.z * 3.0)
 	q.exclude = [get_rid()]
 	var hit := get_world_3d().direct_space_state.intersect_ray(q)
-	if hit and hit.collider.has_meta("label"):
-		подсказка.text = hit.collider.get_meta("label")
+	цель = hit.get("collider") as CollisionObject3D
+	if is_instance_valid(цель) and цель.has_meta("label"):
+		подсказка.text = цель.get_meta("label")
 	elif Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		подсказка.text = ""
