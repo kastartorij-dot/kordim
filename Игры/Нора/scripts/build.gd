@@ -11,15 +11,13 @@ var открыт := false
 var движение_люка: Tween
 
 var м := {}
-var лесной_генератор := RandomNumberGenerator.new()
 
 func _ready() -> void:
-	лесной_генератор.seed = 1026
 	_материалы_участка()
 	_рельеф()
 	_тропа("Тропа_к_ручью", УЧАСТОК.trail, .37)
 	_тропа("Спуск_к_коновязи", УЧАСТОК.access, .23)
-	_лес()
+	preload("res://scripts/forest.gd").new().populate(self, _высота)
 	_у_ручья()
 	var игрок := CharacterBody3D.new()
 	игрок.name = "Игрок"
@@ -34,7 +32,8 @@ func _ready() -> void:
 		игрок.rotation.y = deg_to_rad(25)
 
 func _process(_delta: float) -> void:
-	огонь.light_energy = 2.45 + .22 * sin(Time.get_ticks_msec() * .013) + randf() * .13
+	var t := Time.get_ticks_msec() * .001
+	огонь.light_energy = 2.28 + .12 * sin(t * 5.1) + .07 * sin(t * 9.4)
 
 func interact(действие: String, игрок: CharacterBody3D) -> void:
 	match действие:
@@ -92,35 +91,24 @@ func _мат(цвет: Color, шероховатость := .9) -> StandardMater
 	return mat
 
 func _материалы_участка() -> void:
-	м.земля = _мат(Color(.60,.46,.30))
-	м.земля.vertex_color_use_as_albedo = true
-	var n := NoiseTexture2D.new()
-	n.seamless = true
-	n.noise = FastNoiseLite.new()
-	n.noise.frequency = .075
-	var градиент := Gradient.new()
-	градиент.set_color(0, Color(.48,.44,.39))
-	градиент.set_color(1, Color(1, .94, .84))
-	n.color_ramp = градиент
-	м.земля.albedo_texture = n
-	м.земля.uv1_triplanar = true
-	м.земля.uv1_scale = Vector3(.47, .47, .47)
+	var soil := ShaderMaterial.new()
+	soil.shader = preload("res://textures/forest_soil.gdshader")
+	м.земля = soil
 	м.кора = _мат(Color(.31,.21,.15))
-	м.хвоя = _мат(Color(.17,.242,.14))
-	м.хвоя2 = _мат(Color(.21,.29,.17))
-	м.куст = _мат(Color(.26,.35,.17))
 	м.камень = _мат(Color(.45,.43,.36))
-	м.тропа = _мат(Color(.36,.27,.18))
 	м.вода = _мат(Color(.24,.41,.43,.84),.12)
 	м.вода.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	м.шкура = _мат(Color(.48,.37,.26))
 
+func _цвет_грунта(x: float, z: float, y: float) -> Color:
+	var влажность := smoothstep(-2.9,-1.1,y)
+	var основной := Color(.35,.375,.35).lerp(Color(.56,.55,.48),влажность)
+	var просвет := .91+.072*sin(x*.82+z*1.37)+.053*cos(z*.77-x*.41)
+	return основной*просвет
+
 func _вершина_грунта(mesh: SurfaceTool, x: float, z: float) -> void:
 	var y := _высота(x,z)
-	var влажность := smoothstep(-2.9,-1.1,y)
-	var основной := Color(.49,.51,.37).lerp(Color(.66,.69,.48),влажность)
-	var t := .90+.07*sin(x*.83+z*1.47)+.06*cos(z*.80-x*.39)
-	mesh.set_color(основной*t)
+	mesh.set_color(_цвет_грунта(x,z,y))
 	mesh.add_vertex(Vector3(x,y,z))
 
 func _рельеф() -> void:
@@ -160,20 +148,36 @@ func _сетка(имя: String, поверхность: SurfaceTool, мат: Ma
 func _тропа(имя: String, точки: Array, полуширина: float) -> void:
 	var поверхность := SurfaceTool.new()
 	поверхность.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var края: Array[Vector3] = []
-	for i in точки.size():
-		var p := Vector2(точки[i][0],точки[i][1])
-		var a: Array = точки[maxi(i-1,0)]
-		var b: Array = точки[mini(i+1,точки.size()-1)]
-		var ход := Vector2(b[0]-a[0],b[1]-a[1]).normalized()
-		var сбоку := Vector2(ход.y,-ход.x)*полуширина
-		for q in [p+сбоку,p-сбоку]:
-			края.append(Vector3(q.x,_высота(q.x,q.y)+.038,q.y))
-	for i in range(0,края.size()-2,2):
-		for j in [i, i+2, i+1, i+1, i+2, i+3]:
-			поверхность.add_vertex(края[j])
+	var центры := PackedVector2Array()
+	for i in range(1,точки.size()):
+		var a := Vector2(точки[i-1][0],точки[i-1][1])
+		var b := Vector2(точки[i][0],точки[i][1])
+		var steps := maxi(1,ceili(a.distance_to(b)/.30))
+		for j in steps:
+			центры.append(a.lerp(b,float(j)/steps))
+	центры.append(Vector2(точки.back()[0],точки.back()[1]))
+	var вершины: Array[Vector3] = []
+	var цвета := PackedColorArray()
+	var ширины := [-1.0,-.64,.64,1.0]
+	for i in центры.size():
+		var p := центры[i]
+		var ход := (центры[mini(i+1,центры.size()-1)]-центры[maxi(i-1,0)]).normalized()
+		var сбоку := Vector2(ход.y,-ход.x)*полуширина*(.95+.13*sin(i*.49)+.08*cos(i*.83))
+		for j in ширины.size():
+			var q: Vector2 = p+сбоку*ширины[j]
+			var высота := _высота(q.x,q.y)
+			var цвет := _цвет_грунта(q.x,q.y,высота)
+			if j==1 or j==2:
+				цвет = цвет.lerp(Color(.69,.62,.49),.59)
+			цвета.append(цвет)
+			вершины.append(Vector3(q.x,высота+.038,q.y))
+	for i in range(0,вершины.size()-4,4):
+		for j in range(i,i+3):
+			for k in [j,j+1,j+4,j+1,j+5,j+4]:
+				поверхность.set_color(цвета[k])
+				поверхность.add_vertex(вершины[k])
 	поверхность.generate_normals()
-	_сетка(имя,поверхность,м.тропа)
+	_сетка(имя,поверхность,м.земля)
 
 func _ствол(p: Vector3, радиус: float, высота: float, мат: Material, крона := false) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
@@ -194,32 +198,6 @@ func _жердь(откуда: Vector3, куда: Vector3, радиус: float) 
 	var узел := _ствол((откуда+куда)/2, радиус, вектор.length(), м.кора)
 	узел.quaternion = Quaternion(Vector3.UP, вектор.normalized())
 	return узел
-
-func _лес() -> void:
-	var деревья: Array[Vector3] = []
-	for i in 200:
-		var x := лесной_генератор.randf_range(-45,45)
-		var z := лесной_генератор.randf_range(-45,45)
-		if (absf(x)<10 and absf(z)<9.3) or (x>-4 and x<13 and z>-17 and z<-8):
-			continue
-		if _высота(x,z)<-2.42:
-			continue
-		деревья.append(_точка([x,z]))
-	for p in УЧАСТОК.rail:
-		деревья.append(_точка(p))
-	for p in деревья:
-		var h := лесной_генератор.randf_range(9,16)
-		var st := _ствол(p+Vector3.UP*h/2,h*.014+.07,h,м.кора)
-		st.create_trimesh_collision()
-		for k in 4:
-			var kh := h*.48*(1.0-k*.15)
-			var ширина := h*.142*(1.0-k*.19)
-			_ствол(p+Vector3.UP*h*(.45+k*.137),ширина,kh,м.хвоя if k%2==0 else м.хвоя2,true)
-	for координаты in УЧАСТОК.screen:
-		var p := _точка(координаты)
-		for i in 3:
-			_ствол(p+Vector3(лесной_генератор.randf_range(-.28,.28),.61+i*.44,лесной_генератор.randf_range(-.28,.28)),
-				.67-i*.081,1.37-i*.14,м.куст,true)
 
 func _у_ручья() -> void:
 	for координаты in [[-3.0,-15.95],[-3.28,-16.54],[-2.91,-17.24],[-2.63,-17.85],[-.7,10.45],[5.65,9.0],[-4.15,-6.2],[11.6,-6.7]]:
