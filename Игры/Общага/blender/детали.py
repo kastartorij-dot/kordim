@@ -304,6 +304,73 @@ def ель_во_дворе(x, y, g, height, trunk, needles):
     bpy.context.collection.objects.link(tree)
 
 
+def жилой_корпус_48(label, footprint, g, top):
+    wall = mat((0.59, 0.565, 0.514), 0.93)
+    base = mat((0.27, 0.235, 0.22), 0.93)
+    red = mat((0.37, 0.102, 0.105), 0.82)
+    frame = mat((0.71, 0.70, 0.66), 0.85)
+    glass = mat((0.17, 0.22, 0.25), 0.44)
+    brown = mat((0.27, 0.22, 0.199), 0.88)
+    _mesh(label + " цоколь", [(footprint, g, g + 2.75)], base)
+    _mesh(label, [(footprint, g + 2.75, top - 2.9)], wall)
+    _mesh(label + " красный этаж", [(footprint, top - 2.9, top)], red,
+          roof=mat((0.24, 0.23, 0.23), 0.94))
+    pts = footprint[:-1] if footprint[0] == footprint[-1] else footprint
+    area = sum(x1*y2-x2*y1 for (x1,y1), (x2,y2) in zip(pts, pts[1:] + pts[:1]))
+    parts = {material: [] for material in (wall, base, red, frame, glass, brown)}
+    for a, b in zip(pts, pts[1:] + pts[:1]):
+        length = math.dist(a, b)
+        if length < 2.3:
+            continue
+        vx, vy = (b[0] - a[0]) / length, (b[1] - a[1]) / length
+        nx, ny = (vy, -vx) if area > 0 else (-vy, vx)
+
+        def panel(material, start, finish, depth, front, bottom, ceiling):
+            q = [(a[0] + vx*t + nx*n, a[1] + vy*t + ny*n)
+                 for t, n in ((start, depth), (finish, depth), (finish, front), (start, front))]
+            parts[material].append((q, bottom, ceiling))
+
+        bays = max(1, round(length / 3.35))
+        for bay in range(bays):
+            center, bay_width = length * (bay + 0.5) / bays, length / bays
+            loggia = bays >= 3 and bay % 3 == 1
+            projection = 0.52 if loggia else 0.07
+            if loggia:
+                panel(wall, center - bay_width*0.47, center + bay_width*0.47,
+                      0, projection, g+2.78, top-2.9)
+                panel(red, center - bay_width*0.47, center + bay_width*0.47,
+                      0, projection, top-2.9, top+0.68)
+            for level in range(10):
+                z = g + 0.86 + (top - g - 0.45) * level / 10
+                span = bay_width * (0.80 if loggia else 0.55)
+                left, right = center - span/2, center + span/2
+                if loggia and 0 < level < 9:
+                    panel(brown, left, right, projection, projection+0.07, z-0.35, z+1.40)
+                panel(frame, left, right, projection+0.07, projection+0.13, z, z+1.18)
+                count = 3 if loggia else 2
+                for pane in range(count):
+                    panel(glass, left + span*pane/count + 0.052, left + span*(pane+1)/count - 0.042,
+                          projection+0.13, projection+0.16, z+0.075, z+1.11)
+                panel(frame, left-0.08, right+0.08, projection, projection+0.20, z-0.05, z+0.025)
+    for material, geometry in parts.items():
+        if geometry:
+            _mesh(label + " детали фасада", geometry, material)
+
+
+def кирпичный_корпус_слева(footprint, g):
+    brick = кладка("кирпич_низкого_корпуса", (0.50, 0.355, 0.25), (0.45, 0.35, 0.26))
+    flashing = mat((0.08, 0.31, 0.33), 0.66)
+    trim = mat((0.43, 0.19, 0.13), 0.92)
+    x1, x2 = min(p[0] for p in footprint), max(p[0] for p in footprint)
+    y1, y2 = min(p[1] for p in footprint), max(p[1] for p in footprint)
+    _mesh("низкий кирпичный корпус", [(footprint, g+0.20, g+3.25)], brick, 0.76)
+    box("бирюзовый свес", x1-0.36, y1-0.23, g+3.06, x2+0.24, y2+0.23, g+3.24, flashing, 0.018, None)
+    box("парапет низкого корпуса", x1, y1, g+3.24, x1+0.27, y2, g+3.66, trim, 0, None)
+    box("колпак низкого корпуса", x1-0.08, y1-0.10, g+3.66, x1+0.35, y2+0.10, g+3.74, flashing, 0.015, None)
+    for y in (y1+0.18, (y1+y2)/2, y2-0.18):
+        box("кирпичная лопатка низкого корпуса", x1-0.12, y-0.16, g+0.2, x1+0.16, y+0.16, g+3.31, trim, 0, None)
+
+
 def двор(g, facade_x):
     """Сквозной проход, зелёная полоса и ворота по панорамам автора."""
     paving = кладка("брусчатка_двора", (0.40, 0.395, 0.37), (0.34, 0.335, 0.31))
@@ -312,7 +379,13 @@ def двор(g, facade_x):
     metal = mat((0.037, 0.12, 0.092), 0.7)
     grass = mat((0.15, 0.24, 0.09), 0.95)
     hedge = mat((0.07, 0.17, 0.045), 0.95)
-    tile = box("покрытие_двора", 6.3, -27.5, g, facade_x - 4.0, 34, g + 0.046, paving, 0, None)
+    left_gate = 65.5
+    tile = box("покрытие_двора", 6.3, -27.5, g, facade_x - 4.0, left_gate, g + 0.046, paving, 0, None)
+    uv_box(tile, tile=0.76)
+    tile = box("брусчатка за левой оградой", 5.7, left_gate, g, 47, 68, g+0.046, paving, 0, None)
+    uv_box(tile, tile=0.76)
+    box("зелёная полоса за левым проездом", -4, 75, g, 49, 85, g+0.045, grass, 0, None)
+    tile = box("тротуар у жилых домов", -4, 74, g, 49, 75.6, g+0.052, paving, 0, None)
     uv_box(tile, tile=0.76)
     approach = box("подход_вдоль_торца", facade_x - 4.0, -27.5, g, 49, -21, g + 0.046, paving, 0, None)
     uv_box(approach, tile=0.76)
@@ -328,13 +401,14 @@ def двор(g, facade_x):
                                   (43.0, (0.40, 0.42, 0.40), 4.4, False)):
         припаркованный_автомобиль(x, -29.35, g+0.04, mat(color, 0.42), length, van)
     box("газон_у_корпуса", facade_x - 4.0, -17, g, facade_x, 28.2, g + 0.10, grass, 0, None)
-    box("бордюр_газона", facade_x - 4.05, -17, g, facade_x - 3.95, 28.2, g + 0.14, curb, 0.005, None)
+    box("газон у низкого корпуса", facade_x - 4.0, 28.2, g, 28.6, left_gate, g+0.092, grass, 0, None)
+    box("бордюр_газона", facade_x - 4.05, -17, g, facade_x - 3.95, left_gate, g + 0.14, curb, 0.005, None)
     for y in (-12, -7, -2, 3, 16, 21, 25):
         x = facade_x - 5.5
         box("вазон", x - 0.54, y - 0.54, g + 0.046, x + 0.54, y + 0.54, g + 0.38, curb, 0.025, None)
         box("земля_вазона", x - 0.44, y - 0.44, g + 0.379, x + 0.44, y + 0.44, g + 0.385, soil, 0, None)
     vegetation = random.Random(23)
-    for y in (*range(-16, 6, 2), *range(12, 27, 2)):
+    for y in (*range(-16, 6, 2), *range(12, 61, 2)):
         for dy in (0.35, 0.91, 1.46):
             x = facade_x - 3.1 + vegetation.uniform(-0.13, 0.13)
             bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=1, location=(x, y+dy, g+0.53))
@@ -352,6 +426,19 @@ def двор(g, facade_x):
     box("цоколь_общежития", 4.90, -21.5, g, 6.29, 33, g+0.50, concrete, 0, None)
     box("первый_этаж_общежития", 4.92, -21.5, g+0.50, 6.22, 33, g+4.20, plaster, 0, None)
     box("облицовка_над_входом", 4.91, -21.5, g+3.65, 6.50, 33, g+4.72, plaster, 0, None)
+    box("крыло_46к1_у_левой_ограды", 1.1, 33, g, 6.19, 59, g+3.56, plaster, 0, None)
+    box("цоколь_левого_крыла", 1.08, 33, g, 6.26, 59.08, g+0.48, concrete, 0, None)
+    for y in range(35, 59, 3):
+        box("окно_левого_крыла", 6.19, y-0.75, g+1.05, 6.24, y+0.75, g+2.66, door_green, 0, None)
+        box("стекло_левого_крыла", 6.24, y-0.65, g+1.15, 6.27, y+0.65, g+2.56, dark_glass, 0, None)
+    facade = [(a, b) for a, b in ((0.5, 3.65), (6.32, 3.65), (6.32, 33), (0.5, 33))]
+    _mesh("корпус 46 к1 над левым двором", [(facade, g+4.72, g+39)], plaster)
+    bands = []
+    for floor in range(1, 12):
+        z = g + 3.2 * floor + 1.9
+        for y in range(5, 33, 3):
+            bands.append(([(6.31,y-1.23), (6.37,y-1.23), (6.37,y+1.23), (6.31,y+1.23)], z, z+1.43))
+    _mesh("бирюзовые ленты окон 46 к1", bands, mat((0.10, 0.29, 0.28), 0.55))
     for y in (-18, -12, -6, 0, 6, 11, 17, 23, 29):
         box("колонна_общежития", 6.20, y-0.24, g, 6.49, y+0.24, g+3.76, concrete, 0, None)
     for y in (-15, -9, -3, 3, 14, 20, 26, 31):
@@ -375,6 +462,8 @@ def двор(g, facade_x):
     лавка(x, entrance_y - 1.15, g + 0.10, -math.pi / 2, bench_green, metal)
     лавка(x, entrance_y + 1.65, g + 0.10, math.pi / 2, bench_green, metal)
     лавка(facade_x - 4.45, entrance_y + 6.3, g + 0.046, 0, bench_wood, metal)
+    лавка(facade_x - 4.45, 30.2, g + 0.046, 0, bench_wood, metal)
+    лавка(facade_x - 4.45, 41.0, g + 0.046, 0, bench_wood, metal)
     bin_yellow = mat((0.61, 0.42, 0.12), 0.9)
     for y in (entrance_y - 2.0, entrance_y + 2.95):
         x = facade_x - 4.1
@@ -383,7 +472,12 @@ def двор(g, facade_x):
 
     fence_x = facade_x - 1.95
     секция_ограды((fence_x, -16), (fence_x, 27), g, 1.05, metal)
-    секция_ограды((6.3, 33), (facade_x, 33), g, 1.55, metal)
+    секция_ограды((6.3, left_gate), (11.7, left_gate), g, 1.55, metal)
+    секция_ограды((12.3, left_gate), (17.4, left_gate), g, 1.55, metal, gate=True)
+    секция_ограды((19.5, left_gate), (28.6, left_gate), g, 1.55, metal)
+    for x, color in ((7.4, (0.51, 0.52, 0.50)), (13.4, (0.17, 0.22, 0.26)),
+                     (23.8, (0.44, 0.46, 0.47)), (33.5, (0.12, 0.14, 0.16))):
+        припаркованный_автомобиль(x, 72.7, g+0.02, mat(color, 0.42))
     # Ворота со стороны парковки и отдельная калитка на углу. За углом
     # ограда тянется вдоль прохода к Наличной, по обеим сторонам дорожки.
     post_brick = кладка("кирпич_столбов_двора", (0.57, 0.38, 0.25), (0.47, 0.35, 0.25))
@@ -397,7 +491,8 @@ def двор(g, facade_x):
     секция_ограды((48.5, -26.95), (48.5, -23.55), g, 1.57, metal, gate=True)
     секция_ограды((48.5, -22.15), (48.5, -20.98), g, 1.57, metal)
     for x, y in ((14, right_edge), (19, right_edge), (21, right_edge),
-                 (48.5, -26.95), (48.5, -23.55), (48.5, -22.15)):
+                 (48.5, -26.95), (48.5, -23.55), (48.5, -22.15),
+                 (12, left_gate), (17.7, left_gate), (19.2, left_gate)):
         post = box("кирпичный_столб_ворот", x - 0.29, y - 0.29, g, x + 0.29, y + 0.29, g + 1.88, post_brick, 0, None)
         uv_box(post, tile=0.76)
         box("основание_колпака", x - 0.35, y - 0.35, g + 1.88, x + 0.35, y + 0.35, g + 2.0, metal, 0.015, None)
@@ -411,7 +506,8 @@ def двор(g, facade_x):
     needles = mat((0.075, 0.17, 0.10), 0.95)
     for x, y, height in ((facade_x-2.2, -13.2, 6.4), (facade_x-2.2, -8.8, 5.0),
                          (facade_x-2.2, 14.5, 4.8), (facade_x+3.5, -18.9, 5.8),
-                         (facade_x+7.7, -18.7, 6.2), (facade_x+12, -18.4, 5.4)):
+                         (facade_x+7.7, -18.7, 6.2), (facade_x+12, -18.4, 5.4),
+                         (31, 32.7, 6.1), (34, 35.2, 7.2), (25.1, 62.1, 7.0)):
         ель_во_дворе(x, y, g, height, trunk, needles)
 
 
@@ -432,9 +528,15 @@ def вид(L, W, вечер=False):
         if is_own_building(bid, b): continue
         pts = [to_room(x, y, L, W) for x, y in b["p"]]
         cx = sum(p[0] for p in pts) / len(pts); cy = sum(p[1] for p in pts) / len(pts)
-        if cx < L + 2 or math.hypot(cx - L, cy - W / 2) > VIEW["range_m"]: continue
         z1, z2 = building_span(bid, t)
         if z2 <= z1: continue
+        if bid in {"16959843", "16959623"}:
+            жилой_корпус_48(t["addr:housenumber"], pts, g, z2)
+            continue
+        if bid == "85426983":
+            кирпичный_корпус_слева(pts, g)
+            continue
+        if cx < L + 2 or math.hypot(cx - L, cy - W / 2) > VIEW["range_m"]: continue
         if bid == "85426979":
             brick_k2 = кладка("кирпич_46к2", (0.51, 0.36, 0.26), (0.44, 0.35, 0.27))
             _mesh("корпус_46к2", [(pts, z1, z2)], brick_k2, 0.76, mat((0.20, 0.23, 0.23), 0.9))
