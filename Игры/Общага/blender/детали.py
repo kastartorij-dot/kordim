@@ -56,14 +56,16 @@ def микрофон(x, y, z):
     c = cyl("микрофон", 0.022, z + 0.29, z + 0.37, x + 0.05, y + 0.08, mat((0.15, 0.15, 0.16), 0.3), 24)
     c.rotation_euler = (math.radians(-40), 0, 0)
 
-def у_стола(L, W):
+def у_стола(ширина):
     # стол стоит в (1.875, 0) повёрнут на 180: локальные x → X = 1.875 − x, y → Y = −y
     box("коврик_мыши", 1.875 - 0.32, 0.27, 0.75, 1.875 - 0.04, 0.5, 0.753, mat((0.25, 0.45, 0.12), 0.7), 0.003, None)
-    микрофон(1.875 + 0.5, 0.25, 0.75)
-    # Уточнение автора: горизонтально за столом и дальше к кровати, без подъёма за монитором.
+    микрофон(1.875 + 0.41, 0.25, 0.75)
+    # Лента на передней и задней кромках, с продолжением к щиту кровати.
     red = emit_mat("лента_стол", (1.0, 0.08, 0.15), 5)
-    box("лента_стол", 1.32, 0.002, 0.8, 2.42, 0.01, 0.808, red, 0, None)
-    box("лента_к_кровати", 2.42, 0.002, 0.8, 2.65, 0.01, 0.808, red, 0, None)
+    left, right = 1.875 - ширина / 2, 1.875 + ширина / 2
+    box("лента_стол_перед", left, 0.620, 0.731, right, 0.627, 0.740, red, 0, None)
+    box("лента_стол_сзади", left, 0.002, 0.746, right, 0.01, 0.754, red, 0, None)
+    box("лента_к_кровати", right, 0.002, 0.746, 2.65, 0.01, 0.754, red, 0, None)
 
 # ---------------------------------------------------------------- сложенная доска за шторой
 def гладильная_доска(L):
@@ -197,7 +199,7 @@ def кладка(name, color, seam):
         row = y // 16
         for x in range(128):
             column, distance = divmod((x + (16 if row % 2 else 0)) % 128, 32)
-            multiplier = 0.92 + ((column * 7 + row * 3) % 7) * 0.025
+            multiplier = 0.94 + ((column * 5 + row * 3) % 7) * 0.02
             rgb = seam if y % 16 == 0 or distance == 0 else [c * multiplier for c in color]
             pixels.extend((*rgb, 1))
     image.pixels.foreach_set(pixels)
@@ -231,30 +233,35 @@ def двор(g, facade_x):
     metal = mat((0.037, 0.12, 0.092), 0.7)
     grass = mat((0.15, 0.24, 0.09), 0.95)
     hedge = mat((0.07, 0.17, 0.045), 0.95)
-    tile = box("покрытие_двора", 6.3, -19, g, facade_x - 4.0, 29, g + 0.046, paving, 0, None)
+    tile = box("покрытие_двора", 6.3, -27.5, g, facade_x - 4.0, 34, g + 0.046, paving, 0, None)
     uv_box(tile, tile=0.76)
+    approach = box("подход_к_правым_воротам", facade_x - 4.0, -27.5, g, 49, -21, g + 0.046, paving, 0, None)
+    uv_box(approach, tile=0.76)
+    asphalt = mat((0.19, 0.20, 0.20), 0.96)
+    box("проезд_за_правой_оградой", 6.3, -35, g, 55, -27.5, g + 0.04, asphalt, 0, None)
     box("газон_у_корпуса", facade_x - 4.0, -17, g, facade_x, 28.2, g + 0.10, grass, 0, None)
     box("бордюр_газона", facade_x - 4.05, -17, g, facade_x - 3.95, 28.2, g + 0.14, curb, 0.005, None)
-    for y in (-12, -7, 10, 15, 20, 25):
+    for y in (-12, -7, -2, 3, 16, 21, 25):
         x = facade_x - 5.5
         box("вазон", x - 0.54, y - 0.54, g + 0.046, x + 0.54, y + 0.54, g + 0.38, curb, 0.025, None)
         box("земля_вазона", x - 0.44, y - 0.44, g + 0.379, x + 0.44, y + 0.44, g + 0.385, soil, 0, None)
-    for y in (*range(-16, -2, 2), *range(4, 27, 2)):
+    for y in (*range(-16, 6, 2), *range(12, 27, 2)):
         x = facade_x - 3.1
         box("живая_изгородь", x - 0.38, y, g + 0.14, x + 0.38, y + 1.77, g + 0.94, hedge, 0.14, None)
 
-    # Карман с двумя лавками и жёлтыми урнами, отмеченный автором напротив окна.
-    pocket = box("карман_под_лавками", facade_x - 4.03, -2.25, g + 0.09,
-                 facade_x - 2.55, 3.8, g + 0.105, paving, 0, None)
+    # Пара лавок стоит напротив входа, левее прямого вида из комнаты.
+    entrance_y = 8.0
+    pocket = box("карман_под_лавками", facade_x - 4.03, entrance_y - 2.25, g + 0.09,
+                 facade_x - 2.55, entrance_y + 3.8, g + 0.105, paving, 0, None)
     uv_box(pocket, tile=0.76)
     bench_wood = mat((0.18, 0.105, 0.062), 0.84)
     bench_green = mat((0.07, 0.23, 0.13), 0.82)
     x = facade_x - 3.25
-    лавка(x, -1.15, g + 0.10, -math.pi / 2, bench_green, metal)
-    лавка(x, 1.65, g + 0.10, math.pi / 2, bench_green, metal)
-    лавка(facade_x - 4.45, 6.3, g + 0.046, 0, bench_wood, metal)
+    лавка(x, entrance_y - 1.15, g + 0.10, -math.pi / 2, bench_green, metal)
+    лавка(x, entrance_y + 1.65, g + 0.10, math.pi / 2, bench_green, metal)
+    лавка(facade_x - 4.45, entrance_y + 6.3, g + 0.046, 0, bench_wood, metal)
     bin_yellow = mat((0.61, 0.42, 0.12), 0.9)
-    for y in (-2.00, 2.95):
+    for y in (entrance_y - 2.0, entrance_y + 2.95):
         x = facade_x - 4.1
         box("урна_жёлтая", x - 0.22, y - 0.22, g + 0.046, x + 0.22, y + 0.22, g + 0.59, bin_yellow, 0.018, None)
         box("урна_верх", x - 0.18, y - 0.18, g + 0.587, x + 0.18, y + 0.18, g + 0.593, metal, 0, None)
@@ -266,15 +273,15 @@ def двор(g, facade_x):
         y = -16 + 0.31 * i
         box("садовая_ограда_прут", fence_x - 0.013, y - 0.013, g + 0.11, fence_x + 0.013, y + 0.013, g + 1.05, metal, 0, None)
 
-    for y in (-16, 25):
-        for x1, x2 in ((6.3, 10.4), (11, 13.8), (13.8, 16.6), (17.2, facade_x)):
+    for y in (-27.5, 33):
+        for x1, x2 in ((6.3, 10.4), (11, 13.8), (13.8, 16.6), (18.6, facade_x)):
             for h in (0.30, 1.45):
                 box("ограда_перекладина", x1, y - 0.025, g + h, x2, y + 0.025, g + h + 0.04, metal, 0, None)
             count = round((x2 - x1) / 0.19)
             for i in range(count + 1):
                 x = x1 + (x2 - x1) * i / count
                 box("ограда_прут", x - 0.012, y - 0.012, g + 0.08, x + 0.012, y + 0.012, g + 1.67, metal, 0, None)
-        for x in (10.7, 16.9):
+        for x in (10.7, 16.9, 18.3):
             box("кирпичный_столб_ворот", x - 0.32, y - 0.32, g, x + 0.32, y + 0.32, g + 1.78, curb, 0, None)
             box("колпак_ворот", x - 0.37, y - 0.37, g + 1.78, x + 0.37, y + 0.37, g + 1.88, metal, 0.025, None)
 
@@ -314,7 +321,7 @@ def вид(L, W, вечер=False):
         z1, z2 = building_span(bid, t)
         if z2 <= z1: continue
         if bid == "85426979":
-            brick_k2 = кладка("кирпич_46к2", (0.56, 0.42, 0.30), (0.49, 0.40, 0.31))
+            brick_k2 = кладка("кирпич_46к2", (0.51, 0.36, 0.26), (0.44, 0.35, 0.27))
             _mesh("корпус_46к2", [(pts, z1, z2)], brick_k2, 0.76, mat((0.20, 0.23, 0.23), 0.9))
             # Два ряда высоких окон, светлый кирпич и тёмные обрамления по F18/F20.
             frame_mat = mat((0.35, 0.16, 0.12), 0.85)
@@ -325,20 +332,22 @@ def вид(L, W, вечер=False):
                 dx,dy=b[0]-a[0],b[1]-a[1]; length=math.hypot(dx,dy)
                 if length < 2.5: continue
                 nx,ny=(dy/length,-dx/length) if area > 0 else (-dy/length,dx/length)
-                count=max(1,int(length/2.7))
+                count=max(1,round(length/4.2))
                 for i in range(count):
                     f=(i+0.5)/count; xx=a[0]+dx*f; yy=a[1]+dy*f
-                    for bottom in (g+1.1,g+4.5):
-                        for name,w,h,depth,offset,material in [
-                            ("обрамление_46к2",1.65,2.45,0.08,0.03,frame_mat),
-                            ("окно_46к2",1.40,2.15,0.04,0.09,pane_mat),
-                            ("импост_46к2",0.055,2.15,0.04,0.12,bar_mat)]:
-                            ob=box(name,-w/2,-depth/2,0,w/2,depth/2,h,material,0,None)
-                            ob.location=(xx+nx*offset,yy+ny*offset,bottom+(2.45-h)/2)
-                            ob.rotation_euler.z=math.atan2(dy,dx)
-                        lintel = box("перемычка_рамы", -0.70, -0.02, 0, 0.70, 0.02, 0.065, bar_mat, 0, None)
-                        lintel.location = (xx + nx * 0.12, yy + ny * 0.12, bottom + 1.65)
-                        lintel.rotation_euler.z = math.atan2(dy, dx)
+                    width = min(2.56 if i % 3 != 1 else 2.20, length / count - 0.35)
+                    for bottom in (g+1.28,g+4.68):
+                        frame = empty("оконный_блок_46к2", (xx, yy, bottom))
+                        frame.rotation_euler.z = math.atan2(dy, dx)
+                        outside = -1 if area > 0 else 1
+                        box("стекло_46к2", -width/2, 0, 0, width/2, outside*0.085, 1.65, pane_mat, 0, None, frame)
+                        for j in range(4):
+                            x = width * (j / 3 - 0.5)
+                            box("вертикаль_рамы", x-0.038, outside*0.08, 0, x+0.038, outside*0.16, 1.65, bar_mat, 0, None, frame)
+                        for z in (0.0, 1.11, 1.58):
+                            box("перемычка_рамы", -width/2, outside*0.09, z, width/2, outside*0.17, z+0.07, bar_mat, 0, None, frame)
+                        box("отлив_46к2", -width/2-0.10, 0, -0.045, width/2+0.10, outside*0.22, 0.025, bar_mat, 0, None, frame)
+                        box("кирпичная_перемычка", -width/2-0.20, 0, 1.69, width/2+0.20, outside*0.075, 1.90, frame_mat, 0, None, frame)
         elif bid == "16237661":
             _mesh("дом_55_светлый", [(pts,z1,z2)], pan, 9, mat((0.24,0.25,0.25),0.9))
         else:

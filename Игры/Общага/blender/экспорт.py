@@ -38,6 +38,15 @@ for angle in range(0, 91):
     rotation = Matrix.Rotation(math.radians(-angle), 4, "Z")
     assert min((pivot + rotation @ (v - pivot)).x for v in door_points) > max(bed_ends) + 0.05, "Полотно задевает кровать"
 print("Окно/кровати OK: ткань за щитами, малый зазор, ход двери свободен")
+room_leaf = next(ob for ob in bpy.data.objects
+                 if ob.name.split(".")[0] == "полотно" and ob.parent and ob.parent.name == "Дверь_комнаты")
+room_pivot = room_leaf.matrix_world.translation.copy()
+room_leaf_points = world_points(room_leaf)
+commode_edge = min(v.x for v in world_points(bpy.data.objects["Комод"]))
+for angle in range(81):
+    rotation = Matrix.Rotation(math.radians(angle), 4, "Z")
+    assert max((room_pivot + rotation @ (v - room_pivot)).x
+               for v in room_leaf_points) < commode_edge, "Дверь комнаты задевает комод"
 # Сохраняем подвижные узлы отдельно, остальную геометрию объединяем.
 # Положение петель и направления берутся из исходной иерархии Blender.
 groups = []

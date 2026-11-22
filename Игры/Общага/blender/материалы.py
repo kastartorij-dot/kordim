@@ -34,6 +34,25 @@ def save_normal(name, height):
     rgba[:, :, :3] = normal * 0.5 + 0.5
     save_pixels(name, rgba, non_color=True)
 
+def generate_wallpaper():
+    n = 512
+    v, u = np.mgrid[0:n, 0:n] / n
+    rng = np.random.default_rng(14)
+    height = np.zeros((n, n))
+    # Пологие пятна штукатурки и тонкие неровные кромки между ними.
+    for size, weight in ((21, 0.0009), (43, 0.00032), (107, 0.00008)):
+        grid = rng.normal(0, 1, (size, size))
+        x = u * size + 0.32 * np.sin(v * 8 * np.pi)
+        y = v * size + 0.28 * np.sin(u * 6 * np.pi)
+        ix, iy = np.floor(x).astype(int), np.floor(y).astype(int)
+        sx, sy = x - ix, y - iy
+        sx, sy = sx * sx * (3 - 2 * sx), sy * sy * (3 - 2 * sy)
+        a = grid[iy % size, ix % size] * (1 - sx) + grid[iy % size, (ix + 1) % size] * sx
+        b = grid[(iy + 1) % size, ix % size] * (1 - sx) + grid[(iy + 1) % size, (ix + 1) % size] * sx
+        ridge = a * (1 - sy) + b * sy
+        height += weight * np.tanh(ridge * 2.7)
+    save_normal("обои_normal.png", height)
+
 
 def generate(force=False):
     n = 512
@@ -46,11 +65,7 @@ def generate(force=False):
             height -= 0.0014 * np.exp(-(distance / 0.045) ** 2)
         save_normal("покрывало_normal.png", height)
     if force or not (TEX / "обои_normal.png").exists():
-        noise = np.random.default_rng(14).normal(0, 1, (n, n))
-        for _ in range(3):
-            noise = (noise * 2 + np.roll(noise, 1, 0) + np.roll(noise, -1, 0)
-                     + np.roll(noise, 1, 1) + np.roll(noise, -1, 1)) / 6
-        save_normal("обои_normal.png", noise * 0.0003)
+        generate_wallpaper()
     if force or not (TEX / "ткань_normal.png").exists():
         save_normal("ткань_normal.png", weave)
     if force or not (TEX / "ламинат_светлый_diff.png").exists():

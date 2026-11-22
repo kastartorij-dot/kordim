@@ -92,8 +92,15 @@ class ExportTests(unittest.TestCase):
                 if self.gltf["materials"][primitive["material"]].get("name") != "лента_стол":
                     continue
                 position = self.gltf["accessors"][primitive["attributes"]["POSITION"]]
-                self.assertLess(position["max"][1] - position["min"][1], 0.02)
-                self.assertGreater(position["max"][0] - position["min"][0], 1.2)
+                view = self.gltf["bufferViews"][position["bufferView"]]
+                offset = self.binary_start + view.get("byteOffset", 0) + position.get("byteOffset", 0)
+                points = [struct.unpack_from("<3f", self.raw, offset + i * view.get("byteStride", 12))
+                          for i in range(position["count"])]
+                for front, width in ((True, 0.9), (False, 1.2)):
+                    strip = [p for p in points if (p[2] < -0.3) == front]
+                    self.assertTrue(strip)
+                    self.assertLess(max(p[1] for p in strip) - min(p[1] for p in strip), 0.012)
+                    self.assertGreater(max(p[0] for p in strip) - min(p[0] for p in strip), width)
                 checked = True
         self.assertTrue(checked, "Не найдена горизонтальная подсветка стола")
 

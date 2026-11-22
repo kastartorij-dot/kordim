@@ -39,7 +39,7 @@ def wall_box(name, x1, y1, z1, x2, y2, z2, mat):
 def wallpaper():
     m = flat_mat("обои", (0.78, 0.75, 0.64), 0.92)
     from материалы import normal_map
-    normal_map(m, "обои_normal.png", 0.65)
+    normal_map(m, "обои_normal.png", 1.0)
     return m
 
 def curtain(name, y1, y2, x, z1, z2, mat, folds=7, depth=0.06, seed=1, lean=0.0):
@@ -299,7 +299,9 @@ def build():
     wall_box("окно_стена_1", L, 0.0, 0, X2, 0.4, H, M["обои"])
     wall_box("окно_под", L, 0.4, 0, X2, 1.7, 0.83, M["обои"])
     wall_box("окно_над", L, 0.4, 2.25, X2, 1.7, H, M["обои"])   # без перекрытия с простенком: Cycles рисует перекрытия чёрным
-    wall_box("окно_простенок", FRAME_X, 1.7, 0, X2, 1.85, H, M["обои"])
+    wall_box("окно_простенок", FRAME_X, 1.7, 0, X2, 1.85, 2.25, M["обои"])
+    wall_box("простенок_над_проёмом", L, 1.7, 2.25, X2, 1.85, H, M["обои"])
+    wall_box("простенок_под_подоконником", L, 1.7, 0, FRAME_X, 1.82, 0.83, M["обои"])
     wall_box("балк_над", L, 1.85, 2.25, X2, 2.6, H, M["обои"])
     wall_box("окно_стена_2", L, 2.6, 0, X2, W, H, M["обои"])
     box("пол_у_простенка", L, 1.7, -0.02, X2, 1.85, 0.0, lam, 0, "y")
@@ -308,7 +310,7 @@ def build():
     for (y1, y2, z1, z2) in ((0.4, 0.47, 0.85, 2.25), (1.63, 1.7, 0.85, 2.25), (0.4, 1.7, 0.85, 0.92), (0.4, 1.7, 2.18, 2.25), (1.02, 1.08, 0.85, 2.25)):
         box("рама", xr, y1, z1, xr + 0.07, y2, z2, M["пвх"], 0.004, None)
     box("стекло_окна", xr + 0.03, 0.47, 0.92, xr + 0.034, 1.63, 2.18, M["стекло"], 0, None)
-    box("подоконник", L - 0.08, 0.36, 0.83, xr, 1.74, 0.85, M["пвх"], 0.004, "y")
+    box("подоконник", L - 0.08, 0.36, 0.83, xr, 1.82, 0.85, M["пвх"], 0.004, "y")
     # откосы
     box("откос", L, 0.4, 0.85, xr, 0.41, 2.25, M["пвх"], 0, None); box("откос", xr - 0.02, 1.69, 0.85, xr, 1.7, 2.25, M["пвх"], 0, None)
     box("откос", L, 0.4, 2.24, xr, 1.7, 2.25, M["пвх"], 0, None)
@@ -345,23 +347,28 @@ def build():
     bed_materials = dict(M); bed_materials["ольха"] = M["дуб_светлый"]
     place(кровать(bed_materials, лента=True, покрывало="одеяло_зелёное"), BED_CENTER, 0.0, 0, mirror_y=True)
     place(кровать(bed_materials, покрывало="одеяло_зелёное", seed=7), BED_CENTER, W, 0)
-    стол_root = стол(M); p = полка(M); p.parent = стол_root; техника_на_стол(M, стол_root)
+    desk_width = 0.94
+    стол_root = стол(M, ширина=desk_width); p = полка(M); p.parent = стол_root
+    техника_на_стол(M, стол_root, ширина=desk_width)
     place(стол_root, 1.875, 0.0, 180)
-    place(комод(M), 0.84, 0.0, 180)
+    place(комод(M), 1.09, 0.0, 180)
     wardrobe = place(шкаф(M, открыт=0.45), 0.0, 1.85, 90)
     place(тумба_свч(M), 0.0, 2.95, 90)
-    side_table = place(столик(M, ширина=0.6), 0.85, W, 0)
+    side_table = place(столик(M, ширина=0.86), 0.85, W, 0)
     place(холодильник(M), BED_CENTER - 1.02 - 0.275 - 0.01, W, 0)
     nightstand = place(тумбочка(M, "ольха", "выкл"), L, 1.375, -90)
     place(стул(M), 1.87, 0.85, 0)
-    place(стул(M), 0.85, 2.3, 180)
+    place(стул(M), 1.06, 2.3, 180)
     place(дверь_комнаты(M, открыта=80), 0.0, 0.55, 90)
     # мелочь: полка, шкаф, холодильник, столы, подоконник, тумбочка — blender/мелочь.py
     from мелочь import наполнить
     наполнить(L, W, attach_details, стол_root, wardrobe, side_table, nightstand)
+    side_table.location.x += 0.21
+    nightstand.location.x -= 0.13
+    nightstand.location.y -= 0.04
     from детали import у_стола, гладильная_доска, в_шкафу, санузел, в_коридоре, вид
-    attach_details(стол_root, у_стола, L, W)
-    стол_root.location.x -= 0.17
+    attach_details(стол_root, у_стола, desk_width)
+    стол_root.location.x -= 0.05
     гладильная_доска(L)
     attach_details(wardrobe, в_шкафу)
     в_коридоре()
@@ -488,7 +495,7 @@ def свет(режим="день", ночник=False):
         l = bpy.context.object; l.data.shape = "DISK"; l.data.size = 0.25; l.data.energy = 50; l.data.color = (1.0, 0.86, 0.68)
     if режим in ("вечер", "ночь"):
         # лента по верху щита кровати 1: тонкий светильник вдоль щита
-        bpy.ops.object.light_add(type="AREA", location=(L - 1.045, 0.04, 1.03))
+        bpy.ops.object.light_add(type="AREA", location=(L - 1.045, 0.04, 1.08))
         l = bpy.context.object; l.data.shape = "RECTANGLE"; l.data.size = 2.0; l.data.size_y = 0.02
         l.data.energy = 10; l.data.color = (1.0, 0.1, 0.25); l.rotation_euler = (math.radians(-90), 0, 0)
     if ночник:
