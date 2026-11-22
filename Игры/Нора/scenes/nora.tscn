@@ -33,9 +33,12 @@ fog_light_color = Color(0.40, 0.47, 0.55, 1)
 fog_sun_scatter = 0.15
 fog_density = 0.86
 fog_depth_begin = 4.3
-fog_depth_end = 43.0
-fog_depth_curve = 0.92
+fog_depth_end = 49.0
+fog_depth_curve = 1.16
+volumetric_fog_enabled = true
 volumetric_fog_density = 0.0
+volumetric_fog_length = 46.0
+volumetric_fog_anisotropy = 0.28
 
 [node name="Нора" type="Node3D" unique_id=789591890]
 script = ExtResource("1")

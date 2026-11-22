@@ -1,7 +1,6 @@
 extends Node3D
 
 const ДАННЫЕ := preload("res://scripts/layout.gd").DATA
-const УЧАСТОК: Dictionary = ДАННЫЕ.site
 const ЛЮК: Array = ДАННЫЕ.room.hatch
 
 @onready var огонь: OmniLight3D = $"Сруб/Очаг/Огонь"
@@ -10,16 +9,19 @@ const ЛЮК: Array = ДАННЫЕ.room.hatch
 var открыт := false
 var движение_люка: Tween
 
-var м := {}
+var terrain: Node3D
 
 func _ready() -> void:
 	get_viewport().screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA
-	_материалы_участка()
-	_рельеф()
-	_тропа("Тропа_к_ручью", УЧАСТОК.trail, .37)
-	_тропа("Спуск_к_коновязи", УЧАСТОК.access, .23)
-	preload("res://scripts/forest.gd").new().populate(self, _высота)
-	_у_ручья()
+	terrain = preload("res://scripts/terrain.gd").new()
+	terrain.name = "Участок"
+	add_child(terrain)
+	terrain.build()
+	preload("res://scripts/forest.gd").new().populate(terrain, terrain.height_at)
+	var detail := preload("res://scripts/site_details.gd").new()
+	detail.name = "Камни_и_валежник"
+	terrain.add_child(detail)
+	detail.populate(terrain)
 	var игрок := CharacterBody3D.new()
 	игрок.name = "Игрок"
 	игрок.set_script(load("res://scripts/player.gd"))
@@ -29,8 +31,8 @@ func _ready() -> void:
 		игрок.rotation.y = deg_to_rad(39)
 		игрок.камера.rotation.x = deg_to_rad(-10)
 	else:
-		игрок.position = Vector3(3.60, .055, 8.20)
-		игрок.rotation.y = deg_to_rad(25)
+		игрок.position = Vector3(6.45, terrain.height_at(6.45, 7.80)+.055, 7.80)
+		игрок.rotation.y = deg_to_rad(50)
 	if DisplayServer.get_name() != "headless":
 		var звуки := preload("res://scripts/ambience.gd").new()
 		звуки.name = "Звуки_Норы"
@@ -63,194 +65,5 @@ func _двинуть_люк(открыть: bool) -> void:
 	if движение_люка != null:
 		движение_люка.kill()
 	движение_люка = create_tween()
-	движение_люка.tween_property(петля, "rotation:z", deg_to_rad(103) if открыт else 0.0, .43) 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-
-# Рельеф от поляны (0) до сухого берега (−2,00) и воды (−2,65 м).
-func _линия_берега(x: float, берег: Array) -> float:
-	for i in range(1, берег.size()):
-		var a: Array = берег[i - 1]
-		var b: Array = берег[i]
-		if x <= b[0]:
-			return lerpf(a[1], b[1], clampf(inverse_lerp(a[0], b[0], x), 0, 1))
-	return берег.back()[1]
-
-func _высота(x: float, z: float) -> float:
-	var ближний := _линия_берега(x, УЧАСТОК.lower)
-	var дальний := _линия_берега(x, УЧАСТОК.upper)
-	if z >= -5.3:
-		return 0.0
-	if z >= -13.2:
-		return lerpf(-2, 0, smoothstep(-13.2, -5.3, z))
-	if z >= ближний:
-		return lerpf(-2.70, -2.0, smoothstep(ближний, ближний + 1.35, z))
-	if z <= дальний:
-		return lerpf(-1.35, -2.70, smoothstep(дальний - 4.0, дальний, z))
-	return -3.0
-
-func _точка(p: Array, подъём := .0) -> Vector3:
-	return Vector3(p[0], _высота(p[0], p[1]) + подъём, p[1])
-
-func _мат(цвет: Color, шероховатость := .9) -> StandardMaterial3D:
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = цвет
-	mat.roughness = шероховатость
-	return mat
-
-func _материалы_участка() -> void:
-	var soil := ShaderMaterial.new()
-	soil.shader = preload("res://textures/forest_soil.gdshader")
-	м.земля = soil
-	м.кора = _мат(Color(.31,.21,.15))
-	м.камень = _мат(Color(.45,.43,.36))
-	var stream := ShaderMaterial.new()
-	stream.shader = preload("res://textures/creek_surface.gdshader")
-	м.вода = stream
-	м.шкура = _мат(Color(.48,.37,.26))
-
-func _цвет_грунта(x: float, z: float, y: float) -> Color:
-	var влажность := smoothstep(-2.9,-1.1,y)
-	var основной := Color(.35,.375,.35).lerp(Color(.56,.55,.48),влажность)
-	var просвет := .91+.072*sin(x*.82+z*1.37)+.053*cos(z*.77-x*.41)
-	return основной*просвет
-
-func _вершина_грунта(mesh: SurfaceTool, x: float, z: float) -> void:
-	var y := _высота(x,z)
-	mesh.set_color(_цвет_грунта(x,z,y))
-	mesh.add_vertex(Vector3(x,y,z))
-
-func _рельеф() -> void:
-	var поверхность := SurfaceTool.new()
-	поверхность.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for x in range(-47,47):
-		for z in range(-47,47):
-			# Вырез под погребом закрыт половицами с настоящим проёмом под люк.
-			if x >= -4 and x < 0 and z >= -1 and z < 3:
-				continue
-			for v in [Vector2(x,z),Vector2(x+1,z),Vector2(x,z+1),Vector2(x+1,z),Vector2(x+1,z+1),Vector2(x,z+1)]:
-				_вершина_грунта(поверхность,v.x,v.y)
-	поверхность.index()
-	поверхность.generate_normals()
-	var земля := _сетка("Рельеф",поверхность,м.земля)
-	земля.create_trimesh_collision()
-	var вода := SurfaceTool.new()
-	вода.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var alpha := [0.14, 0.74, 1.0, 0.74, 0.14]
-	for i in range(1, УЧАСТОК.upper.size()):
-		var upstream: Array = УЧАСТОК.upper[i-1]
-		var downstream: Array = УЧАСТОК.upper[i]
-		var near_up: Array = УЧАСТОК.lower[i-1]
-		var near_down: Array = УЧАСТОК.lower[i]
-		var cross_up: Array[Vector3] = []
-		var cross_down: Array[Vector3] = []
-		for lane in alpha.size():
-			var across := float(lane)/(alpha.size()-1)
-			cross_up.append(Vector3(upstream[0],-2.65,lerpf(upstream[1],near_up[1],across)))
-			cross_down.append(Vector3(downstream[0],-2.65,lerpf(downstream[1],near_down[1],across)))
-		for lane in range(alpha.size()-1):
-			var vertices := [cross_up[lane],cross_down[lane],cross_up[lane+1],
-				cross_down[lane],cross_down[lane+1],cross_up[lane+1]]
-			var rows := [lane,lane,lane+1,lane,lane+1,lane+1]
-			for j in vertices.size():
-				вода.set_color(Color(1,1,1,alpha[rows[j]]))
-				вода.add_vertex(vertices[j])
-	вода.generate_normals()
-	_сетка("Ручей",вода,м.вода)
-
-func _сетка(имя: String, поверхность: SurfaceTool, мат: Material) -> MeshInstance3D:
-	var узел := MeshInstance3D.new()
-	узел.name = имя
-	узел.mesh = поверхность.commit()
-	узел.material_override = мат
-	add_child(узел)
-	return узел
-
-func _тропа(имя: String, точки: Array, полуширина: float) -> void:
-	var поверхность := SurfaceTool.new()
-	поверхность.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var центры := PackedVector2Array()
-	for i in range(1,точки.size()):
-		var a := Vector2(точки[i-1][0],точки[i-1][1])
-		var b := Vector2(точки[i][0],точки[i][1])
-		var steps := maxi(1,ceili(a.distance_to(b)/.30))
-		for j in steps:
-			центры.append(a.lerp(b,float(j)/steps))
-	центры.append(Vector2(точки.back()[0],точки.back()[1]))
-	var вершины: Array[Vector3] = []
-	var цвета := PackedColorArray()
-	var ширины := [-1.0,-.64,.64,1.0]
-	for i in центры.size():
-		var p := центры[i]
-		var ход := (центры[mini(i+1,центры.size()-1)]-центры[maxi(i-1,0)]).normalized()
-		var сбоку := Vector2(ход.y,-ход.x)*полуширина*(.95+.13*sin(i*.49)+.08*cos(i*.83))
-		for j in ширины.size():
-			var q: Vector2 = p+сбоку*ширины[j]
-			var высота := _высота(q.x,q.y)
-			var цвет := _цвет_грунта(q.x,q.y,высота)
-			if j==1 or j==2:
-				цвет = цвет.lerp(Color(.69,.62,.49),.59)
-			цвета.append(цвет)
-			вершины.append(Vector3(q.x,высота+.038,q.y))
-	for i in range(0,вершины.size()-4,4):
-		for j in range(i,i+3):
-			for k in [j,j+1,j+4,j+1,j+5,j+4]:
-				поверхность.set_color(цвета[k])
-				поверхность.add_vertex(вершины[k])
-	поверхность.generate_normals()
-	_сетка(имя,поверхность,м.земля)
-
-func _ствол(p: Vector3, радиус: float, высота: float, мат: Material, крона := false) -> MeshInstance3D:
-	var mi := MeshInstance3D.new()
-	var форма := CylinderMesh.new()
-	форма.bottom_radius = радиус
-	форма.top_radius = 0 if крона else радиус*.68
-	форма.height = высота
-	форма.radial_segments = 9
-	форма.rings = 0
-	mi.mesh = форма
-	mi.material_override = мат
-	mi.position = p
-	add_child(mi)
-	return mi
-
-func _жердь(откуда: Vector3, куда: Vector3, радиус: float) -> MeshInstance3D:
-	var вектор := куда - откуда
-	var узел := _ствол((откуда+куда)/2, радиус, вектор.length(), м.кора)
-	узел.quaternion = Quaternion(Vector3.UP, вектор.normalized())
-	return узел
-
-func _у_ручья() -> void:
-	var валун := preload("res://models/dressing/river-rock.scn")
-	for spot in [[-3.85,-15.44,.82,.51],[-4.66,-15.81,.68,-.5],[5.62,-14.64,1.13,.40],[10.63,-15.64,.72,-1.1]]:
-		var камень: Node3D = валун.instantiate()
-		камень.position = _точка([spot[0],spot[1]],-.039)
-		камень.scale = Vector3.ONE*float(spot[2])
-		камень.rotation.y = spot[3]
-		add_child(камень,true)
-	for координаты in [[-3.0,-15.95],[-3.28,-16.54],[-2.91,-17.24],[-2.63,-17.85],[-.7,10.45],[5.65,9.0],[-4.15,-6.2],[11.6,-6.7]]:
-		var mi := MeshInstance3D.new()
-		var форма := SphereMesh.new()
-		форма.radius = .31
-		форма.height = .36
-		форма.radial_segments = 7
-		форма.rings = 4
-		mi.mesh = форма
-		mi.material_override = м.камень
-		mi.position = _точка(координаты,.11)
-		mi.scale.z = .74
-		add_child(mi)
-	var p := УЧАСТОК.rail
-	_жердь(_точка(p[0],1.15),_точка(p[1],1.15),.064).name = "Коновязь"
-	var сушилка := УЧАСТОК.rack
-	for опора in сушилка:
-		_жердь(_точка(опора),_точка(опора,1.43),.051)
-	for y in [1.02,1.38]:
-		_жердь(_точка(сушилка[0],y),_точка(сушилка[1],y),.037)
-	for i in 2:
-		var mi := MeshInstance3D.new()
-		var panel := BoxMesh.new()
-		panel.size = Vector3(.36,.51,.052)
-		mi.mesh = panel
-		mi.material_override = м.шкура
-		mi.position = _точка([-2.24+i*.70,-5.20],1.12)
-		mi.rotation.z = .12-i*.23
-		add_child(mi)
+	var animation := движение_люка.tween_property(петля, "rotation:z", deg_to_rad(103) if открыт else 0.0, .43)
+	animation.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
