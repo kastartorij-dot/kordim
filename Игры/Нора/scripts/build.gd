@@ -13,6 +13,7 @@ var движение_люка: Tween
 var м := {}
 
 func _ready() -> void:
+	get_viewport().screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA
 	_материалы_участка()
 	_рельеф()
 	_тропа("Тропа_к_ручью", УЧАСТОК.trail, .37)
@@ -30,6 +31,11 @@ func _ready() -> void:
 	else:
 		игрок.position = Vector3(3.60, .055, 8.20)
 		игрок.rotation.y = deg_to_rad(25)
+	if DisplayServer.get_name() != "headless":
+		var звуки := preload("res://scripts/ambience.gd").new()
+		звуки.name = "Звуки_Норы"
+		add_child(звуки)
+		звуки.setup(игрок, огонь.global_position)
 
 func _process(_delta: float) -> void:
 	var t := Time.get_ticks_msec() * .001
@@ -96,8 +102,9 @@ func _материалы_участка() -> void:
 	м.земля = soil
 	м.кора = _мат(Color(.31,.21,.15))
 	м.камень = _мат(Color(.45,.43,.36))
-	м.вода = _мат(Color(.24,.41,.43,.84),.12)
-	м.вода.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	var stream := ShaderMaterial.new()
+	stream.shader = preload("res://textures/creek_surface.gdshader")
+	м.вода = stream
 	м.шкура = _мат(Color(.48,.37,.26))
 
 func _цвет_грунта(x: float, z: float, y: float) -> Color:
@@ -127,13 +134,25 @@ func _рельеф() -> void:
 	земля.create_trimesh_collision()
 	var вода := SurfaceTool.new()
 	вода.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var alpha := [0.14, 0.74, 1.0, 0.74, 0.14]
 	for i in range(1, УЧАСТОК.upper.size()):
-		var a: Array = УЧАСТОК.upper[i-1]
-		var b: Array = УЧАСТОК.upper[i]
-		var c: Array = УЧАСТОК.lower[i-1]
-		var d: Array = УЧАСТОК.lower[i]
-		for p in [a,b,c,b,d,c]:
-			вода.add_vertex(Vector3(p[0],-2.65,p[1]))
+		var upstream: Array = УЧАСТОК.upper[i-1]
+		var downstream: Array = УЧАСТОК.upper[i]
+		var near_up: Array = УЧАСТОК.lower[i-1]
+		var near_down: Array = УЧАСТОК.lower[i]
+		var cross_up: Array[Vector3] = []
+		var cross_down: Array[Vector3] = []
+		for lane in alpha.size():
+			var across := float(lane)/(alpha.size()-1)
+			cross_up.append(Vector3(upstream[0],-2.65,lerpf(upstream[1],near_up[1],across)))
+			cross_down.append(Vector3(downstream[0],-2.65,lerpf(downstream[1],near_down[1],across)))
+		for lane in range(alpha.size()-1):
+			var vertices := [cross_up[lane],cross_down[lane],cross_up[lane+1],
+				cross_down[lane],cross_down[lane+1],cross_up[lane+1]]
+			var rows := [lane,lane,lane+1,lane,lane+1,lane+1]
+			for j in vertices.size():
+				вода.set_color(Color(1,1,1,alpha[rows[j]]))
+				вода.add_vertex(vertices[j])
 	вода.generate_normals()
 	_сетка("Ручей",вода,м.вода)
 
@@ -200,6 +219,13 @@ func _жердь(откуда: Vector3, куда: Vector3, радиус: float) 
 	return узел
 
 func _у_ручья() -> void:
+	var валун := preload("res://models/dressing/river-rock.scn")
+	for spot in [[-3.85,-15.44,.82,.51],[-4.66,-15.81,.68,-.5],[5.62,-14.64,1.13,.40],[10.63,-15.64,.72,-1.1]]:
+		var камень: Node3D = валун.instantiate()
+		камень.position = _точка([spot[0],spot[1]],-.039)
+		камень.scale = Vector3.ONE*float(spot[2])
+		камень.rotation.y = spot[3]
+		add_child(камень,true)
 	for координаты in [[-3.0,-15.95],[-3.28,-16.54],[-2.91,-17.24],[-2.63,-17.85],[-.7,10.45],[5.65,9.0],[-4.15,-6.2],[11.6,-6.7]]:
 		var mi := MeshInstance3D.new()
 		var форма := SphereMesh.new()

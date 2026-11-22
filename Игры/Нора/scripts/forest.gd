@@ -1,6 +1,7 @@
 extends RefCounted
 
 const WOOD_SHADER := preload("res://textures/wood_grain.gdshader")
+const WIND_SHADER := preload("res://textures/foliage_wind.gdshader")
 const SITE: Dictionary = preload("res://scripts/layout.gd").DATA.site
 
 var rng := RandomNumberGenerator.new()
@@ -115,7 +116,7 @@ func _build_trees() -> void:
 	twig_mesh.rings = 0
 	_instances("Стволы_и_сосны",bole,bark,trunks)
 	_instances("Сучья",twig_mesh,bark,branches)
-	_instances("Хвойные_лапы",_needle_mesh(),_lit_cards(),needles,needle_colors)
+	_instances("Хвойные_лапы",_needle_mesh(),_wind(true),needles,needle_colors)
 
 func _add_trunk_collision(p: Vector3, radius: float, height: float) -> void:
 	var body := StaticBody3D.new()
@@ -200,8 +201,8 @@ func _build_understory() -> void:
 	stone_mesh.radial_segments = 6
 	stone_mesh.rings = 3
 	var leaf_mat := _lit_cards()
-	_instances("Сухая_трава",_grass_mesh(),leaf_mat,grasses,grass_colors,false)
-	_instances("Папоротник_и_подлесок",_bracken_mesh(),leaf_mat,bracken,bracken_colors)
+	_instances("Сухая_трава",_grass_mesh(),_wind(),grasses,grass_colors,false)
+	_instances("Папоротник_и_подлесок",_bracken_mesh(),_wind(),bracken,bracken_colors)
 	_instances("Лесная_подстилка",_leaf_mesh(),leaf_mat,litter,litter_colors,false)
 	_instances("Камни_среди_травы",stone_mesh,leaf_mat,stones,stone_colors)
 
@@ -223,21 +224,49 @@ func _grass_mesh() -> ArrayMesh:
 	surface.generate_normals()
 	return surface.commit()
 
+func _fern_spine(direction: Vector3, size: float, t: float) -> Vector3:
+	return direction*(t*.78*size) + Vector3.UP*(sin(t*2.11)*size*.81)
+
 func _bracken_mesh() -> ArrayMesh:
 	var surface := SurfaceTool.new()
 	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for i in 7:
-		var f := Vector3(cos(i*2.399963),0,sin(i*2.399963))
-		var s := f.cross(Vector3.UP)
-		for j in range(1,8):
-			var t := j/8.0
-			var vein := f*t*.69+Vector3.UP*(sin(t*1.93)*(.8+.1*(i%3)))
-			var tip := vein + f*.13 + Vector3.UP*.045
-			for side in [-1.0,1.0]:
-				var blade: Vector3 = s*(sin(t*PI)*.17*float(side))
-				_triangle(surface,vein-f*.115,vein+blade+f*.075,tip,Color(.62,.72,.53),Color.WHITE,Color(.79,.83,.64))
+		var direction := Vector3(cos(i*2.399963),0,sin(i*2.399963))
+		var cross := direction.cross(Vector3.UP)
+		var size := .84+.084*(i%4)
+		for j in 12:
+			var t := j/12.0
+			var from := _fern_spine(direction,size,t)
+			var to := _fern_spine(direction,size,(j+1)/12.0)
+			var stalk := cross*(.008*(1.0-t)+.001)
+			var green := Color(.63,.72,.46)
+			_triangle(surface,from-stalk,to-stalk,from+stalk,green,green,green)
+			_triangle(surface,from+stalk,to-stalk,to+stalk,green,green,green)
+			if j < 2:
+				continue
+			for amount in [-1.0,1.0]:
+				var broad := sin(t*PI)*(.177+.021*(i%3))
+				var apex := from + cross*float(amount)*broad + direction*(.054+.055*t) + Vector3.UP*.013
+				var along := apex-from
+				var wing := Vector3(along.z,0,-along.x).normalized()
+				var base := from.lerp(apex,.16)
+				var pavilion := from.lerp(apex,.54)+Vector3.UP*.016
+				var left := pavilion + wing*(.027*sin(t*PI)+.008) - Vector3.UP*.016
+				var right := pavilion - wing*(.028*sin(t*PI)+.008) - Vector3.UP*.016
+				var tips := Color(.86,.93,.64)
+				var side := Color(.71,.80,.53)
+				_triangle(surface,base,left,pavilion,green,side,tips)
+				_triangle(surface,base,pavilion,right,green,tips,side)
+				_triangle(surface,left,apex,pavilion,side,tips,tips)
+				_triangle(surface,pavilion,apex,right,tips,tips,side)
 	surface.generate_normals()
 	return surface.commit()
+
+func _wind(bough := false) -> ShaderMaterial:
+	var material := ShaderMaterial.new()
+	material.shader = WIND_SHADER
+	material.set_shader_parameter("bough",bough)
+	return material
 
 func _leaf_mesh() -> ArrayMesh:
 	var surface := SurfaceTool.new()

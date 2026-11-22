@@ -7,6 +7,8 @@ const БЕГ := 5.0
 const ПРЫЖОК := 3.6
 var камера: Camera3D
 var подсказка: Label
+var плашка: PanelContainer
+var прицел: Label
 var цель: CollisionObject3D
 var g: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
@@ -25,23 +27,50 @@ func _ready() -> void:
 	add_child(камера)
 	var слой := CanvasLayer.new()
 	add_child(слой)
+	плашка = PanelContainer.new()
+	плашка.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var оформление := StyleBoxFlat.new()
+	оформление.bg_color = Color(.065,.055,.046,.81)
+	оформление.border_color = Color(.44,.32,.22,.56)
+	оформление.set_border_width_all(1)
+	оформление.set_corner_radius_all(5)
+	оформление.content_margin_left = 15
+	оформление.content_margin_right = 15
+	оформление.content_margin_top = 8
+	оформление.content_margin_bottom = 8
+	плашка.add_theme_stylebox_override("panel",оформление)
+	слой.add_child(плашка)
 	подсказка = Label.new()
-	подсказка.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	подсказка.position = Vector2(-400, -110)
-	подсказка.size = Vector2(800, 80)
 	подсказка.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	подсказка.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	подсказка.add_theme_font_size_override("font_size", 20)
-	подсказка.add_theme_color_override("font_shadow_color", Color.BLACK)
-	подсказка.add_theme_constant_override("shadow_offset_x", 2)
-	подсказка.add_theme_constant_override("shadow_offset_y", 2)
-	подсказка.text = "Клик — управлять мышью. WASD — идти, Shift — бегом, E — люк или лестница, Esc — отпустить мышь."
-	слой.add_child(подсказка)
-	var прицел := Label.new()
+	подсказка.add_theme_font_size_override("font_size", 16)
+	подсказка.add_theme_color_override("font_color",Color(.94,.86,.72))
+	плашка.add_child(подсказка)
+	прицел = Label.new()
 	прицел.text = "·"
-	прицел.set_anchors_preset(Control.PRESET_CENTER)
-	прицел.add_theme_font_size_override("font_size", 28)
+	прицел.add_theme_font_size_override("font_size", 22)
+	прицел.add_theme_color_override("font_color",Color(.96,.87,.72,.68))
+	прицел.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	прицел.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	прицел.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	слой.add_child(прицел)
+	прицел.set_anchors_preset(Control.PRESET_CENTER)
+	прицел.offset_left = -10
+	прицел.offset_right = 10
+	прицел.offset_top = -14
+	прицел.offset_bottom = 14
+	get_viewport().size_changed.connect(_разместить_подсказку)
+	_разместить_подсказку()
+
+func _разместить_подсказку() -> void:
+	var размер := get_viewport().get_visible_rect().size
+	var ширина := minf(размер.x - 24.0, 460.0)
+	плашка.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	плашка.offset_left = -ширина * 0.5
+	плашка.offset_right = ширина * 0.5
+	плашка.offset_top = -72
+	плашка.offset_bottom = -26
+
 
 func _unhandled_input(e: InputEvent) -> void:
 	if e is InputEventMouseButton and e.pressed:
@@ -79,7 +108,12 @@ func _смотрю() -> void:
 	q.exclude = [get_rid()]
 	var hit := get_world_3d().direct_space_state.intersect_ray(q)
 	цель = hit.get("collider") as CollisionObject3D
-	if is_instance_valid(цель) and цель.has_meta("label"):
+	var захват := Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
+	прицел.visible = захват
+	if not захват:
+		подсказка.text = "Клик · взгляд     WASD · ходьба     E · действие"
+	elif is_instance_valid(цель) and цель.has_meta("label"):
 		подсказка.text = цель.get_meta("label")
-	elif Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+	else:
 		подсказка.text = ""
+	плашка.visible = not подсказка.text.is_empty()
