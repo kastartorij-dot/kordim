@@ -27,13 +27,15 @@ class NeighborhoodTests(unittest.TestCase):
         self.assertAlmostEqual(x, 24.9)
         self.assertAlmostEqual(y, 1.6)
 
-    def test_k2_is_in_front_and_its_roof_is_below_eyes(self):
+    def test_k2_is_in_front_and_spans_eye_level(self):
         b = self.data["buildings"]["85426979"]
         pts = [to_room(e, n, 4.6, 3.2) for e, n in b["p"]]
         self.assertTrue(all(x > 20 for x, y in pts))
         self.assertLess(min(y for x, y in pts), 1.6)
         self.assertGreater(max(y for x, y in pts), 1.6)
-        self.assertLess(building_span("85426979", b["t"])[1], 1.62)
+        bottom, top = building_span("85426979", b["t"])
+        self.assertLess(bottom, 1.62)
+        self.assertGreater(top, 1.62)
 
     def test_real_brick_apartment_and_own_footprints(self):
         self.assertEqual(building_kind(self.data["buildings"]["16237661"]["t"]), "кирпич")
@@ -45,8 +47,8 @@ class NeighborhoodTests(unittest.TestCase):
     def test_rooftop_parts_do_not_start_at_ground(self):
         tags = self.data["buildings"]["159547404"]["t"]
         bottom, top = building_span("159547404", tags)
-        self.assertEqual((bottom, top), (26, 29))
-        self.assertEqual(building_span("test", {"height": "12 m", "min_height": "6"}), (-4, 2))
+        self.assertEqual((bottom + VIEW["floor_height_m"], top + VIEW["floor_height_m"]), (36, 39))
+        self.assertEqual(building_span("test", {"height": "12 m", "min_height": "6"}), (1, 7))
 
 
 class ExportTests(unittest.TestCase):

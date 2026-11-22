@@ -189,6 +189,110 @@ def _mesh(name, polys, m, uvtile=None, roof=None):
     if roof: ob.data.materials.append(roof)
     return ob
 
+def кладка(name, color, seam):
+    """Тайловая карта из четырёх рядов со смещённым швом, встроенная в GLB."""
+    image = bpy.data.images.new(name, width=128, height=64, alpha=False)
+    pixels = []
+    for y in range(64):
+        row = y // 16
+        for x in range(128):
+            column, distance = divmod((x + (16 if row % 2 else 0)) % 128, 32)
+            multiplier = 0.92 + ((column * 7 + row * 3) % 7) * 0.025
+            rgb = seam if y % 16 == 0 or distance == 0 else [c * multiplier for c in color]
+            pixels.extend((*rgb, 1))
+    image.pixels.foreach_set(pixels)
+    image.pack()
+    material = mat(color, 0.95)
+    nodes = material.node_tree.nodes
+    texture = nodes.new("ShaderNodeTexImage")
+    texture.image = image
+    material.node_tree.links.new(texture.outputs["Color"], nodes["Principled BSDF"].inputs["Base Color"])
+    return material
+
+
+def лавка(x, y, ground, angle, wood, metal):
+    root = empty("лавка_двора", (x, y, ground))
+    root.rotation_euler.z = angle
+    for slat in range(4):
+        edge = -0.26 + slat * 0.13
+        box("лавка_сиденье", edge, -0.9, 0.44, edge + 0.105, 0.9, 0.48, wood, 0.006, None, root)
+    for h in (0.59, 0.73, 0.87):
+        box("лавка_спинка", 0.27, -0.9, h, 0.31, 0.9, h + 0.10, wood, 0.008, None, root)
+    for end in (-0.66, 0.66):
+        tube("лавка_опора", [(-0.28, end, 0), (-0.12, end, 0.44),
+                             (0.20, end, 0.44), (0.34, end, 0.97)], 0.027, metal, root)
+
+
+def двор(g, facade_x):
+    """Сквозной проход, зелёная полоса и ворота по панорамам автора."""
+    paving = кладка("брусчатка_двора", (0.48, 0.49, 0.48), (0.37, 0.38, 0.37))
+    curb = mat((0.55, 0.53, 0.48), 0.95)
+    soil = mat((0.19, 0.15, 0.10), 1.0)
+    metal = mat((0.037, 0.12, 0.092), 0.7)
+    grass = mat((0.15, 0.24, 0.09), 0.95)
+    hedge = mat((0.07, 0.17, 0.045), 0.95)
+    tile = box("покрытие_двора", 6.3, -19, g, facade_x - 4.0, 29, g + 0.046, paving, 0, None)
+    uv_box(tile, tile=0.76)
+    box("газон_у_корпуса", facade_x - 4.0, -17, g, facade_x, 28.2, g + 0.10, grass, 0, None)
+    box("бордюр_газона", facade_x - 4.05, -17, g, facade_x - 3.95, 28.2, g + 0.14, curb, 0.005, None)
+    for y in (-12, -7, 10, 15, 20, 25):
+        x = facade_x - 5.5
+        box("вазон", x - 0.54, y - 0.54, g + 0.046, x + 0.54, y + 0.54, g + 0.38, curb, 0.025, None)
+        box("земля_вазона", x - 0.44, y - 0.44, g + 0.379, x + 0.44, y + 0.44, g + 0.385, soil, 0, None)
+    for y in (*range(-16, -2, 2), *range(4, 27, 2)):
+        x = facade_x - 3.1
+        box("живая_изгородь", x - 0.38, y, g + 0.14, x + 0.38, y + 1.77, g + 0.94, hedge, 0.14, None)
+
+    # Карман с двумя лавками и жёлтыми урнами, отмеченный автором напротив окна.
+    pocket = box("карман_под_лавками", facade_x - 4.03, -2.25, g + 0.09,
+                 facade_x - 2.55, 3.8, g + 0.105, paving, 0, None)
+    uv_box(pocket, tile=0.76)
+    bench_wood = mat((0.18, 0.105, 0.062), 0.84)
+    bench_green = mat((0.07, 0.23, 0.13), 0.82)
+    x = facade_x - 3.25
+    лавка(x, -1.15, g + 0.10, -math.pi / 2, bench_green, metal)
+    лавка(x, 1.65, g + 0.10, math.pi / 2, bench_green, metal)
+    лавка(facade_x - 4.45, 6.3, g + 0.046, 0, bench_wood, metal)
+    bin_yellow = mat((0.61, 0.42, 0.12), 0.9)
+    for y in (-2.00, 2.95):
+        x = facade_x - 4.1
+        box("урна_жёлтая", x - 0.22, y - 0.22, g + 0.046, x + 0.22, y + 0.22, g + 0.59, bin_yellow, 0.018, None)
+        box("урна_верх", x - 0.18, y - 0.18, g + 0.587, x + 0.18, y + 0.18, g + 0.593, metal, 0, None)
+
+    fence_x = facade_x - 1.95
+    for h in (0.26, 0.97):
+        box("садовая_ограда", fence_x - 0.025, -16, g + h, fence_x + 0.025, 27, g + h + 0.035, metal, 0, None)
+    for i in range(139):
+        y = -16 + 0.31 * i
+        box("садовая_ограда_прут", fence_x - 0.013, y - 0.013, g + 0.11, fence_x + 0.013, y + 0.013, g + 1.05, metal, 0, None)
+
+    for y in (-16, 25):
+        for x1, x2 in ((6.3, 10.4), (11, 13.8), (13.8, 16.6), (17.2, facade_x)):
+            for h in (0.30, 1.45):
+                box("ограда_перекладина", x1, y - 0.025, g + h, x2, y + 0.025, g + h + 0.04, metal, 0, None)
+            count = round((x2 - x1) / 0.19)
+            for i in range(count + 1):
+                x = x1 + (x2 - x1) * i / count
+                box("ограда_прут", x - 0.012, y - 0.012, g + 0.08, x + 0.012, y + 0.012, g + 1.67, metal, 0, None)
+        for x in (10.7, 16.9):
+            box("кирпичный_столб_ворот", x - 0.32, y - 0.32, g, x + 0.32, y + 0.32, g + 1.78, curb, 0, None)
+            box("колпак_ворот", x - 0.37, y - 0.37, g + 1.78, x + 0.37, y + 0.37, g + 1.88, metal, 0.025, None)
+
+    trunk = mat((0.16, 0.11, 0.072), 0.95)
+    needles = mat((0.075, 0.17, 0.10), 0.95)
+    for y, height in ((-13.2, 6.4), (-8.8, 5.0), (14.5, 4.8)):
+        x = facade_x - 2.2
+        cyl("ель_ствол", 0.11, g, g + height * 0.8, x, y, trunk, 10)
+        for tier in range(6):
+            radius = height * (0.26 - tier * 0.038)
+            bpy.ops.mesh.primitive_cone_add(vertices=13, radius1=radius, depth=height * 0.33,
+                                            location=(x, y, g + height * (0.31 + tier * 0.105)))
+            branch = bpy.context.object
+            branch.name = "ель_ветви"
+            branch.rotation_euler.z = tier * 0.33
+            branch.data.materials.append(needles)
+
+
 def вид(L, W, вечер=False):
     data = json.load(open(os.path.join(ROOT, "assets", "osm", "окрестности.json")))
     g = -VIEW["floor_height_m"]
@@ -210,11 +314,12 @@ def вид(L, W, вечер=False):
         z1, z2 = building_span(bid, t)
         if z2 <= z1: continue
         if bid == "85426979":
-            _mesh("корпус_46к2", [(pts, z1, z2)], mat((0.72, 0.66, 0.43), 0.9), 6, mat((0.20, 0.23, 0.23), 0.9))
+            brick_k2 = кладка("кирпич_46к2", (0.56, 0.42, 0.30), (0.49, 0.40, 0.31))
+            _mesh("корпус_46к2", [(pts, z1, z2)], brick_k2, 0.76, mat((0.20, 0.23, 0.23), 0.9))
             # Два ряда высоких окон, светлый кирпич и тёмные обрамления по F18/F20.
             frame_mat = mat((0.35, 0.16, 0.12), 0.85)
-            pane_mat = mat((0.13, 0.29, 0.30), 0.3)
-            bar_mat = mat((0.36, 0.55, 0.48), 0.55)
+            pane_mat = mat((0.055, 0.11, 0.125), 0.35)
+            bar_mat = mat((0.08, 0.30, 0.26), 0.55)
             area = sum(a[0]*b[1]-b[0]*a[1] for a,b in zip(pts,pts[1:]+pts[:1]))
             for a,b in zip(pts, pts[1:]+pts[:1]):
                 dx,dy=b[0]-a[0],b[1]-a[1]; length=math.hypot(dx,dy)
@@ -231,6 +336,9 @@ def вид(L, W, вечер=False):
                             ob=box(name,-w/2,-depth/2,0,w/2,depth/2,h,material,0,None)
                             ob.location=(xx+nx*offset,yy+ny*offset,bottom+(2.45-h)/2)
                             ob.rotation_euler.z=math.atan2(dy,dx)
+                        lintel = box("перемычка_рамы", -0.70, -0.02, 0, 0.70, 0.02, 0.065, bar_mat, 0, None)
+                        lintel.location = (xx + nx * 0.12, yy + ny * 0.12, bottom + 1.65)
+                        lintel.rotation_euler.z = math.atan2(dy, dx)
         elif bid == "16237661":
             _mesh("дом_55_светлый", [(pts,z1,z2)], pan, 9, mat((0.24,0.25,0.25),0.9))
         else:
@@ -269,6 +377,7 @@ def вид(L, W, вечер=False):
     _mesh("дороги", road_polys["асфальт"], asphalt)
     _mesh("тротуары", road_polys["тротуар"], walk)
     box("земля", L + 0.3, -450, g - 0.1, 500, 450, g, mat((0.27, 0.33, 0.2), 0.95), 0, None)
+    двор(g, x1)
     # деревья: из OSM и рядами вдоль Наличной (ели и лиственные), как на фото
     spots = [to_room(x, y, L, W) for x, y in data["trees"]]
     for r in data["roads"].values():
@@ -298,6 +407,9 @@ def вид(L, W, вечер=False):
             tr.data.materials.append(mat((0.13 + rnd.uniform(0, 0.08), 0.28 + rnd.uniform(0, 0.1), 0.1), 0.9))
         tr.name = "крона"
     # фонари во дворе 46 к2, как на фото из окна
-    for (x, y) in ((L + 14, W / 2 - 4), (L + 14, W / 2 + 18)):
-        cyl("фонарь", 0.08, g, g + 8, x, y, mat((0.4, 0.4, 0.42), 0.4), 10)
-        box("фонарь_голова", x - 0.4, y - 0.15, g + 8, x + 0.4, y + 0.15, g + 8.12, mat((0.6, 0.6, 0.6), 0.4), 0.02, None)
+    for (x, y) in ((x1 - 5.3, -6), (x1 - 5.3, 15)):
+        pole = mat((0.25, 0.27, 0.27), 0.55)
+        cyl("фонарь", 0.08, g, g + 6.2, x, y, pole, 10)
+        tube("кронштейн_фонаря", [(x, y, g + 6.08), (x - 0.22, y, g + 6.25),
+                                  (x - 0.58, y, g + 6.28)], 0.036, pole)
+        box("фонарь_голова", x - 0.78, y - 0.12, g + 6.23, x - 0.38, y + 0.12, g + 6.34, pole, 0.025, None)

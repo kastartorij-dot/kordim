@@ -80,11 +80,15 @@ func _update_value() -> void:
 	var axis := Vector3(spec.axis[0], spec.axis[1], spec.axis[2])
 	value = relative.basis.get_euler().dot(axis) if spec.kind == "rotate" else relative.origin.dot(axis)
 
-func restore_state(state: Dictionary) -> void:
+func restore_state(state: Dictionary, legacy_furniture: bool = false) -> void:
 	is_moving = false
 	blocked = false
 	is_open = state.is_open
 	is_locked = state.is_locked
+	if legacy_furniture:
+		transform = base_transform * _offset(spec.opened if is_open else spec.closed)
+		_update_value()
+		return
 	position = Vector3(state.pos_x, state.pos_y, state.pos_z)
 	rotation = Vector3(state.rot_x, state.rot_y, state.rot_z)
 	_update_value()

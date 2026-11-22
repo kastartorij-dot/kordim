@@ -71,8 +71,9 @@ for ob in list(bpy.context.scene.objects):
         # Исходная створка уже сдвинута на 0,45; это промежуточное положение.
         groups[-1][2]["initial_value"] = 0
     elif ob.type == "EMPTY" and parent == "Холодильник" and base.startswith("дверь_"):
-        movable(ob, "Морозилка" if base == "дверь_морозилка" else "Холодильник",
-                "rotate", 0, math.radians(100), (0, 1, 0))
+        freezer = base == "дверь_морозилка"
+        movable(ob, "Морозилка" if freezer else "Холодильник",
+                "rotate", 0, math.radians(100 if freezer else 80), (0, 1, 0))
     elif ob.type == "EMPTY" and base == "дверца" and parent == "Тумба_СВЧ":
         movable(ob, "Дверца тумбы", "rotate", 0, math.radians(95), (0, 1, 0))
 
@@ -123,9 +124,35 @@ def merge(parts, name, pivot):
 curtains = [(bpy.data.objects["штора_1"], Vector((CURTAIN_X, 0, 0))),
             (bpy.data.objects["штора_2"], Vector((CURTAIN_X, W, 0)))]
 moving_parts = {ob for parts, _, _ in groups for ob in parts} | {ob for ob, _ in curtains}
-exported = [merge([ob for ob in meshes if ob not in moving_parts], "Общага", Vector((0, 0, 0)))]
+furniture_names = {
+    "Кровать": "Кровать у стола", "Кровать.001": "Кровать у лоджии",
+    "Стол": "Письменный стол", "Комод": "Комод", "Шкаф": "Шкаф",
+    "Тумба_СВЧ": "Тумба СВЧ", "Столик": "Чёрный столик",
+    "Холодильник": "Холодильник", "Тумбочка": "Тумбочка",
+    "Стул": "Стул у стола", "Стул.001": "Стул у столика",
+}
+furniture = {}
+for source, label in furniture_names.items():
+    root = bpy.data.objects[source]
+    descendants = set(root.children_recursive)
+    parts = [ob for ob in meshes if ob in descendants and ob not in moving_parts]
+    for group_parts, _, spec in groups:
+        if group_parts[0] in descendants:
+            spec["furniture"] = label
+    furniture[label] = (parts, root.matrix_world.translation.copy())
+    root.name = "Исходник " + source
+furniture_parts = {ob for parts, _ in furniture.values() for ob in parts}
+exported = [merge([ob for ob in meshes if ob not in moving_parts | furniture_parts],
+                  "Комната и двор", Vector((0, 0, 0)))]
+parents = {label: merge(parts, label, pivot) for label, (parts, pivot) in furniture.items()}
+exported.extend(parents.values())
 for parts, pivot, spec in groups:
-    exported.append(merge(parts, spec["node"], pivot))
+    ob = merge(parts, spec["node"], pivot)
+    if "furniture" in spec:
+        parent = parents[spec["furniture"]]
+        ob.parent = parent
+        ob.location = pivot - furniture[spec["furniture"]][1]
+    exported.append(ob)
 for i, (ob, pivot) in enumerate(curtains):
     exported.append(merge([ob], "Curtain_%s" % i, pivot))
 bpy.ops.object.select_all(action="DESELECT")

@@ -10,7 +10,8 @@
       0.0,
       -1.0
     ],
-    "initial_open": false
+    "initial_open": false,
+    "furniture": "Письменный стол"
   },
   {
     "node": "Moving_01",
@@ -23,7 +24,8 @@
       0.0,
       -1.0
     ],
-    "initial_open": false
+    "initial_open": false,
+    "furniture": "Письменный стол"
   },
   {
     "node": "Moving_02",
@@ -36,7 +38,8 @@
       0.0,
       -1.0
     ],
-    "initial_open": false
+    "initial_open": false,
+    "furniture": "Письменный стол"
   },
   {
     "node": "Moving_03",
@@ -49,7 +52,8 @@
       0.0,
       -1.0
     ],
-    "initial_open": false
+    "initial_open": false,
+    "furniture": "Комод"
   },
   {
     "node": "Moving_04",
@@ -62,7 +66,8 @@
       0.0,
       -1.0
     ],
-    "initial_open": false
+    "initial_open": false,
+    "furniture": "Комод"
   },
   {
     "node": "Moving_05",
@@ -75,7 +80,8 @@
       0.0,
       -1.0
     ],
-    "initial_open": false
+    "initial_open": false,
+    "furniture": "Комод"
   },
   {
     "node": "Moving_06",
@@ -89,7 +95,8 @@
       -1.0
     ],
     "initial_open": true,
-    "initial_value": 0
+    "initial_value": 0,
+    "furniture": "Шкаф"
   },
   {
     "node": "Moving_07",
@@ -103,7 +110,8 @@
       -1.0
     ],
     "initial_open": false,
-    "initial_value": 0
+    "initial_value": 0,
+    "furniture": "Шкаф"
   },
   {
     "node": "Moving_08",
@@ -116,7 +124,8 @@
       0.0,
       -4.371138828673793e-08
     ],
-    "initial_open": false
+    "initial_open": false,
+    "furniture": "Тумба СВЧ"
   },
   {
     "node": "Moving_09",
@@ -129,20 +138,22 @@
       1,
       0
     ],
-    "initial_open": false
+    "initial_open": false,
+    "furniture": "Тумба СВЧ"
   },
   {
     "node": "Moving_10",
     "label": "Холодильник",
     "kind": "rotate",
     "closed": 0,
-    "opened": 1.7453292519943295,
+    "opened": 1.3962634015954636,
     "axis": [
       0,
       1,
       0
     ],
-    "initial_open": false
+    "initial_open": false,
+    "furniture": "Холодильник"
   },
   {
     "node": "Moving_11",
@@ -155,7 +166,8 @@
       1,
       0
     ],
-    "initial_open": false
+    "initial_open": false,
+    "furniture": "Холодильник"
   },
   {
     "node": "Moving_12",
@@ -168,7 +180,8 @@
       0.0,
       -4.371138828673793e-08
     ],
-    "initial_open": false
+    "initial_open": false,
+    "furniture": "Тумбочка"
   },
   {
     "node": "Moving_13",
@@ -181,7 +194,8 @@
       0.0,
       -4.371138828673793e-08
     ],
-    "initial_open": false
+    "initial_open": false,
+    "furniture": "Тумбочка"
   },
   {
     "node": "Moving_14",

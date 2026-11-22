@@ -37,6 +37,8 @@ const VIEWS := [
 	[Vector3(4.0, 0.95, -1.85), Vector3(0, 1.2, -0.25)],
 	[Vector3(5.35, 1.62, -0.9), Vector3(35, 1.62, -0.9)],
 	[Vector3(0.85, 1.62, -0.65), Vector3(0.5, 1.05, -0.23)],
+	[Vector3(4.42, 1.70, -1.02), Vector3(26.8, 0.0, -0.35)],
+	[Vector3(6.15, 1.62, -1.02), Vector3(24, -1.75, -0.35)],
 ]
 
 func _ready() -> void:
@@ -46,19 +48,11 @@ func _ready() -> void:
 	for arg in args:
 		if arg == "--inspect" or arg.begins_with("--shot="):
 			walk_enabled = false
-	var path := "res://models/общага.glb"
-	if not ResourceLoader.exists(path):
-		push_error("Сначала соберите models/общага.glb: blender --background --python blender/экспорт.py")
-		get_tree().quit(1)
-		return
-	var packed: PackedScene = load(path)
-	var room := packed.instantiate()
-	add_child(room)
-	loaded_room = room
+	loaded_room = $Модель
 	_build_trees()
 	if walk_enabled:
-		_build_interactions(room)
-		_build_collisions(room)
+		_build_interactions(loaded_room)
+		_build_collisions(loaded_room)
 	var environment := WorldEnvironment.new()
 	var env := Environment.new()
 	env.background_mode = Environment.BG_SKY
@@ -98,7 +92,7 @@ func _ready() -> void:
 	ceiling_light.shadow_enabled = true
 	add_child(ceiling_light)
 	bedside_light = OmniLight3D.new()
-	bedside_light.position = Vector3(4.25, 0.83, -1.375) # Перед рассеивателем, чтобы он не перекрывал собственный свет.
+	bedside_light.position = _furniture_point("Тумбочка", Vector3(-0.35, 0.83, 0))
 	bedside_light.light_color = Color(1.0, 0.18, 0.48)
 	bedside_light.light_energy = 0.3
 	bedside_light.omni_range = 2.2
@@ -273,7 +267,11 @@ func _build_accent_lighting() -> void:
 			mesh.set_surface_override_material(surface, light_materials[key])
 	# Горизонтальная лента за столом до кровати и лента над её щитом.
 	# Ограниченный радиус и тени оставляют углы и полку тёмными.
-	for at in [Vector3(1.65, 0.86, -0.10), Vector3(2.50, 0.86, -0.10), Vector3(3.60, 1.08, -0.08)]:
+	for at in [
+		_furniture_point("Письменный стол", Vector3(-0.225, 0.86, -0.10)),
+		_furniture_point("Письменный стол", Vector3(0.625, 0.86, -0.10)),
+		_furniture_point("Кровать у стола", Vector3(0.245, 1.08, -0.08)),
+	]:
 		var light := OmniLight3D.new()
 		light.position = at
 		light.light_energy = 0.24
@@ -423,10 +421,11 @@ func _build_interactions(room: Node3D) -> void:
 		var mesh_node := room.find_child(spec.node, true, false) as MeshInstance3D
 		assert(mesh_node != null, "В GLB отсутствует подвижный узел: " + spec.node)
 		var body := AnimatableBody3D.new()
-		body.name = spec.node
 		body.set_script(load("res://scripts/movable.gd"))
-		room.add_child(body)
+		var parent := mesh_node.get_parent()
+		parent.add_child(body)
 		body.configure(mesh_node, spec)
+		body.name = spec.node
 		interactables.append(body)
 
 func _interaction_target() -> Node3D:
@@ -444,6 +443,7 @@ func _show_status(message: String) -> void:
 func save_walk(path: String = SAVE_PATH) -> Error:
 	var data := ConfigFile.new()
 	data.set_value("walk", "version", 1)
+	data.set_value("walk", "furniture_local", true)
 	data.set_value("walk", "lighting", lighting_mode)
 	data.set_value("walk", "lamp_color", lamp_color)
 	data.set_value("walk", "strip_mode", strip_mode)
@@ -468,8 +468,10 @@ func load_walk(path: String = SAVE_PATH) -> Error:
 	var saved_player = data.get_value("walk", "player")
 	var pitch = data.get_value("walk", "camera_pitch")
 	var items = data.get_value("walk", "items")
+	var furniture_local = data.get_value("walk", "furniture_local", false)
 	if data.get_value("walk", "version", 0) != 1 or not saved_player is Transform3D or not pitch is float or not items is Dictionary:
 		return ERR_INVALID_DATA
+	if not furniture_local is bool: return ERR_INVALID_DATA
 	for item in interactables:
 		var state = items.get(item.spec.node)
 		if state == null: continue # новые узлы остаются в начальной позе старого сохранения
@@ -496,20 +498,27 @@ func load_walk(path: String = SAVE_PATH) -> Error:
 	player.jump_queued = false
 	camera.rotation.x = clampf(pitch, -1.45, 1.45)
 	for item in interactables:
-		if items.has(item.spec.node): item.restore_state(items[item.spec.node])
+		if items.has(item.spec.node):
+			item.restore_state(items[item.spec.node], not furniture_local and item.spec.has("furniture"))
 	return OK
+
+func _furniture_point(label: String, offset: Vector3) -> Vector3:
+	var furniture := loaded_room.get_node(NodePath(label)) as Node3D
+	return to_local(furniture.to_global(offset))
 
 func _build_room_controls() -> void:
 	for entry in [
-		["Стул у стола", Vector3(2.0, 0.45, -0.85), Vector3(1.875, 1.15, 0.0), "chair", Vector3(0.50, 0.35, 0.50)],
-		["Стул у столика", Vector3(0.85, 0.45, -2.3), Vector3(0.85, 1.15, -3.2), "chair", Vector3(0.50, 0.35, 0.50)],
-		["Кровать у стола", Vector3(3.35, 0.45, -0.45), Vector3(1.6, 0.8, -0.45), "bed", Vector3(1.8, 0.18, 0.75)],
-		["Кровать у балкона", Vector3(3.35, 0.45, -2.75), Vector3(0.8, 0.8, -2.75), "bed", Vector3(1.8, 0.18, 0.75)]]:
-		var control := _add_room_control(entry[0], entry[1], entry[4], entry[3])
-		control.rest_target = entry[2]
+		["Стул у стола", Vector3(0, 0.45, 0), Vector3(-0.125, 1.15, 0.85), "chair", Vector3(0.50, 0.35, 0.50)],
+		["Стул у столика", Vector3(0, 0.45, 0), Vector3(0, 1.15, -0.9), "chair", Vector3(0.50, 0.35, 0.50)],
+		["Кровать у стола", Vector3(0, 0.45, -0.45), Vector3(-1.75, 0.8, -0.45), "bed", Vector3(1.8, 0.18, 0.75)],
+		["Кровать у лоджии", Vector3(0, 0.45, 0.45), Vector3(-2.55, 0.8, 0.45), "bed", Vector3(1.8, 0.18, 0.75)]]:
+		var furniture := loaded_room.get_node(NodePath(entry[0])) as Node3D
+		var control := _add_room_control(entry[0], to_local(furniture.to_global(entry[1])), entry[4], entry[3])
+		control.global_basis = furniture.global_basis.orthonormalized()
+		control.rest_target = furniture.to_global(entry[2])
 	# Проёмы и размеры по существующей Blender-сцене, без новых внешних зависимостей.
 	_add_room_control("Выключатель", Vector3(0.34, 1.09, -0.02), Vector3(0.13, 0.14, 0.07), "light")
-	_add_room_control("Ночник", Vector3(4.35, 0.72, -1.375), Vector3(0.18, 0.25, 0.18), "lamp")
+	_add_room_control("Ночник", _furniture_point("Тумбочка", Vector3(-0.25, 0.72, 0)), Vector3(0.18, 0.25, 0.18), "lamp")
 	for index in range(2):
 		var control := _add_room_control("Штора_%s" % index, Vector3(4.49, 1.3, -0.36 if index == 0 else -2.85), Vector3(0.18, 2.5, 0.75), "curtain")
 		control.cloth = loaded_room.find_child("Curtain_%s" % index, true, false)
@@ -538,7 +547,7 @@ func _add_room_control(label: String, at: Vector3, size: Vector3, kind: String) 
 
 func _build_trees() -> void:
 	var packed := load("res://models/дерево.glb") as PackedScene
-	for at in [Vector3(23, -10, -12), Vector3(22, -10, 20), Vector3(46, -10, 8), Vector3(45, -10, -30)]:
+	for at in [Vector3(46, -5, 8), Vector3(45, -5, -30)]:
 		var tree := packed.instantiate() as Node3D
 		add_child(tree)
 		tree.position = at
