@@ -441,7 +441,10 @@ func _interaction_target() -> Node3D:
 	var ray := PhysicsRayQueryParameters3D.create(origin, origin - camera.global_basis.z * 2.0, 11)
 	ray.collide_with_areas = true
 	var hit := get_world_3d().direct_space_state.intersect_ray(ray)
-	if not hit.is_empty() and (hit.collider in interactables or hit.collider in room_controls): return hit.collider
+	var collider := hit.get("collider") as Node3D
+	var area := collider as Area3D
+	if collider != null and (collider in interactables or (area != null and area in room_controls)):
+		return collider
 	return null
 
 func _show_status(message: String) -> void:
