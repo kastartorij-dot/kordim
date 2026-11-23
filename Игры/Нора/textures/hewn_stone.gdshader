@@ -11,7 +11,10 @@ void vertex() {
 }
 
 void fragment() {
-	vec3 slab = vec3(.243,.217,.182) * (.49 + COLOR.rgb*.66);
+	// Тёмный серый булыжник, как на концепте: у огня камень не должен выгорать в белый.
+	vec3 slab = mix(vec3(.243,.217,.182), vec3(.22), .35) * .52 * (.49 + COLOR.rgb*.66);
+	// Выше топки камень закопчён: чем выше от пола, тем темнее.
+	slab *= 1.0 - .34 * smoothstep(.9, 2.3, world_point.y);
 	float detail = grain(floor(world_point*88.0))-.5;
 	float grit = grain(floor(world_point*39.0+vec3(.24,.51,.9)))-.5;
 	float wear = sin(world_point.x*9.1+world_point.y*12.3)*sin(world_point.z*19.6-world_point.y*7.1);
