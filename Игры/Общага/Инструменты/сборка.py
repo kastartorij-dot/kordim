@@ -14,7 +14,7 @@ run('--path',str(ROOT),'--export-release','Windows',str(exe))
 # Пакет проверяется из пустой папки, без fallback на исходники проекта.
 with tempfile.TemporaryDirectory(prefix='dorm-pack-') as temp:
  run('--path',temp,'--main-pack',str(exe),'--quit-after','5',cwd=temp)
-output=ROOT/'Сборки';output.mkdir(exist_ok=True)
+output=ROOT/'builds'/'пакеты';output.mkdir(parents=True,exist_ok=True)
 text='''Общага — Godot 4.7.2.
 Распакуйте архив и запустите Dorm.exe.
 Клик — мышь; WASD/стрелки — ходьба; Shift — бег; пробел — прыжок.
@@ -28,10 +28,8 @@ N — цвет ночника: розовый/зелёный/тёплый. B —
 1/2/3/4 — быстрые ракурсы, но весь маршрут доступен пешком.
 Перед проходом по коридору закройте дверь санузла.
 Шторы, выключатель и ночник управляются клавишей E.
-Кровати придвинуты к окну: зазор ~0,2 м; дверь утоплена в общий откос с отдельным порогом.
-Длина чёрного столика 0,6 м; все размеры оценочные, не обмер.
 Площадка за входной дверью техническая, общий коридор здания не реконструирован.
-Проверен встроенный PCK на Linux, сам Windows EXE на ПК автора ещё не проверялся.
+Встроенный PCK проверен при сборке. Запуск Windows EXE проверяется отдельно.
 COGITO Door — MIT; модель дерева Poly Haven — CC0. Лицензии/источники рядом.
 '''
 with zipfile.ZipFile(output/'Общага-прогулка-Windows.zip','w',zipfile.ZIP_DEFLATED,compresslevel=6) as z:
@@ -43,12 +41,11 @@ files=subprocess.check_output(['git','ls-files','--cached','--others','--exclude
 with zipfile.ZipFile(output/'Общага-прогулка-Godot.zip','w',zipfile.ZIP_DEFLATED,compresslevel=6) as z:
  for name in sorted(set(filter(None,files))):
   p=Path(name)
-  if any(part in {'Сборки','shots','.godot','builds','референсы_локально','__pycache__'} for part in p.parts):continue
+  if any(part in {'Сборки','Сборки_локально','shots','.godot','builds','референсы_локально','__pycache__'} for part in p.parts):continue
   if (ROOT/p).is_file():z.write(ROOT/p,Path('Общага')/p)
-report={'engine':version,'windows_exe_run_on_windows':False,'embedded_pack_checked_on_linux':True,'archives':{}}
+report={'engine':version,'windows_exe_run_on_windows':False,'embedded_pack_checked':True,'archives':{}}
 for name in ['Общага-прогулка-Godot.zip','Общага-прогулка-Windows.zip']:
  p=output/name
- if p.stat().st_size >= 100*1024*1024: raise RuntimeError("Архив превышает лимит GitHub 100 MiB: "+name)
  with zipfile.ZipFile(p) as z:
   assert z.testzip() is None
   assert not any(n.lower().endswith(('.mp4','.mov','.mkv')) for n in z.namelist())

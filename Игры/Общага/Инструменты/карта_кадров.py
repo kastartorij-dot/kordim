@@ -18,7 +18,7 @@ def main():
     parser.add_argument("--videos", type=Path, required=True)
     parser.add_argument("--out", type=Path, default=ROOT / "референсы_локально")
     args = parser.parse_args()
-    rows = json.loads((ROOT / "Кадры.json").read_text(encoding="utf-8"))
+    rows = json.loads((ROOT / "Фото_референсы" / "Кадры.json").read_text(encoding="utf-8"))
     files = list(args.videos.rglob("*"))
     sources = {}
     for name in {r["video"] for r in rows}:
