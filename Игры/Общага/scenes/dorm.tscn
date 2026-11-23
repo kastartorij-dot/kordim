@@ -1,9 +1,16 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/dorm.gd" id="1"]
 [ext_resource type="PackedScene" path="res://models/общага.glb" id="2"]
 
 [ext_resource type="PackedScene" path="res://models/пиджак.glb" id="3"]
+
+[ext_resource type="PackedScene" path="res://models/предметы/sink.glb" id="4"]
+[ext_resource type="PackedScene" path="res://models/предметы/toilet.glb" id="5"]
+[ext_resource type="PackedScene" path="res://models/предметы/sneakers_black_striped.glb" id="6"]
+[ext_resource type="PackedScene" path="res://models/предметы/bag_with_bottles.glb" id="7"]
+[ext_resource type="PackedScene" path="res://models/предметы/microwave.glb" id="8"]
+[ext_resource type="PackedScene" path="res://models/предметы/electric_kettle.glb" id="9"]
 
 [sub_resource type="StandardMaterial3D" id="PegMaterial"]
 albedo_color = Color(0.43, 0.44, 0.46, 1)
@@ -34,5 +41,25 @@ mesh = SubResource("JacketPegMesh")
 [node name="Пиджак_в_шкафу" parent="Модель/Шкаф" instance=ExtResource("3")]
 position = Vector3(0.30, 1.952, 0.51)
 rotation = Vector3(0, 2.5132741, 0)
+
+[node name="Раковина" parent="Модель" instance=ExtResource("4")]
+position = Vector3(-2.3, 0.86, -1.525)
+
+[node name="Унитаз" parent="Модель" instance=ExtResource("5")]
+position = Vector3(-0.575, 0, -2.6)
+
+[node name="Чёрные_кроссовки" parent="Модель" instance=ExtResource("6")]
+position = Vector3(-0.95, 0.32, -0.16)
+
+[node name="Пакет_с_бутылками" parent="Модель" instance=ExtResource("7")]
+position = Vector3(-0.23, 0, -0.51)
+
+[node name="Микроволновка" parent="Модель/Тумба СВЧ" instance=ExtResource("8")]
+position = Vector3(0.21, 0.8, 0)
+rotation = Vector3(0, 1.5707964, 0)
+
+[node name="Чайник" parent="Модель/Тумба СВЧ" instance=ExtResource("9")]
+position = Vector3(0.14, 1.072, -0.09)
+rotation = Vector3(0, 1.5707964, 0)
 
 [editable path="Модель"]
