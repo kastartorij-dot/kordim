@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3]
+[gd_scene load_steps=27 format=3]
 
 [ext_resource type="Script" path="res://scripts/dorm.gd" id="1"]
 [ext_resource type="PackedScene" path="res://models/общага.glb" id="2"]
@@ -21,6 +21,38 @@
 [ext_resource type="PackedScene" path="res://models/утверждённые/corridor_ceiling_lamp.glb" id="HallLamp"]
 [ext_resource type="PackedScene" path="res://models/утверждённые/blue_wardrobe_bag.glb" id="WardrobeBag"]
 [ext_resource type="PackedScene" path="res://models/утверждённые/ironing_board_folded.glb" id="IroningBoard"]
+
+[ext_resource type="Texture2D" path="res://textures/плитка_санузла_вертикальная.png" id="BathTile"]
+
+[sub_resource type="StandardMaterial3D" id="BathWall"]
+albedo_texture = ExtResource("BathTile")
+roughness = 0.72
+uv1_triplanar = true
+uv1_scale = Vector3(1.45, 1.45, 1.45)
+
+[sub_resource type="StandardMaterial3D" id="ShowerChrome"]
+albedo_color = Color(0.78, 0.79, 0.81, 1)
+metallic = 0.82
+roughness = 0.24
+
+[sub_resource type="CylinderMesh" id="ShowerKnobMesh"]
+material = SubResource("ShowerChrome")
+top_radius = 0.017
+bottom_radius = 0.014
+height = 0.056
+radial_segments = 20
+
+[sub_resource type="StandardMaterial3D" id="CornerFacing"]
+albedo_color = Color(0.57, 0.51, 0.45, 1)
+roughness = 0.94
+
+[sub_resource type="BoxMesh" id="CornerPanel"]
+material = SubResource("CornerFacing")
+size = Vector3(0.26, 0.794, 0.42)
+
+[sub_resource type="BoxMesh" id="CornerBacking"]
+material = SubResource("CornerFacing")
+size = Vector3(0.24, 8.8, 0.40)
 
 [sub_resource type="StandardMaterial3D" id="PegMaterial"]
 albedo_color = Color(0.43, 0.44, 0.46, 1)
@@ -80,6 +112,54 @@ position = Vector3(-0.48, 1.6, -0.06)
 
 [node name="Санузел" parent="Модель" instance=ExtResource("Bath")]
 
+[node name="Торец_облицовки_лоджии" type="MeshInstance3D" parent="Модель"]
+position = Vector3(6.67, -0.6, 0.44)
+mesh = SubResource("CornerBacking")
+
+[node name="Панель_1" type="MeshInstance3D" parent="Модель/Торец_облицовки_лоджии"]
+position = Vector3(0, -4, 0)
+mesh = SubResource("CornerPanel")
+
+[node name="Панель_2" type="MeshInstance3D" parent="Модель/Торец_облицовки_лоджии"]
+position = Vector3(0, -3.2, 0)
+mesh = SubResource("CornerPanel")
+
+[node name="Панель_3" type="MeshInstance3D" parent="Модель/Торец_облицовки_лоджии"]
+position = Vector3(0, -2.4, 0)
+mesh = SubResource("CornerPanel")
+
+[node name="Панель_4" type="MeshInstance3D" parent="Модель/Торец_облицовки_лоджии"]
+position = Vector3(0, -1.6, 0)
+mesh = SubResource("CornerPanel")
+
+[node name="Панель_5" type="MeshInstance3D" parent="Модель/Торец_облицовки_лоджии"]
+position = Vector3(0, -0.8, 0)
+mesh = SubResource("CornerPanel")
+
+[node name="Панель_6" type="MeshInstance3D" parent="Модель/Торец_облицовки_лоджии"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("CornerPanel")
+
+[node name="Панель_7" type="MeshInstance3D" parent="Модель/Торец_облицовки_лоджии"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("CornerPanel")
+
+[node name="Панель_8" type="MeshInstance3D" parent="Модель/Торец_облицовки_лоджии"]
+position = Vector3(0, 1.6, 0)
+mesh = SubResource("CornerPanel")
+
+[node name="Панель_9" type="MeshInstance3D" parent="Модель/Торец_облицовки_лоджии"]
+position = Vector3(0, 2.4, 0)
+mesh = SubResource("CornerPanel")
+
+[node name="Панель_10" type="MeshInstance3D" parent="Модель/Торец_облицовки_лоджии"]
+position = Vector3(0, 3.2, 0)
+mesh = SubResource("CornerPanel")
+
+[node name="Панель_11" type="MeshInstance3D" parent="Модель/Торец_облицовки_лоджии"]
+position = Vector3(0, 4, 0)
+mesh = SubResource("CornerPanel")
+
 [node name="Белые_кроссовки" parent="Модель" instance=ExtResource("WhiteShoes")]
 position = Vector3(-0.62, 0.32, -0.15)
 
@@ -103,8 +183,17 @@ rotation = Vector3(0, 1.5707964, 0)
 [node name="Гладильная_доска" parent="Модель" instance=ExtResource("IroningBoard")]
 position = Vector3(4.542, 0, -0.26)
 
+[node name="Ручка_душевой_створки" type="MeshInstance3D" parent="Модель/Санузел"]
+position = Vector3(-1.419, 1.10, -1.764)
+rotation = Vector3(1.5707964, 0, 0)
+mesh = SubResource("ShowerKnobMesh")
+
+[node name="Wall_Panels" parent="Модель/Санузел/Bathroom_Architecture" index="2"]
+material_override = SubResource("BathWall")
+
 [node name="Toilet_Plumbing_Niche" parent="Модель/Санузел/Bathroom_Architecture" index="4"]
 position = Vector3(-0.5, 0, 0)
+material_override = SubResource("BathWall")
 
 [node name="Compact_Toilet" parent="Модель/Санузел" index="3"]
 position = Vector3(-0.5, 0, 0)

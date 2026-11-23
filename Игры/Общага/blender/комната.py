@@ -39,7 +39,7 @@ def wall_box(name, x1, y1, z1, x2, y2, z2, mat):
 def wallpaper():
     m = flat_mat("обои", (0.78, 0.75, 0.64), 0.92)
     from материалы import normal_map
-    normal_map(m, "обои_normal.png", 1.0)
+    normal_map(m, "обои_normal.png", 1.7)
     return m
 
 def curtain(name, y1, y2, x, z1, z2, mat, folds=7, depth=0.06, seed=1, lean=0.0):
@@ -312,7 +312,7 @@ def build():
                              (1.02, 1.08, 0.92, 2.18)):
         box("рама", xr, y1, z1, xr + 0.07, y2, z2, M["пвх"], 0.004, None)
     box("стекло_окна", xr + 0.03, 0.47, 0.92, xr + 0.034, 1.63, 2.18, M["стекло"], 0, None)
-    box("подоконник", L, 0.4, 0.83, xr, 1.85, 0.85, M["пвх"], 0, "y")
+    box("подоконник", L - 0.085, 0.38, 0.83, xr, 1.85, 0.85, M["плитка_розовая"], 0.003, "y")
     # откосы
     box("откос", L, 0.4, 0.85, xr, 0.41, 2.25, M["пвх"], 0, None); box("откос", xr - 0.02, 1.69, 0.85, xr, 1.7, 2.25, M["пвх"], 0, None)
     box("откос", L, 0.4, 2.24, xr, 1.7, 2.25, M["пвх"], 0, None)
@@ -342,10 +342,14 @@ def build():
     extrude2d("порог_балкона", [(L - 0.02, -0.02), (X2 + 0.18, -0.02),
               (X2 + 0.18, 0), (X2, THRESHOLD), (L + 0.18, THRESHOLD), (L - 0.02, 0)],
               "xz", 1.85, 2.6, M["пвх"], bevel=0.002)
-    # радиатор под окном: 6 секций
-    for i in range(6):
-        y = 1.15 + i * 0.08
-        box("секция", L - 0.10, y, 0.15, L - 0.025, y + 0.075, 0.7, M["пластик_белый"], 0.008, None)
+    # Узкие секции радиатора и щели верхней решётки.
+    for i in range(9):
+        y = 1.03 + i * 0.061
+        box("секция_радиатора", L - 0.10, y, 0.15, L - 0.035, y + 0.057, 0.665,
+            M["пластик_белый"], 0.006, None)
+        for x in (L - 0.101, L - 0.073, L - 0.045):
+            box("решётка_радиатора", x, y, 0.657, x + 0.009, y + 0.057, 0.693,
+                M["пластик_белый"], 0.001, None)
     # плинтус, кабель-канал, плафон, датчик, розетки, выключатель
     for (x1, y1, x2, y2) in ((0, 0, L, 0.015), (0, W - 0.015, L, W), (0.015, 0.95, 0.03, W), (0.015, 0, 0.03, 0.15), (L - 0.015, 0, L, 0.4), (FRAME_X - 0.015, 1.7, FRAME_X, 1.85)):
         box("плинтус", x1, y1, 0, x2, y2, 0.06, M["пвх"], 0.002, None)
@@ -357,10 +361,21 @@ def build():
         box("розетка", x, 0.0, 1.0, x + 0.075, 0.015, 1.075, M["пластик_белый"], 0.004, None)
     box("выключатель", 0.3, 0.0, 1.05, 0.38, 0.015, 1.13, M["пластик_белый"], 0.004, None)
 
+    for y, side in ((0.0, 1), (W, -1)):
+        plate = M["пластик_белый"]
+        dark = M["пластик_чёрный"]
+        x, z = 4.12, 1.22
+        box("накладка_розетки_у_кровати", x - 0.037, y, z - 0.037,
+            x + 0.037, y + side * 0.012, z + 0.037, plate, 0.004, None)
+        for offset in (-0.0095, 0.0095):
+            hole = cyl("гнездо_розетки", 0.0032, 0, 0.003, 0, 0, dark, 12, None, "y")
+            hole.location = (x + offset, y + side * 0.013, z)
+
     # ---------- мебель
-    bed_materials = dict(M); bed_materials["ольха"] = M["дуб_светлый"]
+    bed_materials = dict(M); bed_materials["ольха"] = wood_mat("шпон_щитов", "дуб_светлый_diff.jpg",
+                                                        "oak_veneer_01_rough.jpg", "oak_veneer_01_nor.jpg", 0.78, 0.025)
     place(кровать(bed_materials, лента=True, покрывало="одеяло_зелёное"), BED_CENTER, 0.0, 0, mirror_y=True)
-    place(кровать(bed_materials, покрывало="одеяло_зелёное", seed=7), BED_CENTER, W, 0)
+    place(кровать(bed_materials, покрывало="одеяло_зелёное", seed=7, низкое_изножье=True), BED_CENTER, W, 0)
     desk_width = 0.94
     стол_root = стол(M, ширина=desk_width); p = полка(M); p.parent = стол_root
     техника_на_стол(M, стол_root, ширина=desk_width)
@@ -376,7 +391,7 @@ def build():
     place(дверь_комнаты(M, открыта=80), 0.0, 0.55, 90)
     # мелочь: полка, шкаф, холодильник, столы, подоконник, тумбочка — blender/мелочь.py
     from мелочь import наполнить
-    наполнить(L, W, attach_details, стол_root, wardrobe, side_table, nightstand)
+    наполнить(L, W, attach_details, стол_root, wardrobe, nightstand)
     side_table.location.x += 0.21
     nightstand.location.x -= 0.13
     nightstand.location.y -= 0.04
@@ -425,7 +440,11 @@ def build():
     wall_box("лоджия_бок_1", LX, -0.25, 0, LX + 1.25, -0.12, H, M["стена_лоджии"])
     wall_box("лоджия_бок_2", LX, W + 0.12, 0, LX + 1.25, W + 0.25, H, M["стена_лоджии"])
     wall_box("парапет", LX + 1.13, -0.12, 0, LX + 1.25, W + 0.12, 1.0, M["стена_лоджии"])
-    box("парапет_плитка", LX + 1.0, -0.12, 1.0, LX + 1.3, W + 0.12, 1.03, M["плитка_розовая"], 0.003, None)
+    for i in range(12):
+        y1 = -0.12 + i * (W + 0.24) / 12
+        y2 = -0.12 + (i + 1) * (W + 0.24) / 12
+        box("плитка_подоконника_лоджии", LX + 1.0, y1 + 0.0015, 1.0,
+            LX + 1.3, y2 - 0.0015, 1.03, M["плитка_розовая"], 0.001, None)
     wall_box("потолок_лоджии", LX, -0.25, H, LX + 1.3, W + 0.25, H + 0.12, M["потолок"])
     frame = M["рамы_зелёные"]
     pane_width = (W + 0.24) / 4
@@ -448,8 +467,10 @@ def build():
         box("стойка_створки", x1, y, bottom, x2, y + rail, top, frame, 0.002, None, sash)
     for z in (bottom, top - rail):
         box("перекладина_створки", x1, start + rail, z, x2, end - rail, z + rail, frame, 0.002, None, sash)
+    sash_glass = glass_mat("тонированное_стекло_лоджии", (0.46, 0.71, 0.73), 0.10)
+    sash_glass.node_tree.nodes["Principled BSDF"].inputs["Alpha"].default_value = 0.29
     box("стекло_створки", x1 + 0.014, start + rail, bottom + rail,
-        x1 + 0.016, end - rail, top - rail, M["стекло"], 0, None, sash)
+        x1 + 0.016, end - rail, top - rail, sash_glass, 0, None, sash)
     box("ручка_створки", x1 - 0.014, start + 0.006, 1.63,
         x1, start + 0.028, 1.75, frame, 0.003, None, sash)
     interior = set(bpy.context.scene.objects)

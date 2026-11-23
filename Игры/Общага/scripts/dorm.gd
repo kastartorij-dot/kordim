@@ -21,6 +21,8 @@ var lamp_menu: Control
 var strip_mode := 0
 var strip_lights: Array[OmniLight3D] = []
 var light_materials := {}
+var screen_material: StandardMaterial3D
+var monitor_light: OmniLight3D
 const LAMP_COLORS := [Color(1.0, 0.12, 0.65), Color(0.22, 1.0, 0.35), Color(1.0, 0.73, 0.42), Color(0.25, 0.53, 1), Color(0.63, 0.32, 1), Color.WHITE]
 const LAMP_NAMES := ["Розовый", "Зелёный", "Тёплый", "Голубой", "Сиреневый", "Белый"]
 const STRIP_COLORS := [Color.BLACK, Color(1.0, 0.025, 0.08), Color(0.42, 0.08, 1.0)]
@@ -339,7 +341,12 @@ func _build_accent_lighting() -> void:
 	for mesh in loaded_room.find_children("*", "MeshInstance3D", true, false):
 		for surface in mesh.mesh.get_surface_count():
 			var material := mesh.get_active_material(surface) as StandardMaterial3D
-			if material == null or material.resource_name not in ["ночник", "лента", "лента_стол", "кулеры_пк"]: continue
+			if material == null: continue
+			if material.resource_name == "экран":
+				if screen_material == null: screen_material = material.duplicate()
+				mesh.set_surface_override_material(surface, screen_material)
+				continue
+			if material.resource_name not in ["ночник", "лента", "лента_стол", "кулеры_пк"]: continue
 			var key := material.resource_name
 			if not light_materials.has(key): light_materials[key] = material.duplicate()
 			mesh.set_surface_override_material(surface, light_materials[key])
@@ -347,20 +354,34 @@ func _build_accent_lighting() -> void:
 	# Ограниченный радиус и тени оставляют углы и полку тёмными.
 	for at in [
 		_furniture_point("Письменный стол", Vector3(-0.23, 0.79, -0.05)),
-		_furniture_point("Письменный стол", Vector3(0.18, 0.68, -0.66)),
-		_furniture_point("Кровать у стола", Vector3(0.245, 1.08, -0.08)),
+		_furniture_point("Письменный стол", Vector3(0.22, 0.80, -0.05)),
+		_furniture_point("Кровать у стола", Vector3(-0.48, 1.08, -0.07)),
+		_furniture_point("Кровать у стола", Vector3(0.30, 1.08, -0.07)),
+		_furniture_point("Кровать у стола", Vector3(0.88, 1.08, -0.43)),
 	]:
 		var light := OmniLight3D.new()
 		light.position = at
-		light.light_energy = 0.24
-		light.omni_range = 1.25
+		light.light_energy = 0.14
+		light.omni_range = 1.15
 		light.shadow_enabled = true
 		light.shadow_bias = 0.025
 		light.shadow_normal_bias = 0.08
 		add_child(light)
 		strip_lights.append(light)
 
+	monitor_light = OmniLight3D.new()
+	monitor_light.position = _furniture_point("Письменный стол", Vector3(-0.135, 0.96, 0.39))
+	monitor_light.light_color = Color(0.42, 0.62, 1.0)
+	monitor_light.light_energy = 0.12
+	monitor_light.omni_range = 0.76
+	add_child(monitor_light)
+
 func _update_accent_lighting() -> void:
+	monitor_light.visible = lighting_mode == 2
+	if screen_material != null:
+		screen_material.emission_enabled = lighting_mode == 2
+		screen_material.emission = Color(0.24, 0.36, 0.58)
+		screen_material.emission_energy_multiplier = 0.7
 	var lamp_tint: Color = LAMP_COLORS[lamp_preview if lamp_preview >= 0 else lamp_color]
 	bedside_light.visible = lamp_on
 	bedside_light.light_color = lamp_tint

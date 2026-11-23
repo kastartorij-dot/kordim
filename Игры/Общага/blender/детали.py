@@ -67,10 +67,9 @@ def у_стола(ширина):
         v = pad.data.vertices[loop.vertex_index].co
         pad.data.uv_layers.active.data[loop.index].uv = (0.5 - v.x / 0.254, 0.5 - v.y / 0.210)
     микрофон(1.875 + 0.41, 0.25, 0.75)
-    # Лента на передней и задней кромках, с продолжением к щиту кровати.
+    # Лента вдоль задней кромки стола, с продолжением к щиту кровати.
     red = emit_mat("лента_стол", (1.0, 0.08, 0.15), 5)
     left, right = 1.875 - ширина / 2, 1.875 + ширина / 2
-    box("лента_стол_перед", left, 0.620, 0.731, right, 0.627, 0.740, red, 0, None)
     box("лента_стол_сзади", left, 0.002, 0.746, right, 0.01, 0.754, red, 0, None)
     box("лента_к_кровати", right, 0.002, 0.746, 2.65, 0.01, 0.754, red, 0, None)
 
@@ -386,6 +385,21 @@ def двор(g, facade_x):
         x = facade_x - 5.5
         box("вазон", x - 0.54, y - 0.54, g + 0.046, x + 0.54, y + 0.54, g + 0.38, curb, 0.025, None)
         box("земля_вазона", x - 0.44, y - 0.44, g + 0.379, x + 0.44, y + 0.44, g + 0.385, soil, 0, None)
+    # Островок у торца кирпичного корпуса оставляет сквозную дорожку свободной.
+    bed = [(facade_x - 9.0, -17.0), (facade_x - 5.3, -17.0),
+           (facade_x - 4.35, -14.6), (facade_x - 5.1, -11.4),
+           (facade_x - 8.25, -11.7), (facade_x - 9.35, -14.4)]
+    _mesh("клумба_у_торца", [(bed, g + 0.044, g + 0.076)], grass)
+    shrub_colors = [hedge, mat((0.15, 0.28, 0.09), 0.93), mat((0.20, 0.12, 0.08), 0.95)]
+    for dx, y, radius, color in ((-8.2, -14.6, 0.72, 0), (-7.3, -15.5, 0.53, 1),
+                                  (-6.3, -14.1, 0.62, 0), (-7.0, -12.9, 0.58, 2),
+                                  (-5.7, -12.5, 0.41, 1)):
+        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=radius,
+                                            location=(facade_x + dx, y, g + radius * 0.6))
+        shrub = bpy.context.object
+        shrub.name = "куст_на_клумбе"
+        shrub.scale = (1.15, 0.88, 0.78)
+        shrub.data.materials.append(shrub_colors[color])
     vegetation = random.Random(23)
     for y in (*range(-16, 6, 2), *range(12, 61, 2)):
         for dy in (0.35, 0.91, 1.46):
@@ -483,7 +497,7 @@ def двор(g, facade_x):
 
     trunk = mat((0.16, 0.11, 0.072), 0.95)
     needles = mat((0.075, 0.17, 0.10), 0.95)
-    for x, y, height in ((facade_x-2.2, -13.2, 6.4), (facade_x-2.2, -8.8, 5.0),
+    for x, y, height in ((facade_x-7.4, -14.3, 2.8), (facade_x-2.2, -13.2, 6.4), (facade_x-2.2, -8.8, 5.0),
                          (facade_x-2.2, 14.5, 4.8), (facade_x+3.5, -18.9, 5.8),
                          (facade_x+7.7, -18.7, 6.2), (facade_x+12, -18.4, 5.4),
                          (31, 32.7, 6.1), (34, 35.2, 7.2), (25.1, 62.1, 7.0)):

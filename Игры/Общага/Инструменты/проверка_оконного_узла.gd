@@ -56,12 +56,12 @@ func run() -> void:
  if not check(is_equal_approx(door.rotation.y, deg_to_rad(-80.0)), "Старая поза прячет стекло за откосом"): return
  # Подоконник и поднятый порог существуют как отдельные поверхности.
  var space: PhysicsDirectSpaceState3D = scene.get_world_3d().direct_space_state
- for entry in [[Vector3(4.9, 1.2, -1.3), 0.85], [Vector3(5.1, 0.6, -2.15), 0.10], [Vector3(4.9, 1.2, -1.84), 0.85]]:
+ for entry in [[Vector3(4.9, 1.2, -1.3), 0.85], [Vector3(5.1, 0.6, -2.15), 0.10], [Vector3(4.9, 1.2, -1.84), 0.85], [Vector3(4.55, 1.2, -1.6), 0.85]]:
   var origin: Vector3 = entry[0]
   var ray := PhysicsRayQueryParameters3D.create(origin, origin - Vector3(0, 0.7, 0), 1)
   var hit: Dictionary = space.intersect_ray(ray)
   if not check(not hit.is_empty() and absf(hit.position.y - entry[1]) < 0.015, "Нет отдельного подоконника/порога"): return
- var before_sill := PhysicsRayQueryParameters3D.create(Vector3(4.58, 1.2, -1.6), Vector3(4.58, 0.76, -1.6), 1)
- if not check(space.intersect_ray(before_sill).is_empty(), "Подоконник выступает за плоскость стены"): return
+ var before_sill := PhysicsRayQueryParameters3D.create(Vector3(4.50, 1.2, -1.6), Vector3(4.50, 0.76, -1.6), 1)
+ if not check(space.intersect_ray(before_sill).is_empty(), "Подоконник заходит в плоскость шторы"): return
  print("Оконный узел OK: шторы за щитами, глубина проёма, ход двери, отдельный подоконник/порог")
  quit()
