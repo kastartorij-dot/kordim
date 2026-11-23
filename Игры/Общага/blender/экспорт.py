@@ -97,6 +97,10 @@ movable(balcony_parts[0], "Балконная дверь", "rotate", 0, -math.ra
 groups[-1][2]["clamp_saved_pose"] = True
 groups[-1] = (balcony_parts, groups[-1][1], groups[-1][2])
 
+sash = bpy.data.objects["Створка_лоджии"]
+movable(sash, "Левая створка лоджии", "slide", 0, sash["ход"], (0, 0, 1))
+groups[-1][2]["clamp_saved_pose"] = True
+
 meshes = [ob for ob in bpy.context.scene.objects if ob.type == "MESH"]
 bpy.ops.object.select_all(action="DESELECT")
 for ob in meshes:

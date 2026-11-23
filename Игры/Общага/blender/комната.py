@@ -427,11 +427,31 @@ def build():
     wall_box("парапет", LX + 1.13, -0.12, 0, LX + 1.25, W + 0.12, 1.0, M["стена_лоджии"])
     box("парапет_плитка", LX + 1.0, -0.12, 1.0, LX + 1.3, W + 0.12, 1.03, M["плитка_розовая"], 0.003, None)
     wall_box("потолок_лоджии", LX, -0.25, H, LX + 1.3, W + 0.25, H + 0.12, M["потолок"])
-    for y in [-0.12 + i * (W + 0.24) / 4 for i in range(5)]:
-        box("рама_лоджии", LX + 1.15, y - 0.025, 1.03, LX + 1.2, y + 0.025, H, M["рамы_зелёные"], 0.003, None)
-    box("рама_лоджии_низ", LX + 1.15, -0.12, 1.03, LX + 1.2, W + 0.12, 1.09, M["рамы_зелёные"], 0.003, None)
-    box("рама_лоджии_верх", LX + 1.15, -0.12, H - 0.06, LX + 1.2, W + 0.12, H, M["рамы_зелёные"], 0.003, None)
-    box("стекло_лоджии", LX + 1.17, -0.12, 1.09, LX + 1.172, W + 0.12, H - 0.06, M["стекло"], 0, None)
+    frame = M["рамы_зелёные"]
+    pane_width = (W + 0.24) / 4
+    edges = [-0.12 + i * pane_width for i in range(5)]
+    bottom, top = 1.09, H - 0.06
+    for y in edges:
+        box("рама_лоджии", LX + 1.17, y - 0.025, bottom, LX + 1.2, y + 0.025, top, frame, 0.003, None)
+    box("рама_лоджии_низ", LX + 1.13, edges[0], 1.03, LX + 1.2, edges[-1], bottom, frame, 0.003, None)
+    box("рама_лоджии_верх", LX + 1.13, edges[0], top, LX + 1.2, edges[-1], H, frame, 0.003, None)
+    for left, right in zip(edges[:3], edges[1:4]):
+        box("стекло_лоджии", LX + 1.18, left, bottom, LX + 1.182, right, top, M["стекло"], 0, None)
+
+    # Изнутри лоджии больший Blender Y находится слева. Створка идёт вправо
+    # по внутренней направляющей и проходит перед соседним стеклом.
+    sash = empty("Створка_лоджии")
+    sash["ход"] = pane_width
+    start, end = edges[3] + 0.006, edges[4] - 0.006
+    x1, x2, rail = LX + 1.135, LX + 1.163, 0.032
+    for y in (start, end - rail):
+        box("стойка_створки", x1, y, bottom, x2, y + rail, top, frame, 0.002, None, sash)
+    for z in (bottom, top - rail):
+        box("перекладина_створки", x1, start + rail, z, x2, end - rail, z + rail, frame, 0.002, None, sash)
+    box("стекло_створки", x1 + 0.014, start + rail, bottom + rail,
+        x1 + 0.016, end - rail, top - rail, M["стекло"], 0, None, sash)
+    box("ручка_створки", x1 - 0.014, start + 0.006, 1.63,
+        x1, start + 0.028, 1.75, frame, 0.003, None, sash)
     interior = set(bpy.context.scene.objects)
     вид(L, W)   # окружение по OpenStreetMap — детали.py
     for ob in set(bpy.context.scene.objects) - interior:

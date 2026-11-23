@@ -30,18 +30,21 @@ func _run() -> void:
 	player.position = Vector3(5.4, 0.03, -1.6)
 	await physics_frame
 	await physics_frame
-	if not _check(scene.interactables.size() == 18, "Ожидались 16 подвижных узлов"): return
+	if not _check(scene.interactables.size() == 19, "Ожидались 19 подвижных узлов"): return
 	var room_door: Node3D
 	var bathroom_door: Node3D
 	var drawer: Node3D
+	var sash: Node3D
 	for item in scene.interactables:
 		if item.spec.label == "Дверь в комнату": room_door = item
 		if item.spec.label == "Дверь санузла": bathroom_door = item
 		if item.spec.label == "Ящик · Комод": drawer = item
+		if item.spec.label == "Левая створка лоджии": sash = item
 		var original: Transform3D = item.transform
 		item.toggle()
 		await _settle(item)
 		if not _check(not item.blocked and not item.moving, "Не завершён ход: " + item.spec.label): return
+		if item == sash and not _check(item.position.z > original.origin.z and is_equal_approx(item.position.x, original.origin.x), "Левая створка должна сдвигаться вправо по направляющей"): return
 		var expected: float = item.spec.opened if item.opened else item.spec.closed
 		if not _check(is_equal_approx(item.value, expected), "Не достигнута конечная поза"): return
 		if not _check(not item.transform.is_equal_approx(original), "Меш не движется"): return
@@ -49,6 +52,12 @@ func _run() -> void:
 		await _settle(item)
 		if item.spec.has("initial_value"): continue # шкаф первоначально приоткрыт, возврат до упора
 		if not _check(item.transform.is_equal_approx(original), "Нет возврата в исходную позу"): return
+	if not _check(sash != null, "Не найдена левая створка лоджии"): return
+	player.position = Vector3(5.78, 0.03, -2.85)
+	await physics_frame
+	await physics_frame
+	scene.camera.look_at(sash.global_transform * sash.collision.shape.get_debug_mesh().get_aabb().get_center())
+	if not _check(scene._interaction_target() == sash, "Луч не выбирает створку с лоджии"): return
 	# Закрытая комнатная дверь блокирует проход; открытая пропускает.
 	room_door.toggle()
 	await _settle(room_door)
@@ -111,5 +120,5 @@ func _run() -> void:
 	if not _check(player.position.z < -1.55, "Игрок застрял на пороге санузла"): return
 	await _walk(player, Vector3.BACK, 27)
 	if not _check(player.position.z > -0.95, "Игрок застрял при выходе из санузла"): return
-	print("Взаимодействия OK: 18 узлов, оба положения, коллизии дверей, коридор туда/обратно, луч, защита игрока, порог санузла")
+	print("Взаимодействия OK: 19 узлов, оба положения, коллизии дверей, коридор туда/обратно, луч, защита игрока, порог санузла")
 	quit()

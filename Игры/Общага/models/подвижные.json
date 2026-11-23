@@ -249,5 +249,19 @@
     ],
     "initial_open": false,
     "clamp_saved_pose": true
+  },
+  {
+    "node": "Moving_18",
+    "label": "Левая створка лоджии",
+    "kind": "slide",
+    "closed": 0,
+    "opened": 0.8600000000000001,
+    "axis": [
+      0,
+      0,
+      1
+    ],
+    "initial_open": false,
+    "clamp_saved_pose": true
   }
 ]

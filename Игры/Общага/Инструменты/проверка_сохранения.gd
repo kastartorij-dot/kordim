@@ -50,5 +50,5 @@ func _run() -> void:
 	if not _check(scene.load_walk(TEST_SAVE) == ERR_INVALID_DATA, "Принято неполное сохранение"): return
 	if not _check(scene.player.transform.is_equal_approx(player_pose), "Повреждённый файл изменил игрока"): return
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_SAVE))
-	print("Сохранение OK: игрок, камера, 18 состояний COGITO, отсутствующий/неполный файл")
+	print("Сохранение OK: игрок, камера, %d состояний COGITO, отсутствующий/неполный файл" % scene.interactables.size())
 	quit()
