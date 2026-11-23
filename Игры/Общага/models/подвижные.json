@@ -241,12 +241,13 @@
     "label": "Балконная дверь",
     "kind": "rotate",
     "closed": 0,
-    "opened": -1.5707963267948966,
+    "opened": -1.3962634015954636,
     "axis": [
       0,
       1,
       0
     ],
-    "initial_open": false
+    "initial_open": false,
+    "clamp_saved_pose": true
   }
 ]

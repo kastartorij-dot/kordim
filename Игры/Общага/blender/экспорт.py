@@ -92,7 +92,9 @@ movable(entry_parts[0], "Входная дверь", "rotate", 0, math.radians(9
 groups[-1] = (entry_parts, groups[-1][1], groups[-1][2])
 
 balcony_parts = [ob for ob in bpy.context.scene.objects if ob.type == "MESH" and ob.name.split(".")[0] in ("рама_балк", "стекло_балк", "панель_балк", "ручка_балк")]
-movable(balcony_parts[0], "Балконная дверь", "rotate", 0, -math.pi / 2, (0, 1, 0), pivot=(FRAME_X + 0.035, 2.6, 0))
+movable(balcony_parts[0], "Балконная дверь", "rotate", 0, -math.radians(80), (0, 1, 0), pivot=(FRAME_X + 0.035, 2.6, 0))
+# Стекло остаётся перед откосом, в том числе после загрузки старого сохранения.
+groups[-1][2]["clamp_saved_pose"] = True
 groups[-1] = (balcony_parts, groups[-1][1], groups[-1][2])
 
 meshes = [ob for ob in bpy.context.scene.objects if ob.type == "MESH"]
@@ -175,7 +177,8 @@ for material in {mat for ob in exported for mat in ob.data.materials}:
     bsdf = next((n for n in material.node_tree.nodes if n.type == "BSDF_PRINCIPLED"), None)
     if bsdf and bsdf.inputs["Transmission Weight"].default_value > 0.5:
         bsdf.inputs["Transmission Weight"].default_value = 0
-        bsdf.inputs["Alpha"].default_value = 0.14 if bsdf.inputs["Roughness"].default_value < 0.1 else 0.35
+        if bsdf.inputs["Alpha"].default_value >= 1.0:
+            bsdf.inputs["Alpha"].default_value = 0.14 if bsdf.inputs["Roughness"].default_value < 0.1 else 0.35
         material.surface_render_method = "DITHERED"
 
 path = os.path.join(ROOT, "models", "общага.glb")

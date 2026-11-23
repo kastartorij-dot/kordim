@@ -37,6 +37,8 @@ func run() -> void:
    if material != null and material.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED:
     if not check(material.cull_mode == BaseMaterial3D.CULL_DISABLED and material.albedo_color.a < 0.5,
                   "Остекление балконной двери непрозрачно с одной стороны"): return
+    if not check(material.albedo_color.a > 0.25 and material.albedo_color.b > material.albedo_color.r + 0.12,
+                  "Стекло балконной двери сливается с белым откосом"): return
     transparent_surfaces += 1
  if not check(transparent_surfaces == 1, "Ожидается одна прозрачная поверхность двери"): return
  var shape: Shape3D = door.collision.shape
@@ -45,12 +47,21 @@ func run() -> void:
   # ConvexPolygonShape3D использует координаты подвижного узла.
   for point in (shape as ConvexPolygonShape3D).points:
    if not check((pose * point).x > 4.45, "Полотно пересекает кровать"): return
+ # Старое сохранение с открытой на 90° дверью должно оставить стекло перед откосом.
+ var old_pose: Transform3D = door.base_transform * door._offset(-PI / 2)
+ var old_angles := old_pose.basis.get_euler()
+ door.restore_state({"is_open": true, "is_locked": false,
+                     "pos_x": old_pose.origin.x, "pos_y": old_pose.origin.y, "pos_z": old_pose.origin.z,
+                     "rot_x": old_angles.x, "rot_y": old_angles.y, "rot_z": old_angles.z})
+ if not check(is_equal_approx(door.rotation.y, deg_to_rad(-80.0)), "Старая поза прячет стекло за откосом"): return
  # Подоконник и поднятый порог существуют как отдельные поверхности.
  var space: PhysicsDirectSpaceState3D = scene.get_world_3d().direct_space_state
- for entry in [[Vector3(4.9, 1.2, -1.3), 0.85], [Vector3(5.1, 0.6, -2.15), 0.10], [Vector3(4.9, 1.2, -1.84), 0.83]]:
+ for entry in [[Vector3(4.9, 1.2, -1.3), 0.85], [Vector3(5.1, 0.6, -2.15), 0.10], [Vector3(4.9, 1.2, -1.84), 0.85]]:
   var origin: Vector3 = entry[0]
   var ray := PhysicsRayQueryParameters3D.create(origin, origin - Vector3(0, 0.7, 0), 1)
   var hit: Dictionary = space.intersect_ray(ray)
   if not check(not hit.is_empty() and absf(hit.position.y - entry[1]) < 0.015, "Нет отдельного подоконника/порога"): return
+ var before_sill := PhysicsRayQueryParameters3D.create(Vector3(4.58, 1.2, -1.6), Vector3(4.58, 0.76, -1.6), 1)
+ if not check(space.intersect_ray(before_sill).is_empty(), "Подоконник выступает за плоскость стены"): return
  print("Оконный узел OK: шторы за щитами, глубина проёма, ход двери, отдельный подоконник/порог")
  quit()

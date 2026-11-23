@@ -92,3 +92,8 @@ func restore_state(state: Dictionary, legacy_furniture: bool = false) -> void:
 	position = Vector3(state.pos_x, state.pos_y, state.pos_z)
 	rotation = Vector3(state.rot_x, state.rot_y, state.rot_z)
 	_update_value()
+	if spec.get("clamp_saved_pose", false):
+		var limited := clampf(value, minf(spec.closed, spec.opened), maxf(spec.closed, spec.opened))
+		if not is_equal_approx(value, limited):
+			transform = base_transform * _offset(limited)
+			_update_value()

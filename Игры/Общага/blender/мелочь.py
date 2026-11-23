@@ -249,6 +249,30 @@ def ряд(x1, x2, y, z, seed, плотность=0.75, hmax=0.28, weights=(5, 3
         n += 1
     return n
 
+def кубик_рубика(x, y, z):
+    """Кубик 3×3 с цветными наклейками и тёмными швами."""
+    size = 0.064
+    half = size / 2
+    center = (x, y, z + half)
+    body_min = [value - half for value in center]
+    body_max = [value + half for value in center]
+    box("Кубик_Рубика", *body_min, *body_max, mat(PAL["чёрный"], 0.56), 0.0012)
+    for axis, negative, positive in ((0, "красный", "оранж"), (1, "синий", "зелёный"),
+                                     (2, "белый", "жёлтый")):
+        u, v = (index for index in range(3) if index != axis)
+        for side, color in ((-1, negative), (1, positive)):
+            sticker_mat = mat(PAL[color], 0.48)
+            face = center[axis] + side * half
+            for row in (-1, 0, 1):
+                for column in (-1, 0, 1):
+                    low, high = list(center), list(center)
+                    low[axis], high[axis] = sorted((face, face + side * 0.0005))
+                    for index, offset in ((u, row), (v, column)):
+                        mid = center[index] + offset * size / 3
+                        low[index], high[index] = mid - 0.0097, mid + 0.0097
+                    box("наклейка_кубика", *low, *high, sticker_mat, 0)
+
+
 def наполнить(L, W, attach, desk, wardrobe, side_table, nightstand):
     """Раскладка мелочи по комнате (оси комнаты — см. комната.py)."""
     _mats.clear()   # материалы прошлой сборки уже удалены вместе со сценой
@@ -265,8 +289,8 @@ def наполнить(L, W, attach, desk, wardrobe, side_table, nightstand):
     attach(side_table, кружка, 0.65, W - 0.2, 0.75, "бирюза")
     attach(side_table, cyl, "тарелка", 0.1, 0.75, 0.765, 0.98, W - 0.25, mat(PAL["голубой"], 0.2), 32)
     attach(side_table, пакет, 1.0, W - 0.42, 0.75, 0.08, 0.07, "белый", 3)
-    # подоконник: стакан и коробка
-    стакан(L - 0.0, 1.2, 0.85)
-    коробка(L + 0.02, 1.4, 0.85, 0.1, 0.1, 0.12, "жёлтый", "белый", 0.3)
+    # подоконник: стакан и кубик Рубика
+    стакан(L + 0.06, 1.2, 0.85)
+    кубик_рубика(L + 0.095, 1.4, 0.85)
     # тумбочка у окна: зелёная кружка, как на видео 4
     attach(nightstand, кружка, L - 0.33, 1.2, 0.6, "зелёный")
