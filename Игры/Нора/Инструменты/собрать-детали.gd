@@ -53,6 +53,8 @@ func _build() -> void:
 		"hearth": _hearth(),
 		"smoke": _smoke(),
 		"porch": _porch(),
+		"wood-store": _wood_store(),
+		"chopping-block": _chopping_block(),
 		"rafters": _rafters(),
 		"roof": _roof(),
 		"curtains": _curtains(),
@@ -648,15 +650,121 @@ func _porch() -> Node3D:
 	var reed := _fabric(Color(.36,.288,.192),Color(.225,.175,.109),.72)
 	var mat := _mesh(root,"Плетёный_коврик",_cloth(Vector2(.81,.47),.013,.31),reed,Vector3(1.55,.062,2.75))
 	mat.rotation.y = .023
-	var bark := _mat(Color(.275,.201,.132),.95)
-	var stump_profile := [Vector2(.35,0),Vector2(.34,.045),Vector2(.292,.082),Vector2(.264,.211),Vector2(.252,.362),Vector2(.256,.435),Vector2(0,.442)]
-	_mesh(root,"Чурбан_для_дров",_lathe(stump_profile,21,0,2.6),bark,Vector3(4.345,.006,4.129))
-	var top := _lathe([Vector2(0,0),Vector2(.251,0),Vector2(.241,.014),Vector2(0,.019)],24)
-	_mesh(root,"Срез_чурбана",top,board,Vector3(4.345,.449,4.129))
-	for i in 5:
-		var at := Vector3(3.70+.14*i,.025+rng.randf()*.034,4.21+(i%2)*.20)
-		var chip := _mesh(root,"Щепа_у_чурбана",_block(Vector3(.16,.029,.068),.008,Color.WHITE,i,.003),board,at)
-		chip.rotation.y = rng.randf_range(-1.2,1.2)
+	_doorstep(root)
+	return root
+
+func _doorstep(root: Node3D) -> void:
+	var step := _group(root,"Каменный_порог",Vector3(1.40,0,3.76))
+	var surface := SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var rows := PackedVector3Array([
+		Vector3(-.51,.039,-.253), Vector3(-.23,.047,-.259), Vector3(.19,.047,-.244), Vector3(.52,.031,-.239),
+		Vector3(-.545,.071,-.116), Vector3(-.23,.101,-.128), Vector3(.19,.102,-.117), Vector3(.551,.058,-.093),
+		Vector3(-.578,.029,.143), Vector3(-.26,.075,.169), Vector3(.22,.066,.175), Vector3(.572,.028,.140),
+		Vector3(-.503,-.016,.298), Vector3(-.30,-.008,.368), Vector3(.20,-.012,.329), Vector3(.482,-.020,.277),
+	])
+	for row in 3:
+		for col in 3:
+			var a := row*4+col
+			for index in [a,a+1,a+4,a+1,a+5,a+4]:
+				_point(surface,rows[index],Color.WHITE)
+	surface.generate_normals()
+	var slate := _mat(Color(.68,.65,.59),.96)
+	slate.albedo_texture = preload("res://textures/forest/trail.res")
+	slate.normal_enabled = true
+	slate.normal_texture = preload("res://textures/forest/trail_n.res")
+	slate.normal_scale = .32
+	slate.uv1_triplanar = true
+	slate.uv1_scale = Vector3.ONE*1.0
+	var rock := _mesh(step,"Плоский_обтёсанный_камень",surface.commit(),slate,Vector3.ZERO)
+	rock.create_trimesh_collision()
+	var sill := _furniture_finish(Color(.77,.67,.53))
+	_mesh(step,"Потёртый_деревянный_край",_block(Vector3(.98,.051,.123),.012,Color.WHITE,4.12,.004),
+		sill,Vector3(0,.040,-.197))
+
+func _wood_store() -> Node3D:
+	var root := _group(null,"Дрова_под_навесом")
+	var frame := _furniture_finish(Color(.72,.61,.48))
+	var upright := _furniture_finish(Color(.68,.58,.45),true)
+	var roofing := _furniture_finish(Color(.75,.65,.49))
+	roofing.set_shader_parameter("length_on_z",true)
+	for x in [-.837,.837]:
+		for z in [-.287,.29]:
+			var height := .935 if z < 0.0 else .760
+			_hewn_member(root,"Стойка",Vector3(x,-.038,z),Vector3(x,height,z),Vector2(.086,.093),upright)
+		_hewn_member(root,"Раскос",Vector3(x,.435,.267),Vector3(x,.842,-.233),Vector2(.049,.054),frame)
+	for z in [-.276,.263]:
+		var height := .891 if z < 0.0 else .728
+		_hewn_member(root,"Перекладина",Vector3(-.93,height,z),Vector3(.93,height,z),Vector2(.073,.075),frame)
+		_hewn_member(root,"Подкладка_под_дрова",Vector3(-.825,.066,z),Vector3(.825,.066,z),Vector2(.078,.077),frame)
+	for i in 11:
+		var cover := _mesh(root,"Доска_козырька",_block(Vector3(.174,.039,.749+.025*sin(i*2.4)),.009,Color.WHITE,1.7*i,.004),
+			roofing,Vector3(-.886+.177*i,.860+.006*cos(i*2.1),.017))
+		cover.rotation.x = .287
+		cover.set_instance_shader_parameter("board_shift",.58*sin(i*2.36))
+	var grain := _furniture_finish(Color(.94,.75,.52))
+	grain.set_shader_parameter("length_on_z",true)
+	grain.set_shader_parameter("fresh_cut",true)
+	for row in 4:
+		var count := 8 if row < 2 else 7
+		for i in count:
+			var key := row*8+i
+			var width := .177+.022*sin(key*2.4)
+			var height := .125+.026*cos(key*3.8)
+			var depth := .50+.119*sin(key*3.1)
+			var at := Vector3((float(i)-(count-1)*.5)*.192+.024*sin(key*2.7),.17+row*.139,.015+.025*sin(key*1.3))
+			var log := _mesh(root,"Колотое_полено",_split_log(width,height,depth,key),grain,at)
+			log.rotation = Vector3(.044*sin(key),.055*sin(key*1.15),.33*sin(key*2.8))
+			log.set_instance_shader_parameter("board_shift",.70*sin(key*3.90))
+	_solid(root,"Штабель",Vector3(0,.377,0),Vector3(1.78,.754,.67),"Дрова под отдельным деревянным навесом.")
+	return root
+
+func _split_log(width: float, height: float, depth: float, seed: int) -> ArrayMesh:
+	var profile := [
+		Vector2(-.47,-.40), Vector2(.34,-.43), Vector2(.51,-.12),
+		Vector2(.17,.49), Vector2(-.33,.41), Vector2(-.51,.11),
+	]
+	var points := PackedVector3Array()
+	for side in [-1.0,1.0]:
+		for i in profile.size():
+			var p: Vector2 = profile[i]
+			points.append(Vector3(width*(p.x+.077*sin(seed+i*3.1+side)),height*(p.y+.068*cos(i*3.8+side)),side*depth*.5+.014*sin(seed+i*2.7)))
+	var surface := SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for i in 6:
+		var j := (i+1)%6
+		var tone := Color(.62,.57,.48) if i in [0,1,5] else Color(.91,.86,.76)
+		for k in [i,i+6,j,j,i+6,j+6]:
+			_point(surface,points[k],tone)
+	for i in range(1,5):
+		for k in [0,i,i+1,6,7+i,6+i]:
+			_point(surface,points[k],Color(.99,.91,.76))
+	surface.generate_normals()
+	return surface.commit()
+
+func _chopping_block() -> Node3D:
+	var root := _group(null,"Колода_с_топором")
+	var bark := _furniture_finish(Color(.55,.47,.39),true)
+	var end := _furniture_finish(Color(.87,.75,.57))
+	var profile := [Vector2(.282,-.026),Vector2(.281,.035),Vector2(.251,.098),Vector2(.236,.234),Vector2(.244,.402)]
+	_mesh(root,"Кора_колоды",_lathe(profile,29,0,2.6),bark,Vector3.ZERO)
+	_mesh(root,"Потёртый_срез",_lathe([Vector2(.245,.398),Vector2(.236,.413),Vector2(0,.416)],29,0,2.6),end,Vector3.ZERO)
+	_solid(root,"Колода",Vector3(0,.198,0),Vector3(.468,.396,.47),"Колода для колки дров. В срезе оставлен топор.")
+	var axe := _group(root,"Топор_для_дров",Vector3(.014,.398,.022))
+	axe.rotation.y = -.32
+	var handle := PackedVector3Array([Vector3(.015,.104,0),Vector3(.087,.239,.006),Vector3(.179,.389,.012),Vector3(.261,.557,.023)])
+	var grip := _mat(Color(.44,.315,.193),.88)
+	_mesh(axe,"Топорище",_tube(handle,.019,11),grip,Vector3.ZERO)
+	var axe_iron := _mat(Color(.37,.358,.339),.63,.46)
+	var cheeks := _block(Vector3(.116,.105,.046),.013,Color.WHITE,.61,.003)
+	_mesh(axe,"Обух",cheeks,axe_iron,Vector3(.017,.110,0)).rotation.z = -.19
+	var edge := _block(Vector3(.104,.093,.021),.010,Color.WHITE,.62,.002)
+	var bit := _mesh(axe,"Лезвие_в_колоде",edge,axe_iron,Vector3(-.051,.058,0))
+	bit.rotation.z = .56
+	for i in 7:
+		var chip := _mesh(root,"Щепка",_block(Vector3(.077,.014,.042),.005,Color.WHITE,float(i),.003),end,
+			Vector3(.47*cos(i*2.38),.018,.35*sin(i*2.38)))
+		chip.rotation.y = i*1.7
 	return root
 
 func _curtains() -> Node3D:

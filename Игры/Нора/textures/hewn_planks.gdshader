@@ -5,6 +5,7 @@ uniform sampler2D grain_normal : hint_normal, filter_linear_mipmap_anisotropic, 
 uniform bool roof_deck = false;
 uniform bool floor_wear = false;
 uniform bool furniture_wear = false;
+uniform bool fresh_cut = false;
 uniform bool vertical_grain = false;
 uniform bool length_on_z = false;
 uniform vec4 tint : source_color = vec4(.83,.68,.51,1.0);
@@ -55,6 +56,10 @@ void fragment() {
 		vec2 radial = vec2(wood_point.y, length_on_z ? wood_point.x : wood_point.z);
 		float rings = sin(length(radial*vec2(1.31,.94)+vec2(.019,-.021))*177.0+scratch*1.4);
 		surface *= mix(vec3(1.0),vec3(.90+(.085*rings)),transverse_face);
+		if (fresh_cut) {
+			vec3 sapwood = vec3(.48,.30,.16)*(.77+.18*rings+.22*scuff+seed*.13);
+			surface = mix(surface,sapwood,transverse_face*.71);
+		}
 	}
 	ALBEDO = surface * (wear + (scuff-.36)*.15 + seed*.145) * mix(vec3(.88),COLOR.rgb,.45);
 	NORMAL_MAP = texture(grain_normal,grain_uv).rgb;

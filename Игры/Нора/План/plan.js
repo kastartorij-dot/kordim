@@ -117,9 +117,9 @@ function siteEntries() {
     entry('rack', 'Сушилка для шкур', 'Как появилась Нора',
       'За домом стоит жердь с двумя перекладинами. При первой встрече на ней сушатся две заячьи шкуры.',
       'Точное место за срубом и длина перекладин условные.', 'origin'),
-    entry('wood', 'Поленница', 'Канон и проза',
-      'Дрова у правой стены. Арн подходит от ручья сбоку, оставаясь за поленницей, а затем огибает угол к двери.',
-      'Рабочее пятно 0,50 × 1,50 м у правого торца.', 'canon'),
+    entry('wood', 'Поленница', 'Расстановка в Godot',
+      'Дрова сложены справа от входа под отдельным дощатым козырьком. Рядом колода с топором.',
+      'Пятно навеса около 1,95 × 0,78 м.', 'working'),
   ];
   if (period !== 'spring') {
     objects.push(
@@ -146,7 +146,7 @@ function faceEntries() {
       'Глухой бревенчатый торец у очага. Над ним двускатная крыша из дранки под толстым мхом, с выпуском брёвен на углах.',
       'Торец 7,00 м. Свесы скатов около 0,60 м с каждой стороны.', 'ref'),
     entry('right', 'Правый торец', 'Рабочий чертёж',
-      'В торце небольшое окно ближе к задней стене. Поленница стоит у стены ближе к входному фасаду.',
+      'В торце небольшое окно ближе к задней стене.',
       'Торец 7,00 м. Окно 0,70 × 0,60 м, подоконник на высоте 1,10 м.', 'ref'),
   ];
 }
@@ -316,8 +316,8 @@ function drawRoom(objects) {
     ${box([-1.8,3.98,1.6,.32],'furniture','rx="6"')}
     ${circle(x(-3.1),z(4),19,'class="furniture"')}
     ${circle(x(-3.1),z(4),13,'fill="none" stroke="#a6865c"')}
-    ${box([4.89,.85,.50,1.5],'furniture')}
-    ${[-.54,-.27,0,.27,.54].map(d => edge(4.65,.85+d,5.09,.85+d,'fine known')).join('')}
+    ${box(layout.site.wood,'furniture')}
+    ${circle(x(layout.site.choppingBlock[0]),z(layout.site.choppingBlock[1]),14,'class="furniture"')}
     ${fireplace} ${table} ${roomDetails} ${arn} ${hatch}
     ${period === 'spring' ? '' :
       obj('washing',room.washing,box(room.washing,'furniture') + circle(x(-2.015),z(3.11),8,'class="fine known"'),[-1.5,2.88]) +
@@ -326,7 +326,7 @@ function drawRoom(objects) {
     ${select('door',[1.4,3.39,1.2,.35])} ${dot('door',1.4,3.91)}
     ${label(x(1.4),z(4.27),'Вход','note')}
     ${label(x(-1.8),z(4.42),'Лавка и бочка','note')}
-    ${label(749,z(.85),'Дрова','note')}
+    ${label(x(3.43),z(4.60),'Дрова','note')}
     ${dimension(614,571,680,571,'1 м')}
   `,'План комнаты Норы с верстаком, отдельным алхимическим столом и свободным люком');
 }
@@ -413,16 +413,16 @@ function drawSite(objects) {
     ${outline('trail',track(trail,''))}
     ${outline('stream',polygon([...upper,...lower.slice().reverse()],''))}
     ${outline('rack',groundRect(-2.94,-5.44,2.37,.83,'',''))}
-    ${outline('wood',groundRect(4.5,-.02,.78,1.74,'',''))}
+    ${outline('wood',groundRect(2.46,3.60,1.95,.78,'',''))}
     ${note(-10.9,-18.2,'Ручей')} ${note(-3.55,-14.68,'Спуск за водой','end')}
     ${note(14.8,-20.1,'К ивняку ниже по течению')}
     ${note(-.35,2.38,'Нора · 9 × 7 м')} ${note(.30,5.12,'Вход','end')}
     ${note(-7.6,-5.09,'Сушилка')} ${note(12.2,2.8,'Поленница')}
     ${note(5.25,10.18,'Узкая тропа')} ${note(-10.8,4.9,'Лес')}
     ${track([[-6.1,-5.37],[-3.9,-5.37],[-2.8,-5.15]],'callout-line')}
-    ${track([[10.5,2.6],[7.7,2.6],[5.15,1.18]],'callout-line')}
+    ${track([[10.5,2.6],[7.7,2.6],[4.39,3.99]],'callout-line')}
     ${dot('house',0,.80)} ${dot('trail',6.38,7.91)} ${dot('stream',-6.35,-17.49)}
-    ${dot('rack',-4.48,-5.37)} ${dot('wood',6.4,1.82)}
+    ${dot('rack',-4.48,-5.37)} ${dot('wood',4.25,4.25)}
     ${dimension(x(-16),z(12.1),x(-11),z(12.1),'5 м')}
     ${label(x(16.7),z(12.1),'Фасад внизу','note','end')}
   `, 'Ближайшая территория Норы с тропой, уклоном и ручьём');
@@ -473,7 +473,7 @@ function drawFaces(objects) {
         line(face.x-103,base-17,face.x-86,base-17,'fine known'),
         line(face.x-103,base-7,face.x-86,base-7,'fine known'),
       ].join('') : '',
-      face.id === 'right' ? rect(face.x-(.85+.75)*scale,base-27,1.5*scale,27,'','fill="url(#woodstack)" stroke="#c39b69"') : '',
+      face.id === 'front' ? [rect(face.x+2.51*scale,base-25,1.84*scale,25,'','fill="url(#woodstack)" stroke="#c39b69"'),line(face.x+2.43*scale,base-28,face.x+4.46*scale,base-28,'fine known')].join('') : '',
     ].join('');
 
     return [
