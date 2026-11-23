@@ -1,0 +1,99 @@
+name: Проверка Общаги
+
+# Первый этап быстрый и без Godot: целостность models/общага.glb, ссылки на его
+# узлы из кода и данных, бюджеты размера. Второй гоняет все Инструменты/проверка_*.gd
+# в Godot headless. Ничего не публикует и не чинит — только красный или зелёный.
+
+on:
+  push:
+    paths:
+      - "Игры/Общага/**"
+      - ".github/workflows/dorm-check.yml"
+  pull_request:
+    paths:
+      - "Игры/Общага/**"
+      - ".github/workflows/dorm-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dorm-check-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Должна совпадать с версией в Игры/Общага/README.md и Инструменты/сборка.py (требует 4.7.x).
+  GODOT_VERSION: "4.7.2"
+
+jobs:
+  glb:
+    name: GLB и данные (без Godot)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Модель, подвижные узлы и бюджеты
+        run: python Игры/Общага/Инструменты/проверка_glb.py
+
+      - name: Окружение из OpenStreetMap
+        working-directory: Игры/Общага/blender
+        run: python проверка_окружения.py
+
+      - name: Ссылки между документами
+        run: python Игры/Общага/Инструменты/проверка_ссылок.py
+
+  godot:
+    name: Проверки Godot (headless)
+    needs: glb
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Кэш Godot
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/godot-bin
+          key: godot-${{ env.GODOT_VERSION }}-linux-x86_64
+
+      - name: Скачать Godot
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          base="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable"
+          zip="Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          mkdir -p "$HOME/godot-bin"
+          cd "$HOME/godot-bin"
+          curl -fsSL -O "$base/$zip"
+          curl -fsSL -O "$base/SHA512-SUMS.txt"
+          grep " $zip\$" SHA512-SUMS.txt | sha512sum -c -
+          unzip -q "$zip"
+          mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" godot
+          chmod +x godot
+          rm -f "$zip" SHA512-SUMS.txt
+
+      - name: Версия Godot
+        run: |
+          "$HOME/godot-bin/godot" --version
+
+      - name: Все проверки по очереди
+        run: python Игры/Общага/Инструменты/прогнать_проверки.py --godot "$HOME/godot-bin/godot"
+
+      - name: Логи проверок
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dorm-check-logs
+          path: Игры/Общага/builds/логи-проверок/
+          if-no-files-found: ignore

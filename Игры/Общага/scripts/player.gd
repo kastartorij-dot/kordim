@@ -124,5 +124,5 @@ func _physics_process(delta: float) -> void:
 	jump_queued = false
 	move_and_slide()
 	if position.y < -4:
-		position = Vector3(0.75, 0.1, -1.6)
+		position = Vector3(1.05, 0.08, -1.6)
 		velocity = Vector3.ZERO
