@@ -1,11 +1,34 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/dorm.gd" id="1"]
 [ext_resource type="PackedScene" path="res://models/общага.glb" id="2"]
+
+[ext_resource type="PackedScene" path="res://models/пиджак.glb" id="3"]
+
+[sub_resource type="StandardMaterial3D" id="PegMaterial"]
+albedo_color = Color(0.43, 0.44, 0.46, 1)
+metallic = 0.72
+roughness = 0.35
+
+[sub_resource type="CylinderMesh" id="JacketPegMesh"]
+material = SubResource("PegMaterial")
+top_radius = 0.008
+bottom_radius = 0.008
+height = 0.14
+radial_segments = 12
 
 [node name="Общага" type="Node3D"]
 script = ExtResource("1")
 
 [node name="Модель" parent="." instance=ExtResource("2")]
+
+[node name="Пиджак_Горного" parent="." instance=ExtResource("3")]
+position = Vector3(-1.5, 1.66, -0.12)
+rotation = Vector3(0, 3.1415927, 0)
+
+[node name="Настенный_крючок_пиджака" type="MeshInstance3D" parent="."]
+position = Vector3(-1.523, 1.589, -0.07)
+rotation = Vector3(1.5707964, 0, 0)
+mesh = SubResource("JacketPegMesh")
 
 [editable path="Модель"]
