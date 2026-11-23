@@ -2,6 +2,7 @@ extends Node3D
 ## Осмотр существующей Blender-сборки. Координаты Blender (x,y,z) → Godot (x,z,-y).
 
 var camera: Camera3D
+var smoking: Node3D
 var hint: Label
 var help_button: Button
 var lighting_mode := 0
@@ -139,6 +140,9 @@ func _ready() -> void:
 		player.add_child(camera)
 		player.camera = camera
 		camera.position.y = 1.62
+		smoking = preload("res://scripts/smoking_fp.gd").new()
+		smoking.name = "Руки"
+		camera.add_child(smoking)
 	else:
 		add_child(camera)
 	var layer := CanvasLayer.new()
@@ -152,7 +156,7 @@ func _ready() -> void:
 	hint.add_theme_constant_override("shadow_offset_x", 1)
 	hint.add_theme_constant_override("shadow_offset_y", 1)
 	if walk_enabled:
-		hint.text = "WASD / стрелки — идти · Клик — захват мыши · Shift — бежать · Пробел — прыжок · Ctrl — присесть · E — взаимодействовать\n1 — комната · 2 — у кровати · 3 — на лоджию · 4 — у двери · Esc — отпустить мышь · F11 — полный экран\nF5 — сохранить · F9 — загрузить · L — день / вечер / ночь · N — цвет ночника · B — подсветка · P — облегчённый свет"
+		hint.text = "WASD / стрелки — идти · Клик — захват мыши · Shift — бежать · Пробел — прыжок · Ctrl — присесть · E — взаимодействовать\n1 — комната · 2 — у кровати · 3 — на лоджию · 4 — у двери · Esc — отпустить мышь · F11 — полный экран\nF5 — сохранить · F9 — загрузить · L — день / вечер / ночь · N — цвет ночника · B — подсветка · P — облегчённый свет\nC — достать / убрать сигарету · F — затяжка · G — стряхнуть пепел"
 	else:
 		hint.text = "Осмотр · Клик — мышь · WASD — движение · Q/E — вниз/вверх · Shift — быстрее\n1 — комната · 2 — от кровати · 3 — лоджия · 4 — у двери · Esc — отпустить мышь"
 	layer.add_child(hint)
@@ -596,6 +600,7 @@ func load_walk(path: String = SAVE_PATH) -> Error:
 	if not saved_ceiling is bool or not curtains is Dictionary: return ERR_INVALID_DATA
 	for key in curtains:
 		if not key is String or not curtains[key] is bool: return ERR_INVALID_DATA
+	smoking.put_away()
 	lamp_color = saved_lamp
 	lamp_brightness = saved_brightness
 	strip_mode = saved_strip
