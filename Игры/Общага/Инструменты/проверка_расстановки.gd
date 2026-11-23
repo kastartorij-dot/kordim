@@ -25,7 +25,7 @@ func run() -> void:
 		checked_doors += 1
 	assert(checked_doors == 2)
 	var rest_area: Area3D = dorm.room_controls[0]
-	assert(rest_area.global_position.is_equal_approx(chair.to_global(Vector3(0, 0.45, 0))))
+	assert(rest_area.global_position.is_equal_approx(chair.to_global(Vector3(0, 0.45, 0.20))))
 	# Твёрдая боковина должна быть там же, где и сдвинутая видимая модель.
 	var side_point := fridge.to_global(Vector3(-0.26, 0.75, 0.3))
 	var ray := PhysicsRayQueryParameters3D.create(side_point - Vector3(0.09, 0, 0),

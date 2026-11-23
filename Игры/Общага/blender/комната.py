@@ -515,7 +515,7 @@ def свет(режим="день", ночник=False):
     if ночник:
         pink = flat_mat("ночник_горит", (1.0, 0.6, 0.95), 0.4, emit=(1.0, 0.3, 0.85))
         for ob in bpy.data.objects:
-            if ob.name.startswith("абажур"):
+            if ob.name.startswith("рассеиватель"):
                 ob.data.materials.clear(); ob.data.materials.append(pink)
         bpy.ops.object.light_add(type="POINT", location=(L - 0.2, 1.375, 0.72))
         l = bpy.context.object; l.data.energy = 45; l.data.shadow_soft_size = 0.07; l.data.color = (1.0, 0.35, 0.85)

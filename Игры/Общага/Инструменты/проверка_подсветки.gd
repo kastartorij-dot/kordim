@@ -23,7 +23,7 @@ func run() -> void:
 	root.add_child(scene)
 	await physics_frame
 	scene.player.set_physics_process(false)
-	if not check(scene.light_materials.size() == 3, "Не найдены материалы лампы и двух лент в GLB"): return
+	if not check(scene.light_materials.size() == 4, "Не найдены материалы лампы, лент и кулеров в GLB"): return
 	var lamp: StandardMaterial3D = scene.light_materials["ночник"]
 	if not check(not lamp.emission_enabled and not scene.bedside_light.visible, "Днём ночник должен быть выключен"): return
 	for material in scene.light_materials.values():
@@ -63,6 +63,29 @@ func run() -> void:
 	saved.set_value("walk", "lighting", 2)
 	saved.save(TEST_SAVE)
 	if not check(scene.load_walk(TEST_SAVE) == OK and scene.lamp_color == 0 and scene.strip_mode == 0, "Нарушена совместимость старых сохранений"): return
+	var fans: StandardMaterial3D = scene.light_materials["кулеры_пк"]
+	if not check(not fans.emission_enabled, "Кулеры должны гаснуть вместе с лентами"): return
+	for i in range(2):
+		scene._cycle_strip()
+		if not check(fans.emission_enabled and fans.emission == scene.light_materials["лента_стол"].emission, "Кулеры должны повторять цвет лент"): return
+
+	var menu: Control = scene.lamp_menu
+	menu.open()
+	if not check(menu.visible, "Меню ночника не открылось"): return
+	menu.swatches[4].mouse_entered.emit()
+	if not check(scene.lamp_color == 0 and scene.bedside_light.light_color == scene.LAMP_COLORS[4], "Наведение должно временно менять цвет"): return
+	menu.swatches[4].mouse_exited.emit()
+	if not check(scene.bedside_light.light_color == scene.LAMP_COLORS[0], "При уходе мыши должен вернуться выбранный цвет"): return
+	menu.swatches[4].pressed.emit()
+	menu.brightness.value = 40
+	if not check(is_equal_approx(scene.bedside_light.light_energy, 0.12), "Яркость ночника не применилась"): return
+	menu.power.pressed.emit()
+	key(KEY_ESCAPE)
+	if not check(not menu.visible and not scene.bedside_light.visible and scene.lighting_mode == 2, "Выключение ночника или закрытие меню нарушено"): return
+	if not check(scene.save_walk(TEST_SAVE) == OK, "Не записано состояние нового ночника"): return
+	scene._set_lighting(2)
+	if not check(scene.load_walk(TEST_SAVE) == OK and not scene.lamp_on and scene.lamp_color == 4 and is_equal_approx(scene.lamp_brightness, 0.4), "Не восстановлены питание, цвет или яркость ночника"): return
+
 	# Материалы импортированного ресурса не должны меняться вместе с экземпляром.
 	var pristine = load("res://models/общага.glb").instantiate()
 	for mesh in pristine.find_children("*", "MeshInstance3D", true, false):

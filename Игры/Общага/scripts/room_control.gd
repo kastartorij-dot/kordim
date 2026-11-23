@@ -11,7 +11,8 @@ func prompt() -> String:
 	if kind == "chair": return "E — сесть на стул"
 	if kind == "bed": return "E — лечь на кровать"
 	if kind == "curtain": return "E — %s штору" % ("раздвинуть" if closed else "задвинуть")
-	return "E — %s" % ("переключить ночник" if kind == "lamp" else "переключить свет")
+	if kind == "lamp": return "ЛКМ / E — настроить ночник"
+	return "E — переключить свет"
 func toggle() -> void:
 	if kind in ["chair", "bed"]:
 		if not scene.player.can_stand_at(scene.player.global_transform):
@@ -20,7 +21,7 @@ func toggle() -> void:
 		scene.player.start_rest(kind, global_position - Vector3(0, 0.45, 0), rest_target)
 		return
 	if kind == "curtain": set_closed(not closed)
-	elif kind == "lamp": scene._set_lighting(0 if scene.lighting_mode == 2 else 2)
+	elif kind == "lamp": scene.lamp_menu.open()
 	else: scene._set_lighting((scene.lighting_mode + 1) % 3)
 func set_closed(value: bool, immediate := false) -> void:
 	closed = value

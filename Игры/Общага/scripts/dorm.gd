@@ -13,11 +13,15 @@ var daylight: Array[Light3D] = []
 var ceiling_light: OmniLight3D
 var bedside_light: OmniLight3D
 var lamp_color := 0
+var lamp_brightness := 1.0
+var lamp_on := false
+var lamp_preview := -1
+var lamp_menu: Control
 var strip_mode := 0
 var strip_lights: Array[OmniLight3D] = []
 var light_materials := {}
-const LAMP_COLORS := [Color(1.0, 0.12, 0.65), Color(0.22, 1.0, 0.35), Color(1.0, 0.73, 0.42)]
-const LAMP_NAMES := ["розовый", "зелёный", "тёплый"]
+const LAMP_COLORS := [Color(1.0, 0.12, 0.65), Color(0.22, 1.0, 0.35), Color(1.0, 0.73, 0.42), Color(0.25, 0.53, 1), Color(0.63, 0.32, 1), Color.WHITE]
+const LAMP_NAMES := ["Розовый", "Зелёный", "Тёплый", "Голубой", "Сиреневый", "Белый"]
 const STRIP_COLORS := [Color.BLACK, Color(1.0, 0.025, 0.08), Color(0.42, 0.08, 1.0)]
 const STRIP_NAMES := ["выключена", "красная", "фиолетовая"]
 var shot_path := ""
@@ -57,6 +61,7 @@ func _ready() -> void:
 		if arg == "--inspect" or arg.begins_with("--shot="):
 			walk_enabled = false
 	loaded_room = $Модель
+	_tint_microwave()
 	_build_trees()
 	if walk_enabled:
 		_build_interactions(loaded_room)
@@ -99,7 +104,7 @@ func _ready() -> void:
 	ceiling_light.shadow_enabled = true
 	add_child(ceiling_light)
 	bedside_light = OmniLight3D.new()
-	bedside_light.position = _furniture_point("Тумбочка", Vector3(-0.35, 0.83, 0))
+	bedside_light.position = _furniture_point("Тумбочка", Vector3(-0.30, 0.82, 0.05))
 	bedside_light.light_color = Color(1.0, 0.18, 0.48)
 	bedside_light.light_energy = 0.3
 	bedside_light.omni_range = 2.2
@@ -125,6 +130,9 @@ func _ready() -> void:
 		add_child(camera)
 	var layer := CanvasLayer.new()
 	add_child(layer)
+	lamp_menu = preload("res://scripts/lamp_menu.gd").new()
+	lamp_menu.room = self
+	layer.add_child(lamp_menu)
 	hint = Label.new()
 	hint.position = Vector2(20, 18)
 	hint.add_theme_color_override("font_shadow_color", Color.BLACK)
@@ -169,7 +177,7 @@ func _ready() -> void:
 		if arg.begins_with("--view="): preset = clampi(int(arg.substr(7)), 1, VIEWS.size())
 		elif arg.begins_with("--shot="): shot_path = arg.substr(7)
 		elif arg.begins_with("--frames="): shot_frames = maxi(1, int(arg.substr(9)))
-		elif arg.begins_with("--lamp-color="): lamp_color = clampi(int(arg.substr(13)), 0, 2)
+		elif arg.begins_with("--lamp-color="): lamp_color = clampi(int(arg.substr(13)), 0, LAMP_COLORS.size() - 1)
 		elif arg.begins_with("--strip="): strip_mode = clampi(int(arg.substr(8)), 0, 2)
 	_set_view(preset)
 	for arg in args:
@@ -255,11 +263,22 @@ func _set_lighting(mode: int) -> void:
 	lighting_mode = mode % 3
 	for light in daylight: light.visible = lighting_mode == 0
 	ceiling_light.visible = lighting_mode == 1
-	bedside_light.visible = lighting_mode == 2
+	lamp_on = lighting_mode == 2
 	var day_ambient := 0.18 if daylight_prototype else 0.28
 	room_environment.ambient_light_energy = [day_ambient, 0.08, 0.015][lighting_mode]
 	sky_material.set_shader_parameter("lighting_mode", lighting_mode)
 	_update_accent_lighting()
+
+func _tint_microwave() -> void:
+	var microwave := loaded_room.get_node_or_null("Тумба СВЧ/Микроволновка")
+	if microwave == null: return
+	for mesh in microwave.find_children("*", "MeshInstance3D", true, false):
+		for surface in mesh.mesh.get_surface_count():
+			var material := mesh.get_active_material(surface) as StandardMaterial3D
+			if material == null or material.resource_name != "пластик_белый": continue
+			var casing := material.duplicate() as StandardMaterial3D
+			casing.albedo_color = Color("#24252a")
+			mesh.set_surface_override_material(surface, casing)
 
 func _build_accent_lighting() -> void:
 	# Готовые StandardMaterial3D и OmniLight3D Godot. Копии материалов только
@@ -267,7 +286,7 @@ func _build_accent_lighting() -> void:
 	for mesh in loaded_room.find_children("*", "MeshInstance3D", true, false):
 		for surface in mesh.mesh.get_surface_count():
 			var material := mesh.get_active_material(surface) as StandardMaterial3D
-			if material == null or material.resource_name not in ["ночник", "лента", "лента_стол"]: continue
+			if material == null or material.resource_name not in ["ночник", "лента", "лента_стол", "кулеры_пк"]: continue
 			var key := material.resource_name
 			if not light_materials.has(key): light_materials[key] = material.duplicate()
 			mesh.set_surface_override_material(surface, light_materials[key])
@@ -289,25 +308,28 @@ func _build_accent_lighting() -> void:
 		strip_lights.append(light)
 
 func _update_accent_lighting() -> void:
-	bedside_light.light_color = LAMP_COLORS[lamp_color]
+	var lamp_tint: Color = LAMP_COLORS[lamp_preview if lamp_preview >= 0 else lamp_color]
+	bedside_light.visible = lamp_on
+	bedside_light.light_color = lamp_tint
+	bedside_light.light_energy = 0.3 * lamp_brightness
 	for light in strip_lights:
 		light.visible = strip_mode != 0
 		light.light_color = STRIP_COLORS[strip_mode]
 	for key in light_materials:
 		var material := light_materials[key] as StandardMaterial3D
 		var is_lamp: bool = key == "ночник"
-		var enabled := lighting_mode == 2 if is_lamp else strip_mode != 0
-		var color: Color = LAMP_COLORS[lamp_color] if is_lamp else STRIP_COLORS[strip_mode]
+		var enabled := lamp_on if is_lamp else strip_mode != 0
+		var color: Color = lamp_tint if is_lamp else STRIP_COLORS[strip_mode]
 		material.emission_enabled = enabled
 		# Яркая середина рассеивателя почти белая на фото; окружающий свет цветной.
 		material.emission = color.lerp(Color.WHITE, 0.65) if is_lamp else color
-		material.emission_energy_multiplier = 2.8 if is_lamp else 2.0
+		material.emission_energy_multiplier = 2.8 * lamp_brightness if is_lamp else 2.0
 		material.albedo_color = Color(0.95, 0.95, 0.95) if is_lamp else (color if enabled else Color(0.45, 0.45, 0.43))
 
 func _cycle_lamp_color() -> void:
 	lamp_color = (lamp_color + 1) % LAMP_COLORS.size()
 	_update_accent_lighting()
-	_show_status("Цвет ночника: " + LAMP_NAMES[lamp_color] + (" · L — включить" if lighting_mode != 2 else ""))
+	_show_status("Цвет ночника: " + LAMP_NAMES[lamp_color])
 
 func _cycle_strip() -> void:
 	strip_mode = (strip_mode + 1) % STRIP_COLORS.size()
@@ -319,6 +341,13 @@ func _toggle_help() -> void:
 	help_button.text = "Скрыть управление [H]" if hint.visible else "Управление [H]"
 
 func _input(event: InputEvent) -> void:
+	if lamp_menu == null or lamp_menu.visible: return
+	if player != null and player.resting.is_empty() and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		var target := _interaction_target() as Area3D
+		if target != null and target in room_controls and target.kind == "lamp":
+			lamp_menu.open()
+			get_viewport().set_input_as_handled()
+			return
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.physical_keycode == KEY_N:
 			_cycle_lamp_color()
@@ -335,6 +364,7 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _unhandled_input(event: InputEvent) -> void:
+	if lamp_menu.visible: return
 	if player != null:
 		if event is InputEventKey and event.pressed and not event.echo:
 			if event.physical_keycode == KEY_F5:
@@ -457,6 +487,8 @@ func save_walk(path: String = SAVE_PATH) -> Error:
 	data.set_value("walk", "furniture_local", true)
 	data.set_value("walk", "lighting", lighting_mode)
 	data.set_value("walk", "lamp_color", lamp_color)
+	data.set_value("walk", "lamp_on", lamp_on)
+	data.set_value("walk", "lamp_brightness", lamp_brightness)
 	data.set_value("walk", "strip_mode", strip_mode)
 	var curtains := {}
 	for control in room_controls:
@@ -496,9 +528,16 @@ func load_walk(path: String = SAVE_PATH) -> Error:
 	var saved_strip = data.get_value("walk", "strip_mode", 0)
 	if not saved_lamp is int or saved_lamp < 0 or saved_lamp >= LAMP_COLORS.size(): return ERR_INVALID_DATA
 	if not saved_strip is int or saved_strip < 0 or saved_strip >= STRIP_COLORS.size(): return ERR_INVALID_DATA
+	var saved_power = data.get_value("walk", "lamp_on", saved_light == 2)
+	var saved_brightness = data.get_value("walk", "lamp_brightness", 1.0)
+	if not saved_power is bool or not saved_brightness is float or not is_finite(saved_brightness) or saved_brightness < 0.05 or saved_brightness > 1.0:
+		return ERR_INVALID_DATA
 	lamp_color = saved_lamp
+	lamp_brightness = saved_brightness
 	strip_mode = saved_strip
 	_set_lighting(saved_light)
+	lamp_on = saved_power
+	_update_accent_lighting()
 	var curtains = data.get_value("walk", "curtains", {})
 	if curtains is Dictionary:
 		for control in room_controls:
@@ -519,7 +558,7 @@ func _furniture_point(label: String, offset: Vector3) -> Vector3:
 
 func _build_room_controls() -> void:
 	for entry in [
-		["Стул у стола", Vector3(0, 0.45, 0), Vector3(-0.125, 1.15, 0.85), "chair", Vector3(0.50, 0.35, 0.50)],
+		["Стул у стола", Vector3(0, 0.45, 0.20), Vector3(0.20, 1.00, 1.00), "chair", Vector3(0.50, 0.35, 0.50)],
 		["Стул у столика", Vector3(0, 0.45, 0), Vector3(0, 1.15, -0.9), "chair", Vector3(0.50, 0.35, 0.50)],
 		["Кровать у стола", Vector3(0, 0.45, -0.45), Vector3(-1.75, 0.8, -0.45), "bed", Vector3(1.8, 0.18, 0.75)],
 		["Кровать у лоджии", Vector3(0, 0.45, 0.45), Vector3(-2.55, 0.8, 0.45), "bed", Vector3(1.8, 0.18, 0.75)]]:
@@ -529,7 +568,7 @@ func _build_room_controls() -> void:
 		control.rest_target = furniture.to_global(entry[2])
 	# Проёмы и размеры по существующей Blender-сцене, без новых внешних зависимостей.
 	_add_room_control("Выключатель", Vector3(0.34, 1.09, -0.02), Vector3(0.13, 0.14, 0.07), "light")
-	_add_room_control("Ночник", _furniture_point("Тумбочка", Vector3(-0.25, 0.72, 0)), Vector3(0.18, 0.25, 0.18), "lamp")
+	_add_room_control("Ночник", _furniture_point("Тумбочка", Vector3(-0.20, 0.70, 0.05)), Vector3(0.15, 0.21, 0.15), "lamp")
 	for index in range(2):
 		var control := _add_room_control("Штора_%s" % index, Vector3(4.49, 1.3, -0.36 if index == 0 else -2.85), Vector3(0.18, 2.5, 0.75), "curtain")
 		control.cloth = loaded_room.find_child("Curtain_%s" % index, true, false)
