@@ -192,11 +192,11 @@ mesh = SubResource("ShowerKnobMesh")
 material_override = SubResource("BathWall")
 
 [node name="Toilet_Plumbing_Niche" parent="Модель/Санузел/Bathroom_Architecture" index="4"]
-position = Vector3(-0.5, 0, 0)
+position = Vector3(-0.39, 0, 0)
 material_override = SubResource("BathWall")
 
 [node name="Compact_Toilet" parent="Модель/Санузел" index="3"]
-position = Vector3(-0.5, 0, 0)
+position = Vector3(-0.39, 0, 0)
 
 [editable path="Модель"]
 [editable path="Модель/Санузел"]

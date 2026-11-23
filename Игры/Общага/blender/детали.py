@@ -465,6 +465,10 @@ def двор(g, facade_x):
 
     fence_x = facade_x - 1.95
     секция_ограды((fence_x, -16), (fence_x, 27), g, 1.05, metal)
+    # Ограда заворачивает за торец, оставляя проход к боковой калитке.
+    секция_ограды((fence_x, -16), (fence_x, -18.15), g, 1.05, metal)
+    секция_ограды((fence_x, -18.15), (facade_x - 0.5, -18.15), g, 1.05, metal)
+    секция_ограды((facade_x - 0.5, -18.15), (facade_x - 0.5, -20.98), g, 1.05, metal)
     секция_ограды((6.3, left_gate), (11.7, left_gate), g, 1.55, metal)
     секция_ограды((12.3, left_gate), (17.4, left_gate), g, 1.55, metal, gate=True)
     секция_ограды((19.5, left_gate), (28.6, left_gate), g, 1.55, metal)

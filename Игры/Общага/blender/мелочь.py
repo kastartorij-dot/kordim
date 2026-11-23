@@ -3,7 +3,7 @@
 # цвета — с фото 1 и 2 (белые и голубые бутылки, голубая коробка, оранжево-чёрная упаковка, зелёные пачки).
 # Раскладка случайная, но с постоянным зерном — от запуска к запуску одинаковая.
 import bpy, math, random
-from мебель import box, cyl, soft, flat_mat, glass_mat
+from мебель import box, cyl, soft, flat_mat, glass_mat, tube
 
 _mats = {}
 def mat(color, rough=0.4, kind="plastic"):
@@ -84,9 +84,17 @@ def стакан(x, y, z, r=0.035, h=0.11):
     return 2 * r
 
 def кружка(x, y, z, тело="белый"):
-    cyl("кружка", 0.042, z, z + 0.095, x, y, mat(PAL[тело], 0.25), 24)
-    b = box("ручка", x + 0.04, y - 0.006, z + 0.02, x + 0.07, y + 0.006, z + 0.08, mat(PAL[тело], 0.25), 0.006, None)
-    return 0.1
+    glaze = mat(PAL[тело], 0.22)
+    profile = [(0.001, 0.003), (0.029, 0.003), (0.033, 0.006), (0.037, 0.015),
+               (0.039, 0.052), (0.042, 0.089), (0.042, 0.094), (0.040, 0.096),
+               (0.037, 0.094), (0.036, 0.089), (0.033, 0.026), (0.029, 0.013),
+               (0.001, 0.012)]
+    cup = lathe("керамическая кружка", profile, glaze, segs=64)
+    cup.location = (x, y, z)
+    handle = [(x, y - 0.037 - 0.034 * math.sin(math.pi * i / 24),
+               z + 0.048 + 0.029 * math.cos(math.pi * i / 24)) for i in range(25)]
+    tube("округлая ручка кружки", handle, 0.0058, glaze, None, 0.006)
+    return 0.12
 
 def стопка_бумаг(x, y, z, n=8):
     for i in range(n):
