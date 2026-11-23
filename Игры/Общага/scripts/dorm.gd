@@ -396,9 +396,11 @@ func _build_collisions(room: Node) -> void:
 	# Пакеты/бутылки у порога — мягкая бытовая мелочь, не непроходимая стена.
 	# Исключаем только их маленькую область; большие треугольники пола остаются.
 	var clutter := AABB(Vector3(-0.55, -0.05, -0.72), Vector3(0.60, 0.50, 0.72))
+	var clothing_root := room.get_node_or_null("Шкаф/Пиджак_в_шкафу")
 	for node in nodes:
 		var mesh_node: MeshInstance3D = node
 		if mesh_node.get_parent() in interactables or str(mesh_node.name).begins_with("Curtain_"): continue
+		if clothing_root != null and clothing_root.is_ancestor_of(mesh_node): continue
 		var triangles := mesh_node.mesh.get_faces()
 		for i in range(0, triangles.size(), 3):
 			var a: Vector3 = mesh_node.global_transform * triangles[i]
