@@ -97,6 +97,50 @@ def кирпич(n=1024):
             d.line((x0 + 0.9 * px, y0, x0 + 0.9 * px, y0 + 1.6 * px), fill=(30, 110, 105), width=5)
     return im
 
+def дом_55(n=768):
+    """Светлый кирпич, вертикали лоджий и отдельные окна, тайл 12 × 12 м."""
+    rng = random.Random(55)
+    im = Image.new("RGB", (n, n), (166, 157, 141))
+    d = ImageDraw.Draw(im)
+    px = n / 12
+    brick_width = round(0.25 * px)
+    brick_height = round(0.075 * px)
+    for row, y in enumerate(range(0, n, brick_height)):
+        for x in range(-(row % 2) * (brick_width // 2), n, brick_width):
+            tone = rng.randint(-7, 7)
+            d.rectangle((x, y, x + brick_width - 2, y + brick_height - 2),
+                        fill=(183 + tone, 173 + tone, 154 + tone))
+
+    def rect(x, y, w, h, color):
+        d.rectangle(tuple(round(value * px) for value in (x, y, x + w, y + h)), fill=color)
+
+    def glazing(x, y, width, height, panes):
+        rect(x, y, width, height, (210, 207, 197))
+        pane_width = width / panes
+        for pane in range(panes):
+            tone = rng.randint(67, 115)
+            rect(x + pane * pane_width + 0.04, y + 0.05, pane_width - 0.08, height - 0.10,
+                 (tone - 7, tone, tone + 7))
+
+    for x, width in ((0.55, 2.55), (6.50, 2.90)):
+        rect(x - 0.12, 0, width + 0.24, 12, (162, 156, 145))
+        for floor in range(4):
+            y = floor * 3
+            rect(x, y + 0.39, width, 2.20, (111, 108, 101))
+            if rng.random() > 0.18:
+                glazing(x + 0.10, y + 0.51, width - 0.20, 1.35, rng.choice((3, 4, 5)))
+            rect(x, y + 1.88, width, 0.71, rng.choice(((179, 175, 164), (194, 191, 182), (155, 151, 139))))
+            rect(x - 0.07, y + 2.59, width + 0.14, 0.13, (140, 134, 124))
+
+    for x, width in ((3.76, 1.42), (5.49, 0.66), (10.22, 1.16)):
+        for floor in range(4):
+            y = floor * 3 + 0.69
+            rect(x - 0.06, y - 0.07, width + 0.12, 1.47, (137, 128, 113))
+            glazing(x, y, width, 1.34, 2 if width > 1 else 1)
+            rect(x - 0.08, y + 1.35, width + 0.16, 0.09, (199, 193, 181))
+    return im
+
+
 if __name__ == "__main__":
     save(розы(), "пододеяльник_розы.png")
     save(узор_синий(), "пододеяльник_синий.png")
@@ -105,3 +149,4 @@ if __name__ == "__main__":
     save(панелька(False), "фасад_панелька.png")
     R.seed(7); save(панелька(True), "фасад_панелька_вечер.png")
     save(кирпич(), "фасад_кирпич.png")
+    save(дом_55(), "фасад_дом_55.png")

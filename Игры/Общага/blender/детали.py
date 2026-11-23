@@ -160,7 +160,7 @@ def в_коридоре():
 import json
 from окружение import VIEW, to_room, building_span, building_kind, is_own_building
 
-def _mesh(name, polys, m, uvtile=None, roof=None):
+def _mesh(name, polys, m, uvtile=None, roof=None, *, continuous_u=False):
     """polys: [([(x, y), ...], z1, z2)] — призмы, одним объектом."""
     import bmesh
     bm = bmesh.new()
@@ -172,6 +172,7 @@ def _mesh(name, polys, m, uvtile=None, roof=None):
         try:
             top = bm.faces.new(t)
             if roof: top.material_index = 1
+            u = 0.0
             for i in range(len(pts)):
                 j = (i + 1) % len(pts)
                 face = bm.faces.new((b[i], b[j], t[j], t[i]))
@@ -179,8 +180,11 @@ def _mesh(name, polys, m, uvtile=None, roof=None):
                     # Развёртка вдоль стены и вверх: этажи остаются горизонтальными
                     # и на повёрнутых контурах. На крышу текстура окон не идёт.
                     length = math.dist(pts[i], pts[j])
-                    coords = ((0, 0), (length / uvtile, 0),
-                              (length / uvtile, (z2 - z1) / uvtile), (0, (z2 - z1) / uvtile))
+                    next_u = u + length / uvtile
+                    height = (z2 - z1) / uvtile
+                    coords = ((u, 0), (next_u, 0), (next_u, height), (u, height))
+                    if continuous_u:
+                        u = next_u
                     for loop, coord in zip(face.loops, coords): loop[uv].uv = coord
         except ValueError:
             pass
@@ -566,7 +570,9 @@ def вид(L, W, вечер=False):
                         box("отлив_46к2", -width/2-0.10, 0, -0.045, width/2+0.10, outside*0.22, 0.025, bar_mat, 0, None, frame)
                         box("кирпичная_перемычка", -width/2-0.20, 0, 1.69, width/2+0.20, outside*0.075, 1.90, frame_mat, 0, None, frame)
         elif bid == "16237661":
-            _mesh("дом_55_светлый", [(pts,z1,z2)], pan, 9, mat((0.24,0.25,0.25),0.9))
+            facade_55 = img_mat("фасад_дом_55", "фасад_дом_55.png", 0.9)
+            _mesh("дом_55_светлый", [(pts, z1, z2)], facade_55, 12,
+                  mat((0.24, 0.25, 0.25), 0.9), continuous_u=True)
         else:
             groups[building_kind(t)].append((pts, z1, z2))
     roof = mat((0.22, 0.24, 0.24), 0.95)
