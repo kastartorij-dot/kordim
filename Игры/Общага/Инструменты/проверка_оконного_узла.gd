@@ -29,6 +29,16 @@ func run() -> void:
  for item in scene.interactables:
   if item.spec.label == "Балконная дверь": door = item
  if not check(door != null and door.position.x > 5.2, "Дверь не утоплена в проём"): return
+ var transparent_surfaces := 0
+ for node in door.find_children("*", "MeshInstance3D", true, false):
+  var visual := node as MeshInstance3D
+  for surface in range(visual.mesh.get_surface_count()):
+   var material := visual.get_active_material(surface) as BaseMaterial3D
+   if material != null and material.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED:
+    if not check(material.cull_mode == BaseMaterial3D.CULL_DISABLED and material.albedo_color.a < 0.5,
+                  "Остекление балконной двери непрозрачно с одной стороны"): return
+    transparent_surfaces += 1
+ if not check(transparent_surfaces == 1, "Ожидается одна прозрачная поверхность двери"): return
  var shape: Shape3D = door.collision.shape
  for angle in range(91):
   var pose: Transform3D = door.base_transform * door._offset(deg_to_rad(-angle))
@@ -37,7 +47,7 @@ func run() -> void:
    if not check((pose * point).x > 4.45, "Полотно пересекает кровать"): return
  # Подоконник и поднятый порог существуют как отдельные поверхности.
  var space: PhysicsDirectSpaceState3D = scene.get_world_3d().direct_space_state
- for entry in [[Vector3(4.9, 1.2, -1.3), 0.85], [Vector3(5.1, 0.6, -2.15), 0.10]]:
+ for entry in [[Vector3(4.9, 1.2, -1.3), 0.85], [Vector3(5.1, 0.6, -2.15), 0.10], [Vector3(4.9, 1.2, -1.84), 0.83]]:
   var origin: Vector3 = entry[0]
   var ray := PhysicsRayQueryParameters3D.create(origin, origin - Vector3(0, 0.7, 0), 1)
   var hit: Dictionary = space.intersect_ray(ray)
