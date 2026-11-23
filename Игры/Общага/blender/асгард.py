@@ -25,8 +25,8 @@ FLOOR_H = 3.45        # высота типового офисного этаж�
 OFFICE_FLOORS = 8
 H_MAIN = H_PLINTH + OFFICE_FLOORS * FLOOR_H  # 31.70 м
 H_PARAPET = H_MAIN + 0.60                    # 32.30 м
-H_CORNICE_BOT = H_MAIN - 0.55                # 31.15 м
-H_CORNICE_TOP = H_MAIN + 1.55                # 33.25 м
+H_CORNICE_BOT = H_MAIN - 1.10                  # 30.60 м
+H_CORNICE_TOP = H_MAIN + 0.72                  # 32.42 м
 
 # Зонирование 24-вершинного контура r7641833_308929943 из assets/osm/окрестности.json:
 # 0..6 — северный торец (смотрит на общагу), 7..15 — восточный фасад (Наличная ул.),

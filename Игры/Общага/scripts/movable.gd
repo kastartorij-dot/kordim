@@ -10,6 +10,7 @@ var moving: bool:
 	get: return is_moving
 var blocked := false
 var collision: CollisionShape3D
+var sweep_query := PhysicsShapeQueryParameters3D.new()
 
 func configure(mesh_node: MeshInstance3D, settings: Dictionary) -> void:
 	spec = settings
@@ -22,6 +23,9 @@ func configure(mesh_node: MeshInstance3D, settings: Dictionary) -> void:
 	collision = CollisionShape3D.new()
 	collision.shape = mesh_node.mesh.create_convex_shape(true, false)
 	add_child(collision)
+	sweep_query.shape = collision.shape
+	sweep_query.collision_mask = 4
+	sweep_query.margin = 0.015
 	is_open = spec.get("initial_open", false)
 	value = spec.get("initial_value", spec.opened if is_open else spec.closed)
 	base_transform = transform * _offset(value).affine_inverse()
@@ -45,10 +49,12 @@ func _offset(at: float) -> Transform3D:
 	return Transform3D(Basis.IDENTITY, axis * at)
 
 func toggle() -> void:
+	if is_locked: return
 	blocked = false
 	interact(self)
 
 func prompt() -> String:
+	if is_locked: return "Заперто"
 	if blocked: return "Проход занят · отойдите и нажмите E"
 	return "E — %s · %s" % ["закрыть" if is_open else "открыть", spec.label]
 
@@ -63,12 +69,8 @@ func _physics_process(delta: float) -> void:
 	var count := maxi(1, ceili(maxf(angle / deg_to_rad(1), previous.origin.distance_to(candidate.origin) / 0.01)))
 	for i in range(1, count + 1):
 		var pose := previous.interpolate_with(candidate, float(i) / count)
-		var query := PhysicsShapeQueryParameters3D.new()
-		query.shape = collision.shape
-		query.transform = get_parent().global_transform * pose
-		query.collision_mask = 4
-		query.margin = 0.015
-		if not get_world_3d().direct_space_state.intersect_shape(query, 1).is_empty():
+		sweep_query.transform = get_parent().global_transform * pose
+		if not get_world_3d().direct_space_state.intersect_shape(sweep_query, 1).is_empty():
 			blocked = true
 			is_moving = false
 			break

@@ -13,6 +13,7 @@ assert не завершает процесс: Godot печатает ошибк
 даёт ложные срабатывания (луч попадает в подвижный объект вместо выключателя).
 """
 import argparse
+import os
 import re
 import shutil
 import subprocess
@@ -78,7 +79,7 @@ def main():
     if not args.no_import:
         print("Импорт ресурсов Godot…", flush=True)
         code, out, timed_out, took = run_godot(
-            godot, root, ["--editor", "--import", "--quit"], args.import_timeout)
+            godot, root, ["--editor", "--import"], args.import_timeout)
         (log_dir / "00_импорт.log").write_text(out, encoding="utf-8")
         if timed_out or code != 0 or BAD.search(out):
             print(f"Импорт не удался ({'таймаут' if timed_out else f'код {code}, см. ошибки импорта в логе'}), {took:.0f} с. Хвост лога:")
@@ -104,6 +105,11 @@ def main():
             why = verdict(code, out, timed_out)
             print(f"{'ok  ' if why is None else 'FAIL'} {title}  ({took:.1f} с)" + (f" — {why}" if why else ""), flush=True)
             if why:
+                if os.environ.get("GITHUB_ACTIONS") == "true":
+                    details = next((line.strip() for line in reversed(out.splitlines())
+                                    if "ERROR" in line or "Assertion failed" in line), "")
+                    message = f"{title}: {why}" + (f" · {details}" if details else "")
+                    print("::error::" + message.replace("%", "%25"), flush=True)
                 print("     --- хвост вывода ---")
                 for line in out.splitlines()[-12:]:
                     print("     " + line)

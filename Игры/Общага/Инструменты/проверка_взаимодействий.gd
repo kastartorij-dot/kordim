@@ -95,5 +95,21 @@ func _run() -> void:
 	drawer.toggle()
 	await _settle(drawer)
 	if not _check(drawer.blocked and drawer.value > 0 and drawer.value < drawer.spec.opened, "Ящик не остановился перед игроком"): return
-	print("Взаимодействия OK: 18 узлов, оба положения, коллизии дверей, коридор туда/обратно, луч, защита игрока")
+	# Новый порожек и облицовка не должны сужать проход в санузел.
+	# Подходим сбоку, вне сектора движения полотна.
+	player.position = Vector3(-0.08, 0.015, -0.78)
+	await physics_frame
+	await physics_frame
+	if not bathroom_door.opened:
+		bathroom_door.toggle()
+		await _settle(bathroom_door)
+	if not _check(bathroom_door.opened and not bathroom_door.blocked and not bathroom_door.moving, "Не открылась дверь санузла"): return
+	player.position = Vector3(-0.59, 0.015, -0.86)
+	await physics_frame
+	await physics_frame
+	await _walk(player, Vector3.FORWARD, 27)
+	if not _check(player.position.z < -1.55, "Игрок застрял на пороге санузла"): return
+	await _walk(player, Vector3.BACK, 27)
+	if not _check(player.position.z > -0.95, "Игрок застрял при выходе из санузла"): return
+	print("Взаимодействия OK: 18 узлов, оба положения, коллизии дверей, коридор туда/обратно, луч, защита игрока, порог санузла")
 	quit()

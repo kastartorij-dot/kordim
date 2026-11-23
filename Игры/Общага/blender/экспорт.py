@@ -153,8 +153,10 @@ for source, label in furniture_names.items():
     furniture[label] = (parts, root.matrix_world.translation.copy())
     root.name = "Исходник " + source
 furniture_parts = {ob for parts, _ in furniture.values() for ob in parts}
-exported = [merge([ob for ob in meshes if ob not in moving_parts | furniture_parts],
-                  "Комната и двор", Vector((0, 0, 0)))]
+static = [ob for ob in meshes if ob not in moving_parts | furniture_parts]
+asgard = [ob for ob in static if ob.name.startswith("асгард_")]
+outside = [ob for ob in static if ob.get("двор") and ob not in asgard]
+exported = [merge([ob for ob in static if not ob.get("двор")], "Комната и двор", Vector((0, 0, 0)))]
 parents = {label: merge(parts, label, pivot) for label, (parts, pivot) in furniture.items()}
 exported.extend(parents.values())
 for parts, pivot, spec in groups:
@@ -166,6 +168,9 @@ for parts, pivot, spec in groups:
     exported.append(ob)
 for i, (ob, pivot) in enumerate(curtains):
     exported.append(merge([ob], "Curtain_%s" % i, pivot))
+# Сначала сохраняем прежний порядок игровых узлов, затем добавляем окружение.
+exported.extend(merge(parts, label, Vector((0, 0, 0))) for parts, label in
+                ((outside, "Окружение"), (asgard, "БЦ Асгард")) if parts)
 bpy.ops.object.select_all(action="DESELECT")
 for ob in exported:
     ob.select_set(True)

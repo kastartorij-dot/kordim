@@ -35,6 +35,15 @@ var status_hint: Label
 var status_time := 0.0
 var room_controls: Array[Area3D] = []
 var loaded_room: Node3D
+var fast_lights := false
+var original_shadows: Dictionary[Light3D, bool] = {}
+var asgard_day: Dictionary[StandardMaterial3D, Texture2D] = {}
+var asgard_night: Dictionary[StandardMaterial3D, Texture2D] = {}
+var interaction_ray := PhysicsRayQueryParameters3D.new()
+const ASGARD_NIGHT_TEXTURES := {
+ "асгард_витраж": preload("res://textures/фасад_асгард_стекло_вечер.png"),
+ "асгард_вентфасад": preload("res://textures/фасад_асгард_стена_вечер.png"),
+}
 const SAVE_PATH := "user://walk.cfg"
 
 const VIEWS := [
@@ -62,6 +71,9 @@ func _ready() -> void:
 			walk_enabled = false
 	loaded_room = $Модель
 	_tint_microwave()
+	_prepare_asgard_lighting()
+	interaction_ray.collision_mask = 11
+	interaction_ray.collide_with_areas = true
 	_build_trees()
 	if walk_enabled:
 		_build_interactions(loaded_room)
@@ -111,6 +123,7 @@ func _ready() -> void:
 	bedside_light.shadow_enabled = true
 	add_child(bedside_light)
 	_build_accent_lighting()
+	_set_fast_lights(args.has("--fast-lights"))
 	_set_lighting(0)
 	_build_room_controls()
 	camera = Camera3D.new()
@@ -139,7 +152,7 @@ func _ready() -> void:
 	hint.add_theme_constant_override("shadow_offset_x", 1)
 	hint.add_theme_constant_override("shadow_offset_y", 1)
 	if walk_enabled:
-		hint.text = "WASD / стрелки — идти · Клик — захват мыши · Shift — бежать · Пробел — прыжок · Ctrl — присесть · E — взаимодействовать\n1 — комната · 2 — у кровати · 3 — на лоджию · 4 — у двери · Esc — отпустить мышь · F11 — полный экран\nF5 — сохранить · F9 — загрузить · L — день / вечер / ночь · N — цвет ночника · B — подсветка"
+		hint.text = "WASD / стрелки — идти · Клик — захват мыши · Shift — бежать · Пробел — прыжок · Ctrl — присесть · E — взаимодействовать\n1 — комната · 2 — у кровати · 3 — на лоджию · 4 — у двери · Esc — отпустить мышь · F11 — полный экран\nF5 — сохранить · F9 — загрузить · L — день / вечер / ночь · N — цвет ночника · B — подсветка · P — облегчённый свет"
 	else:
 		hint.text = "Осмотр · Клик — мышь · WASD — движение · Q/E — вниз/вверх · Shift — быстрее\n1 — комната · 2 — от кровати · 3 — лоджия · 4 — у двери · Esc — отпустить мышь"
 	layer.add_child(hint)
@@ -267,7 +280,43 @@ func _set_lighting(mode: int) -> void:
 	var day_ambient := 0.18 if daylight_prototype else 0.28
 	room_environment.ambient_light_energy = [day_ambient, 0.08, 0.015][lighting_mode]
 	sky_material.set_shader_parameter("lighting_mode", lighting_mode)
+	for material in asgard_day:
+		var after_dark := lighting_mode != 0
+		material.albedo_texture = asgard_night[material] if after_dark else asgard_day[material]
+		material.emission_enabled = after_dark
 	_update_accent_lighting()
+
+func _prepare_asgard_lighting() -> void:
+	var building := loaded_room.get_node_or_null("БЦ Асгард") as MeshInstance3D
+	if building == null or building.mesh == null: return
+	for surface in building.mesh.get_surface_count():
+		var original := building.mesh.surface_get_material(surface) as StandardMaterial3D
+		if original == null or not ASGARD_NIGHT_TEXTURES.has(original.resource_name): continue
+		var material := original.duplicate() as StandardMaterial3D
+		var texture: Texture2D = ASGARD_NIGHT_TEXTURES[original.resource_name]
+		material.emission = Color.BLACK
+		material.emission_texture = texture
+		material.emission_energy_multiplier = 0.42
+		material.emission_operator = BaseMaterial3D.EMISSION_OP_ADD
+		building.set_surface_override_material(surface, material)
+		asgard_day[material] = original.albedo_texture
+		asgard_night[material] = texture
+
+func _set_fast_lights(enabled: bool) -> void:
+	if original_shadows.is_empty():
+		for light in daylight:
+			if not light is DirectionalLight3D:
+				original_shadows[light] = light.shadow_enabled
+		original_shadows[bedside_light] = bedside_light.shadow_enabled
+		for light in strip_lights:
+			original_shadows[light] = light.shadow_enabled
+	fast_lights = enabled
+	for light in original_shadows:
+		light.shadow_enabled = original_shadows[light] and not enabled
+
+func _toggle_ceiling_light() -> void:
+	ceiling_light.visible = not ceiling_light.visible
+	_show_status("Главный свет включён" if ceiling_light.visible else "Главный свет выключен")
 
 func _tint_microwave() -> void:
 	var microwave := loaded_room.get_node_or_null("Тумба СВЧ/Микроволновка")
@@ -355,6 +404,10 @@ func _input(event: InputEvent) -> void:
 		elif event.physical_keycode == KEY_B:
 			_cycle_strip()
 			get_viewport().set_input_as_handled()
+		elif event.physical_keycode == KEY_P:
+			_set_fast_lights(not fast_lights)
+			_show_status("Облегчённый свет включён" if fast_lights else "Облегчённый свет выключен")
+			get_viewport().set_input_as_handled()
 	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_L:
 		_set_lighting(lighting_mode + 1)
 		_show_status(["Дневной свет", "Вечерний свет", "Ночник"][lighting_mode])
@@ -402,10 +455,10 @@ func _process(delta: float) -> void:
 			var result := get_viewport().get_texture().get_image().save_png(target)
 			get_tree().quit(0 if result == OK else 1)
 		return
+	status_time = maxf(0, status_time - delta)
+	status_hint.visible = status_time > 0
 	if player != null:
-		status_time = maxf(0, status_time - delta)
-		status_hint.visible = status_time > 0
-		var item := _interaction_target() if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED else null
+		var item := _interaction_target() if player.resting.is_empty() and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED else null
 		interaction_hint.text = "E / Пробел — встать" if not player.resting.is_empty() else (item.prompt() if item != null else "")
 		return
 	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED: return
@@ -427,10 +480,12 @@ func _build_collisions(room: Node) -> void:
 	# Исключаем только их маленькую область; большие треугольники пола остаются.
 	var clutter := AABB(Vector3(-0.55, -0.05, -0.72), Vector3(0.60, 0.50, 0.72))
 	var clothing_root := room.get_node_or_null("Шкаф/Пиджак_в_шкафу")
+	var broadphase := bounds.grow(0.001)
 	for node in nodes:
 		var mesh_node: MeshInstance3D = node
 		if mesh_node.get_parent() in interactables or str(mesh_node.name).begins_with("Curtain_"): continue
 		if clothing_root != null and clothing_root.is_ancestor_of(mesh_node): continue
+		if mesh_node.mesh == null or not broadphase.intersects(mesh_node.global_transform * mesh_node.get_aabb()): continue
 		var triangles := mesh_node.mesh.get_faces()
 		for i in range(0, triangles.size(), 3):
 			var a: Vector3 = mesh_node.global_transform * triangles[i]
@@ -468,9 +523,9 @@ func _build_interactions(room: Node3D) -> void:
 
 func _interaction_target() -> Node3D:
 	var origin := camera.global_position
-	var ray := PhysicsRayQueryParameters3D.create(origin, origin - camera.global_basis.z * 2.0, 11)
-	ray.collide_with_areas = true
-	var hit := get_world_3d().direct_space_state.intersect_ray(ray)
+	interaction_ray.from = origin
+	interaction_ray.to = origin - camera.global_basis.z * 2.0
+	var hit := get_world_3d().direct_space_state.intersect_ray(interaction_ray)
 	var collider := hit.get("collider") as Node3D
 	var area := collider as Area3D
 	if collider != null and (collider in interactables or (area != null and area in room_controls)):
@@ -486,6 +541,7 @@ func save_walk(path: String = SAVE_PATH) -> Error:
 	data.set_value("walk", "version", 1)
 	data.set_value("walk", "furniture_local", true)
 	data.set_value("walk", "lighting", lighting_mode)
+	data.set_value("walk", "ceiling_on", ceiling_light.visible)
 	data.set_value("walk", "lamp_color", lamp_color)
 	data.set_value("walk", "lamp_on", lamp_on)
 	data.set_value("walk", "lamp_brightness", lamp_brightness)
@@ -514,13 +570,16 @@ func load_walk(path: String = SAVE_PATH) -> Error:
 	var furniture_local = data.get_value("walk", "furniture_local", false)
 	if data.get_value("walk", "version", 0) != 1 or not saved_player is Transform3D or not pitch is float or not items is Dictionary:
 		return ERR_INVALID_DATA
-	if not furniture_local is bool: return ERR_INVALID_DATA
+	if not furniture_local is bool or not is_finite(pitch) or not saved_player.is_finite():
+		return ERR_INVALID_DATA
+	if not saved_player.basis.is_conformal() or not is_equal_approx(saved_player.basis.determinant(), 1.0):
+		return ERR_INVALID_DATA
 	for item in interactables:
 		var state = items.get(item.spec.node)
 		if state == null: continue # новые узлы остаются в начальной позе старого сохранения
 		if not state is Dictionary: return ERR_INVALID_DATA
 		for key in ["pos_x", "pos_y", "pos_z", "rot_x", "rot_y", "rot_z"]:
-			if not state.get(key) is float: return ERR_INVALID_DATA
+			if not state.get(key) is float or not is_finite(state[key]): return ERR_INVALID_DATA
 		if not state.get("is_open") is bool or not state.get("is_locked") is bool: return ERR_INVALID_DATA
 	var saved_light = data.get_value("walk", "lighting", 0)
 	if not saved_light is int or saved_light < 0 or saved_light > 2: return ERR_INVALID_DATA
@@ -532,16 +591,20 @@ func load_walk(path: String = SAVE_PATH) -> Error:
 	var saved_brightness = data.get_value("walk", "lamp_brightness", 1.0)
 	if not saved_power is bool or not saved_brightness is float or not is_finite(saved_brightness) or saved_brightness < 0.05 or saved_brightness > 1.0:
 		return ERR_INVALID_DATA
+	var saved_ceiling = data.get_value("walk", "ceiling_on", saved_light == 1)
+	var curtains = data.get_value("walk", "curtains", {})
+	if not saved_ceiling is bool or not curtains is Dictionary: return ERR_INVALID_DATA
+	for key in curtains:
+		if not key is String or not curtains[key] is bool: return ERR_INVALID_DATA
 	lamp_color = saved_lamp
 	lamp_brightness = saved_brightness
 	strip_mode = saved_strip
 	_set_lighting(saved_light)
+	ceiling_light.visible = saved_ceiling
 	lamp_on = saved_power
 	_update_accent_lighting()
-	var curtains = data.get_value("walk", "curtains", {})
-	if curtains is Dictionary:
-		for control in room_controls:
-			if control.kind == "curtain": control.set_closed(bool(curtains.get(str(control.name), false)), true)
+	for control in room_controls:
+		if control.kind == "curtain": control.set_closed(curtains.get(str(control.name), false), true)
 	player.reset_posture()
 	player.transform = saved_player
 	player.velocity = Vector3.ZERO

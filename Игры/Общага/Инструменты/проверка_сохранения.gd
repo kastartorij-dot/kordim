@@ -39,6 +39,12 @@ func _run() -> void:
 	# Загрузка несуществующего или неполного файла не меняет сцену.
 	if not _check(scene.load_walk("user://missing-dorm-save.cfg") == ERR_FILE_NOT_FOUND, "Нет корректной обработки отсутствующего файла"): return
 	var invalid := ConfigFile.new()
+	if not _check(invalid.load(TEST_SAVE) == OK, "Не прочитано проверочное сохранение"): return
+	invalid.set_value("walk", "camera_pitch", INF)
+	if not _check(invalid.save(TEST_SAVE) == OK, "Не записано повреждённое сохранение"): return
+	if not _check(scene.load_walk(TEST_SAVE) == ERR_INVALID_DATA, "Принят бесконечный наклон"): return
+	if not _check(scene.player.transform.is_equal_approx(player_pose), "Повреждённый файл изменил игрока"): return
+	invalid.clear()
 	invalid.set_value("walk", "version", 1)
 	invalid.save(TEST_SAVE)
 	if not _check(scene.load_walk(TEST_SAVE) == ERR_INVALID_DATA, "Принято неполное сохранение"): return

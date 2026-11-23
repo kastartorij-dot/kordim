@@ -38,5 +38,19 @@ func _run() -> void:
 		if not _check(scene.bedside_light.visible == (mode == 2), "Неверное состояние ночника"): return
 		var ambient: float = [expected_day_ambient, 0.08, 0.015][mode]
 		if not _check(is_equal_approx(scene.room_environment.ambient_light_energy, ambient), "Неверная фоновая освещённость"): return
+	var sun: Light3D = scene.daylight[0]
+	var window_light: Light3D = scene.daylight[1]
+	var window_shadow := window_light.shadow_enabled
+	scene._set_fast_lights(true)
+	if not _check(sun.shadow_enabled and scene.ceiling_light.shadow_enabled, "Потеряны основные тени"): return
+	if not _check(not window_light.shadow_enabled and not scene.bedside_light.shadow_enabled, "Остались дополнительные тени"): return
+	scene._set_fast_lights(false)
+	if not _check(window_light.shadow_enabled == window_shadow and scene.bedside_light.shadow_enabled, "Дополнительные тени не восстановились"): return
+	if not _check(scene.asgard_day.size() == 2, "В БЦ Асгард отсутствуют материалы фасада"): return
+	for material in scene.asgard_day:
+		if not _check(material.emission_enabled, "Нет ночной подсветки фасада"): return
+	scene._set_lighting(0)
+	for material in scene.asgard_day:
+		if not _check(not material.emission_enabled, "Ночной фасад остался днём"): return
 	print("Свет OK: день/вечер/ночь; прототип v2=", v2, ", старый прототип=", v1)
 	quit()

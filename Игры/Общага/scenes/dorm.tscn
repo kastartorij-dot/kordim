@@ -1,9 +1,26 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=20 format=3]
 
 [ext_resource type="Script" path="res://scripts/dorm.gd" id="1"]
 [ext_resource type="PackedScene" path="res://models/общага.glb" id="2"]
 
 [ext_resource type="PackedScene" path="res://models/пиджак.glb" id="3"]
+
+[ext_resource type="PackedScene" path="res://models/предметы/sneakers_black_striped.glb" id="6"]
+[ext_resource type="PackedScene" path="res://models/предметы/bag_with_bottles.glb" id="7"]
+[ext_resource type="PackedScene" path="res://models/предметы/microwave.glb" id="8"]
+[ext_resource type="PackedScene" path="res://models/предметы/electric_kettle.glb" id="9"]
+
+[ext_resource type="PackedScene" path="res://models/утверждённые/parka_v2.glb" id="Jacket0"]
+[ext_resource type="PackedScene" path="res://models/утверждённые/puffer_v2.glb" id="Jacket1"]
+[ext_resource type="PackedScene" path="res://models/утверждённые/dark_jacket_v2.glb" id="Jacket2"]
+
+[ext_resource type="PackedScene" path="res://models/утверждённые/bathroom_full_v2.glb" id="Bath"]
+[ext_resource type="PackedScene" path="res://models/утверждённые/white_running_sneakers.glb" id="WhiteShoes"]
+[ext_resource type="PackedScene" path="res://models/утверждённые/blue_flip_flops.glb" id="FlipFlops"]
+[ext_resource type="PackedScene" path="res://models/утверждённые/cap_khaki.glb" id="Cap"]
+[ext_resource type="PackedScene" path="res://models/утверждённые/corridor_ceiling_lamp.glb" id="HallLamp"]
+[ext_resource type="PackedScene" path="res://models/утверждённые/blue_wardrobe_bag.glb" id="WardrobeBag"]
+[ext_resource type="PackedScene" path="res://models/утверждённые/ironing_board_folded.glb" id="IroningBoard"]
 
 [sub_resource type="StandardMaterial3D" id="PegMaterial"]
 albedo_color = Color(0.43, 0.44, 0.46, 1)
@@ -35,7 +52,62 @@ mesh = SubResource("JacketPegMesh")
 position = Vector3(0.30, 1.952, 0.51)
 rotation = Vector3(0, 2.5132741, 0)
 
+[node name="Чёрные_кроссовки" parent="Модель" instance=ExtResource("6")]
+position = Vector3(-0.95, 0.32, -0.16)
+
+[node name="Пакет_с_бутылками" parent="Модель" instance=ExtResource("7")]
+position = Vector3(-0.23, 0, -0.51)
+
+[node name="Микроволновка" parent="Модель/Тумба СВЧ" instance=ExtResource("8")]
+position = Vector3(0.21, 0.8, 0)
+rotation = Vector3(0, 1.5707964, 0)
+
+[node name="Чайник" parent="Модель/Тумба СВЧ" instance=ExtResource("9")]
+position = Vector3(0.14, 1.072, -0.09)
+rotation = Vector3(0, 1.5707964, 0)
+
 [node name="Стул у стола" parent="Модель" index="11"]
 position = Vector3(1.87, 0, -1.12)
 
+[node name="Парка" parent="Модель" instance=ExtResource("Jacket0")]
+position = Vector3(-1, 1.6, -0.06)
+
+[node name="Пуховик" parent="Модель" instance=ExtResource("Jacket1")]
+position = Vector3(-0.74, 1.6, -0.06)
+
+[node name="Тёмная_куртка" parent="Модель" instance=ExtResource("Jacket2")]
+position = Vector3(-0.48, 1.6, -0.06)
+
+[node name="Санузел" parent="Модель" instance=ExtResource("Bath")]
+
+[node name="Белые_кроссовки" parent="Модель" instance=ExtResource("WhiteShoes")]
+position = Vector3(-0.62, 0.32, -0.15)
+
+[node name="Шлёпанцы" parent="Модель" instance=ExtResource("FlipFlops")]
+position = Vector3(-1.6, 0, -0.4)
+
+[node name="Шлёпанцы_у_двери" parent="Модель" instance=ExtResource("FlipFlops")]
+position = Vector3(-1.25, 0, -0.78)
+rotation = Vector3(0, -0.2094395, 0)
+
+[node name="Кепка" parent="Модель" instance=ExtResource("Cap")]
+position = Vector3(-0.5, 1.77, -0.15)
+
+[node name="Плафон_коридора" parent="Модель" instance=ExtResource("HallLamp")]
+position = Vector3(-1.3, 2.65, -0.6)
+
+[node name="Сумка_в_шкафу" parent="Модель/Шкаф" instance=ExtResource("WardrobeBag")]
+position = Vector3(0.29, 0.08, 0.515)
+rotation = Vector3(0, 1.5707964, 0)
+
+[node name="Гладильная_доска" parent="Модель" instance=ExtResource("IroningBoard")]
+position = Vector3(4.542, 0, -0.26)
+
+[node name="Toilet_Plumbing_Niche" parent="Модель/Санузел/Bathroom_Architecture" index="4"]
+position = Vector3(-0.5, 0, 0)
+
+[node name="Compact_Toilet" parent="Модель/Санузел" index="3"]
+position = Vector3(-0.5, 0, 0)
+
 [editable path="Модель"]
+[editable path="Модель/Санузел"]

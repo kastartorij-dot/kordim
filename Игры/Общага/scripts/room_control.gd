@@ -12,7 +12,7 @@ func prompt() -> String:
 	if kind == "bed": return "E — лечь на кровать"
 	if kind == "curtain": return "E — %s штору" % ("раздвинуть" if closed else "задвинуть")
 	if kind == "lamp": return "ЛКМ / E — настроить ночник"
-	return "E — переключить свет"
+	return "E — %s главный свет" % ("выключить" if scene.ceiling_light.visible else "включить")
 func toggle() -> void:
 	if kind in ["chair", "bed"]:
 		if not scene.player.can_stand_at(scene.player.global_transform):
@@ -22,7 +22,7 @@ func toggle() -> void:
 		return
 	if kind == "curtain": set_closed(not closed)
 	elif kind == "lamp": scene.lamp_menu.open()
-	else: scene._set_lighting((scene.lighting_mode + 1) % 3)
+	else: scene._toggle_ceiling_light()
 func set_closed(value: bool, immediate := false) -> void:
 	closed = value
 	var shape := get_child(0) as CollisionShape3D
