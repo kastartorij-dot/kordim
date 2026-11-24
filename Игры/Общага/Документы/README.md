@@ -66,6 +66,8 @@ blender --background --threads 6 --python-exit-code 1 --python blender/эксп�
 
 ## Документы и источники
 
+- [Размерный план двора и сверка с игрой](Двор/README.md) задают целевую расстановку и фиксируют расхождения по каждой позиции.
+
 - [Исходный план](Исходный_план.md) хранит инвентарь, разбор планировки и ранние решения.
 - [Графика](../Графика/README.md) хранит контрольные снимки и прототипы дневного освещения. Основной рендерер — Compatibility.
 - [Данные OSM](../assets/osm/) используются локально. [Атрибуция OpenStreetMap](https://www.openstreetmap.org/copyright), [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/).
