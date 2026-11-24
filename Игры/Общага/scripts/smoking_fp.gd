@@ -1,11 +1,7 @@
 extends Node3D
 
 @export var model_scene: PackedScene = preload("res://models/руки_сигарета.glb")
-@export var toggle_key: Key = KEY_C
-@export var drag_key: Key = KEY_F
-@export var flick_key: Key = KEY_G
-
-enum State { HIDDEN, LIGHTING, IDLE, DRAGGING, FLICKING }
+enum State { HIDDEN, DRAWING, PACK, EXTRACTING, UNLIT, LIGHTING, LIT, DRAGGING, FLICKING }
 
 var _state: State = State.HIDDEN
 var _rig: Node3D
@@ -19,21 +15,25 @@ var _smoke_exhale: CPUParticles3D
 var _ash_particles: CPUParticles3D
 var _t := 0.0
 var _ash_released := false
+var _exhale_released := false
 var _ember_material: StandardMaterial3D
 
 
 func _ready() -> void:
 	_rig = model_scene.instantiate()
-	_rig.position = Vector3(0.0, -0.025, -0.25)
+	_rig.rotation_degrees.y = 180.0
 	_rig.visible = false
 	add_child(_rig)
+	var camera_anchor := _rig.find_child("точка_камеры", true, false) as Node3D
+	_rig.position -= to_local(camera_anchor.global_position)
 
 	_anim = _rig.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	_anim.animation_finished.connect(_on_anim_finished)
-	_anim.get_animation("покой_курение").loop_mode = Animation.LOOP_LINEAR
-	_ember_node = _rig.find_child("уголёк", true, false) as Node3D
+	for clip in ["покой_пачка", "покой_неподожжённая", "покой_курение"]:
+		_anim.get_animation(clip).loop_mode = Animation.LOOP_LINEAR
+	_ember_node = _rig.find_child("уголёк_торец", true, false) as Node3D
 	_flame_node = _rig.find_child("пламя_узел", true, false) as Node3D
-	var ember_mesh := _ember_node as MeshInstance3D
+	var ember_mesh := _rig.find_child("уголёк", true, false) as MeshInstance3D
 	_ember_material = ember_mesh.get_active_material(0).duplicate() as StandardMaterial3D
 	_ember_material.emission_enabled = true
 	_ember_material.emission = Color(1.0, 0.24, 0.03)
@@ -135,39 +135,46 @@ func _make_smoke_particles(amount: int, lifetime: float, smin: float, smax: floa
 	return p
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
-		return
+func handle_event(event: InputEvent) -> bool:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		if _state == State.LIT:
+			_exhale_released = false
+			_play(State.DRAGGING, &"затяжка", 0.12)
+			return true
+		return _state in [State.DRAGGING, State.FLICKING]
 	if not (event is InputEventKey and event.pressed and not event.echo):
-		return
-	if handle_key(event.physical_keycode):
-		get_viewport().set_input_as_handled()
-
-
-func handle_key(key: Key) -> bool:
-	match key:
-		toggle_key:
+		return false
+	match event.physical_keycode:
+		KEY_1:
 			if _state == State.HIDDEN:
 				_rig.show()
-				_state = State.LIGHTING
 				_t = 0.0
-				_anim.play("достать_и_поджечь")
-				_anim.advance(0.0)
-				_process(0.0)
-			else:
-				put_away()
-		drag_key:
-			if _state == State.IDLE:
-				_state = State.DRAGGING
-				_anim.play("затяжка", 0.12)
-		flick_key:
-			if _state == State.IDLE:
-				_state = State.FLICKING
+				_play(State.DRAWING, &"достать_пачку")
+			return true
+		KEY_E:
+			if _state == State.PACK:
+				_play(State.EXTRACTING, &"вынуть_сигарету", 0.12)
+				return true
+			if _state == State.UNLIT:
+				_play(State.LIGHTING, &"поджечь_сигарету", 0.12)
+				return true
+			return _state in [State.DRAWING, State.EXTRACTING, State.LIGHTING]
+		KEY_G:
+			if _state == State.LIT:
 				_ash_released = false
-				_anim.play("стряхнуть_пепел", 0.12)
-		_:
-			return false
-	return true
+				_play(State.FLICKING, &"стряхнуть_пепел", 0.12)
+				return true
+		KEY_C:
+			if _state != State.HIDDEN:
+				put_away()
+				return true
+	return false
+
+
+func _play(next: State, clip: StringName, blend := 0.0) -> void:
+	_state = next
+	_anim.play(clip, blend)
+	_anim.advance(0.0)
 
 
 func put_away() -> void:
@@ -175,20 +182,22 @@ func put_away() -> void:
 	_anim.stop()
 	_rig.hide()
 	_ember_light.light_energy = 0.0
+	_ember_material.emission_energy_multiplier = 0.0
 	_flame_light.light_energy = 0.0
 	for particles in [_smoke_wisp, _smoke_exhale, _ash_particles]:
 		particles.emitting = false
 		particles.hide()
 
 
-func _on_anim_finished(clip: StringName) -> void:
-	if _state == State.HIDDEN:
-		return
-	if clip == &"затяжка":
-		_smoke_exhale.show()
-		_smoke_exhale.restart()
-	_state = State.IDLE
-	_anim.play("покой_курение", 0.15)
+func _on_anim_finished(_clip: StringName) -> void:
+	match _state:
+		State.DRAWING:
+			_play(State.PACK, &"покой_пачка")
+		State.EXTRACTING:
+			_play(State.UNLIT, &"покой_неподожжённая")
+		State.LIGHTING, State.DRAGGING, State.FLICKING:
+			_state = State.LIT
+			_anim.play("покой_курение")
 
 
 func _process(delta: float) -> void:
@@ -202,14 +211,18 @@ func _process(delta: float) -> void:
 		_ash_particles.show()
 		_ash_particles.restart()
 
-	# Мерцание пламени во время поджигания (кадры 36..59 -> ~1.5..2.45 с)
-	if _state == State.LIGHTING and pos >= 1.50 and pos <= 2.45:
-		_flame_light.light_energy = 0.38 + 0.08 * sin(_t * 46.0) + 0.04 * cos(_t * 73.0)
+	if _state == State.DRAGGING and not _exhale_released and pos >= 49.0 / 24.0:
+		_exhale_released = true
+		_smoke_exhale.show()
+		_smoke_exhale.restart()
+
+	if _state == State.LIGHTING and pos >= 24.0 / 24.0 and pos <= 47.0 / 24.0:
+		_flame_light.light_energy = 0.13 + 0.03 * sin(_t * 46.0) + 0.015 * cos(_t * 73.0)
 	else:
 		_flame_light.light_energy = 0.0
 
 	# Свечение уголька и тонкий дымок
-	var lit := (_state != State.LIGHTING) or (pos >= 1.85)
+	var lit := _state in [State.LIT, State.DRAGGING, State.FLICKING] or (_state == State.LIGHTING and pos >= 1.35)
 	_smoke_wisp.visible = lit
 	_smoke_wisp.emitting = lit
 	var glow := 0.0
@@ -218,4 +231,4 @@ func _process(delta: float) -> void:
 		if _state == State.DRAGGING and pos >= 0.70 and pos <= 1.65:
 			glow = 1.65 + 0.18 * sin(_t * 22.0)
 	_ember_material.emission_energy_multiplier = glow
-	_ember_light.light_energy = glow * 0.12
+	_ember_light.light_energy = glow * 0.035

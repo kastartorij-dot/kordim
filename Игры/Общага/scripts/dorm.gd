@@ -171,7 +171,7 @@ func _ready() -> void:
 	hint.add_theme_constant_override("shadow_offset_x", 1)
 	hint.add_theme_constant_override("shadow_offset_y", 1)
 	if walk_enabled:
-		hint.text = "WASD / стрелки — идти · Клик — захват мыши · Shift — бежать · Пробел — прыжок · Ctrl — присесть · E — взаимодействовать\n1 — комната · 2 — у кровати · 3 — на лоджию · 4 — у двери · Esc — отпустить мышь · F11 — полный экран\nF5 — сохранить · F9 — загрузить · L — день / вечер / ночь · N — цвет ночника · B — подсветка · P — облегчённый свет\nC — достать / убрать сигарету · F — затяжка · G — стряхнуть пепел"
+		hint.text = "WASD / стрелки — идти · Клик — захват мыши · Shift — бежать · Пробел — прыжок · Ctrl — присесть · E — взаимодействовать\n2 — у кровати · 3 — на лоджию · 4 — у двери · 5 — комната · Esc — отпустить мышь · F11 — полный экран\nF5 — сохранить · F9 — загрузить · L — день / вечер / ночь · N — цвет ночника · B — подсветка · P — облегчённый свет\n1 — достать пачку · E — вынуть / поджечь сигарету · ЛКМ — затяжка · G — стряхнуть пепел · C — убрать"
 	else:
 		hint.text = "Осмотр · Клик — мышь · WASD — движение · Q/E — вниз/вверх · Shift — быстрее\n1 — комната · 2 — от кровати · 3 — лоджия · 4 — у двери · Esc — отпустить мышь"
 	layer.add_child(hint)
@@ -472,6 +472,9 @@ func _menu_open() -> bool:
 
 func _input(event: InputEvent) -> void:
 	if lamp_menu == null or _menu_open(): return
+	if smoking != null and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and smoking.handle_event(event):
+		get_viewport().set_input_as_handled()
+		return
 	if player != null and player.resting.is_empty() and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		var target := _interaction_target() as Area3D
 		if target != null and target in room_controls and target.kind == "lamp":
@@ -512,8 +515,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			else:
 				var item := _interaction_target()
 				if item != null: item.toggle()
-		if event is InputEventKey and event.pressed and event.physical_keycode >= KEY_1 and event.physical_keycode <= KEY_4:
-			_set_view(event.physical_keycode - KEY_1 + 1)
+		if event is InputEventKey and event.pressed and not event.echo:
+			if event.physical_keycode == KEY_5:
+				_set_view(1)
+			elif event.physical_keycode >= KEY_2 and event.physical_keycode <= KEY_4:
+				_set_view(event.physical_keycode - KEY_1 + 1)
 		return
 	if event is InputEventMouseButton and event.pressed:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
