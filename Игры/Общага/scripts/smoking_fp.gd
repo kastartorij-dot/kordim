@@ -1,7 +1,7 @@
 extends Node3D
 
 @export var model_scene: PackedScene = preload("res://models/руки_сигарета.glb")
-enum State { HIDDEN, DRAWING, PACK, EXTRACTING, UNLIT, LIGHTING, LIT, DRAGGING, FLICKING }
+enum State { HIDDEN, DRAWING, PACK, EXTRACTING, UNLIT, LIGHTING, LIT, DRAGGING, FLICKING, STOWING }
 
 var _state: State = State.HIDDEN
 var _rig: Node3D
@@ -21,7 +21,6 @@ var _ember_material: StandardMaterial3D
 
 func _ready() -> void:
 	_rig = model_scene.instantiate()
-	_rig.rotation_degrees.y = 180.0
 	_rig.visible = false
 	add_child(_rig)
 	var camera_anchor := _rig.find_child("точка_камеры", true, false) as Node3D
@@ -158,17 +157,34 @@ func handle_event(event: InputEvent) -> bool:
 			if _state == State.UNLIT:
 				_play(State.LIGHTING, &"поджечь_сигарету", 0.12)
 				return true
-			return _state in [State.DRAWING, State.EXTRACTING, State.LIGHTING]
+			return _state in [State.DRAWING, State.EXTRACTING, State.LIGHTING, State.STOWING]
 		KEY_G:
 			if _state == State.LIT:
 				_ash_released = false
 				_play(State.FLICKING, &"стряхнуть_пепел", 0.12)
 				return true
 		KEY_C:
-			if _state != State.HIDDEN:
-				put_away()
-				return true
+			match _state:
+				State.PACK:
+					_play(State.STOWING, &"убрать_пачку", 0.08)
+				State.UNLIT, State.LIT:
+					_play(State.STOWING, &"убрать_сигарету", 0.08)
+				State.HIDDEN:
+					return false
+				State.STOWING:
+					pass
+				_:
+					put_away()
+			return true
 	return false
+
+
+func interaction_prompt() -> String:
+	match _state:
+		State.PACK: return "E — вынуть сигарету · C — убрать"
+		State.UNLIT: return "E — поджечь · C — убрать"
+		State.LIT: return "ЛКМ — затяжка · G — стряхнуть пепел · C — убрать"
+	return ""
 
 
 func _play(next: State, clip: StringName, blend := 0.0) -> void:
@@ -198,6 +214,8 @@ func _on_anim_finished(_clip: StringName) -> void:
 		State.LIGHTING, State.DRAGGING, State.FLICKING:
 			_state = State.LIT
 			_anim.play("покой_курение")
+		State.STOWING:
+			put_away()
 
 
 func _process(delta: float) -> void:
@@ -211,7 +229,7 @@ func _process(delta: float) -> void:
 		_ash_particles.show()
 		_ash_particles.restart()
 
-	if _state == State.DRAGGING and not _exhale_released and pos >= 49.0 / 24.0:
+	if _state == State.DRAGGING and not _exhale_released and pos >= 41.0 / 24.0:
 		_exhale_released = true
 		_smoke_exhale.show()
 		_smoke_exhale.restart()

@@ -39,17 +39,17 @@ godot --path . -- --view=3 --shot=shots/godot-лоджия.png --frames=30
 
 ## Предметы и санузел
 
-Руки от первого лица загружаются из `models/руки_сигарета.glb`. Восемь клипов покрывают доставание пачки, извлечение, поджигание, затяжку, стряхивание пепла и три позы ожидания. Исходный риг из `assets/smoking_fp/` сохранён в Blender 5.1. Для пересборки модели и проверки механики из корня проекта:
+Руки от первого лица загружаются из `models/руки_сигарета.glb`. Кисти и предметы запекаются по общей траектории. Крышка пачки открывается при доставании, сигарета переходит из пачки в правую руку, а зажигалка подходит к угольку. Для пересборки модели в Blender 5.1 и проверки механики из корня проекта:
 
 ```sh
-blender --background --disable-autoexec --python-exit-code 1 --python blender/руки_сигарета.py
+blender --background --disable-autoexec --python-exit-code 1 --python blender/курение.py
 godot --headless --editor --path . --import
 godot --headless --path . --script Инструменты/проверка_курения.gd
 ```
 
 Без `--headless` проверка также прогоняет клавиши через игровое окно и сохраняет контрольные кадры в `shots/`. При загрузке прогулки сигарета убирается.
 
-Риг рук от Drillimpact распространяется под CC0. Пачка от Vynncore Visual Artist и зажигалка от 3dTeenscape используются по CC BY 4.0. Для игры модели масштабированы и привязаны к костям, к зажигалке добавлено пламя. [Руки](https://drillimpact.itch.io/psx-first-person-arms-free) · [Пачка](https://sketchfab.com/3d-models/marlboro-cigarette-pack-ps1-low-poly-9fb45882d1864d0ea29a1361620f5807) · [Зажигалка](https://sketchfab.com/3d-models/gas-cigarette-lighter-11e39ae4558c49caa1e49ebfa79cfce3) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+Риг WRAD ARMS от wriks распространяется под CC0. Для игры настроены материалы кожи и рукавов. Зажигалка от 3dTeenscape используется по CC BY 4.0. Она масштабирована, к ней добавлено пламя. Пачка и сигарета собраны скриптом проекта. [WRAD ARMS](https://wriks.itch.io/wrad-arms) · [Зажигалка](https://sketchfab.com/3d-models/gas-cigarette-lighter-11e39ae4558c49caa1e49ebfa79cfce3) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
 
 Расстановка утверждённых GLB находится в `scenes/dorm.tscn`. СВЧ и чайник перемещаются вместе с тумбой, сумка вместе со шкафом. Обувь, куртки, кепка, плафон прихожей и сложенная доска загружаются из [каталога моделей](../models/утверждённые/README.md). В санузле используется v2 с подогнанным положением унитаза. Экспорт Blender сохраняет перегородки, ход двери, потолок и декоративный пояс. Плитка, порожек, душ, сантехника, стояк и полотенца входят в GLB санузла.
 

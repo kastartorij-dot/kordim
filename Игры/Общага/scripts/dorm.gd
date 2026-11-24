@@ -547,6 +547,10 @@ func _process(delta: float) -> void:
 	if player != null:
 		var item := _interaction_target() if player.resting.is_empty() and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED else null
 		interaction_hint.text = "E / Пробел — встать" if not player.resting.is_empty() else (item.prompt() if item != null else "")
+		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and not _menu_open():
+			var smoking_prompt: String = smoking.interaction_prompt()
+			if not smoking_prompt.is_empty():
+				interaction_hint.text = smoking_prompt
 		return
 	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED: return
 	var direction := Vector3(
