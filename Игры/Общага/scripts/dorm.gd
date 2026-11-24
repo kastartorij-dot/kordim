@@ -5,6 +5,11 @@ var camera: Camera3D
 var smoking: Node3D
 var hint: Label
 var help_button: Button
+var winter_button: Button
+var garland_button: Button
+var winter_controller: Node3D
+var garland_menu: Control
+var trees: Array[Node3D] = []
 var lighting_mode := 0
 var daylight_prototype := false
 var daylight_prototype_v2 := false # Флаг для сравнения, пока не вариант по умолчанию.
@@ -127,6 +132,10 @@ func _ready() -> void:
 	add_child(bedside_light)
 	_build_accent_lighting()
 	_set_fast_lights(args.has("--fast-lights"))
+	winter_controller = preload("res://scripts/winter_mode.gd").new()
+	winter_controller.name = "ЗимнийРежим"
+	add_child(winter_controller)
+	winter_controller.setup(self)
 	_set_lighting(0)
 	_build_room_controls()
 	camera = Camera3D.new()
@@ -152,6 +161,10 @@ func _ready() -> void:
 	lamp_menu = preload("res://scripts/lamp_menu.gd").new()
 	lamp_menu.room = self
 	layer.add_child(lamp_menu)
+	garland_menu = preload("res://scripts/garland_menu.gd").new()
+	garland_menu.room = self
+	garland_menu.winter = winter_controller
+	layer.add_child(garland_menu)
 	hint = Label.new()
 	hint.position = Vector2(20, 18)
 	hint.add_theme_color_override("font_shadow_color", Color.BLACK)
@@ -171,6 +184,23 @@ func _ready() -> void:
 	help_button.focus_mode = Control.FOCUS_NONE
 	help_button.pressed.connect(_toggle_help)
 	layer.add_child(help_button)
+	winter_button = Button.new()
+	winter_button.position = Vector2(1020, 64)
+	winter_button.size = Vector2(240, 38)
+	winter_button.text = "Зимний режим: Выкл"
+	winter_button.tooltip_text = "Включить или выключить зимний режим. Esc — освободить мышь."
+	winter_button.focus_mode = Control.FOCUS_NONE
+	winter_button.pressed.connect(_toggle_winter)
+	layer.add_child(winter_button)
+	garland_button = Button.new()
+	garland_button.position = Vector2(1020, 110)
+	garland_button.size = Vector2(240, 38)
+	garland_button.text = "Режимы гирлянд"
+	garland_button.tooltip_text = "Открыть меню режимов и яркости гирлянд."
+	garland_button.focus_mode = Control.FOCUS_NONE
+	garland_button.pressed.connect(_open_garland_menu)
+	garland_button.hide()
+	layer.add_child(garland_button)
 	interaction_hint = Label.new()
 	interaction_hint.position = Vector2(0, 390)
 	interaction_hint.size = Vector2(1280, 40)
@@ -198,6 +228,7 @@ func _ready() -> void:
 		elif arg.begins_with("--frames="): shot_frames = maxi(1, int(arg.substr(9)))
 		elif arg.begins_with("--lamp-color="): lamp_color = clampi(int(arg.substr(13)), 0, LAMP_COLORS.size() - 1)
 		elif arg.begins_with("--strip="): strip_mode = clampi(int(arg.substr(8)), 0, 2)
+	if args.has("--winter"): _set_winter(true)
 	_set_view(preset)
 	for arg in args:
 		if arg.begins_with("--light="): _set_lighting(clampi(int(arg.substr(8)), 0, 2))
@@ -290,7 +321,29 @@ func _set_lighting(mode: int) -> void:
 		var after_dark := lighting_mode != 0
 		material.albedo_texture = asgard_night[material] if after_dark else asgard_day[material]
 		material.emission_enabled = after_dark
+	if winter_controller != null and winter_controller.enabled:
+		winter_controller.apply_lighting(lighting_mode)
 	_update_accent_lighting()
+
+func _set_winter(value: bool) -> void:
+	if winter_controller == null: return
+	winter_controller.set_enabled(value)
+	if winter_button != null:
+		winter_button.text = "Зимний режим: Вкл" if value else "Зимний режим: Выкл"
+	if garland_button != null:
+		garland_button.visible = value
+	if not value and garland_menu != null and garland_menu.visible:
+		garland_menu._close()
+
+func _toggle_winter() -> void:
+	if winter_controller == null: return
+	var next: bool = not winter_controller.enabled
+	_set_winter(next)
+	_show_status("Зимний режим включён" if next else "Зимний режим выключен")
+
+func _open_garland_menu() -> void:
+	if garland_menu != null and winter_controller != null and winter_controller.enabled:
+		garland_menu.open()
 
 func _prepare_asgard_lighting() -> void:
 	var building := loaded_room.get_node_or_null("БЦ Асгард") as MeshInstance3D
@@ -414,8 +467,11 @@ func _toggle_help() -> void:
 	hint.visible = not hint.visible
 	help_button.text = "Скрыть управление [H]" if hint.visible else "Управление [H]"
 
+func _menu_open() -> bool:
+	return (lamp_menu != null and lamp_menu.visible) or (garland_menu != null and garland_menu.visible)
+
 func _input(event: InputEvent) -> void:
-	if lamp_menu == null or lamp_menu.visible: return
+	if lamp_menu == null or _menu_open(): return
 	if player != null and player.resting.is_empty() and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		var target := _interaction_target() as Area3D
 		if target != null and target in room_controls and target.kind == "lamp":
@@ -442,7 +498,7 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if lamp_menu.visible: return
+	if _menu_open(): return
 	if player != null:
 		if event is InputEventKey and event.pressed and not event.echo:
 			if event.physical_keycode == KEY_F5:
@@ -571,6 +627,11 @@ func save_walk(path: String = SAVE_PATH) -> Error:
 	data.set_value("walk", "lamp_on", lamp_on)
 	data.set_value("walk", "lamp_brightness", lamp_brightness)
 	data.set_value("walk", "strip_mode", strip_mode)
+	if winter_controller != null:
+		data.set_value("walk", "winter_enabled", winter_controller.enabled)
+		data.set_value("walk", "garland_on", winter_controller.garland_on)
+		data.set_value("walk", "garland_mode", winter_controller.garland_mode)
+		data.set_value("walk", "garland_brightness", winter_controller.garland_brightness)
 	var curtains := {}
 	for control in room_controls:
 		if control.kind == "curtain": curtains[str(control.name)] = control.closed
@@ -628,6 +689,15 @@ func load_walk(path: String = SAVE_PATH) -> Error:
 	_set_lighting(saved_light)
 	ceiling_light.visible = saved_ceiling
 	lamp_on = saved_power
+	if winter_controller != null:
+		var saved_winter = data.get_value("walk", "winter_enabled", false)
+		var saved_g_on = data.get_value("walk", "garland_on", true)
+		var saved_g_mode = data.get_value("walk", "garland_mode", 0)
+		var saved_g_bright = data.get_value("walk", "garland_brightness", 0.85)
+		if saved_g_on is bool: winter_controller.set_garland_on(saved_g_on)
+		if saved_g_mode is int: winter_controller.set_garland_mode(saved_g_mode)
+		if saved_g_bright is float and is_finite(saved_g_bright): winter_controller.set_garland_brightness(saved_g_bright)
+		if saved_winter is bool: _set_winter(saved_winter)
 	_update_accent_lighting()
 	for control in room_controls:
 		if control.kind == "curtain": control.set_closed(curtains.get(str(control.name), false), true)
@@ -692,3 +762,4 @@ func _build_trees() -> void:
 		tree.position = at
 		tree.rotation.y = at.x * 0.41
 		tree.scale = Vector3.ONE * (1.8 + fmod(at.x, 3.0) * 0.15)
+		trees.append(tree)
