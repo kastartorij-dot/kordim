@@ -1,6 +1,6 @@
 extends Node3D
 ## Контроллер зимнего режима: снег и умеренные сугробы с учётом расчистки,
-## зимние деревья без листвы, лёгкий снегопад снаружи и гирлянды вдоль кроватей.
+## зимние деревья без листвы, лёгкий снегопад снаружи и гирлянды на карнизе и щите кровати.
 
 const SNOW_SHADER := preload("res://textures/winter_snow.gdshader")
 
@@ -350,13 +350,18 @@ func _build_garlands() -> void:
 	bulb_mesh.radial_segments = 8
 	bulb_mesh.rings = 5
 
-	# Кровать у стола (стена z = 0.0 -> отступ в комнату z = -0.024, x: 2.32 .. 4.40)
-	_build_garland_strand(2.32, 4.40, -0.024, 1.48, 0.20, 3, 28, wire_mat, bulb_mesh)
-	# Кровать у лоджии (стена z = -3.20 -> отступ в комнату z = -3.176, x: 2.32 .. 4.40)
-	_build_garland_strand(2.32, 4.40, -3.176, 1.48, 0.20, 3, 28, wire_mat, bulb_mesh)
+	# Карниз над шторами и Г-образный щит левой кровати.
+	var rail_left := Vector3(4.54, 2.51, -3.17)
+	var rail_right := Vector3(4.54, 2.51, -0.03)
+	_build_garland_strand(rail_left, rail_right, 0.025, 7, 36, wire_mat, bulb_mesh)
 
-	# Два мягких источника света над кроватями без теней (чтобы не просаживать FPS).
-	for at in [Vector3(3.36, 1.38, -0.34), Vector3(3.36, 1.38, -2.86)]:
+	var bed_side: Vector3 = room._furniture_point("Кровать у лоджии", Vector3(-1.0, 1.054, 0.037))
+	var bed_corner: Vector3 = room._furniture_point("Кровать у лоджии", Vector3(1.008, 1.054, 0.037))
+	var bed_end: Vector3 = room._furniture_point("Кровать у лоджии", Vector3(1.008, 1.054, 0.954))
+	_build_garland_strand(bed_side, bed_corner, 0.022, 4, 23, wire_mat, bulb_mesh)
+	_build_garland_strand(bed_corner, bed_end, 0.022, 2, 11, wire_mat, bulb_mesh)
+
+	for at in [rail_left.lerp(rail_right, 0.5) + Vector3(-0.23, -0.15, 0), bed_side.lerp(bed_corner, 0.65) + Vector3(0, 0.12, 0.22)]:
 		var light := OmniLight3D.new()
 		light.position = at
 		light.light_color = Color(1.0, 0.78, 0.42)
@@ -368,10 +373,8 @@ func _build_garlands() -> void:
 
 
 func _build_garland_strand(
-	x_start: float,
-	x_end: float,
-	wall_z: float,
-	anchor_y: float,
+	start: Vector3,
+	end: Vector3,
 	sag: float,
 	swags: int,
 	bulb_count: int,
@@ -382,11 +385,9 @@ func _build_garland_strand(
 	var points: PackedVector3Array = []
 	for i in range(wire_steps + 1):
 		var t := float(i) / float(wire_steps)
-		var x := lerpf(x_start, x_end, t)
 		var local_t := fmod(t * float(swags), 1.0)
 		if i == wire_steps: local_t = 1.0
-		var y := anchor_y - 4.0 * sag * local_t * (1.0 - local_t)
-		points.append(Vector3(x, y, wall_z))
+		points.append(start.lerp(end, t) - Vector3.UP * (4.0 * sag * local_t * (1.0 - local_t)))
 
 	# Тонкий провисший провод (лента из треугольников, видимая с обеих сторон).
 	var st := SurfaceTool.new()
@@ -414,13 +415,12 @@ func _build_garland_strand(
 	# Лампочки вдоль кривой, распределённые по 4 цветовым каналам.
 	for i in bulb_count:
 		var t := (float(i) + 0.5) / float(bulb_count)
-		var x := lerpf(x_start, x_end, t)
 		var local_t := fmod(t * float(swags), 1.0)
-		var y := anchor_y - 4.0 * sag * local_t * (1.0 - local_t) - 0.016
+		var drop := 4.0 * sag * local_t * (1.0 - local_t) + 0.016
 		var bulb := MeshInstance3D.new()
 		bulb.mesh = bulb_mesh
 		bulb.material_override = _garland_channel_mats[i % 4]
-		bulb.position = Vector3(x, y, wall_z)
+		bulb.position = start.lerp(end, t) - Vector3.UP * drop
 		bulb.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		_garland_root.add_child(bulb)
 
