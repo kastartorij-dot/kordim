@@ -576,14 +576,18 @@ func _build_collisions(room: Node) -> void:
 		var mesh_node: MeshInstance3D = node
 		if mesh_node.get_parent() in interactables or str(mesh_node.name).begins_with("Curtain_"): continue
 		if clothing_root != null and clothing_root.is_ancestor_of(mesh_node): continue
-		if mesh_node.mesh == null or not broadphase.intersects(mesh_node.global_transform * mesh_node.get_aabb()): continue
+		if mesh_node.mesh == null: continue
+		var mesh_transform := mesh_node.global_transform
+		var mesh_bounds: AABB = mesh_transform * mesh_node.get_aabb()
+		if not broadphase.intersects(mesh_bounds): continue
+		var fully_inside := bounds.encloses(mesh_bounds)
 		var triangles := mesh_node.mesh.get_faces()
 		for i in range(0, triangles.size(), 3):
-			var a: Vector3 = mesh_node.global_transform * triangles[i]
-			var b: Vector3 = mesh_node.global_transform * triangles[i + 1]
-			var c: Vector3 = mesh_node.global_transform * triangles[i + 2]
+			var a: Vector3 = mesh_transform * triangles[i]
+			var b: Vector3 = mesh_transform * triangles[i + 1]
+			var c: Vector3 = mesh_transform * triangles[i + 2]
 			if clutter.has_point(a) and clutter.has_point(b) and clutter.has_point(c): continue
-			if bounds.has_point(a) and bounds.has_point(b) and bounds.has_point(c):
+			if fully_inside or (bounds.has_point(a) and bounds.has_point(b) and bounds.has_point(c)):
 				if (b - a).cross(c - a).length_squared() > 0.000000000001:
 					faces.append(a)
 					faces.append(b)
