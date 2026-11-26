@@ -29,7 +29,8 @@ HOLD_DIRECTION = (-0.97, 0.24, 0.13)  # куда смотрит сигарета
 WHEEL = Vector((0.0, -0.005, 0.0345))  # колёсико в системе зажигалки
 WHEEL_PAD = 0.004                      # толщина подушечки между кончиком кости и колёсиком
 FIST_PALM, FIST_ALONG, FIST_LOW = 0.014, 0.030, 0.010  # центр хвата относительно костяшек и отступ вниз
-THUMB_REST = 0.009  # на каком расстоянии от торца фильтра лежит кончик большого пальца в хвате курильщика
+FINGER_X, FINGER_Y = 0.0035, -0.0165  # кончики четырёх пальцев ложатся на переднюю грань зажигалки у правого края
+THUMB_SIDE, THUMB_PALM = 0.012, 0.006  # где лежит кончик большого пальца относительно середины указательного
 PULL_SLOT = Vector((0.0, -0.0064, SLOT_TOP))  # ближняя к игроку сигарета в центре переднего ряда
 
 
@@ -524,18 +525,18 @@ def create_clips(animator, lighter_tip):
                 print("PACK", finger, segment, tuple(round(v, 3) for v in pack_rotation.inverted() @ (w @ bone.head - pack_position)),
                       tuple(round(v, 3) for v in pack_rotation.inverted() @ (w @ bone.tail - pack_position)))
 
-    # Большой палец не торчит в сторону, а подпирает торец фильтра со стороны ладони.
+    # Большой палец расслаблен и лежит вдоль указательного, с той стороны, где нет среднего.
     animator.pose("r", right, right, 0)
     bpy.context.view_layer.update()
     world = animator.rig.matrix_world
-    cig_q = right.rotation @ cigarette_basis
-    cig_dir = cig_q @ Vector((0, 1, 0))
-    butt = right.wrist + right.rotation @ grip + cig_q @ FILTER
+    middle_of = {f: world @ bones[finger_name("r", f, 2)].head.lerp(bones[finger_name("r", f, 2)].tail, 0.5)
+                 for f in ("index", "middle")}
+    side = (middle_of["index"] - middle_of["middle"]).normalized()
+    cig_dir = (right.rotation @ cigarette_basis) @ Vector((0, 1, 0))
+    side -= cig_dir * side.dot(cig_dir)
     palm_center = (right.wrist + sum((world @ bones[finger_name("r", f, 1)].head for f in ("index", "pinky")), Vector()) / 2) / 2
-    toward_palm = palm_center - butt
-    toward_palm -= cig_dir * toward_palm.dot(cig_dir)
-    thumb_tip = butt + toward_palm.normalized() * THUMB_REST + cig_dir * 0.004
-    animator.pose("r", right, right, 0)
+    toward_palm = palm_center - middle_of["index"]
+    thumb_tip = middle_of["index"] + side.normalized() * THUMB_SIDE + toward_palm.normalized() * THUMB_PALM
     miss = animator.fit_digits("r", {"thumb": thumb_tip}, "smoke_thumb", "smoke")
     animator.custom_grips["r", "smoke"] = animator.custom_grips.pop(("r", "smoke_thumb"))
     if "--pinch-debug" in sys.argv:
@@ -579,8 +580,8 @@ def create_clips(animator, lighter_tip):
         """Четыре пальца огибают корпус зажигалки, большой лежит на колёсике (или чуть выше него)."""
         def at(local):
             return lighter_position + lighter_orientation @ Vector(local)
-        tips = {"index": at((0.0072, -0.008, 0.014)), "middle": at((0.0072, -0.008, 0.003)),
-                "ring": at((0.0072, -0.008, -0.008)), "pinky": at((0.0072, -0.008, -0.018)),
+        tips = {"index": at((FINGER_X, FINGER_Y, 0.013)), "middle": at((FINGER_X, FINGER_Y, 0.000)),
+                "ring": at((FINGER_X, FINGER_Y, -0.013)), "pinky": at((FINGER_X, FINGER_Y, -0.025)),
                 "thumb": at(WHEEL + Vector((0.0, 0.0, WHEEL_PAD + thumb_lift)))}
         animator.place("l", strike_l.wrist, strike_l.rotation, "lighter", "lighter", 0)
         miss = animator.fit_digits("l", tips, name, "lighter")
@@ -614,6 +615,40 @@ def create_clips(animator, lighter_tip):
                 wobble = (0.90 + 0.07 * math.sin(frame * 2.1)) if flame_on else HIDDEN_SCALE
                 animator.key(animator.flame, Vector((0, 0, 0.036)), Quaternion((0, 1, 0), 0.03 * math.sin(frame)), wobble, frame)
         animator.finish(name, keys[-1][0])
+
+    # ---- Затяжка: рука идёт ко рту одним движением, без остановки на полпути. Метки кадров завязаны на игру:
+    # губы 20-33, на кадре 42 рука отходит ото рта (выдох).
+    def bake_drag(name="затяжка", last=62):
+        def arc(a, b, via, u):
+            """Одно плавное движение из a в b с небольшим уходом в сторону via, скорость колоколом."""
+            return a.lerp(b, u) + (via - a.lerp(b, 0.55)) * math.sin(math.pi * u)
+
+        speeds, prev = [], []
+        for frame in range(1, last + 1):
+            if frame <= 20:
+                u = smoothstep((frame - 1) / 19)
+                r = arc(right.wrist, lips.wrist, near_face.wrist, u)
+                qr = right.rotation.slerp(lips.rotation, u)
+            elif frame <= 33:
+                r, qr = lips.wrist, lips.rotation
+            else:
+                u = smoothstep((frame - 33) / (last - 33))
+                r = arc(lips.wrist, right.wrist, near_face.wrist, u)
+                qr = lips.rotation.slerp(right.rotation, u)
+            if "--pinch-debug" in sys.argv:
+                speeds.append(round(((r - prev[0]).length * 1000) if prev else 0.0, 1))
+                prev[:] = [r.copy()]
+            animator.place("r", r, qr, "smoke", "smoke", 0, frame)
+            l, ql = animator.pose("l", hidden_l, hidden_l, 0, frame)
+            animator.key(animator.pack, l + ql @ pack_offset, ql @ pack_basis, HIDDEN_SCALE, frame)
+            animator.key(animator.lid, LID_HINGE, Quaternion(), 1, frame)
+            cig_p, cig_q = held(r, qr)
+            animator.key(animator.cigarette, cig_p, cig_q, 1, frame)
+            animator.key(animator.lighter, l + ql @ lighter_offset, ql @ lighter_basis, HIDDEN_SCALE, frame)
+            animator.key(animator.flame, Vector((0, 0, 0.036)), Quaternion(), HIDDEN_SCALE, frame)
+        if "--pinch-debug" in sys.argv:
+            print("DRAG speed mm/frame:", speeds)
+        animator.finish(name, last)
 
     # ---- Вынуть сигарету: большой палец откидывает крышку, правая рука берёт фильтр и вытягивает по оси пачки.
     def hermite(points, frame):
@@ -806,8 +841,7 @@ def create_clips(animator, lighter_tip):
     bake("поджечь_сигарету", [(1, right, low_lighter, 0), (17, strike_r, strike_l, 0),
                              (25, strike_r, struck, 0), (46, strike_r, struck, 0),
                              (52, strike_r, strike_l, 0), (65, right, low_lighter, 0)], cig_on=True, lighter_on=True)
-    bake("затяжка", [(1, right, hidden_l, 0), (12, near_face, hidden_l, 0), (20, lips, hidden_l, 0),
-                     (33, lips, hidden_l, 0), (42, near_face, hidden_l, 0), (62, right, hidden_l, 0)], cig_on=True)
+    bake_drag()
     bake("стряхнуть_пепел", [(1, right, hidden_l, 0), (12, flick, hidden_l, 0),
                              (19, right, hidden_l, 0), (30, right, hidden_l, 0)], cig_on=True)
     bake("убрать_пачку", [(1, hidden_r, left, 0), (19, hidden_r, low_pack, 0)], pack_on=True)
