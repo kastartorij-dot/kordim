@@ -358,6 +358,8 @@ def двор(g, facade_x):
     grass = mat((0.15, 0.24, 0.09), 0.95)
     hedge = mat((0.07, 0.17, 0.045), 0.95)
     left_gate = 65.5
+    pocket_y = 24.0
+    pocket_start, pocket_end = pocket_y - 2.25, pocket_y + 3.8
     tile = box("покрытие_двора", 6.3, -27.5, g, facade_x - 4.0, left_gate, g + 0.046, paving, 0, None)
     uv_box(tile, tile=0.76)
     tile = box("брусчатка за левой оградой", 5.7, left_gate, g, 47, 68, g+0.046, paving, 0, None)
@@ -380,7 +382,8 @@ def двор(g, facade_x):
         припаркованный_автомобиль(x, -29.35, g+0.04, mat(color, 0.42), length, van)
     box("газон_у_корпуса", facade_x - 4.0, -17, g, facade_x, 28.2, g + 0.10, grass, 0, None)
     box("газон у низкого корпуса", facade_x - 4.0, 28.2, g, 28.6, left_gate, g+0.092, grass, 0, None)
-    box("бордюр_газона", facade_x - 4.05, -17, g, facade_x - 3.95, left_gate, g + 0.14, curb, 0.005, None)
+    for y0, y1 in ((-17, pocket_start), (pocket_end, left_gate)):
+        box("бордюр_газона", facade_x - 4.05, y0, g, facade_x - 3.95, y1, g + 0.14, curb, 0.005, None)
     for y in (-12, -7, -2, 3, 16, 21, 25):
         x = facade_x - 5.5
         box("вазон", x - 0.54, y - 0.54, g + 0.046, x + 0.54, y + 0.54, g + 0.38, curb, 0.025, None)
@@ -400,8 +403,10 @@ def двор(g, facade_x):
         shrub.name = "куст_на_клумбе"
         shrub.scale = (1.15, 0.88, 0.78)
         shrub.data.materials.append(shrub_colors[color])
+    # Закрываем прежний разрыв изгороди и оставляем новый у кармана.
     vegetation = random.Random(23)
-    for y in (*range(-16, 6, 2), *range(12, 61, 2)):
+    hedge_rows = (*range(-16, 6, 2), *range(12, 20, 2), 19.75, 6, 8, 10, *range(28, 61, 2))
+    for y in hedge_rows:
         for dy in (0.35, 0.91, 1.46):
             x = facade_x - 3.1 + vegetation.uniform(-0.13, 0.13)
             bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=1, location=(x, y+dy, g+0.53))
@@ -410,8 +415,8 @@ def двор(g, facade_x):
             shrub.scale = (vegetation.uniform(0.4, 0.53), 0.50, vegetation.uniform(0.37, 0.55))
             shrub.data.materials.append(hedge)
 
-    # Пара лавок стоит напротив входа, левее прямого вида из комнаты.
-    entrance_y = 8.0
+    # Ступени целиком между опорами Y 23 и 29.
+    entrance_y = 24.7
     plaster = mat((0.51, 0.44, 0.33), 0.95)
     concrete = mat((0.35, 0.34, 0.30), 0.95)
     dark_glass = mat((0.075, 0.091, 0.10), 0.44)
@@ -434,7 +439,7 @@ def двор(g, facade_x):
     _mesh("бирюзовые ленты окон 46 к1", bands, mat((0.10, 0.29, 0.28), 0.55))
     for y in (-18, -12, -6, 0, 6, 11, 17, 23, 29):
         box("колонна_общежития", 6.20, y-0.24, g, 6.49, y+0.24, g+3.76, concrete, 0, None)
-    for y in (-15, -9, -3, 3, 14, 20, 26, 31):
+    for y in (-15, -9, -3, 3, 8.5, 14, 20, 27, 31):
         box("окно_первого_этажа", 6.22, y-0.80, g+1.06, 6.29, y+0.80, g+2.8, door_green, 0, None)
         for shift in (-0.39, 0.39):
             box("стекло_первого_этажа", 6.29, y+shift-0.34, g+1.13, 6.31, y+shift+0.34, g+2.73, dark_glass, 0, None)
@@ -446,19 +451,18 @@ def двор(g, facade_x):
     for y in (-17.5, -10.0, -1.4, 12.7, 19.3, 29.8):
         cyl("люк_во_дворе", 0.32, g+0.044, g+0.056, 13.0 + vegetation.uniform(-3, 5), y, metal, 20)
 
-    pocket = box("карман_под_лавками", facade_x - 4.03, entrance_y - 2.25, g + 0.09,
-                 facade_x - 2.55, entrance_y + 3.8, g + 0.105, paving, 0, None)
+    pocket = box("карман_под_лавками", facade_x - 4.03, pocket_start, g + 0.09,
+                 facade_x - 2.55, pocket_end, g + 0.105, paving, 0, None)
     uv_box(pocket, tile=0.76)
     bench_wood = mat((0.18, 0.105, 0.062), 0.84)
     bench_green = mat((0.07, 0.23, 0.13), 0.82)
     x = facade_x - 3.25
-    лавка(x, entrance_y - 1.15, g + 0.10, -math.pi / 2, bench_green, metal)
-    лавка(x, entrance_y + 1.65, g + 0.10, math.pi / 2, bench_green, metal)
-    лавка(facade_x - 4.45, entrance_y + 6.3, g + 0.046, 0, bench_wood, metal)
+    лавка(x, pocket_y - 1.15, g + 0.10, -math.pi / 2, bench_green, metal)
+    лавка(x, pocket_y + 1.65, g + 0.10, math.pi / 2, bench_green, metal)
     лавка(facade_x - 4.45, 30.2, g + 0.046, 0, bench_wood, metal)
     лавка(facade_x - 4.45, 41.0, g + 0.046, 0, bench_wood, metal)
     bin_yellow = mat((0.61, 0.42, 0.12), 0.9)
-    for y in (entrance_y - 2.0, entrance_y + 2.95):
+    for y in (pocket_y - 2.0, pocket_y + 2.95):
         x = facade_x - 4.1
         box("урна_жёлтая", x - 0.22, y - 0.22, g + 0.046, x + 0.22, y + 0.22, g + 0.59, bin_yellow, 0.018, None)
         box("урна_верх", x - 0.18, y - 0.18, g + 0.587, x + 0.18, y + 0.18, g + 0.593, metal, 0, None)
