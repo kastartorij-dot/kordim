@@ -26,7 +26,7 @@ var lamp_menu: Control
 var strip_mode := 0
 var strip_lights: Array[OmniLight3D] = []
 var light_materials := {}
-var screen_material: StandardMaterial3D
+var evening_window_light: SpotLight3D
 var monitor_light: OmniLight3D
 const LAMP_COLORS := [Color(1.0, 0.12, 0.65), Color(0.22, 1.0, 0.35), Color(1.0, 0.73, 0.42), Color(0.25, 0.53, 1), Color(0.63, 0.32, 1), Color.WHITE]
 const LAMP_NAMES := ["Розовый", "Зелёный", "Тёплый", "Голубой", "Сиреневый", "Белый"]
@@ -118,11 +118,21 @@ func _ready() -> void:
 	_fill_light(Vector3(-1.3, 2.4, -1.9), 0.8, 3)
 	ceiling_light = OmniLight3D.new()
 	ceiling_light.position = Vector3(2.3, 2.45, -1.6)
-	ceiling_light.light_color = Color(1.0, 0.80, 0.57)
-	ceiling_light.light_energy = 0.65
+	ceiling_light.light_color = Color(1.0, 0.89, 0.75)
+	ceiling_light.light_energy = 0.38
 	ceiling_light.omni_range = 5.0
 	ceiling_light.shadow_enabled = true
 	add_child(ceiling_light)
+	# Холодный рассеянный свет с улицы остаётся у оконного проёма.
+	evening_window_light = SpotLight3D.new()
+	evening_window_light.position = Vector3(4.36, 1.88, -1.88)
+	evening_window_light.light_color = Color(0.65, 0.76, 1.0)
+	evening_window_light.light_energy = 0.13
+	evening_window_light.light_specular = 0.0
+	evening_window_light.spot_range = 3.1
+	evening_window_light.spot_angle = 46.0
+	add_child(evening_window_light)
+	evening_window_light.look_at(Vector3(2.4, 0.96, -1.65))
 	bedside_light = OmniLight3D.new()
 	bedside_light.position = _furniture_point("Тумбочка", Vector3(-0.30, 0.82, 0.05))
 	bedside_light.light_color = Color(1.0, 0.18, 0.48)
@@ -313,6 +323,7 @@ func _set_lighting(mode: int) -> void:
 	lighting_mode = mode % 3
 	for light in daylight: light.visible = lighting_mode == 0
 	ceiling_light.visible = lighting_mode == 1
+	evening_window_light.visible = lighting_mode == 1
 	lamp_on = lighting_mode == 2
 	var day_ambient := 0.18 if daylight_prototype else 0.28
 	room_environment.ambient_light_energy = [day_ambient, 0.08, 0.015][lighting_mode]
@@ -396,8 +407,13 @@ func _build_accent_lighting() -> void:
 			var material := mesh.get_active_material(surface) as StandardMaterial3D
 			if material == null: continue
 			if material.resource_name == "экран":
-				if screen_material == null: screen_material = material.duplicate()
-				mesh.set_surface_override_material(surface, screen_material)
+				if mesh == loaded_room.get_node("Письменный стол"):
+					_set_wallpaper(mesh, surface)
+				else:
+					var dark_screen := material.duplicate() as StandardMaterial3D
+					dark_screen.emission_enabled = false
+					dark_screen.roughness = 0.32
+					mesh.set_surface_override_material(surface, dark_screen)
 				continue
 			if material.resource_name not in ["ночник", "лента", "лента_стол", "кулеры_пк"]: continue
 			var key := material.resource_name
@@ -424,17 +440,26 @@ func _build_accent_lighting() -> void:
 
 	monitor_light = OmniLight3D.new()
 	monitor_light.position = _furniture_point("Письменный стол", Vector3(-0.135, 0.96, 0.39))
-	monitor_light.light_color = Color(0.42, 0.62, 1.0)
-	monitor_light.light_energy = 0.12
+	monitor_light.light_color = Color(0.79, 0.46, 0.78)
+	monitor_light.light_energy = 0.04
 	monitor_light.omni_range = 0.76
 	add_child(monitor_light)
 
+func _set_wallpaper(mesh: MeshInstance3D, surface: int) -> void:
+	# Стол экспортируется одним мешем. Берём габариты только поверхности экрана.
+	var vertices: PackedVector3Array = mesh.mesh.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
+	var bounds := AABB(vertices[0], Vector3.ZERO)
+	for vertex in vertices:
+		bounds = bounds.expand(vertex)
+	var display := ShaderMaterial.new()
+	display.shader = preload("res://textures/monitor_screen.gdshader")
+	display.set_shader_parameter("wallpaper", preload("res://textures/monitor_wallpaper.jpg"))
+	display.set_shader_parameter("screen_min", Vector2(bounds.position.x, bounds.position.y))
+	display.set_shader_parameter("screen_size", Vector2(bounds.size.x, bounds.size.y))
+	mesh.set_surface_override_material(surface, display)
+
 func _update_accent_lighting() -> void:
-	monitor_light.visible = lighting_mode == 2
-	if screen_material != null:
-		screen_material.emission_enabled = lighting_mode == 2
-		screen_material.emission = Color(0.24, 0.36, 0.58)
-		screen_material.emission_energy_multiplier = 0.7
+	monitor_light.visible = lighting_mode != 0
 	var lamp_tint: Color = LAMP_COLORS[lamp_preview if lamp_preview >= 0 else lamp_color]
 	bedside_light.visible = lamp_on
 	bedside_light.light_color = lamp_tint

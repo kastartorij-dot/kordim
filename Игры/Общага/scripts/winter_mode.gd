@@ -584,4 +584,5 @@ func _update_garland_visuals(t: float) -> void:
 		light.visible = active
 		if active and avg_intensity > 0.001:
 			light.light_color = avg_color / avg_intensity
-			light.light_energy = 0.24 * garland_brightness * (avg_intensity / 4.0)
+			var spill := 0.12 if room.lighting_mode == 1 else 0.24
+			light.light_energy = spill * garland_brightness * (avg_intensity / 4.0)
