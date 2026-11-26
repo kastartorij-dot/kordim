@@ -46,6 +46,7 @@ var status_time := 0.0
 var room_controls: Array[Area3D] = []
 var loaded_room: Node3D
 var fast_lights := false
+var courtyard_path: MeshInstance3D
 var original_shadows: Dictionary[Light3D, bool] = {}
 var asgard_day: Dictionary[StandardMaterial3D, Texture2D] = {}
 var asgard_night: Dictionary[StandardMaterial3D, Texture2D] = {}
@@ -146,6 +147,8 @@ func _ready() -> void:
 	bedside_light.omni_range = 2.2
 	bedside_light.shadow_enabled = true
 	add_child(bedside_light)
+	courtyard_path = preload("res://scripts/courtyard_path.gd").new()
+	add_child(courtyard_path)
 	_build_courtyard_lights()
 	_build_accent_lighting()
 	_set_fast_lights(args.has("--fast-lights"))
@@ -350,6 +353,7 @@ func _set_lighting(mode: int) -> void:
 func _set_winter(value: bool) -> void:
 	if winter_controller == null: return
 	winter_controller.set_enabled(value)
+	courtyard_path.set_winter(value)
 	if winter_button != null:
 		winter_button.text = "Зимний режим: Вкл" if value else "Зимний режим: Выкл"
 	if garland_button != null:
