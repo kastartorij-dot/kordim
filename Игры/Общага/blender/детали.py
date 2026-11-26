@@ -358,6 +358,7 @@ def двор(g, facade_x):
     grass = mat((0.15, 0.24, 0.09), 0.95)
     hedge = mat((0.07, 0.17, 0.045), 0.95)
     left_gate = 65.5
+    fence_x = facade_x - 1.95
     pocket_y = 24.0
     pocket_start, pocket_end = pocket_y - 2.25, pocket_y + 3.8
     tile = box("покрытие_двора", 6.3, -27.5, g, facade_x - 4.0, left_gate, g + 0.046, paving, 0, None)
@@ -388,21 +389,15 @@ def двор(g, facade_x):
         x = facade_x - 5.5
         box("вазон", x - 0.54, y - 0.54, g + 0.046, x + 0.54, y + 0.54, g + 0.38, curb, 0.025, None)
         box("земля_вазона", x - 0.44, y - 0.44, g + 0.379, x + 0.44, y + 0.44, g + 0.385, soil, 0, None)
-    # Островок у торца кирпичного корпуса оставляет сквозную дорожку свободной.
-    bed = [(facade_x - 9.0, -17.0), (facade_x - 5.3, -17.0),
-           (facade_x - 4.35, -14.6), (facade_x - 5.1, -11.4),
-           (facade_x - 8.25, -11.7), (facade_x - 9.35, -14.4)]
-    _mesh("клумба_у_торца", [(bed, g + 0.044, g + 0.076)], grass)
-    shrub_colors = [hedge, mat((0.15, 0.28, 0.09), 0.93), mat((0.20, 0.12, 0.08), 0.95)]
-    for dx, y, radius, color in ((-8.2, -14.6, 0.72, 0), (-7.3, -15.5, 0.53, 1),
-                                  (-6.3, -14.1, 0.62, 0), (-7.0, -12.9, 0.58, 2),
-                                  (-5.7, -12.5, 0.41, 1)):
+    # У южного угла посадки целиком внутри поворота ограды.
+    box("газон_за_поворотом_ограды", fence_x, -18.15, g, facade_x, -17, g + 0.10, grass, 0, None)
+    for y, radius in ((-17.62, 0.34), (-17.18, 0.31), (-15.32, 0.34)):
         bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=radius,
-                                            location=(facade_x + dx, y, g + radius * 0.6))
+                                            location=(facade_x - 0.77, y, g + 0.10 + radius * 0.36))
         shrub = bpy.context.object
-        shrub.name = "куст_на_клумбе"
-        shrub.scale = (1.15, 0.88, 0.78)
-        shrub.data.materials.append(shrub_colors[color])
+        shrub.name = "куст_за_оградой"
+        shrub.scale = (1.10, 0.90, 0.65)
+        shrub.data.materials.append(hedge)
     # Закрываем прежний разрыв изгороди и оставляем новый у кармана.
     vegetation = random.Random(23)
     hedge_rows = (*range(-16, 6, 2), *range(12, 20, 2), 19.75, 6, 8, 10, *range(28, 61, 2))
@@ -467,7 +462,6 @@ def двор(g, facade_x):
         box("урна_жёлтая", x - 0.22, y - 0.22, g + 0.046, x + 0.22, y + 0.22, g + 0.59, bin_yellow, 0.018, None)
         box("урна_верх", x - 0.18, y - 0.18, g + 0.587, x + 0.18, y + 0.18, g + 0.593, metal, 0, None)
 
-    fence_x = facade_x - 1.95
     секция_ограды((fence_x, -16), (fence_x, 27), g, 1.05, metal)
     # Ограда заворачивает за торец, оставляя проход к боковой калитке.
     секция_ограды((fence_x, -16), (fence_x, -18.15), g, 1.05, metal)
@@ -505,7 +499,8 @@ def двор(g, facade_x):
 
     trunk = mat((0.16, 0.11, 0.072), 0.95)
     needles = mat((0.075, 0.17, 0.10), 0.95)
-    for x, y, height in ((facade_x-7.4, -14.3, 2.8), (facade_x-2.2, -13.2, 6.4), (facade_x-2.2, -8.8, 5.0),
+    ель_во_дворе(facade_x - 1.0, -16.40, g + 0.10, 2.8, trunk, needles)
+    for x, y, height in ((facade_x-2.2, -13.2, 6.4), (facade_x-2.2, -8.8, 5.0),
                          (facade_x-2.2, 14.5, 4.8), (facade_x+3.5, -18.9, 5.8),
                          (facade_x+7.7, -18.7, 6.2), (facade_x+12, -18.4, 5.4),
                          (31, 32.7, 6.1), (34, 35.2, 7.2), (25.1, 62.1, 7.0)):
@@ -572,7 +567,12 @@ def вид(L, W, вечер=False):
                         for z in (0.0, 1.11, 1.58):
                             box("перемычка_рамы", -width/2, outside*0.09, z, width/2, outside*0.17, z+0.07, bar_mat, 0, None, frame)
                         box("отлив_46к2", -width/2-0.10, 0, -0.045, width/2+0.10, outside*0.22, 0.025, bar_mat, 0, None, frame)
-                        box("кирпичная_перемычка", -width/2-0.20, 0, 1.69, width/2+0.20, outside*0.075, 1.90, frame_mat, 0, None, frame)
+                        if nx < -0.5 or ny < -0.5:
+                            box("кирпичная_перемычка", -width/2-0.23, 0, 1.65, width/2+0.23, outside*0.19, 1.96, frame_mat, 0, None, frame)
+                            for x in (-width/2 - 0.15, width/2 + 0.15):
+                                box("край_перемычки", x-0.08, 0, 1.43, x+0.08, outside*0.18, 1.69, frame_mat, 0, None, frame)
+                        else:
+                            box("кирпичная_перемычка", -width/2-0.20, 0, 1.69, width/2+0.20, outside*0.075, 1.90, frame_mat, 0, None, frame)
         elif bid == "16237661":
             facade_55 = img_mat("фасад_дом_55", "фасад_дом_55.png", 0.9)
             _mesh("дом_55_светлый", [(pts, z1, z2)], facade_55, 12,
@@ -589,7 +589,11 @@ def вид(L, W, вечер=False):
     teal = mat((0.08, 0.42, 0.4), 0.45); dark_brick = mat((0.45, 0.2, 0.12), 0.85)
     xs = [p[0] for p in k2]; ys = [p[1] for p in k2]
     x1, x2, y1, y2 = min(xs), max(xs), min(ys), max(ys)
-    box("карниз_46к2", x1 - 0.4, y1 - 0.4, g + 8.0, x1 + 0.6, y2 + 0.4, g + 8.4, teal, 0.02, None)
+    box("карниз_46к2", x1 - 0.4, y1 - 0.4, g + 8.0, x1 + 0.6, y2 + 0.4, g + 8.32, dark_brick, 0.02, None)
+    box("накрывка_карниза_46к2", x1 - 0.42, y1 - 0.42, g + 8.32, x1 + 0.60, y2 + 0.42, g + 8.40, teal, 0.01, None)
+    for i in range(int((y2 - y1) / 0.84)):
+        yy = y1 + 0.42 + i * 0.84
+        box("кирпичный_зубец_карниза", x1 - 0.26, yy - 0.12, g + 7.78, x1 + 0.07, yy + 0.12, g + 8.04, dark_brick, 0, None)
     for yy in [y1 + i * 4.5 for i in range(int((y2 - y1) / 4.5) + 1)]:
         box("столбик", x1 - 0.1, yy - 0.3, g + 8.4, x1 + 0.5, yy + 0.3, g + 9.2, dark_brick, 0, None)
         box("колпак", x1 - 0.15, yy - 0.35, g + 9.2, x1 + 0.55, yy + 0.35, g + 9.3, teal, 0.01, None)
@@ -642,10 +646,14 @@ def вид(L, W, вечер=False):
             tr = bpy.context.object; tr.scale = (1, 1, 1.15)
             tr.data.materials.append(mat((0.13 + rnd.uniform(0, 0.08), 0.28 + rnd.uniform(0, 0.1), 0.1), 0.9))
         tr.name = "крона"
-    # фонари во дворе 46 к2, как на фото из окна
-    for (x, y) in ((x1 - 5.3, -6), (x1 - 5.3, 15)):
-        pole = mat((0.25, 0.27, 0.27), 0.55)
+    # Двухрожковые фонари видны в створе и при взгляде вдоль двора.
+    pole = mat((0.25, 0.27, 0.27), 0.55)
+    diffuser = mat((0.75, 0.76, 0.72), 0.55)
+    for x, y in ((x1 - 5.3, -6), (x1 - 5.3, 15), (x1 - 5.3, 35)):
         cyl("фонарь", 0.08, g, g + 6.2, x, y, pole, 10)
-        tube("кронштейн_фонаря", [(x, y, g + 6.08), (x - 0.22, y, g + 6.25),
-                                  (x - 0.58, y, g + 6.28)], 0.036, pole)
-        box("фонарь_голова", x - 0.78, y - 0.12, g + 6.23, x - 0.38, y + 0.12, g + 6.34, pole, 0.025, None)
+        for side in (-1, 1):
+            tube("кронштейн_фонаря", [(x, y, g + 6.04), (x, y + 0.28 * side, g + 6.24),
+                                      (x, y + 0.55 * side, g + 6.28)], 0.036, pole)
+            yy = y + 0.62 * side
+            box("фонарь_голова", x - 0.11, yy - 0.23, g + 6.23, x + 0.11, yy + 0.23, g + 6.34, pole, 0.045, None)
+            box("фонарь_рассеиватель", x - 0.08, yy - 0.15, g + 6.22, x + 0.08, yy + 0.15, g + 6.24, diffuser, 0.012, None)
