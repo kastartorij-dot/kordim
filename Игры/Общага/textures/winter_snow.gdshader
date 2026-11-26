@@ -8,6 +8,8 @@ uniform float coverage : hint_range(0.0, 1.0) = 0.92;
 uniform float noise_scale = 0.35;
 uniform float min_world_x = 6.66;
 uniform float normal_offset = 0.006;
+uniform sampler2D albedo_mask : hint_default_white;
+uniform float alpha_cutoff = 0.0;
 
 varying vec3 v_world_pos;
 varying vec3 v_world_normal;
@@ -38,7 +40,7 @@ void vertex() {
 
 void fragment() {
 	// Исключаем комнату и застеклённую лоджию (x <= 6.66).
-	if (v_world_pos.x < min_world_x) {
+	if (v_world_pos.x < min_world_x || (alpha_cutoff > 0.0 && texture(albedo_mask, UV).a < alpha_cutoff)) {
 		discard;
 	}
 	float up = clamp(v_world_normal.y, 0.0, 1.0);

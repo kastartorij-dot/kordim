@@ -258,28 +258,25 @@ def припаркованный_автомобиль(x, y, g, paint, length=4.2
                 wheel.location = (axle, ty, g+0.315)
 
 
-def ель_во_дворе(x, y, g, height, trunk, needles):
-    cyl("ель_ствол", 0.11, g, g + height * 0.82, x, y, trunk, 10)
-    random_shape = random.Random(round(y * 100))
-    vertices, faces = [], []
-    for tier in range(9):
-        radius = height * (0.265 - tier * 0.028)
-        z = g + height * (0.23 + tier * 0.079)
-        first = len(vertices)
-        for j in range(24):
-            angle = math.tau * j / 24 + tier * 0.34
-            distance = radius * (0.69 if j % 2 else 1.0) * random_shape.uniform(0.83, 1.12)
-            vertices.append((x + distance*math.cos(angle), y + distance*math.sin(angle),
-                             z + height*random_shape.uniform(-0.045, 0.035)))
-        tip = len(vertices)
-        vertices.append((x, y, z + height * 0.19))
-        faces.extend((first+j, first+(j+1) % 24, tip) for j in range(24))
-        faces.append(tuple(range(first+23, first-1, -1)))
-    mesh = bpy.data.meshes.new("ветви_ели")
-    mesh.from_pydata(vertices, [], faces)
-    mesh.materials.append(needles)
-    tree = bpy.data.objects.new("ель_двора", mesh)
-    bpy.context.collection.objects.link(tree)
+def загрузить_растение(name):
+    before = set(bpy.context.scene.objects)
+    path = os.path.join(os.path.dirname(__file__), "растения", name + ".glb")
+    bpy.ops.import_scene.gltf(filepath=path)
+    plant, = set(bpy.context.scene.objects) - before
+    mesh = plant.data
+    bottom = min(v.co.z for v in mesh.vertices)
+    dimensions = plant.dimensions.copy()
+    bpy.data.objects.remove(plant, do_unlink=True)
+    return mesh, dimensions, bottom
+
+
+def посадка(name, template, x, y, ground, width, depth, height, angle=0):
+    mesh, dimensions, bottom = template
+    plant = bpy.data.objects.new(name, mesh)
+    bpy.context.collection.objects.link(plant)
+    plant.scale = (width / dimensions.x, depth / dimensions.y, height / dimensions.z)
+    plant.location = (x, y, ground - bottom * plant.scale.z)
+    plant.rotation_euler.z = angle
 
 
 def жилой_корпус_48(label, footprint, g, top):
@@ -359,6 +356,7 @@ def двор(g, facade_x):
     hedge = mat((0.07, 0.17, 0.045), 0.95)
     left_gate = 65.5
     fence_x = facade_x - 1.95
+    south_turn = -20.98
     pocket_y = 24.0
     pocket_start, pocket_end = pocket_y - 2.25, pocket_y + 3.8
     tile = box("покрытие_двора", 6.3, -27.5, g, facade_x - 4.0, left_gate, g + 0.046, paving, 0, None)
@@ -370,6 +368,8 @@ def двор(g, facade_x):
     uv_box(tile, tile=0.76)
     approach = box("подход_вдоль_торца", facade_x - 4.0, -27.5, g, 49, -21, g + 0.046, paving, 0, None)
     uv_box(approach, tile=0.76)
+    approach_edge = box("мощение_у_поворота", facade_x - 4.0, -21, g, fence_x, -17, g + 0.046, paving, 0, None)
+    uv_box(approach_edge, tile=0.76)
     asphalt = mat((0.16, 0.165, 0.165), 0.96)
     box("проезд_за_правой_оградой", 6.3, -35.3, g, 55, -28.1, g + 0.04, asphalt, 0, None)
     for y0, y1 in ((-36.65, -35.3), (-28.1, -27.5)):
@@ -389,26 +389,20 @@ def двор(g, facade_x):
         x = facade_x - 5.5
         box("вазон", x - 0.54, y - 0.54, g + 0.046, x + 0.54, y + 0.54, g + 0.38, curb, 0.025, None)
         box("земля_вазона", x - 0.44, y - 0.44, g + 0.379, x + 0.44, y + 0.44, g + 0.385, soil, 0, None)
-    # У южного угла посадки целиком внутри поворота ограды.
-    box("газон_за_поворотом_ограды", fence_x, -18.15, g, facade_x, -17, g + 0.10, grass, 0, None)
-    for y, radius in ((-17.62, 0.34), (-17.18, 0.31), (-15.32, 0.34)):
-        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=radius,
-                                            location=(facade_x - 0.77, y, g + 0.10 + radius * 0.36))
-        shrub = bpy.context.object
-        shrub.name = "куст_за_оградой"
-        shrub.scale = (1.10, 0.90, 0.65)
-        shrub.data.materials.append(hedge)
+    # Покрытие и газон стыкуются ровно по непрерывной линии ограды.
+    box("газон_за_поворотом_ограды", fence_x, south_turn, g, facade_x, -17, g + 0.10, grass, 0, None)
+    bush = загрузить_растение("Bush_Common")
+    for y, width in ((-17.62, 0.75), (-17.18, 0.66), (-15.32, 0.75)):
+        посадка("куст_за_оградой", bush, facade_x - 0.77, y, g + 0.10, width, width, width * 0.58)
     # Закрываем прежний разрыв изгороди и оставляем новый у кармана.
     vegetation = random.Random(23)
     hedge_rows = (*range(-16, 6, 2), *range(12, 20, 2), 19.75, 6, 8, 10, *range(28, 61, 2))
     for y in hedge_rows:
         for dy in (0.35, 0.91, 1.46):
             x = facade_x - 3.1 + vegetation.uniform(-0.13, 0.13)
-            bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=1, location=(x, y+dy, g+0.53))
-            shrub = bpy.context.object
-            shrub.name = "куст_живой_изгороди"
-            shrub.scale = (vegetation.uniform(0.4, 0.53), 0.50, vegetation.uniform(0.37, 0.55))
-            shrub.data.materials.append(hedge)
+            width = vegetation.uniform(0.8, 1.06)
+            height = 0.53 + vegetation.uniform(0.37, 0.55)
+            посадка("куст_живой_изгороди", bush, x, y + dy, g + 0.09, width, 1.0, height)
 
     # Ступени целиком между опорами Y 23 и 29.
     entrance_y = 24.7
@@ -462,11 +456,8 @@ def двор(g, facade_x):
         box("урна_жёлтая", x - 0.22, y - 0.22, g + 0.046, x + 0.22, y + 0.22, g + 0.59, bin_yellow, 0.018, None)
         box("урна_верх", x - 0.18, y - 0.18, g + 0.587, x + 0.18, y + 0.18, g + 0.593, metal, 0, None)
 
-    секция_ограды((fence_x, -16), (fence_x, 27), g, 1.05, metal)
-    # Ограда заворачивает за торец, оставляя проход к боковой калитке.
-    секция_ограды((fence_x, -16), (fence_x, -18.15), g, 1.05, metal)
-    секция_ограды((fence_x, -18.15), (facade_x - 0.5, -18.15), g, 1.05, metal)
-    секция_ограды((facade_x - 0.5, -18.15), (facade_x - 0.5, -20.98), g, 1.05, metal)
+    секция_ограды((fence_x, south_turn), (fence_x, 27), g, 1.05, metal)
+    секция_ограды((fence_x, south_turn), (48.5, south_turn), g, 1.05, metal)
     секция_ограды((6.3, left_gate), (11.7, left_gate), g, 1.55, metal)
     секция_ограды((12.3, left_gate), (17.4, left_gate), g, 1.55, metal, gate=True)
     секция_ограды((19.5, left_gate), (28.6, left_gate), g, 1.55, metal)
@@ -481,10 +472,10 @@ def двор(g, facade_x):
         секция_ограды((x1, right_edge), (x2, right_edge), g, 1.58, metal)
     for x1, x2 in ((14.25, 16.5), (16.5, 18.75)):
         секция_ограды((x1, right_edge), (x2, right_edge), g, 1.59, metal, gate=True)
-    секция_ограды((facade_x - 0.5, -20.98), (48.5, -20.98), g, 1.48, metal)
     секция_ограды((48.5, right_edge), (48.5, -26.95), g, 1.57, metal)
     секция_ограды((48.5, -26.95), (48.5, -23.55), g, 1.57, metal, gate=True)
-    секция_ограды((48.5, -22.15), (48.5, -20.98), g, 1.57, metal)
+    секция_ограды((48.5, -23.55), (48.5, -22.15), g, 1.57, metal, gate=True)
+    секция_ограды((48.5, -22.15), (48.5, south_turn), g, 1.05, metal)
     for x, y in ((14, right_edge), (19, right_edge), (21, right_edge),
                  (48.5, -26.95), (48.5, -23.55), (48.5, -22.15),
                  (12, left_gate), (17.7, left_gate), (19.2, left_gate)):
@@ -497,14 +488,14 @@ def двор(g, facade_x):
         cap.name = "скатный_колпак_ворот"
         cap.data.materials.append(metal)
 
-    trunk = mat((0.16, 0.11, 0.072), 0.95)
-    needles = mat((0.075, 0.17, 0.10), 0.95)
-    ель_во_дворе(facade_x - 1.0, -16.40, g + 0.10, 2.8, trunk, needles)
-    for x, y, height in ((facade_x-2.2, -13.2, 6.4), (facade_x-2.2, -8.8, 5.0),
-                         (facade_x-2.2, 14.5, 4.8), (facade_x+3.5, -18.9, 5.8),
-                         (facade_x+7.7, -18.7, 6.2), (facade_x+12, -18.4, 5.4),
-                         (31, 32.7, 6.1), (34, 35.2, 7.2), (25.1, 62.1, 7.0)):
-        ель_во_дворе(x, y, g, height, trunk, needles)
+    pines = [загрузить_растение(name) for name in ("Pine_2", "Pine_4")]
+    посадка("молодая_ель", pines[1], facade_x - 1.0, -16.40, g + 0.10, 1.65, 1.65, 2.8)
+    for i, (x, y, height) in enumerate(((facade_x-2.2, -13.2, 6.4), (facade_x-2.2, -8.8, 5.0),
+                                        (facade_x-2.2, 14.5, 4.8), (facade_x+3.5, -18.9, 5.8),
+                                        (facade_x+7.7, -18.7, 6.2), (facade_x+12, -18.4, 5.4),
+                                        (31, 32.7, 6.1), (34, 35.2, 7.2), (25.1, 62.1, 7.0))):
+        width = height * 0.62
+        посадка("ель_двора", pines[i % 2], x, y, g, width, width, height, angle=i * 1.23)
 
 
 def вид(L, W, вечер=False):
@@ -604,38 +595,37 @@ def вид(L, W, вечер=False):
     widths = {"primary": 18, "secondary": 16, "tertiary": 12, "residential": 7, "service": 4.5, "living_street": 5,
               "footway": 2.2, "path": 1.8, "pedestrian": 4, "cycleway": 2}
     road_polys = {"асфальт": [], "тротуар": []}
+    road_spans = []
     for r in data["roads"].values():
         w = widths.get(r["kind"])
         if not w: continue
         P = [to_room(x, y, L, W) for x, y in r["p"]]
         if all(p[0] < L or math.hypot(*p) > 420 for p in P): continue
         for (ax, ay), (bx, by) in zip(P, P[1:]):
-            dx, dy = bx - ax, by - ay; ln = math.hypot(dx, dy) or 1
-            nx, ny = -dy / ln * w / 2, dx / ln * w / 2
+            dx, dy = bx - ax, by - ay
+            length = math.hypot(dx, dy)
+            if not length: continue
+            ux, uy = dx / length, dy / length
+            road_spans.append((ax, ay, ux, uy, length, w / 2))
+            nx, ny = -uy * w / 2, ux * w / 2
             q = [(ax + nx, ay + ny), (bx + nx, by + ny), (bx - nx, by - ny), (ax - nx, ay - ny)]
             road_polys["тротуар" if w < 3 else "асфальт"].append((q, g + 0.01 + (0.005 if w < 3 else 0), g + 0.02 + (0.005 if w < 3 else 0)))
     _mesh("дороги", road_polys["асфальт"], asphalt)
     _mesh("тротуары", road_polys["тротуар"], walk)
     box("земля", L + 0.3, -450, g - 0.1, 500, 450, g, mat((0.27, 0.33, 0.2), 0.95), 0, None)
     двор(g, x1)
-    # деревья: из OSM и рядами вдоль Наличной (ели и лиственные), как на фото
+    # Дальние деревья берём из OSM. Проверяем ствол по ширине всех полос,
+    # включая боковые проезды и пешеходные дорожки.
     spots = [to_room(x, y, L, W) for x, y in data["trees"]]
-    for r in data["roads"].values():
-        if r["name"] == "Наличная улица":
-            P = [to_room(x, y, L, W) for x, y in r["p"]]
-            for (ax, ay), (bx, by) in zip(P, P[1:]):
-                ln = math.hypot(bx - ax, by - ay)
-                for k in range(int(ln / 9)):
-                    f = (k + rnd.random() * 0.5) / max(1, ln / 9)
-                    px, py = ax + (bx - ax) * f, ay + (by - ay) * f
-                    off = rnd.choice((-1, 1)) * rnd.uniform(11, 16)
-                    nx, ny = -(by - ay) / ln, (bx - ax) / ln
-                    spots.append((px + nx * off, py + ny * off))
     ствол = mat((0.25, 0.2, 0.15), 0.9)
     for (x, y) in spots:
         if x < L + 8 or math.hypot(x, y) > 380: continue
         # Ближний план заменён готовыми CC0-деревьями в Godot; здесь только дальний LOD.
         if math.hypot(x - L, y - W / 2) < 65: continue
+        on_road = any(-0.5 <= (x - ax) * ux + (y - ay) * uy <= length + 0.5
+                      and abs((y - ay) * ux - (x - ax) * uy) <= half_width + 0.5
+                      for ax, ay, ux, uy, length, half_width in road_spans)
+        if on_road: continue
         h = rnd.uniform(7, 13)
         cyl("ствол", 0.2, g, g + h * 0.4, x, y, ствол, 8)
         if rnd.random() < 0.45:   # ель

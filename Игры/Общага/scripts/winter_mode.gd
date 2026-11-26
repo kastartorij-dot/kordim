@@ -130,6 +130,10 @@ func _scan_outdoor_scene() -> void:
 				_register_surface_override(courtyard, surface, _road_winter_mat)
 			elif _matches_palette(color, Color(0.45, 0.44, 0.42)):
 				_register_surface_override(courtyard, surface, _walk_winter_mat)
+			elif material.resource_name.begins_with("Leaves_Pine") or material.resource_name == "Leaves_TwistedTree":
+				_register_cutout_snow(courtyard, surface, material, _evergreen_snow_pass)
+			elif material.resource_name.begins_with("Bark_NormalTree"):
+				_register_cutout_snow(courtyard, surface, material, _branch_frost_pass)
 			elif _matches_palette(color, Color(0.07, 0.20, 0.10)):
 				_register_surface_next_pass(courtyard, surface, _evergreen_snow_pass)
 			elif absf(color.b - 0.10) < 0.001 and color.r >= 0.129 and color.r <= 0.211 and color.g >= 0.279 and color.g <= 0.381:
@@ -144,6 +148,13 @@ func _scan_outdoor_scene() -> void:
 		_register_next_pass(asgard, _roof_snow_pass)
 	for tree in room.trees:
 		_process_procedural_tree(tree)
+
+
+func _register_cutout_snow(mesh: MeshInstance3D, surface: int, material: StandardMaterial3D, snow: ShaderMaterial) -> void:
+	var masked_snow := snow.duplicate() as ShaderMaterial
+	masked_snow.set_shader_parameter("albedo_mask", material.albedo_texture)
+	masked_snow.set_shader_parameter("alpha_cutoff", material.alpha_scissor_threshold)
+	_register_surface_next_pass(mesh, surface, masked_snow)
 
 
 func _matches_palette(color: Color, source: Color) -> bool:
