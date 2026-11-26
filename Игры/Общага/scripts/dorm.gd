@@ -28,6 +28,7 @@ var strip_lights: Array[OmniLight3D] = []
 var light_materials := {}
 var evening_window_light: SpotLight3D
 var courtyard_lights: Array[SpotLight3D] = []
+var residential_windows: Array[StandardMaterial3D] = []
 var courtyard_diffusers: Array[MeshInstance3D] = []
 var monitor_light: OmniLight3D
 const LAMP_COLORS := [Color(1.0, 0.12, 0.65), Color(0.22, 1.0, 0.35), Color(1.0, 0.73, 0.42), Color(0.25, 0.53, 1), Color(0.63, 0.32, 1), Color.WHITE]
@@ -87,6 +88,7 @@ func _ready() -> void:
 	loaded_room = $Модель
 	_tint_microwave()
 	_prepare_asgard_lighting()
+	_prepare_residential_windows()
 	interaction_ray.collision_mask = 11
 	interaction_ray.collide_with_areas = true
 	_build_trees()
@@ -336,6 +338,8 @@ func _set_lighting(mode: int) -> void:
 	evening_window_light.visible = lighting_mode == 1
 	for light in courtyard_lights:
 		light.visible = lighting_mode != 0
+	for material in residential_windows:
+		material.emission_enabled = lighting_mode != 0
 	for diffuser in courtyard_diffusers:
 		diffuser.visible = lighting_mode != 0
 	lamp_on = lighting_mode == 2
@@ -387,17 +391,36 @@ func _prepare_asgard_lighting() -> void:
 		asgard_day[material] = original.albedo_texture
 		asgard_night[material] = texture
 
+func _prepare_residential_windows() -> void:
+	var exterior := loaded_room.get_node_or_null("Окружение") as MeshInstance3D
+	if exterior == null: return
+	var masks := {
+		"фасад_панелька": preload("res://textures/фасад_панелька_свечение.png"),
+		"фасад_дом_55": preload("res://textures/фасад_дом_55_свечение.png"),
+	}
+	for i in exterior.mesh.get_surface_count():
+		var source := exterior.get_active_material(i) as StandardMaterial3D
+		if source == null or not masks.has(source.resource_name): continue
+		var windows := source.duplicate() as StandardMaterial3D
+		windows.emission = Color.BLACK
+		windows.emission_texture = masks[source.resource_name]
+		windows.emission_energy_multiplier = 0.42
+		exterior.set_surface_override_material(i, windows)
+		residential_windows.append(windows)
+
 func _build_courtyard_lights() -> void:
 	# Головки существующих опор у 46 к2, см. blender/детали.py.
-	for z in [6.0, -15.0]:
-		var at := Vector3(20.916, 1.22, z)
+	for at in [Vector3(20.916, 1.22, 6.0), Vector3(20.916, 1.22, -15.0),
+			Vector3(21.35, 0.2, -4.4), Vector3(18.0, 0.8, 29.3), Vector3(35.0, 1.25, 29.9)]:
+		if not is_equal_approx(at.x, 20.916):
+			_add_street_pole(at)
 		var light := SpotLight3D.new()
 		light.position = at
 		light.light_color = Color(1.0, 0.86, 0.69)
-		light.light_energy = 2.6
+		light.light_energy = 2.9
 		light.light_specular = 0.0
-		light.spot_range = 12.0
-		light.spot_angle = 54.0
+		light.spot_range = 14.0
+		light.spot_angle = 59.0
 		add_child(light)
 		light.look_at(at + Vector3(-1.7, -6.0, 0.0))
 		courtyard_lights.append(light)
@@ -413,6 +436,30 @@ func _build_courtyard_lights() -> void:
 		diffuser.position = at
 		add_child(diffuser)
 		courtyard_diffusers.append(diffuser)
+
+func _add_street_pole(at: Vector3) -> void:
+	# Оценочная расстановка: у ограды и вдоль тротуара южного проезда.
+	var metal := StandardMaterial3D.new()
+	metal.albedo_color = Color(0.25, 0.27, 0.28)
+	metal.roughness = 0.62
+	var pole := MeshInstance3D.new()
+	var shaft := CylinderMesh.new()
+	shaft.top_radius = 0.04
+	shaft.bottom_radius = 0.078
+	shaft.height = at.y + 4.98
+	shaft.radial_segments = 10
+	shaft.material = metal
+	pole.mesh = shaft
+	pole.position = Vector3(at.x + 0.5, -5.0 + shaft.height * 0.5, at.z)
+	add_child(pole)
+
+	var fixture := MeshInstance3D.new()
+	var head := BoxMesh.new()
+	head.size = Vector3(0.66, 0.085, 0.15)
+	head.material = metal
+	fixture.mesh = head
+	fixture.position = at + Vector3(0.21, 0.045, 0)
+	add_child(fixture)
 
 func _set_fast_lights(enabled: bool) -> void:
 	if original_shadows.is_empty():
