@@ -101,6 +101,9 @@ rotation = Vector3(0, 1.5707964, 0)
 [node name="Стул у стола" parent="Модель" index="11"]
 position = Vector3(1.87, 0, -1.12)
 
+[node name="Стул у столика" parent="Модель"]
+position = Vector3(1.06, 0, -2.42)
+
 [node name="Парка" parent="Модель" instance=ExtResource("Jacket0")]
 position = Vector3(-1, 1.6, -0.06)
 

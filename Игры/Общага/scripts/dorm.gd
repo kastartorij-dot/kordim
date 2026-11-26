@@ -27,6 +27,8 @@ var strip_mode := 0
 var strip_lights: Array[OmniLight3D] = []
 var light_materials := {}
 var evening_window_light: SpotLight3D
+var courtyard_lights: Array[SpotLight3D] = []
+var courtyard_diffusers: Array[MeshInstance3D] = []
 var monitor_light: OmniLight3D
 const LAMP_COLORS := [Color(1.0, 0.12, 0.65), Color(0.22, 1.0, 0.35), Color(1.0, 0.73, 0.42), Color(0.25, 0.53, 1), Color(0.63, 0.32, 1), Color.WHITE]
 const LAMP_NAMES := ["Розовый", "Зелёный", "Тёплый", "Голубой", "Сиреневый", "Белый"]
@@ -51,6 +53,10 @@ var interaction_ray := PhysicsRayQueryParameters3D.new()
 const ASGARD_NIGHT_TEXTURES := {
  "асгард_витраж": preload("res://textures/фасад_асгард_стекло_вечер.png"),
  "асгард_вентфасад": preload("res://textures/фасад_асгард_стена_вечер.png"),
+}
+const ASGARD_EMISSION_TEXTURES := {
+ "асгард_витраж": preload("res://textures/фасад_асгард_стекло_свечение.png"),
+ "асгард_вентфасад": preload("res://textures/фасад_асгард_стена_свечение.png"),
 }
 const SAVE_PATH := "user://walk.cfg"
 
@@ -140,6 +146,7 @@ func _ready() -> void:
 	bedside_light.omni_range = 2.2
 	bedside_light.shadow_enabled = true
 	add_child(bedside_light)
+	_build_courtyard_lights()
 	_build_accent_lighting()
 	_set_fast_lights(args.has("--fast-lights"))
 	winter_controller = preload("res://scripts/winter_mode.gd").new()
@@ -324,6 +331,10 @@ func _set_lighting(mode: int) -> void:
 	for light in daylight: light.visible = lighting_mode == 0
 	ceiling_light.visible = lighting_mode == 1
 	evening_window_light.visible = lighting_mode == 1
+	for light in courtyard_lights:
+		light.visible = lighting_mode != 0
+	for diffuser in courtyard_diffusers:
+		diffuser.visible = lighting_mode != 0
 	lamp_on = lighting_mode == 2
 	var day_ambient := 0.18 if daylight_prototype else 0.28
 	room_environment.ambient_light_energy = [day_ambient, 0.08, 0.015][lighting_mode]
@@ -365,12 +376,39 @@ func _prepare_asgard_lighting() -> void:
 		var material := original.duplicate() as StandardMaterial3D
 		var texture: Texture2D = ASGARD_NIGHT_TEXTURES[original.resource_name]
 		material.emission = Color.BLACK
-		material.emission_texture = texture
-		material.emission_energy_multiplier = 0.42
+		material.emission_texture = ASGARD_EMISSION_TEXTURES[original.resource_name]
+		material.emission_energy_multiplier = 0.28
 		material.emission_operator = BaseMaterial3D.EMISSION_OP_ADD
 		building.set_surface_override_material(surface, material)
 		asgard_day[material] = original.albedo_texture
 		asgard_night[material] = texture
+
+func _build_courtyard_lights() -> void:
+	# Головки существующих опор у 46 к2, см. blender/детали.py.
+	for z in [6.0, -15.0]:
+		var at := Vector3(20.916, 1.22, z)
+		var light := SpotLight3D.new()
+		light.position = at
+		light.light_color = Color(1.0, 0.86, 0.69)
+		light.light_energy = 2.6
+		light.light_specular = 0.0
+		light.spot_range = 12.0
+		light.spot_angle = 54.0
+		add_child(light)
+		light.look_at(at + Vector3(-1.7, -6.0, 0.0))
+		courtyard_lights.append(light)
+
+		var diffuser := MeshInstance3D.new()
+		var panel := BoxMesh.new()
+		panel.size = Vector3(0.29, 0.018, 0.15)
+		var material := StandardMaterial3D.new()
+		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		material.albedo_color = Color(1.0, 0.92, 0.76)
+		panel.material = material
+		diffuser.mesh = panel
+		diffuser.position = at
+		add_child(diffuser)
+		courtyard_diffusers.append(diffuser)
 
 func _set_fast_lights(enabled: bool) -> void:
 	if original_shadows.is_empty():
@@ -406,6 +444,13 @@ func _build_accent_lighting() -> void:
 		for surface in mesh.mesh.get_surface_count():
 			var material := mesh.get_active_material(surface) as StandardMaterial3D
 			if material == null: continue
+			if material.resource_name == "подсветка_клав":
+				var keyboard := material.duplicate() as StandardMaterial3D
+				keyboard.albedo_color = Color(0.24, 0.15, 0.32)
+				keyboard.emission = Color(0.62, 0.37, 0.82)
+				keyboard.emission_energy_multiplier = 0.19
+				mesh.set_surface_override_material(surface, keyboard)
+				continue
 			if material.resource_name == "экран":
 				if mesh == loaded_room.get_node("Письменный стол"):
 					_set_wallpaper(mesh, surface)

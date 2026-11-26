@@ -157,8 +157,25 @@ def асгард_стена(lit=False, n=1024):
     return im
 
 
+def свечение_окон(image, glass):
+    """Отделяет светящиеся стёкла от переплётов и непрозрачной обшивки."""
+    mask = Image.new("RGB", image.size)
+    mask.putdata([
+        (red, green, blue) if (
+            (glass and red >= 145 and green >= 140)
+            or (not glass and red - blue >= 50 and green - blue >= 30)
+        ) else (0, 0, 0)
+        for red, green, blue in image.getdata()
+    ])
+    return mask
+
+
 if __name__ == "__main__":
+    glass_evening = асгард_стекло(True)
+    wall_evening = асгард_стена(True)
     save(асгард_стекло(False), "фасад_асгард_стекло.png")
-    save(асгард_стекло(True), "фасад_асгард_стекло_вечер.png")
+    save(glass_evening, "фасад_асгард_стекло_вечер.png")
     save(асгард_стена(False), "фасад_асгард_стена.png")
-    save(асгард_стена(True), "фасад_асгард_стена_вечер.png")
+    save(wall_evening, "фасад_асгард_стена_вечер.png")
+    save(свечение_окон(glass_evening, True), "фасад_асгард_стекло_свечение.png")
+    save(свечение_окон(wall_evening, False), "фасад_асгард_стена_свечение.png")

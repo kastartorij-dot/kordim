@@ -88,8 +88,19 @@ func start_rest(kind: String, at: Vector3, target: Vector3) -> void:
 
 func leave_rest() -> bool:
 	if resting.is_empty(): return true
-	if not can_stand_at(return_transform): return false
-	global_transform = return_transform
+	var exit := return_transform
+	if not can_stand_at(exit):
+		# Вставание из кресла: сохранённая точка могла оказаться впритык к мебели.
+		# Ищем ближайшее свободное место вокруг точки, где игрок сел.
+		for distance in [0.15, 0.30, 0.45]:
+			for direction in [Vector3.LEFT, Vector3.RIGHT, Vector3.FORWARD, Vector3.BACK]:
+				var candidate := return_transform.translated(direction * distance)
+				if can_stand_at(candidate):
+					exit = candidate
+					break
+			if exit != return_transform: break
+		if exit == return_transform: return false
+	global_transform = exit
 	reset_posture()
 	return true
 
